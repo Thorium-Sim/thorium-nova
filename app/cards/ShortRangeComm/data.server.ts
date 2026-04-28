@@ -100,15 +100,20 @@ export const shortRangeComm = t.router({
 		}),
 	stream: t.procedure
 		.input(z.object({ systemId: z.number().nullable() }))
-		.dataStream(({ entity, input }) => {
-			if (!entity) return false;
+		.dataStream(({ ctx, input }) => {
+			const set = new Set<Entity>();
 			// Get the ships and planets in this solar system to know the distance to what we're communicating with
-			if (
-				entity.components.position?.parentId === input.systemId ||
-				getObjectSystem(entity)?.id === input.systemId
-			)
-				return true;
-			return false;
+			for (const entity of ctx.ecs.componentCache.get("position") || []) {
+				if (entity.components.position?.parentId === input.systemId) {
+					set.add(entity);
+				}
+			}
+			for (const entity of ctx.ecs.componentCache.get("satellite") || []) {
+				if (getObjectSystem(entity)?.id === input.systemId) {
+					set.add(entity);
+				}
+			}
+			return set;
 		}),
 	conversation: t.procedure
 		.input(z.object({ conversationId: z.number().nullish() }))

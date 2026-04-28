@@ -158,16 +158,24 @@ export const sensors = t.router({
 	// scanRepeat: t.procedure,
 	stream: t.procedure
 		.input(z.object({ systemId: z.number().nullable(), shipId: z.number() }))
-		.dataStream(({ ctx, input, entity }) => {
-			if (!entity) return false;
+		.dataStream(({ ctx, input }) => {
+			const set = new Set<Entity>();
 			const systemId =
 				input.systemId || ctx.ecs.getEntityById(input.shipId)?.components.position?.parentId;
 			if (typeof systemId === "undefined") {
-				return false;
+				return set;
 			}
-			return Boolean(
-				(entity.components.position && entity.components.position.parentId === systemId) ||
-				(entity.components.scan && entity.components.scan.parentId === input.shipId),
-			);
+			for (const entity of ctx.ecs.componentCache.get("position") || []) {
+				if (entity.components.position?.parentId === systemId) {
+					set.add(entity);
+				}
+			}
+			for (const entity of ctx.ecs.componentCache.get("scan") || []) {
+				// TODO April 28, 2028 — make it so completed scans aren't sent anymore
+				if (entity.components.scan?.parentId === input.shipId) {
+					set.add(entity);
+				}
+			}
+			return set;
 		}),
 });

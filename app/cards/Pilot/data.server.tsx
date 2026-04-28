@@ -458,21 +458,29 @@ export const pilot = t.router({
 	}),
 	stream: t.procedure
 		.input(z.object({ shipId: z.number(), systemId: z.number().nullable() }))
-		.dataStream(({ ctx, input, entity }) => {
-			if (!entity) return false;
+		.dataStream(({ ctx, input }) => {
+			const set = new Set<Entity>();
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			const systemId = input?.systemId || ship?.components.position?.parentId;
 			if (typeof systemId === "undefined") {
-				return false;
+				return set;
 			}
-			if (
-				(entity.components.isImpulseEngines || entity.components.isWarpEngines) &&
-				ship?.components.shipSystems?.shipSystems.has(entity.id)
-			) {
-				return true;
+			for (const entity of ctx.ecs.componentCache.get("isImpulseEngines") || []) {
+				if (entity.components.isShipSystem?.shipId === input.shipId) {
+					set.add(entity);
+				}
 			}
-			return Boolean(
-				entity.components.position && entity.components.position.parentId === systemId,
-			);
+			for (const entity of ctx.ecs.componentCache.get("isWarpEngines") || []) {
+				if (entity.components.isShipSystem?.shipId === input.shipId) {
+					set.add(entity);
+				}
+			}
+
+			for (const entity of ctx.ecs.componentCache.get("position") || []) {
+				if (entity.components.position?.parentId === systemId) {
+					set.add(entity);
+				}
+			}
+			return set;
 		}),
 });

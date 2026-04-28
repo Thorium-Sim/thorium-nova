@@ -66,7 +66,6 @@ export type MiddlewareFunction<
 		rawInput: unknown;
 		meta: TParams["_meta"] | undefined;
 		publish: TParams["_publish"];
-		entity: TParams["_entity"];
 		next: {
 			(): Promise<MiddlewareResult<TParams>>;
 			<$Context>(opts: { ctx: $Context }): Promise<
@@ -79,7 +78,6 @@ export type MiddlewareFunction<
 					_output_out: TParams["_output_out"];
 					_meta: TParams["_meta"];
 					_publish: TParams["_publish"];
-					_entity: TParams["_entity"];
 				}>
 			>;
 		};

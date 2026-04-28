@@ -18,12 +18,13 @@ import { CircleGridStoreProvider } from "../Pilot/useCircleGridStore";
  * Add explosions to the Viewscreen, and maybe even the targeting grid.
  */
 export function Targeting({ cardLoaded }: CardProps) {
-	const { shipId } = useStation();
+	const { shipId, ship } = useStation();
 	const setTarget = q.targeting.setTarget.useNetSend();
 	const [targetedContact] = q.targeting.targetedContact.useNetRequest({
 		shipId,
 	});
 	q.targeting.stream.useDataStream({ shipId });
+	q.pilot.stream.useDataStream({ shipId, systemId: ship.currentSystem });
 	const [hull] = q.targeting.hull.useNetRequest({ shipId });
 	const clickRef = React.useRef(false);
 	return (

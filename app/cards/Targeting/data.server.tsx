@@ -474,12 +474,19 @@ export const targeting = t.router({
 				});
 			}),
 	}),
-	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ entity, input }) => {
-		if (!entity) return false;
-		return Boolean(
-			(entity.components.isShields || entity.components.isPhasers) &&
-			entity.components.isShipSystem?.shipId === input.shipId,
-		);
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ ctx, input }) => {
+		const set = new Set<Entity>();
+		for (const entity of ctx.ecs.componentCache.get("isShields") || []) {
+			if (entity.components.isShipSystem?.shipId === input.shipId) {
+				set.add(entity);
+			}
+		}
+		for (const entity of ctx.ecs.componentCache.get("isPhasers") || []) {
+			if (entity.components.isShipSystem?.shipId === input.shipId) {
+				set.add(entity);
+			}
+		}
+		return set;
 	}),
 });
 

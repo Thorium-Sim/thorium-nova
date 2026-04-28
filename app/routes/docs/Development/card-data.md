@@ -180,9 +180,9 @@ that makes it easy to do
 on the client.
 
 To define the entity filter for a card, include a `dataStream` function on the
-router in the `data.ts` file, which is called for every entity. This function
-receives an object with the `entity`, `ctx`, and optionally `input` as
-parameters and should return `true` if the entity should be sent to the client.
+router in the `data.ts` file, which returns a set of entities that should be streamed to the client. This function
+receives an object with `ctx`, and optionally `input` as
+parameters.
 
 ```ts
 // /app/cards/Pilot/data.server.ts
@@ -190,11 +190,14 @@ export const pilot = t.router({
 	// ...
 	stream: t.procedure
 		.input(z.object({ systemId: z.number().nullable() }))
-		.dataStream(({ ctx, input, entity }) => {
-			if (!entity) return false;
-			return Boolean(
-				entity.components.position && entity.components.position.parentId === input.systemId,
-			);
+		.dataStream(({ ctx, input }) => {
+			const set = new Set<Entity>();
+			for (const entity of ctx.ecs.componentCache.get("position") || []) {
+				if (entity.components.position?.parentId === input.systemId) {
+					set.add(entity)
+				}
+			}
+			return set;
 		}),
 });
 ```
@@ -203,24 +206,11 @@ Data Streams will only be active when `useDataStream` is called somewhere in the
 card. This hook accepts parameters and returns nothing, so it's best to call it
 at the top of the card component.
 
-```ts
-export const cargoControl = t.router({
-	stream: t.procedure.dataStream(({ entity, ctx }) => {
-		if (!entity) return false;
-		return Boolean(
-			entity.components.cargoContainer &&
-			entity.components.position?.parentId === ctx.ship?.id &&
-			entity.components.passengerMovement,
-		);
-	}),
-});
-```
-
 You still need to request the data stream once per card using the `q` utility.
 This is where you would pass params, if they were needed.
 
 ```ts
-q.cargoControl.stream.useDataStream();
+q.cargoControl.stream.useDataStream({systemId});
 ```
 
 The challenge with DataStreams is making sure the UI remains responsive while

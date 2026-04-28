@@ -184,13 +184,17 @@ export const cargoControl = t.router({
 
 			return matchSorter(output, input.query, { keys: ["name"] }).slice(0, 10);
 		}),
-	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ entity, input }) => {
-		if (!entity) return false;
-		return Boolean(
-			entity.components.cargoContainer &&
-			entity.components.position?.parentId === input.shipId &&
-			entity.components.passengerMovement,
-		);
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
+		const set = new Set<Entity>();
+		for (let entity of ctx.ecs.componentCache.get("cargoContainer") || []) {
+			if (
+				entity.components.position?.parentId === input.shipId &&
+				entity.components.passengerMovement
+			) {
+				set.add(entity);
+			}
+		}
+		return set;
 	}),
 	containerSummon: t.procedure
 		.input(

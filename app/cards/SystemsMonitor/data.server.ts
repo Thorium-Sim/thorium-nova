@@ -4,6 +4,7 @@ import { getPowerSupplierPowerNeeded } from "@thorium/.server/systems/ReactorFue
 import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
+import type { Entity } from "@thorium/utils/ecs";
 import type { MegaWattHour } from "@thorium/utils/unitTypes";
 import z from "zod";
 
@@ -286,11 +287,23 @@ export const systemsMonitor = t.router({
 				return null;
 			}),
 	}),
-	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, entity }) => {
-		if (!entity) return false;
-		return Boolean(
-			entity.components.isShipSystem?.shipId === input.shipId &&
-			(entity.components.power || entity.components.isBattery || entity.components.isReactor),
-		);
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
+		const set = new Set<Entity>();
+		for (const entity of ctx.ecs.componentCache.get("power") || []) {
+			if (entity.components.isShipSystem?.shipId === input.shipId) {
+				set.add(entity);
+			}
+		}
+		for (const entity of ctx.ecs.componentCache.get("isBattery") || []) {
+			if (entity.components.isShipSystem?.shipId === input.shipId) {
+				set.add(entity);
+			}
+		}
+		for (const entity of ctx.ecs.componentCache.get("isReactor") || []) {
+			if (entity.components.isShipSystem?.shipId === input.shipId) {
+				set.add(entity);
+			}
+		}
+		return set;
 	}),
 });

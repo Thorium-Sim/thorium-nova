@@ -180,8 +180,11 @@ export const navigation = t.router({
 
 			return matchItems;
 		}),
-	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ entity, input }) => {
-		return Boolean(entity?.components.position && entity.id === input.shipId);
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ ctx, input }) => {
+		const set = new Set<Entity>();
+		const entity = ctx.ecs.getEntityById(input.shipId);
+		if (entity) set.add(entity);
+		return set;
 	}),
 });
 

@@ -112,16 +112,16 @@ export const longRangeComm = t.router({
 			pubsub.publish.longRangeComm.get({ shipId: input.shipId });
 		}),
 
-	systemStream: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.dataStream(({ input, entity }) => {
-			if (!entity) return false;
-			return Boolean(
-				entity.components.isShipSystem?.shipId === input.shipId &&
-				entity.components.power &&
-				entity.components.isLongRangeComm,
-			);
-		}),
+	systemStream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
+		const set = new Set<Entity>();
+		for (const entity of ctx.ecs.componentCache.get("isLongRangeComm") || []) {
+			if (entity.components.power && entity.components.isShipSystem?.shipId === input.shipId) {
+				set.add(entity);
+			}
+		}
+
+		return set;
+	}),
 	addressBook: t.procedure
 		.input(z.object({ shipId: z.number() }))
 		.filter((publish: { shipId: number }, { input }) => {

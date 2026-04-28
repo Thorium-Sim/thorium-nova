@@ -220,7 +220,7 @@ export interface ProcedureBuilder<TParams extends ProcedureParams> {
 	dataStream(
 		resolver: (
 			opts: ResolveOptions<TParams>,
-		) => MaybePromise<FallbackValue<TParams["_output_in"], boolean>>,
+		) => MaybePromise<FallbackValue<TParams["_output_in"], Set<Entity>>>,
 	): BuildProcedure<"dataStream", TParams, boolean>;
 	/**
 	 * @internal
@@ -379,7 +379,6 @@ function createProcedureCaller(_def: AnyProcedureBuilderDef): AnyProcedure {
 			},
 		): Promise<MiddlewareResult<any>> => {
 			try {
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				const middleware = _def.middlewares[callOpts.index]!;
 				const result = await middleware({
 					ctx: callOpts.ctx,
@@ -389,7 +388,6 @@ function createProcedureCaller(_def: AnyProcedureBuilderDef): AnyProcedure {
 					meta: _def.meta,
 					input: callOpts.input,
 					publish: opts.publish,
-					entity: opts.entity,
 					next: async (nextOpts?: { ctx: any; input?: any }) => {
 						return await callRecursive({
 							index: callOpts.index + 1,

@@ -785,18 +785,31 @@ export const starmapCore = t.router({
 		}),
 	stream: t.procedure
 		.input(z.object({ systemId: z.number().nullable() }))
-		.dataStream(({ entity, input }) => {
-			if (!entity) return false;
-			if ((entity.components.isShip || entity.components.isTorpedo) && entity.components.position) {
+		.dataStream(({ ctx, input }) => {
+			const set = new Set<Entity>();
+			for (const entity of ctx.ecs.componentCache.get("isShip") || []) {
 				if (
-					entity.components.position.type === "interstellar" &&
+					entity.components.position?.type === "interstellar" &&
 					(input.systemId === null || input.systemId === undefined)
-				)
-					return true;
-				if (entity.components.position.parentId === input.systemId) {
-					if (entity.components.isTorpedo) return true;
+				) {
+					set.add(entity);
+				}
+				if (entity.components.position?.parentId === input.systemId) {
+					set.add(entity);
 				}
 			}
-			return false;
+			for (const entity of ctx.ecs.componentCache.get("isTorpedo") || []) {
+				if (
+					entity.components.position?.type === "interstellar" &&
+					(input.systemId === null || input.systemId === undefined)
+				) {
+					set.add(entity);
+				}
+				if (entity.components.position?.parentId === input.systemId) {
+					set.add(entity);
+				}
+			}
+
+			return set;
 		}),
 });

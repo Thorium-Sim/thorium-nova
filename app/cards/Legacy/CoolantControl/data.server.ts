@@ -1,6 +1,7 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
+import type { Entity } from "@thorium/utils/ecs";
 import z from "zod";
 
 const legacyCoolantSystemTypes = ["impulseEngines", "warpEngines", "phasers", "reactor"];
@@ -158,14 +159,18 @@ export const coolantControl = t.router({
 				cooling: input.cooling,
 			});
 		}),
-	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, entity }) => {
-		if (!entity) return false;
-
-		return Boolean(
-			entity.components.isShipSystem?.shipId === input.shipId &&
-			(entity.components.isCoolantTank ||
-				(entity.components.legacyCoolant &&
-					legacyCoolantSystemTypes.includes(entity.components.isShipSystem.type))),
-		);
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
+		const set = new Set<Entity>();
+		for (const entity of ctx.ecs.componentCache.get("isCoolantTank") || []) {
+			if (entity.components.isShipSystem?.shipId === input.shipId) {
+				set.add(entity);
+			}
+		}
+		for (const entity of ctx.ecs.componentCache.get("legacyCoolant") || []) {
+			if (legacyCoolantSystemTypes.includes(entity.components.isShipSystem?.type || "")) {
+				set.add(entity);
+			}
+		}
+		return set;
 	}),
 });

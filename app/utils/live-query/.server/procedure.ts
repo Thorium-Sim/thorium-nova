@@ -12,7 +12,6 @@ export interface ResolveOptions<TParams extends ProcedureParams> {
 	ctx: TParams["_ctx_out"];
 	input: TParams["_input_out"];
 	publish?: TParams["_publish"];
-	entity?: TParams["_entity"];
 }
 
 export type ProcedureBuilderResolver = (opts: ResolveOptions<any>) => Promise<unknown>;
@@ -95,7 +94,6 @@ export interface ProcedureCallOptions {
 	rawInput: unknown;
 	input?: unknown;
 	publish?: unknown;
-	entity?: unknown;
 	path: string;
 	type: ProcedureType;
 	onCall?: (opts: ProcedureCallOptions, result: unknown) => void | Promise<void>;

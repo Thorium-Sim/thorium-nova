@@ -1,13 +1,14 @@
 import type { ClientSettings } from "@thorium/.server/data";
 import { router } from "@thorium/.server/init/router";
 import { isDatabaseContext } from "@thorium/typeguards/isDatabaseContext";
+import type { Entity } from "@thorium/utils/ecs";
 import type { inferAsyncReturnType } from "@thorium/utils/live-query/.server";
 import type {
 	CreateContextOpts,
 	InitWebsocket,
 	InitWebsocketParams,
 } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
-import type { AnyRouter } from "@thorium/utils/live-query/.server/router";
+import { callProcedure, type AnyRouter } from "@thorium/utils/live-query/.server/router";
 import { ServerClient } from "@thorium/utils/live-query/.server/ServerClient";
 import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 
@@ -77,61 +78,25 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 		 * - The ship's scans
 		 * - Ship Passengers
 		 */
-		const entities = [];
-		const ship = context.getPlayerShip(this.id);
-		if (!ship) return;
-		entities.push(dataStreamEntity(ship));
-
-		for (const nearbyShipId of ship.components.nearbyObjects?.objects?.keys() || []) {
-			const entity = context.ecs.getEntityById(nearbyShipId);
-			if (entity) entities.push(dataStreamEntity(entity));
-		}
-
-		for (const systemId of ship?.components.shipSystems?.shipSystems.keys() || []) {
-			const entity = context.ecs.getEntityById(systemId);
-			if (entity) entities.push(dataStreamEntity(entity));
-		}
-
-		for (const scanEntity of context.ecs.componentCache.get("scan") || []) {
-			if (
-				scanEntity.components.scan?.parentId === ship.id &&
-				scanEntity.components.scan.progress < 1
-			) {
-				entities.push(dataStreamEntity(scanEntity));
+		let entities = new Set<Entity>();
+		for (const [, dataStream] of this.dataStreams) {
+			const entitySet = await callProcedure({
+				ctx: context,
+				procedures: router._def.procedures,
+				type: "dataStream",
+				path: dataStream.path,
+				rawInput: dataStream.params,
+			});
+			if (entitySet instanceof Set) {
+				entities = entities.union(entitySet);
 			}
 		}
-
-		for (const diagnosticEntity of context.ecs.componentCache.get("diagnostic") || []) {
-			if (
-				diagnosticEntity.components.diagnostic?.shipId === ship.id &&
-				diagnosticEntity.components.diagnostic.progress < 1
-			) {
-				entities.push(dataStreamEntity(diagnosticEntity));
-			}
+		let dataStream = [];
+		for (const entity of entities) {
+			dataStream.push(dataStreamEntity(entity));
 		}
 
-		for (const torpedoEntity of context.ecs.componentCache.get("isTorpedo") || []) {
-			if (torpedoEntity.components.position?.parentId === ship.components.position?.parentId) {
-				entities.push(dataStreamEntity(torpedoEntity));
-			}
-		}
-
-		for (const legacySensorContact of context.ecs.componentCache.get("isSensorContact") || []) {
-			if (
-				legacySensorContact.components.isSensorContact?.shipId === ship.id &&
-				!legacySensorContact.components.isArmyContact
-			) {
-				entities.push(dataStreamEntity(legacySensorContact));
-			}
-		}
-
-		for (const passengerEntity of context.ecs.componentCache.get("passengerMovement") || []) {
-			if (passengerEntity.components.position?.parentId === ship.id) {
-				entities.push(dataStreamEntity(passengerEntity));
-			}
-		}
-
-		const snapshot = this.SI.snapshot.create(entities);
+		const snapshot = this.SI.snapshot.create(dataStream);
 		this.send(snapshot);
 	}
 	toJSON() {

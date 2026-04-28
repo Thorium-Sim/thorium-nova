@@ -750,13 +750,18 @@ export const sensorGrid = t.router({
 				shipId: input.shipId,
 			});
 		}),
-	stream: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.dataStream(
-			({ input, entity }) =>
-				entity?.components.isSensorContact?.shipId === input.shipId &&
-				!entity.components.isArmyContact,
-		),
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
+		const set = new Set<Entity>();
+		for (const entity of ctx.ecs.componentCache.get("isSensorContact") || []) {
+			if (
+				entity.components.isSensorContact?.shipId === input.shipId &&
+				!entity.components.isArmyContact
+			) {
+				set.add(entity);
+			}
+		}
+		return set;
+	}),
 });
 
 export function rotatePoint({ x, y }: { x: number; y: number }, angle: number) {

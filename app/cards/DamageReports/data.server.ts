@@ -350,10 +350,13 @@ export const damageReports = t.router({
 			applyDamageReportMetrics(timeline);
 			return;
 		}),
-	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, entity }) => {
-		if (!entity) return false;
-		return Boolean(
-			entity.components.diagnostic && entity.components.diagnostic.shipId === input.shipId,
-		);
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
+		const set = new Set<Entity>();
+		for (const diagnostic of ctx.ecs.componentCache.get("diagnostic") || []) {
+			if (diagnostic.components.diagnostic?.shipId === input.shipId) {
+				set.add(diagnostic);
+			}
+		}
+		return set;
 	}),
 });
