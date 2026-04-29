@@ -88,14 +88,14 @@ export const cargoControl = t.router({
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
-		.autoPublish(["cargoContainer", "passengerMovement"], (entity) =>
+		.autoPublish(["isCargoContainer", "passengerMovement"], (entity) =>
 			entity.components.cargoContainer && entity.components.position?.parentId
 				? { shipId: entity.components.position.parentId }
 				: null,
 		)
 		.request(({ ctx, input }) => {
 			const inventoryTemplates = getInventoryTemplates(ctx.ecs);
-			const matchEntities = [...(ctx.ecs.componentCache.get("cargoContainer") || [])];
+			const matchEntities = [...(ctx.ecs.componentCache.get("isCargoContainer") || [])];
 			return (
 				matchEntities
 					.filter(
@@ -186,7 +186,7 @@ export const cargoControl = t.router({
 		}),
 	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
 		const set = new Set<Entity>();
-		for (let entity of ctx.ecs.componentCache.get("cargoContainer") || []) {
+		for (let entity of ctx.ecs.componentCache.get("isCargoContainer") || []) {
 			if (
 				entity.components.position?.parentId === input.shipId &&
 				entity.components.passengerMovement
@@ -216,7 +216,7 @@ export const cargoControl = t.router({
 			if (typeof input.containerId === "number") {
 				container = ctx.flight?.ecs.getEntityById(input.containerId);
 			} else {
-				const matchEntities = [...(ctx.ecs.componentCache.get("cargoContainer") || [])];
+				const matchEntities = [...(ctx.ecs.componentCache.get("isCargoContainer") || [])];
 				// Find the closest container.
 				container = matchEntities.reduce((acc: Entity | null, entity) => {
 					if (

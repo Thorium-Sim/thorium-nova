@@ -5,13 +5,16 @@ import { q } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
+import { pixelRatio } from "@thorium/utils/pixelRatio.client";
 
+import { CargoContainerDot } from "./CargoContainerDot";
 import { CargoContainerList } from "./CargoContainerList";
 import { CargoList } from "./CargoList";
 import { CargoSearchInput } from "./CargoSearchInput";
 import { ContainerLabel } from "./ContainerLabel";
 import { DeckPicker } from "./DeckPicker";
 import { GoToRoomButton } from "./GoToRoomButton";
+import { RoomDot } from "./RoomDot";
 import { ShipView } from "./ShipView";
 import { useShipMapStore } from "./useShipMapStore";
 import { useTransferAmount } from "./useTransferAmount";
@@ -48,7 +51,13 @@ export function CargoControl(props: CardProps) {
 				<div className="z-10 mx-auto w-1/3">
 					<CargoSearchInput />
 				</div>
-				<ShipView deckIndex={deckIndex} cardLoaded={props.cardLoaded} />
+				<ShipView
+					deckIndex={deckIndex}
+					cardLoaded={props.cardLoaded}
+					deckChildren={(deck, deckIndex) => (
+						<CargoContainerDeckChildren key={deckIndex} deck={deck} deckIndex={deckIndex} />
+					)}
+				/>
 			</div>
 			<div className="flex h-full flex-col">
 				<h3 className="text-xl">
@@ -201,5 +210,49 @@ export function CargoControl(props: CardProps) {
 				</Button>
 			</div>
 		</div>
+	);
+}
+
+function CargoContainerDeckChildren({
+	deck,
+	deckIndex,
+}: {
+	deck: { name: string };
+	deckIndex: number;
+}) {
+	const { shipId } = useStation();
+	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
+	const transform = useShipMapStore((store) => store.transform);
+	const { rooms } = cargoRooms;
+	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
+
+	return (
+		<>
+			{rooms.map((room) =>
+				room.deck === deck.name ? (
+					<RoomDot
+						key={room.id}
+						id={room.id}
+						name={room.name || ""}
+						position={{
+							x: room.position.x * pixelRatio * transform.widthScale,
+							y: room.position.y * pixelRatio * transform.widthScale,
+						}}
+					/>
+				) : null,
+			)}
+			{cargoContainers.map(
+				(container) =>
+					container.position && (
+						<CargoContainerDot
+							key={container.id}
+							id={container.id}
+							position={container.position}
+							widthScale={transform.widthScale}
+							deckIndex={deckIndex}
+						/>
+					),
+			)}
+		</>
 	);
 }

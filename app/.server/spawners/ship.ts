@@ -350,6 +350,7 @@ export async function spawnShip(
 			cargoContainer.addComponent("identity", {
 				name: `Container ${greekLetters[i]}${i > 25 ? i : ""}`,
 			});
+			cargoContainer.addComponent("isCargoContainer");
 			cargoContainer.addComponent("cargoContainer", {
 				volume: template.cargoContainerVolume || 1,
 			});

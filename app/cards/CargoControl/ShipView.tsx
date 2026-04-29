@@ -3,34 +3,43 @@ import { useResizeObserver } from "@thorium/hooks/useResizeObserver";
 import { useStation } from "@thorium/routes/station/useStation";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import { pixelRatio } from "@thorium/utils/pixelRatio.client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Suspense } from "react";
 
-import { CargoContainerDot } from "./CargoContainerDot";
-import { RoomDot } from "./RoomDot";
 import { useShipMapStore } from "./useShipMapStore";
 
-export function ShipView({ deckIndex, cardLoaded }: { deckIndex: number; cardLoaded: boolean }) {
+export function ShipView({
+	deckIndex,
+	cardLoaded,
+	deckChildren,
+}: {
+	deckIndex: number;
+	cardLoaded: boolean;
+	deckChildren?: (deck: { name: string }, deckIndex: number) => ReactNode;
+}) {
 	const { shipId } = useStation();
 	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
 
-	const { decks, rooms, shipLength } = cargoRooms;
-	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
+	const { decks, shipLength } = cargoRooms;
 
 	const [ref, dims] = useResizeObserver();
-	const [imgRef, imgDims, imgMeasure] = useResizeObserver();
-
-	const transform = {
-		x: dims.width / 2 - imgDims.width / 2,
-		y: dims.height / 2 - imgDims.height / 2,
-		widthScale: imgDims.width / pixelRatio / shipLength,
-	};
+	const [imgRef, _, imgMeasure] = useResizeObserver();
 
 	const [transformationLoaded] = useState(true);
 
+	const transform = useShipMapStore((state) => state.transform);
 	useEffect(() => {
 		if (cardLoaded) {
-			imgMeasure();
+			const imgDims = imgMeasure();
+			if (imgDims) {
+				useShipMapStore.setState({
+					transform: {
+						x: dims.width / 2 - imgDims.width / 2,
+						y: dims.height / 2 - imgDims.height / 2,
+						widthScale: imgDims.width / pixelRatio / shipLength,
+					},
+				});
+			}
 		}
 	}, [cardLoaded, imgMeasure]);
 	return (
@@ -57,31 +66,7 @@ export function ShipView({ deckIndex, cardLoaded }: { deckIndex: number; cardLoa
 								deckIndex === i ? "deck-on" : deckIndex < i ? "deck-before" : "deck-after"
 							}`}
 						>
-							{rooms.map((room) =>
-								room.deck === d.name ? (
-									<RoomDot
-										key={room.id}
-										id={room.id}
-										name={room.name || ""}
-										position={{
-											x: room.position.x * pixelRatio * transform.widthScale,
-											y: room.position.y * pixelRatio * transform.widthScale,
-										}}
-									/>
-								) : null,
-							)}
-							{cargoContainers.map(
-								(container) =>
-									container.position && (
-										<CargoContainerDot
-											key={container.id}
-											id={container.id}
-											position={container.position}
-											widthScale={transform.widthScale}
-											deckIndex={i}
-										/>
-									),
-							)}
+							{deckChildren?.(d, i)}
 
 							<SVGImageLoader
 								url={d.backgroundUrl || ""}
