@@ -13,7 +13,15 @@ import { Portal } from "@thorium/ui/Portal";
 import { nodeFlags } from "@thorium/utils/flags/DeckNode";
 import { useDrag } from "@use-gesture/react";
 import { capitalCase } from "change-case";
-import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import {
+	Suspense,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+	type ReactNode,
+	type RefObject,
+} from "react";
 import { Disclosure, DisclosurePanel, Heading, Button as RAButton } from "react-aria-components";
 
 import type { PanStateI, updateNodeParams } from "./deckConfig";
@@ -89,15 +97,7 @@ function NodeDisclosure({
 }
 
 export function NodeCircle({
-	id,
-	x,
-	y,
-	isRoom,
-	radius,
-	volume,
-	flags,
-	systems,
-	name,
+	node,
 	selected,
 	panState,
 	updateNode,
@@ -106,7 +106,8 @@ export function NodeCircle({
 	removeNode,
 	addingEdges,
 	hasCrossDeckConnection,
-}: DeckNode & {
+}: {
+	node: DeckNode;
 	panState: RefObject<PanStateI>;
 	updateNode: (params: updateNodeParams) => void;
 	selectNode: () => void;
@@ -116,6 +117,7 @@ export function NodeCircle({
 	addingEdges: boolean;
 	hasCrossDeckConnection: boolean;
 }) {
+	const { id, x, y, radius } = node;
 	const {
 		x: floatingX,
 		y: floatingY,
@@ -156,8 +158,7 @@ export function NodeCircle({
 			deselectNode();
 		}
 	});
-	const confirm = useConfirm();
-	const [availableSystems] = q.plugin.systems.available.useNetRequest();
+
 	const events = bind();
 	return (
 		<>
@@ -202,102 +203,111 @@ export function NodeCircle({
 						}}
 						onMouseDown={(e) => e.stopPropagation()}
 					>
-						<Input
-							className="sticky top-0"
-							label="Name"
-							labelHidden
-							autoFocus
-							placeholder="Name"
-							defaultValue={name}
-							onMouseDown={(e) => e.stopPropagation()}
-							onChange={(e) => {
-								updateNode({ name: e.target.value });
-							}}
-						/>
-						<Checkbox
-							label="Is Room"
-							defaultChecked={isRoom}
-							onChange={(e) => updateNode({ isRoom: e.target.checked })}
-						/>
-						<NodeDisclosure title="Flags">
-							{nodeFlags.map((flag) => (
-								<Checkbox
-									key={flag}
-									label={
-										<>
-											{capitalCase(flag)}
-											<FlagExplainer flag={flag} />
-										</>
-									}
-									defaultChecked={flags.includes(flag)}
-									onChange={(e) => {
-										if (e.target.checked) {
-											updateNode({ flags: [...flags, flag] });
-										} else {
-											updateNode({ flags: flags.filter((f) => f !== flag) });
-										}
-									}}
-								/>
-							))}
-						</NodeDisclosure>
-						<NodeDisclosure title="Systems">
-							{availableSystems.map(({ type }) => (
-								<Checkbox
-									key={type}
-									label={capitalCase(type)}
-									defaultChecked={systems.includes(type)}
-									onChange={(e) => {
-										if (e.target.checked) {
-											updateNode({ systems: [...systems, type] });
-										} else {
-											updateNode({
-												systems: systems.filter((t) => t !== type),
-											});
-										}
-									}}
-								/>
-							))}
-						</NodeDisclosure>
-						<Input
-							label="Radius"
-							type="range"
-							min={0}
-							max={100}
-							defaultValue={radius}
-							onMouseDown={(e) => e.stopPropagation()}
-							onChange={(e) => setRadiusValue(e.target.valueAsNumber)}
-							onMouseUp={(e) =>
-								updateNode({
-									radius: Number((e.target as EventTarget & HTMLInputElement).value),
-								})
-							}
-						/>
-						{isRoom && flags.includes("cargo") && (
+						<NodeConfig node={node} removeNode={removeNode} updateNode={updateNode}>
 							<Input
-								label="Volume for cargo in liters"
-								pattern="[0-9]*"
-								defaultValue={volume}
-								onChange={(e) => updateNode({ volume: Number(e.target.value) })}
-							/>
-						)}
-						<Button
-							className="btn-error btn-sm w-full"
-							onClick={async () => {
-								if (
-									await confirm({
-										header: "Delete Node",
-										body: "Are you sure you want to delete this node?",
+								label="Radius"
+								type="range"
+								min={0}
+								max={100}
+								defaultValue={radius}
+								onMouseDown={(e) => e.stopPropagation()}
+								onChange={(e) => setRadiusValue(e.target.valueAsNumber)}
+								onMouseUp={(e) =>
+									updateNode({
+										radius: Number((e.target as EventTarget & HTMLInputElement).value),
 									})
-								) {
-									removeNode();
 								}
-							}}
-						>
-							Delete
-						</Button>
+							/>
+						</NodeConfig>
 					</div>
 				)}
 			</Portal>
+		</>
+	);
+}
+
+export function NodeConfig({
+	node,
+	updateNode,
+	removeNode,
+	children,
+}: {
+	node: DeckNode;
+	updateNode: (params: updateNodeParams) => void;
+	removeNode: () => void;
+	children?: ReactNode;
+}) {
+	const confirm = useConfirm();
+
+	return (
+		<>
+			<Input
+				className="sticky top-0"
+				label="Name"
+				labelHidden
+				autoFocus
+				placeholder="Name"
+				defaultValue={node.name}
+				onMouseDown={(e) => e.stopPropagation()}
+				onChange={(e) => {
+					updateNode({ name: e.target.value });
+				}}
+			/>
+			<Checkbox
+				label="Is Room"
+				defaultChecked={node.isRoom}
+				onChange={(e) => updateNode({ isRoom: e.target.checked })}
+			/>
+			<NodeDisclosure title="Flags">
+				{nodeFlags.map((flag) => (
+					<Checkbox
+						key={flag}
+						label={
+							<>
+								{capitalCase(flag)}
+								<FlagExplainer flag={flag} />
+							</>
+						}
+						defaultChecked={node.flags.includes(flag)}
+						onChange={(e) => {
+							if (e.target.checked) {
+								updateNode({ flags: [...node.flags, flag] });
+							} else {
+								updateNode({ flags: node.flags.filter((f) => f !== flag) });
+							}
+						}}
+					/>
+				))}
+			</NodeDisclosure>
+			<NodeDisclosure title="Systems">
+				<Suspense>
+					<SystemsList node={node} updateNode={updateNode} />
+				</Suspense>
+			</NodeDisclosure>
+			{children}
+			{node.isRoom && node.flags.includes("cargo") && (
+				<Input
+					label="Volume for cargo in liters"
+					pattern="[0-9]*"
+					defaultValue={node.volume}
+					onChange={(e) => updateNode({ volume: Number(e.target.value) })}
+				/>
+			)}
+			<Button
+				className="btn-error btn-sm w-full"
+				onClick={async () => {
+					if (
+						await confirm({
+							header: "Delete Node",
+							body: "Are you sure you want to delete this node?",
+						})
+					) {
+						removeNode();
+					}
+				}}
+			>
+				Delete
+			</Button>
 		</>
 	);
 }
@@ -307,4 +317,30 @@ function FlagExplainer({ flag }: { flag: string }) {
 		return <InfoTip>Whether the room accepts cargo.</InfoTip>;
 	}
 	return null;
+}
+
+function SystemsList({
+	node,
+	updateNode,
+}: {
+	node: DeckNode;
+	updateNode: (params: updateNodeParams) => void;
+}) {
+	const [availableSystems] = q.plugin.systems.available.useNetRequest();
+	return availableSystems.map(({ type }) => (
+		<Checkbox
+			key={type}
+			label={capitalCase(type)}
+			defaultChecked={node.systems.includes(type)}
+			onChange={(e) => {
+				if (e.target.checked) {
+					updateNode({ systems: [...node.systems, type] });
+				} else {
+					updateNode({
+						systems: node.systems.filter((t) => t !== type),
+					});
+				}
+			}}
+		/>
+	));
 }

@@ -185,26 +185,23 @@ export const deck = t.router({
 		}),
 	updateNode: t.procedure
 		.input(
-			z.intersection(
-				z.object({
-					pluginId: z.string(),
-					shipId: z.string(),
-					deckId: z.string(),
-					nodeId: z.number(),
-				}),
-				z.union([
-					z.object({ x: z.number(), y: z.number() }),
-					z.object({ name: z.string() }),
-					z.object({ isRoom: z.boolean() }),
-					z.object({
-						icon: z.instanceof(File).nullish(),
-					}),
-					z.object({ radius: z.number() }),
-					z.object({ volume: z.number() }),
-					z.object({ flags: nodeFlagsSchema.array() }),
-					z.object({ systems: z.string().array() }),
-				]),
-			),
+			z.object({
+				pluginId: z.string(),
+				shipId: z.string(),
+				deckId: z.string(),
+				nodeId: z.number(),
+				x: z.number().optional(),
+				y: z.number().optional(),
+				name: z.string().optional(),
+				isRoom: z.boolean().optional(),
+
+				icon: z.instanceof(File).nullish().optional(),
+
+				radius: z.number().optional(),
+				volume: z.number().optional(),
+				flags: nodeFlagsSchema.array().optional(),
+				systems: z.string().array().optional(),
+			}),
 		)
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
@@ -212,17 +209,19 @@ export const deck = t.router({
 			const node = deck.nodes.find((node) => node.id === input.nodeId);
 			if (!node) return;
 
-			if ("x" in input) {
+			if (typeof input.x !== "undefined") {
 				node.x = input.x;
+			}
+			if (typeof input.y !== "undefined") {
 				node.y = input.y;
 			}
-			if ("name" in input) {
+			if (typeof input.name !== "undefined") {
 				node.name = input.name;
 			}
-			if ("isRoom" in input) {
+			if (typeof input.isRoom !== "undefined") {
 				node.isRoom = input.isRoom;
 			}
-			if ("icon" in input) {
+			if (typeof input.icon !== "undefined") {
 				const file = input.icon;
 				if (file instanceof File) {
 					const ext = path.extname(file.name);
@@ -231,16 +230,16 @@ export const deck = t.router({
 					ship.write(true);
 				}
 			}
-			if ("radius" in input) {
+			if (typeof input.radius !== "undefined") {
 				node.radius = input.radius;
 			}
-			if ("flags" in input) {
+			if (typeof input.flags !== "undefined") {
 				node.flags = input.flags;
 			}
-			if ("systems" in input) {
+			if (typeof input.systems !== "undefined") {
 				node.systems = input.systems;
 			}
-			if ("volume" in input) {
+			if (typeof input.volume !== "undefined") {
 				if (input.volume < 0) {
 					node.volume = 0;
 				}

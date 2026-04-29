@@ -33,7 +33,6 @@ export async function loadInkStory(
 
 		return story;
 	} catch (error) {
-		console.log(inkFilePath, error);
 		throw new Error(
 			`Unable to read ink story ${inkFilePath}: ${error instanceof Error ? error.message : JSON.stringify(error)}`,
 		);
