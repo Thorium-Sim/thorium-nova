@@ -20,14 +20,16 @@ export interface PanStateI {
 	y: number;
 	scale: number;
 }
-export type updateNodeParams =
-	| { x: number; y: number }
-	| { isRoom: boolean }
-	| { name: string }
-	| { radius: number }
-	| { volume: number }
-	| { flags: NodeFlag[] }
-	| { systems: string[] };
+export type updateNodeParams = {
+	x?: number;
+	y?: number;
+	isRoom?: boolean;
+	name?: string;
+	radius?: number;
+	volume?: number;
+	flags?: NodeFlag[];
+	systems?: string[];
+};
 const pixelRatio = typeof window === "undefined" ? 1 : window.devicePixelRatio;
 
 export default function DeckConfig() {
@@ -153,7 +155,7 @@ export default function DeckConfig() {
 					{nodes.map((deckNode) => (
 						<NodeCircle
 							key={deckNode.id}
-							{...deckNode}
+							node={deckNode}
 							panState={panState}
 							updateNode={async (params: updateNodeParams) => {
 								await q.plugin.ship.deck.updateNode.netSend({

@@ -237,7 +237,6 @@ export async function lazyLoadInkStory(conversation: Entity) {
 
 export function bindInkFunctions(story: Story, conversation: Entity) {
 	story.BindExternalFunction("getLastPath", () => {
-		console.log(conversation.components.isConversation?.executedPaths.at(-2));
 		return (
 			story.KnotContainerWithName(
 				conversation.components.isConversation?.executedPaths.at(-2) || "",

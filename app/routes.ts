@@ -37,6 +37,9 @@ export default [
 					route("cargo", "routes/config/ships/cargo.tsx"),
 					route("physics", "routes/config/ships/physics.tsx"),
 					route("shipMap", "routes/config/ships/shipMap.tsx", [
+						route("rooms", "routes/config/ships/shipMap/blank.tsx", [
+							route(":deckName/:roomId", "routes/config/ships/shipMap/roomConfig.tsx"),
+						]),
 						route(":deckName", "routes/config/ships/shipMap/deckConfig.tsx"),
 					]),
 					route("systems", "routes/config/ships/systems.tsx", [
