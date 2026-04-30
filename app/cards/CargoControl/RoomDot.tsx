@@ -1,13 +1,5 @@
-import {
-	flip,
-	offset,
-	shift,
-	useFloating,
-	useInteractions,
-	useRole,
-	useHover,
-} from "@floating-ui/react";
-import { useState } from "react";
+import { cn } from "@thorium/utils/cn";
+import { useEffect, useRef, useState } from "react";
 
 import { useShipMapStore } from "./useShipMapStore";
 
@@ -23,54 +15,57 @@ export function RoomDot({
 	const selectedRoomId = useShipMapStore((state) => state.selectedRoomId);
 	const isSelected = selectedRoomId === id;
 
-	const [open, setOpen] = useState(false);
+	const textBg = useRef<SVGRectElement>(null);
+	const text = useRef<SVGTextElement>(null);
+	const [tooltipShown, setTooltipShown] = useState(false);
 
-	const { x, y, refs, strategy, context } = useFloating({
-		placement: "left",
-		middleware: [offset(10), flip(), shift()],
-		open,
-		onOpenChange: setOpen,
-	});
-
-	const { getReferenceProps, getFloatingProps } = useInteractions([
-		useHover(context),
-		useRole(context, { role: "tooltip" }),
-	]);
-
+	useEffect(() => {
+		if (text.current && textBg.current) {
+			const bbox = text.current.getBBox();
+			textBg.current.setAttribute("width", `${bbox.width + 4}`);
+			textBg.current.setAttribute("height", `${bbox.height + 2}`);
+			textBg.current.setAttribute("x", `${bbox.x - 2}`);
+			textBg.current.setAttribute("y", `${bbox.y - 1}`);
+		}
+	}, []);
 	return (
 		<>
-			<div
-				className="absolute flex h-4 w-4 cursor-pointer"
-				style={{
-					transform: `translate(calc(${position.x}px - 0.5rem), calc(${position.y}px - 0.5rem))`,
-				}}
-			>
-				<div
-					className={`h-4 w-4 ${
-						isSelected ? "bg-sky-400 shadow-md ring-2 ring-sky-300" : "bg-green-300"
-					} pointer-events-auto rounded-full`}
-					ref={refs.setReference}
+			<circle
+				cx={position.x}
+				cy={position.y}
+				r={5}
+				className={cn("fill-green-300 cursor-pointer pointer-events-auto", {
+					"fill-sky-400": isSelected,
+				})}
+				style={{ anchorName: `--room-${id}` }}
+				onClick={() => useShipMapStore.setState({ selectedRoomId: id })}
+				onPointerEnter={() => setTooltipShown(true)}
+				onPointerLeave={() => setTooltipShown(false)}
+			/>
+			{isSelected && (
+				<circle
+					cx={position.x}
+					cy={position.y}
+					r={5}
+					className={cn("fill-green-300 cursor-pointer", {
+						"fill-sky-400 animate-ping": isSelected,
+					})}
+					style={{ transformOrigin: `${position.x}px ${position.y}px` }}
 					onClick={() => useShipMapStore.setState({ selectedRoomId: id })}
-					{...getReferenceProps()}
 				/>
-				{isSelected && (
-					<span className="absolute inline-flex h-4 w-4 animate-ping rounded-full bg-sky-400" />
-				)}
-			</div>
-			{open && (
-				<div
-					ref={refs.setFloating}
-					style={{
-						position: strategy,
-						top: y ?? 0,
-						left: x ?? 0,
-					}}
-					className="z-50 rounded border-2 border-white/50 bg-black/90 px-2 py-1 text-2xl text-white drop-shadow-xl"
-					{...getFloatingProps()}
-				>
-					{name}
-				</div>
 			)}
+			<style>
+				{`
+				text {
+	font: 1px;
+}`}
+			</style>
+			<g className={tooltipShown ? "" : "hidden"}>
+				<rect ref={textBg} className="stroke fill-black/80 stroke-white/50" rx={2} />
+				<text ref={text} x={position.x + 10} y={position.y + 3} className="fill-white text-[10px]">
+					{name}
+				</text>
+			</g>
 		</>
 	);
 }
