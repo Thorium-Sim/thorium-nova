@@ -15,7 +15,7 @@ import { CargoSearchInput } from "./CargoSearchInput";
 import { ContainerLabel } from "./ContainerLabel";
 import { DeckPicker } from "./DeckPicker";
 import { GoToRoomButton } from "./GoToRoomButton";
-import { RoomDot } from "./RoomDot";
+import { RoomDot, RoomDotLabel } from "./RoomDot";
 import { ShipView } from "./ShipView";
 import { useShipMapStore } from "./useShipMapStore";
 import { useTransferAmount } from "./useTransferAmount";
@@ -243,6 +243,7 @@ function CargoContainerDeckChildren({
 		}
 	}, [renderSite, svgRef]);
 
+	const [currentTooltip, setCurrentTooltip] = useState<number | null>(null);
 	if (!renderSite) return null;
 	return (
 		<>
@@ -258,6 +259,24 @@ function CargoContainerDeckChildren({
 									x: room.position.x * 1.086,
 									y: room.position.y * 1.086,
 								}}
+								onPointerEnter={() => setCurrentTooltip(room.id)}
+								onPointerLeave={() => setCurrentTooltip(null)}
+							/>
+						) : null,
+					)}
+					{/*
+					We have to separate these because rendering order determines layering order in SVG land
+					and otherwise dots could overlap the labels */}
+					{rooms.map((room) =>
+						room.deck === deck.name ? (
+							<RoomDotLabel
+								key={room.id}
+								name={room.name || ""}
+								position={{
+									x: room.position.x * 1.086,
+									y: room.position.y * 1.086,
+								}}
+								tooltipShown={currentTooltip === room.id}
 							/>
 						) : null,
 					)}

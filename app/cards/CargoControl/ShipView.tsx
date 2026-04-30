@@ -26,10 +26,7 @@ export function ShipView({
 	const { decks } = cargoRooms;
 
 	return (
-		<div
-			id="deck-container"
-			className="relative h-full w-full justify-self-center overflow-hidden select-none"
-		>
+		<div id="deck-container" className="relative h-full w-full justify-self-center select-none">
 			<Suspense fallback={null}>
 				{decks.map((d, i) => (
 					<Deck key={d.name} d={d} i={i} deckIndex={deckIndex} deckChildren={deckChildren} />

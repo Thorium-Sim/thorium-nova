@@ -1,33 +1,19 @@
 import { cn } from "@thorium/utils/cn";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, type SVGProps } from "react";
 
 import { useShipMapStore } from "./useShipMapStore";
 
 export function RoomDot({
 	id,
 	position,
-	name,
+	...props
 }: {
 	id: number;
-	name: string;
 	position: { x: number; y: number };
-}) {
+} & Omit<SVGProps<SVGCircleElement>, "id">) {
 	const selectedRoomId = useShipMapStore((state) => state.selectedRoomId);
 	const isSelected = selectedRoomId === id;
 
-	const textBg = useRef<SVGRectElement>(null);
-	const text = useRef<SVGTextElement>(null);
-	const [tooltipShown, setTooltipShown] = useState(false);
-
-	useEffect(() => {
-		if (text.current && textBg.current) {
-			const bbox = text.current.getBBox();
-			textBg.current.setAttribute("width", `${bbox.width + 4}`);
-			textBg.current.setAttribute("height", `${bbox.height + 2}`);
-			textBg.current.setAttribute("x", `${bbox.x - 2}`);
-			textBg.current.setAttribute("y", `${bbox.y - 1}`);
-		}
-	}, []);
 	return (
 		<>
 			<circle
@@ -39,8 +25,7 @@ export function RoomDot({
 				})}
 				style={{ anchorName: `--room-${id}` }}
 				onClick={() => useShipMapStore.setState({ selectedRoomId: id })}
-				onPointerEnter={() => setTooltipShown(true)}
-				onPointerLeave={() => setTooltipShown(false)}
+				{...props}
 			/>
 			{isSelected && (
 				<circle
@@ -54,6 +39,37 @@ export function RoomDot({
 					onClick={() => useShipMapStore.setState({ selectedRoomId: id })}
 				/>
 			)}
+		</>
+	);
+}
+
+export function RoomDotLabel({
+	name,
+	position,
+	tooltipShown,
+}: {
+	name: string;
+	position: { x: number; y: number };
+	tooltipShown: boolean;
+}) {
+	const textBg = useRef<SVGRectElement>(null);
+	const text = useRef<SVGTextElement>(null);
+
+	useEffect(() => {
+		if (text.current && textBg.current) {
+			let bbox = text.current.getBBox();
+			if (bbox.width + bbox.x > text.current.ownerSVGElement!.getBBox().width) {
+				text.current.setAttribute("x", `${position.x - bbox.width - 10}`);
+			}
+			bbox = text.current.getBBox();
+			textBg.current.setAttribute("width", `${bbox.width + 4}`);
+			textBg.current.setAttribute("height", `${bbox.height + 2}`);
+			textBg.current.setAttribute("x", `${bbox.x - 2}`);
+			textBg.current.setAttribute("y", `${bbox.y - 1}`);
+		}
+	}, []);
+	return (
+		<>
 			<style>
 				{`
 				text {
