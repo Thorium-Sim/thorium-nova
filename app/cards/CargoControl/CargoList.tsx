@@ -1,4 +1,5 @@
 import { q } from "@thorium/context/AppContext";
+import { cn } from "@thorium/utils/cn";
 import type { Kelvin } from "@thorium/utils/unitTypes";
 
 import { cargoSort } from "./cargoSort";
@@ -8,6 +9,7 @@ export function CargoList({
 	enRouteContainer,
 	selectedContainerId,
 	onClick,
+	className,
 }: {
 	selectedRoom:
 		| {
@@ -20,13 +22,14 @@ export function CargoList({
 				};
 		  }
 		| undefined;
-	enRouteContainer: { id: number; entityState: "idle" | "enRoute" } | undefined;
+	enRouteContainer?: { id: number; entityState: "idle" | "enRoute" } | undefined;
 	selectedContainerId: number | null;
 	onClick: (key: string) => Promise<void>;
+	className?: string;
 }) {
 	const [inventoryTypes] = q.cargoControl.inventoryTypes.useNetRequest();
 	return (
-		<ul className="panel panel-primary flex-1 overflow-y-auto">
+		<ul className={cn("flex-1 overflow-y-auto", className)}>
 			{selectedRoom &&
 				Object.entries(selectedRoom.contents)
 					.sort(cargoSort)

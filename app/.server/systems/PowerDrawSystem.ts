@@ -1,4 +1,5 @@
 import { getTargetIsInPhaserRange } from "@thorium/.server/systems/PhasersSystem";
+import { getRoomBySystem } from "@thorium/cards/CargoControl/data.server";
 import { type Entity, System } from "@thorium/utils/ecs";
 
 /**
@@ -132,6 +133,27 @@ export class PowerDrawSystem extends System {
 					powerDraw = (maxSafePower - requiredPower) * gain + requiredPower;
 				}
 				break;
+			}
+			case "exocomps": {
+				const ship = this.ecs.getEntityById(entity.components.isShipSystem?.shipId || -1);
+				if (!ship) return;
+				const exocompRooms = getRoomBySystem(ship, "exocomps").map((i) => i.id);
+				if (exocompRooms.length === 0) return;
+
+				// Charge any exocomps that are in the same room as the exocomp system
+				for (const exocomp of this.ecs.componentCache.get("exocomp") || []) {
+					if (!exocomp.components.exocomp) continue;
+					const { maxCharge, chargeRate, currentCharge } = exocomp.components.exocomp;
+					// If node path is empty, then the entity is sitting in a room.
+					if (
+						exocompRooms.includes(exocomp.components.passengerMovement?.destinationNode || -1) &&
+						exocomp.components.passengerMovement?.nodePath.length === 0
+					) {
+						if (currentCharge < maxCharge) {
+							powerDraw += chargeRate;
+						}
+					}
+				}
 			}
 			case "generic":
 				powerDraw = requestedPower;

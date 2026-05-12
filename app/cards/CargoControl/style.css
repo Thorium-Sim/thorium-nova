@@ -1,16 +1,22 @@
 .deck-before {
-	transform: perspective(2000px) rotateX(-90deg) scale(var(--deck-scale, 1));
-	transform-origin: center bottom;
+	transform: perspective(2000px) scale(0.8);
+	transform-origin: center;
 	transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+	pointer-events: none;
+	opacity: 0;
 }
 .deck-after {
-	transform: perspective(2000px) rotateX(90deg) scale(var(--deck-scale, 1));
-	transform-origin: center top;
+	transform: perspective(2000px) scale(1.2);
+	transform-origin: center;
 	transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+	pointer-events: none;
+	opacity: 0;
 }
 .deck-on {
-	transform: perspective(2000px) rotateX(0deg) scale(var(--deck-scale, 1));
-	transform-origin: center center;
+	transform: perspective(2000px) scale(1);
+	opacity: 1;
+	pointer-events: all;
+	transform-origin: center;
 }
 .deck-on .deck-image > svg,
 .deck-after .deck-image > svg,

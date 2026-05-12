@@ -30,3 +30,17 @@ function generateGaussian() {
 
 	return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 }
+
+export function randomPointInCircle(radius = 1) {
+	const u = Math.random();
+	const v = Math.random();
+	const theta = u * 2.0 * Math.PI;
+	const phi = Math.acos(2.0 * v - 1.0);
+	const r = Math.cbrt(Math.random()) * radius;
+	const sinTheta = Math.sin(theta);
+	const cosTheta = Math.cos(theta);
+	const sinPhi = Math.sin(phi);
+	const x = r * sinPhi * cosTheta;
+	const y = r * sinPhi * sinTheta;
+	return [x, y] as const;
+}

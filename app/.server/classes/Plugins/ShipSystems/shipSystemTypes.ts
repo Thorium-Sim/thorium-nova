@@ -1,4 +1,5 @@
 import CoolantTankSystemPlugin from "@thorium/.server/classes/Plugins/ShipSystems/CoolantTank";
+import ExocompsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Exocomps";
 import LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
 import MainComputerPlugin from "@thorium/.server/classes/Plugins/ShipSystems/MainComputer";
 import NavigationPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Navigation";
@@ -38,6 +39,7 @@ export const ShipSystemTypes = {
 	navigation: NavigationPlugin,
 	longRangeComm: LongRangeCommPlugin,
 	shortRangeComm: ShortRangeCommPlugin,
+	exocomps: ExocompsPlugin,
 };
 
 export type ShipSystemFlags = "power" | "heat" | "damage" | "sounds";

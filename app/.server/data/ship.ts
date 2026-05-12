@@ -47,7 +47,10 @@ export const ship = t.router({
 				"shipId" in input
 					? input.shipId
 					: ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId || -1;
-			const ship = ctx.ecs?.getEntityById(shipId)?.toJSON() || null;
+			let ship: Entity | null = null;
+			try {
+				ship = ctx.ecs?.getEntityById(shipId) || null;
+			} catch {}
 			if (!ship)
 				return {
 					id: shipId,
@@ -154,6 +157,31 @@ export const ship = t.router({
 				systemPosition,
 				assets,
 				isDestroyed: ship.components.isDestroyed,
+			};
+		}),
+	rooms: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number } | null, { input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
+			return true;
+		})
+		.autoPublish(["shipMap"], (entity) => [{ shipId: entity.id }])
+		.request(({ ctx, input }) => {
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			return {
+				rooms:
+					ship?.components.shipMap?.deckNodes.flatMap((n) =>
+						n.isRoom
+							? {
+									id: n.id,
+									name: n.name,
+									systems: n.systems,
+									deckIndex: n.deckIndex,
+									flags: n.flags,
+								}
+							: [],
+					) || [],
+				decks: ship?.components.shipMap?.decks.map((d) => ({ name: d.name })) || [],
 			};
 		}),
 	spawn: t.procedure

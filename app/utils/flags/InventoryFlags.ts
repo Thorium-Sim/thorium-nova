@@ -8,20 +8,20 @@ import z from "zod";
 
 export type RepairTypes = z.infer<typeof repairTypes>;
 
-const repairTypes = z.union([
-	z.literal("Computer Specialist"),
-	z.literal("Custodian"),
-	z.literal("Quality Assurance"),
-	z.literal("Electrician"),
-	z.literal("Explosive Expert"),
-	z.literal("Fire Control"),
-	z.literal("General Engineer"),
-	z.literal("Hazardous Waste"),
-	z.literal("Mechanic"),
-	z.literal("Plumber"),
-	z.literal("Structural Engineer"),
-	z.literal("Welder"),
-	z.null(),
+const repairTypes = z.enum([
+	"Computer Specialist",
+	"Custodian",
+	"Quality Assurance",
+	"Electrician",
+	"Exocomp",
+	"Explosive Expert",
+	"Fire Control",
+	"General Engineer",
+	"Hazardous Waste",
+	"Mechanic",
+	"Plumber",
+	"Structural Engineer",
+	"Welder",
 ]);
 
 export const torpedoDamageType = damageTypes
@@ -96,7 +96,7 @@ export const inventoryFlags = z
 			.object({
 				/** The type of repair team that this item is used by. */
 
-				type: repairTypes.optional(),
+				type: repairTypes.array().default([]),
 			})
 			.default({})
 			.optional(),
@@ -119,6 +119,7 @@ export const InventoryFlagValues: {
 			defaultValue: NonNullable<InventoryFlags[P]>[O];
 			info: string;
 			options?: string[];
+			multiple?: boolean;
 		};
 	} & { info: string };
 } = {
@@ -154,8 +155,10 @@ export const InventoryFlagValues: {
 	repair: {
 		info: "Used by repair teams to repair damaged systems.",
 		type: {
-			defaultValue: "General Engineer",
+			defaultValue: ["General Engineer"],
 			info: "The type of repair team that this item is used by.",
+			options: repairTypes._def.values,
+			multiple: true,
 		},
 	},
 	sparePart: {

@@ -402,6 +402,10 @@ const quotes = [
 	"Optimism and pessimism all assume we know the future, and therefore nothing is required from us. I think the future is radically uncertain, and therefore much is required of us.",
 	// Random Tumblr
 	"It feels good to hate, but we know hate is not allowed. So when someone tells us that we're allowed to hate someone else, we get so excited we forget that we're supposed to love everyone.",
+	// Adam Miller
+	"Something changes when you are in love. It's not just that a new person is added to your life, one person among many. It's that this new person changes for you what it means to be alive.",
+	// Clement Mok
+	"Remember, the music is not in the piano.",
 ];
 
 const QuoteOfTheDay = () => {

@@ -1,10 +1,13 @@
 import type { CardProps } from "@thorium/cards/CardProps";
 
 import "./style.css";
+import { CargoContainerDot } from "@thorium/cards/CargoControl/CargoContainerDot";
 import { q } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
+import { useEffect, useState, type RefObject } from "react";
+import { createPortal } from "react-dom";
 
 import { CargoContainerList } from "./CargoContainerList";
 import { CargoList } from "./CargoList";
@@ -12,6 +15,7 @@ import { CargoSearchInput } from "./CargoSearchInput";
 import { ContainerLabel } from "./ContainerLabel";
 import { DeckPicker } from "./DeckPicker";
 import { GoToRoomButton } from "./GoToRoomButton";
+import { RoomDot, RoomDotLabel } from "./RoomDot";
 import { ShipView } from "./ShipView";
 import { useShipMapStore } from "./useShipMapStore";
 import { useTransferAmount } from "./useTransferAmount";
@@ -48,7 +52,18 @@ export function CargoControl(props: CardProps) {
 				<div className="z-10 mx-auto w-1/3">
 					<CargoSearchInput />
 				</div>
-				<ShipView deckIndex={deckIndex} cardLoaded={props.cardLoaded} />
+				<ShipView
+					deckIndex={deckIndex}
+					cardLoaded={props.cardLoaded}
+					deckChildren={(deck, deckIndex, ref) => (
+						<CargoContainerDeckChildren
+							key={deckIndex}
+							deck={deck}
+							deckIndex={deckIndex}
+							svgRef={ref}
+						/>
+					)}
+				/>
 			</div>
 			<div className="flex h-full flex-col">
 				<h3 className="text-xl">
@@ -68,6 +83,7 @@ export function CargoControl(props: CardProps) {
 					)}
 				</h3>
 				<CargoList
+					className="panel panel-primary"
 					selectedRoom={selectedRoom}
 					enRouteContainer={enRouteContainer}
 					selectedContainerId={selectedContainerId}
@@ -136,6 +152,7 @@ export function CargoControl(props: CardProps) {
 			<div className="flex h-full flex-col">
 				<ContainerLabel />
 				<CargoList
+					className="panel panel-primary"
 					selectedRoom={selectedContainer}
 					enRouteContainer={enRouteContainer}
 					selectedContainerId={selectedContainerId}
@@ -201,5 +218,84 @@ export function CargoControl(props: CardProps) {
 				</Button>
 			</div>
 		</div>
+	);
+}
+
+function CargoContainerDeckChildren({
+	deck,
+	deckIndex,
+	svgRef,
+}: {
+	deck: { name: string };
+	deckIndex: number;
+	svgRef: RefObject<HTMLDivElement | null>;
+}) {
+	const { shipId } = useStation();
+	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
+	const { rooms } = cargoRooms;
+	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
+
+	const [renderSite, setRenderSite] = useState<SVGElement | null>(null);
+	useEffect(() => {
+		if (!renderSite) {
+			if (svgRef.current?.children[0]) {
+				setRenderSite(svgRef.current.children[0] as SVGElement);
+			}
+		}
+	}, [renderSite, svgRef]);
+
+	const [currentTooltip, setCurrentTooltip] = useState<number | null>(null);
+	if (!renderSite) return null;
+	return (
+		<>
+			{createPortal(
+				<>
+					{rooms.map((room) =>
+						room.deck === deck.name ? (
+							<RoomDot
+								key={room.id}
+								id={room.id}
+								name={room.name || ""}
+								position={{
+									x: room.position.x * 1.086,
+									y: room.position.y * 1.086,
+								}}
+								onPointerEnter={() => setCurrentTooltip(room.id)}
+								onPointerLeave={() => setCurrentTooltip(null)}
+							/>
+						) : null,
+					)}
+					{/*
+					We have to separate these because rendering order determines layering order in SVG land
+					and otherwise dots could overlap the labels */}
+					{rooms.map((room) =>
+						room.deck === deck.name ? (
+							<RoomDotLabel
+								key={room.id}
+								name={room.name || ""}
+								position={{
+									x: room.position.x * 1.086,
+									y: room.position.y * 1.086,
+								}}
+								tooltipShown={currentTooltip === room.id}
+							/>
+						) : null,
+					)}
+					{cargoContainers.map(
+						(container) =>
+							container.position && (
+								<CargoContainerDot
+									key={container.id}
+									id={container.id}
+									position={container.position}
+									deckIndex={deckIndex}
+								/>
+							),
+					)}
+				</>,
+				renderSite,
+				deck.name,
+			)}
+		</>
 	);
 }

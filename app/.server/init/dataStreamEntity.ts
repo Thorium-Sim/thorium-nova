@@ -73,8 +73,6 @@ export function dataStreamEntity(e: Entity) {
 			id: e.id.toString(),
 			f: e.components.isShortRangeComm.antennaFrequency,
 			y: e.components.power?.currentPower,
-			z: e.components.heat?.heat || 0,
-			c: e.components.legacyCoolant?.coolant || 0,
 		};
 	}
 	if (e.components.power) {
@@ -89,6 +87,23 @@ export function dataStreamEntity(e: Entity) {
 		return {
 			id: e.id.toString(),
 			c: e.components.legacyCoolant?.coolant || 0,
+		};
+	}
+	if (e.components.exocomp) {
+		const { parentId: _, type: __, ...position } = e.components.position || {};
+		const shouldSnap = e.components.snapInterpolation ? 1 : 0;
+
+		return {
+			id: e.id.toString(),
+			...position,
+			f: e.components.exocomp.currentCharge || 1,
+			s: shouldSnap,
+		};
+	}
+	if (e.components.damageControlAssignment) {
+		return {
+			id: e.id.toString(),
+			x: e.components.damageControlAssignment.progress,
 		};
 	}
 	if (e.components.isTorpedo) {

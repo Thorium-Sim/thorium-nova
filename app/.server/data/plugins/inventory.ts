@@ -17,9 +17,10 @@ export const inventory = t.router({
 		})
 		.request(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
-			return plugin.aspects.inventory.map(({ name, description }) => ({
+			return plugin.aspects.inventory.map(({ name, description, flags }) => ({
 				name,
 				description,
+				flags: Object.keys(flags),
 			}));
 		}),
 	get: t.procedure
@@ -109,8 +110,8 @@ export const inventory = t.router({
 			if (input.name !== inventory.name && input.name) {
 				await inventory?.rename(input.name);
 			}
-			if (typeof input.image === "string") {
-				const ext = path.extname(input.image);
+			if (typeof input.image === "object") {
+				const ext = path.extname(input.image.name);
 				inventory.assets.image = await ctx.uploadFile.call(inventory, input.image, `image${ext}`);
 			}
 

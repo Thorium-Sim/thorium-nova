@@ -14,7 +14,6 @@
 @import "./slider.css";
 @import "./textarea.css";
 @plugin "@tailwindcss/typography";
-@plugin "@tailwindcss/container-queries";
 @plugin "tailwindcss-react-aria-components";
 
 @theme static {

@@ -166,9 +166,9 @@ export function NodeCircle({
 				ref={refs.setReference}
 				className={`rounded-full ${
 					selected ? (addingEdges ? "bg-purple-400" : "bg-primary") : "bg-white"
-				} absolute -top-1 -left-1 h-2 w-2 cursor-grab touch-none ${
+				} absolute top-0 left-0 h-2 w-2 cursor-grab touch-none ${
 					hasCrossDeckConnection ? "ring-1" : ""
-				} ring-white ring-offset-1 ring-offset-black`}
+				} -translate-1/2 ring-white ring-offset-1 ring-offset-black`}
 				onMouseDown={(e) => {
 					e.stopPropagation();
 				}}

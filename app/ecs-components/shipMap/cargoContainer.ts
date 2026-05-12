@@ -1,5 +1,9 @@
 import z from "zod";
 
+/** Used for the literal cargo containers that move around the ship */
+export const isCargoContainer = z.object({}).default({});
+
+/** Used for anything that can carry cargo */
 export const cargoContainer = z
 	.object({
 		/** How much cargo this entity can hold. Measured in liters. */
