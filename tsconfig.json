@@ -20,7 +20,7 @@
 		"composite": true,
 		"lib": ["DOM", "DOM.Iterable", "ES2025"],
 		"types": ["vite/client", "bun"],
-		"target": "ES2025",
+		"target": "esnext",
 		"module": "esnext",
 		"moduleResolution": "bundler",
 		"jsx": "react-jsx",

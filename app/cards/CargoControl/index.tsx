@@ -83,6 +83,7 @@ export function CargoControl(props: CardProps) {
 					)}
 				</h3>
 				<CargoList
+					className="panel panel-primary"
 					selectedRoom={selectedRoom}
 					enRouteContainer={enRouteContainer}
 					selectedContainerId={selectedContainerId}
@@ -151,6 +152,7 @@ export function CargoControl(props: CardProps) {
 			<div className="flex h-full flex-col">
 				<ContainerLabel />
 				<CargoList
+					className="panel panel-primary"
 					selectedRoom={selectedContainer}
 					enRouteContainer={enRouteContainer}
 					selectedContainerId={selectedContainerId}
@@ -230,7 +232,6 @@ function CargoContainerDeckChildren({
 }) {
 	const { shipId } = useStation();
 	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
-	const transform = useShipMapStore((store) => store.transform);
 	const { rooms } = cargoRooms;
 	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
 
@@ -287,7 +288,6 @@ function CargoContainerDeckChildren({
 									key={container.id}
 									id={container.id}
 									position={container.position}
-									widthScale={transform.widthScale}
 									deckIndex={deckIndex}
 								/>
 							),

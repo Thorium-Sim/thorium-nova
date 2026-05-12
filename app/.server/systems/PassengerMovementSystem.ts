@@ -70,8 +70,14 @@ export class PassengerMovementSystem extends System {
 		}
 		// Move towards the next node
 		const direction = Math.atan2(nextNode?.y - y, nextNode?.x - x);
-		const velocity = Math.min(passengerMovement.movementMaxVelocity.x, distanceToNext);
-		const zVelocity = Math.min(passengerMovement.movementMaxVelocity.z, nextNode.deckIndex - z);
+		const velocity = Math.min(
+			passengerMovement.movementMaxVelocity.x * passengerMovement.movementVelocityMultiplier,
+			distanceToNext,
+		);
+		const zVelocity = Math.min(
+			passengerMovement.movementMaxVelocity.z * passengerMovement.movementVelocityMultiplier,
+			nextNode.deckIndex - z,
+		);
 		const newX = x + velocity * Math.cos(direction) * elapsedRatio;
 		const newY = y + velocity * Math.sin(direction) * elapsedRatio;
 		let newZ = z + zVelocity * elapsedRatio;

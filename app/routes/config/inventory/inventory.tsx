@@ -266,7 +266,7 @@ export default function InventoryLayout() {
 														inventoryId,
 														flags: {
 															...item?.flags,
-															[key]: {
+															[flagKey]: {
 																...item?.flags[flagKey],
 																[config]: value,
 															},
@@ -299,6 +299,28 @@ export default function InventoryLayout() {
 															label: capitalCase(o),
 														}),
 													);
+													if (value.multiple) {
+														// @ts-expect-error Pain to type these literal keys
+														const values = item.flags[flagKey]?.[config] || [];
+														return (
+															<>
+																{items.map((i) => (
+																	<Checkbox
+																		key={i.id}
+																		label={i.label}
+																		defaultChecked={values.includes(i.id)}
+																		onChange={(e) => {
+																			if (!e.currentTarget.checked) {
+																				updateValue(values.filter((v: string) => v !== i.id));
+																			} else {
+																				updateValue([...values, i.id]);
+																			}
+																		}}
+																	/>
+																))}
+															</>
+														);
+													}
 													return (
 														<Select
 															key={config}
@@ -310,7 +332,7 @@ export default function InventoryLayout() {
 															}
 															setSelected={(value) => {
 																if (Array.isArray(value)) return;
-																updateValue(value.id);
+																updateValue(value);
 															}}
 														/>
 													);

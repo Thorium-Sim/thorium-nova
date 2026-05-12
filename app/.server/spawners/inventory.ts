@@ -57,17 +57,27 @@ export function generateShipInventory(
 		[0, []],
 	);
 
+	const shipSystems = new Set<string>();
+
+	for (const room of inputRooms) {
+		for (const system of room.systems) {
+			shipSystems.add(system);
+		}
+	}
+
 	// We only want to add the kinds of cargo that are absolutely necessary, especially at first.
 	const neededInventory: string[] = [];
 	if (shipConfig.powerNeed > 0) {
 		neededInventory.push("fuel");
 	}
-	// TODO Jan 21, 2023 - these should be conditional based on reactors and systems that need heat.
-	neededInventory.push("coolant");
-	// TODO Jan 21, 2023 - these should be conditional based on whether there are torpedos or not
-	neededInventory.push("torpedoCasing");
-	neededInventory.push("torpedoWarhead");
-	neededInventory.push("torpedoGuidance");
+	if (shipSystems.has("reactor") || shipSystems.has("coolantTank")) {
+		neededInventory.push("coolant");
+	}
+	if (shipSystems.has("torpedoLauncher")) {
+		neededInventory.push("torpedoCasing");
+		neededInventory.push("torpedoWarhead");
+		neededInventory.push("torpedoGuidance");
+	}
 	// TODO Jan 21, 2023 - these should be conditional based on whether there are probes or not
 	neededInventory.push("probeCasing");
 	neededInventory.push("probeEquipment");
@@ -86,12 +96,25 @@ export function generateShipInventory(
 
 	// And we need to figure out our abundance level of each piece of cargo
 	// for doing weighted random selection.
-	const inventoryList = Object.values(flightInventory).filter((i) => {
-		for (const key in i.flags) {
-			if (neededInventory.includes(key)) return true;
+
+	// Use a set to prevent duplicate inventory items from being added
+	const inventorySet = new Set<{
+		name: string;
+		volume: number;
+		abundance: number;
+		flags: InventoryFlags;
+	}>();
+	for (const key in flightInventory) {
+		const item = flightInventory[key];
+		for (const flag in item.flags) {
+			if (neededInventory.includes(flag)) inventorySet.add(item);
 		}
-		return false;
-	});
+		if (shipSystems.has("exocomps") && item.flags.repair?.type.includes("Exocomp")) {
+			inventorySet.add(item);
+		}
+	}
+	const inventoryList = [...inventorySet];
+
 	const cargoAbundance: number[] = [];
 	const totalInventoryVolume = inventoryList.reduce((acc, inventoryTemplate) => {
 		return acc + inventoryTemplate.volume * inventoryTemplate.abundance;

@@ -8,10 +8,8 @@ import {
 	getInventoryTemplates,
 	getPluginInventoryTemplates,
 } from "@thorium/utils/.server/getInventoryTemplates";
-import {
-	calculateShipMapPath,
-	createShipMapGraph,
-} from "@thorium/utils/.server/ship/shipMapPathfinder";
+import { getGraph } from "@thorium/utils/.server/ship/shipMapGraph";
+import { calculateShipMapPath } from "@thorium/utils/.server/ship/shipMapPathfinder";
 import type { ECS, Entity } from "@thorium/utils/ecs";
 import { nodeFlags, nodeFlagsSchema, type NodeFlag } from "@thorium/utils/flags/DeckNode";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
@@ -27,22 +25,6 @@ const transferId = z.object({
 });
 
 const cargoRoomsCache = new Map<Entity, ShipMapDeckNode[]>();
-
-const shipMapGraphCache = new Map<number, ReturnType<typeof createShipMapGraph>>();
-
-function getGraph(entity: Entity) {
-	if (!shipMapGraphCache.has(entity.id)) {
-		if (!entity.components.shipMap) throw new Error("Invalid ship map.");
-		shipMapGraphCache.set(
-			entity.id,
-			createShipMapGraph(
-				entity.components.shipMap?.deckEdges || [],
-				entity.components.shipMap.deckNodes,
-			),
-		);
-	}
-	return shipMapGraphCache.get(entity.id)!;
-}
 
 export const cargoControl = t.router({
 	inventoryTypes: t.procedure
@@ -294,57 +276,6 @@ export const cargoControl = t.router({
 			if (!fromContainer) throw new Error("No source container found.");
 			const toContainer = getCargoContents(ctx.ecs, input.toId);
 			if (!toContainer) throw new Error("No destination container found.");
-
-			const inventoryTemplates = getInventoryTemplates(ctx.ecs);
-
-			const itemCounts: { [key: string]: number } = {};
-			let destinationVolume = toContainer.volume || 0;
-			// First loop to see if there are any errors
-			input.transfers.forEach(({ item, count }) => {
-				if (!fromContainer.contents[item] || fromContainer.contents[item].count < count) {
-					itemCounts[item] = fromContainer.contents[item].count;
-				}
-				const destinationUsedSpace = calculateCargoUsed(
-					toContainer.contents || {},
-					inventoryTemplates,
-				);
-				const movedVolume = calculateCargoUsed(
-					{ [item]: { count: itemCounts[item] || count } },
-					inventoryTemplates,
-				);
-
-				if (destinationUsedSpace + movedVolume > destinationVolume) {
-					const volumeLeft = destinationVolume - destinationUsedSpace;
-					const singleVolume = calculateCargoUsed({ [item]: { count: 1 } }, inventoryTemplates);
-					const cargoItemsThatFitInVolumeLeft = Math.floor(volumeLeft / singleVolume);
-
-					itemCounts[item] = Math.min(itemCounts[item] || count, cargoItemsThatFitInVolumeLeft);
-					if (itemCounts[item] <= 0) throw new Error("Not enough space in destination.");
-				}
-				const actualMovedVolume = calculateCargoUsed(
-					{ [item]: { count: itemCounts[item] || count } },
-					inventoryTemplates,
-				);
-				destinationVolume -= actualMovedVolume;
-			});
-
-			// Then loop to do the actual transfer
-			input.transfers.forEach(({ item, count }) => {
-				fromContainer.contents[item].count -= itemCounts[item] || count;
-				if (!toContainer.contents[item])
-					toContainer.contents[item] = { count: 0, temperature: 295.37 };
-
-				// Average the temperatures of the items being transferred.
-				// The formula we'll use for combining heat is
-				// (T1 * C1 + T2 * C2) / (C1 + C2)
-				const T1 = fromContainer.contents[item].temperature;
-				const T2 = toContainer.contents[item].temperature;
-				const C1 = toContainer.contents[item].count;
-				const C2 = itemCounts[item] || count;
-
-				toContainer.contents[item].count += C2;
-				toContainer.contents[item].temperature = (T1 * C1 + T2 * C2) / (C1 + C2);
-			});
 
 			pubsub.publish.cargoControl.containers({
 				shipId: input.fromId.shipId,
@@ -600,7 +531,7 @@ export function getCargoContents(
 	return null;
 }
 
-function getCargoRooms(ship: Entity | null) {
+export function getCargoRooms(ship: Entity | null) {
 	if (!ship) return [];
 
 	const inventoryTemplates = getInventoryTemplates(ship.ecs);
@@ -618,6 +549,7 @@ function getCargoRooms(ship: Entity | null) {
 			return {
 				id: node.id,
 				name: node.name,
+				deckIndex: node.deckIndex,
 				deck: ship?.components.shipMap?.decks[node.deckIndex].name,
 				position: { x: node.x, y: node.y },
 				volume: node.volume,
@@ -629,6 +561,13 @@ function getCargoRooms(ship: Entity | null) {
 		}) || [];
 
 	return rooms;
+}
+
+export function getRoomsForInventory(ship: Entity | null, inventoryName: string) {
+	if (!ship) return [];
+
+	const cargoRooms = getCargoRooms(ship);
+	return cargoRooms.filter((r) => inventoryName in r.contents);
 }
 
 export function getRoomByFlag(ship: Entity, flag: NodeFlag) {
@@ -643,7 +582,7 @@ export function getRoomByFlag(ship: Entity, flag: NodeFlag) {
 
 export function getRoomBySystem(ship: Entity | null, system: string) {
 	if (!ship?.components.shipMap && ship?.components.cargoContainer) {
-		return [ship.components.cargoContainer];
+		return [{ id: ship.id, ...ship.components.cargoContainer }];
 	}
 
 	const rooms = getCargoRooms(ship);
@@ -674,4 +613,101 @@ function getRoomFromFlagsAndSystems(ship: Entity, flags?: NodeFlag[], systems?: 
 	if (!room) throw new Error("Room not found.");
 
 	return room;
+}
+
+type Container = {
+	volume: number;
+	contents: Record<
+		string,
+		{
+			count: number;
+			temperature: number;
+		}
+	>;
+};
+
+export function transferInventory(
+	ecs: ECS,
+	fromContainer: Container,
+	toContainer: Container,
+	transfers: {
+		item: string;
+		count: number;
+	}[],
+) {
+	const inventoryTemplates = getInventoryTemplates(ecs);
+
+	const itemCounts: { [key: string]: number } = {};
+	let destinationVolume = toContainer.volume || 0;
+	// First loop to see if there are any errors
+	transfers.forEach(({ item, count }) => {
+		if (!fromContainer.contents[item] || fromContainer.contents[item].count < count) {
+			itemCounts[item] = fromContainer.contents[item]?.count || 0;
+		}
+		const destinationUsedSpace = calculateCargoUsed(toContainer.contents || {}, inventoryTemplates);
+		const movedVolume = calculateCargoUsed(
+			{ [item]: { count: itemCounts[item] || count } },
+			inventoryTemplates,
+		);
+
+		if (destinationUsedSpace + movedVolume > destinationVolume) {
+			const volumeLeft = destinationVolume - destinationUsedSpace;
+			const singleVolume = calculateCargoUsed({ [item]: { count: 1 } }, inventoryTemplates);
+			const cargoItemsThatFitInVolumeLeft = Math.floor(volumeLeft / singleVolume);
+
+			itemCounts[item] = Math.min(itemCounts[item] || count, cargoItemsThatFitInVolumeLeft);
+			if (itemCounts[item] <= 0) throw new Error("Not enough space in destination.");
+		}
+		const actualMovedVolume = calculateCargoUsed(
+			{ [item]: { count: itemCounts[item] || count } },
+			inventoryTemplates,
+		);
+		destinationVolume -= actualMovedVolume;
+	});
+
+	const transferredCounts: Record<string, number> = {};
+	// Then loop to do the actual transfer
+	transfers.forEach(({ item, count }) => {
+		const C2 = itemCounts[item] ?? count;
+		if (C2 === 0) return;
+		fromContainer.contents[item].count -= C2;
+		if (!toContainer.contents[item]) toContainer.contents[item] = { count: 0, temperature: 295.37 };
+
+		// Average the temperatures of the items being transferred.
+		// The formula we'll use for combining heat is
+		// (T1 * C1 + T2 * C2) / (C1 + C2)
+		const T1 = fromContainer.contents[item].temperature;
+		const T2 = toContainer.contents[item].temperature;
+		const C1 = toContainer.contents[item].count;
+
+		toContainer.contents[item].count += C2;
+		toContainer.contents[item].temperature = (T1 * C1 + T2 * C2) / (C1 + C2);
+		transferredCounts[item] = C2;
+	});
+
+	return transferredCounts;
+}
+
+const listFormatter = new Intl.ListFormat("en-US", { style: "long", type: "conjunction" });
+const pluralRules = new Intl.PluralRules("en-US");
+export function inventoryToString(ecs: ECS, inventory: Record<string, number>): string {
+	const inventoryTemplates = getInventoryTemplates(ecs);
+	return listFormatter.format(
+		Object.entries(inventory).map(([key, count]) => {
+			const item = inventoryTemplates[key];
+			return `${pluralize(count, item.name, item.plural)}`;
+		}),
+	);
+}
+
+function pluralize(count: number, singular: string, plural: string = singular) {
+	const grammaticalNumber = pluralRules.select(count);
+	switch (grammaticalNumber) {
+		case "one":
+			return count + " " + singular;
+		case "other":
+			return count + " " + plural;
+		default:
+			throw new Error("Unknown: " + grammaticalNumber);
+	}
 }

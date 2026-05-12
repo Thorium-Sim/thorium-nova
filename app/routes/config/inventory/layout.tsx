@@ -57,8 +57,9 @@ export default function InventoryList() {
 							id: d.name,
 							name: d.name,
 							description: d.description,
+							flags: d.flags,
 						}))}
-						searchKeys={["name"]}
+						searchKeys={["name", "flags"]}
 						selectedItem={inventoryId || null}
 						setSelectedItem={({ id }) => navigate(`${id}`)}
 						renderItem={(c) => (

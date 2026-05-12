@@ -26,6 +26,7 @@ export const systemCategories: Record<ShipSystemTypes, (typeof systemFilterValue
 	thrusters: "Propulsion",
 	torpedoLauncher: "Defense",
 	warpEngines: "Propulsion",
+	exocomps: "Misc.",
 };
 
 export const systemSortValues = ["Name", "Type", "Offline", "Damage"];

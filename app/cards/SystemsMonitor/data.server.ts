@@ -1,6 +1,7 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { getPowerSupplierPowerNeeded } from "@thorium/.server/systems/ReactorFuelSystem";
+import { getRoomBySystem } from "@thorium/cards/CargoControl/data.server";
 import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
@@ -145,6 +146,7 @@ export const systemsMonitor = t.router({
 						maxSafeHeat: number;
 						nominalHeat: number;
 					};
+					roomIds: number[];
 				}[] = [];
 				const ship = ctx.ecs.getEntityById(input.shipId);
 				for (const systemId of ship?.components.shipSystems?.shipSystems.keys() || []) {
@@ -153,6 +155,9 @@ export const systemsMonitor = t.router({
 					// Filter out reactors and batteries
 					if (system.components.isReactor || system.components.isBattery) continue;
 
+					const roomIds = getRoomBySystem(ship, system.components.isShipSystem.type).map(
+						(room) => room.id,
+					);
 					systems.push({
 						id: systemId,
 						name: system.components.identity!.name,
@@ -172,6 +177,7 @@ export const systemsMonitor = t.router({
 									nominalHeat: system.components.heat.nominalHeat,
 								}
 							: undefined,
+						roomIds,
 					});
 				}
 

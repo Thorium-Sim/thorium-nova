@@ -14,5 +14,7 @@ export const passengerMovement = z
 				z: z.number().default(3 / 10), // The Z default is because decks are 10 meters high, so it should take 10x as long to move between decks.
 			})
 			.default({}),
+		/** A simple way to adjust the velocity without changing the max velocity values */
+		movementVelocityMultiplier: z.number().default(1),
 	})
 	.default({});

@@ -662,6 +662,7 @@ function spawnShortRangeComm(shipId: number, ecs: ECS, flightMode: "nova" | "leg
 		shipId,
 		{ name: "Short Range Comm", tags: ["generated"], type: "shortRangeComm" },
 		flightMode,
+		shipEntity.components.shipMap?.deckNodes || [],
 		false,
 		{},
 	);

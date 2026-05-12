@@ -99,6 +99,71 @@ export async function spawnShip(
 	entity.addComponent("nearbyObjects", { objects: new Map() });
 	entity.addComponent("facingWaypoints");
 
+	if (params.playerShip) {
+		entity.addComponent("isPlayerShip");
+		entity.addComponent("physicsHandles");
+		entity.addComponent("tweaks");
+		entity.addComponent("shipAlerts");
+	} else {
+		entity.addComponent("shipBehavior", {
+			objective: "hold",
+			behaviorTarget: entity.components.position,
+			actionTarget: entity.components.position,
+		});
+		entity.addComponent("autopilot");
+	}
+
+	// Rooms need to be spawned before ship systems so systems can place entities inside
+	const extraEntities: Entity[] = [];
+	// Initialize the ship map. For now, we'll just load the ship map onto a component of the ship.
+	// In the future, rooms themselves might become entities.
+	if (entity.components.isPlayerShip && template.decks && template.decks?.length > 0) {
+		const deckNodes =
+			template.decks?.flatMap((deck, i) =>
+				deck.nodes.map((n) => ({ ...n, deckIndex: i, contents: {} })),
+			) || [];
+
+		entity.addComponent("shipMap", {
+			decks: template.decks || [],
+			deckNodes,
+			deckEdges: template.deckEdges || [],
+		});
+
+		// Place cargo containers
+		Array.from({ length: template.cargoContainers || 0 }).forEach((_, i) => {
+			// TODO June 24, 2022: Maybe make this use the ECS PRNG
+			const randomRoom = randomFromList(deckNodes.filter((n) => n.isRoom));
+			if (!randomRoom) return;
+			const cargoContainer = new Entity();
+			cargoContainer.addComponent("identity", {
+				name: `Container ${greekLetters[i]}${i > 25 ? i : ""}`,
+			});
+			cargoContainer.addComponent("isCargoContainer");
+			cargoContainer.addComponent("cargoContainer", {
+				volume: template.cargoContainerVolume || 1,
+			});
+			cargoContainer.addComponent("position", {
+				x: randomRoom.x,
+				y: randomRoom.y,
+				z: randomRoom.deckIndex,
+				type: "ship",
+				parentId: entity.id,
+			});
+			cargoContainer.addComponent("passengerMovement", {
+				destinationNode: randomRoom.id,
+			});
+			extraEntities.push(cargoContainer);
+		});
+	} else {
+		// Give the ship some cargo space without creating any rooms
+		entity.addComponent("cargoContainer", {
+			// TODO June 24, 2022: Make this a configurable value
+			volume: 500,
+		});
+	}
+
+	const shipRooms = entity.components.shipMap?.deckNodes || [];
+
 	const systemEntities: Entity[] = [];
 	let phaseCapacitorCount = 0;
 	template.shipSystems?.forEach((system) => {
@@ -117,6 +182,7 @@ export async function spawnShip(
 						shipId,
 						systemPlugin,
 						params.flightMode,
+						shipRooms,
 						params.playerShip,
 						system.overrides,
 					);
@@ -140,6 +206,7 @@ export async function spawnShip(
 						shipId,
 						systemPlugin,
 						params.flightMode,
+						shipRooms,
 						params.playerShip,
 						{
 							...system.overrides,
@@ -163,6 +230,7 @@ export async function spawnShip(
 					shipId,
 					systemPlugin,
 					params.flightMode,
+					shipRooms,
 					params.playerShip,
 					system.overrides,
 				);
@@ -176,6 +244,7 @@ export async function spawnShip(
 						shipId,
 						{ type: "battery" },
 						params.flightMode,
+						shipRooms,
 						params.playerShip,
 						{},
 					);
@@ -205,6 +274,7 @@ export async function spawnShip(
 					shipId,
 					systemPlugin,
 					params.flightMode,
+					shipRooms,
 					params.playerShip,
 					system.overrides,
 				);
@@ -241,6 +311,7 @@ export async function spawnShip(
 						shipId,
 						systemPlugin,
 						params.flightMode,
+						shipRooms,
 						params.playerShip,
 						system.overrides,
 					);
@@ -299,28 +370,15 @@ export async function spawnShip(
 		entity.components.shipSystems?.shipSystems.set(e.id, {});
 	});
 
-	// Now we can add the ship to the ECS
-	if (params.playerShip) {
-		entity.addComponent("isPlayerShip");
-		entity.addComponent("physicsHandles");
-		entity.addComponent("tweaks");
-		entity.addComponent("shipAlerts");
-	} else {
-		entity.addComponent("shipBehavior", {
-			objective: "hold",
-			behaviorTarget: entity.components.position,
-			actionTarget: entity.components.position,
-		});
-		entity.addComponent("autopilot");
-	}
-	const extraEntities: Entity[] = [];
-	// Initialize the ship map. For now, we'll just load the ship map onto a component of the ship.
-	// In the future, rooms themselves might become entities.
-	if (entity.components.isPlayerShip && template.decks && template.decks?.length > 0) {
-		const deckNodes =
-			template.decks?.flatMap((deck, i) =>
-				deck.nodes.map((n) => ({ ...n, deckIndex: i, contents: {} })),
-			) || [];
+	// Create inventory
+	if (
+		entity.components.shipMap?.deckNodes &&
+		entity.components.isPlayerShip &&
+		template.decks &&
+		template.decks?.length > 0
+	) {
+		const deckNodes = entity.components.shipMap.deckNodes;
+
 		generateShipInventory(
 			deckNodes.map((node) => ({
 				id: node.id,
@@ -334,44 +392,7 @@ export async function spawnShip(
 				powerNeed: totalPower * 2.5, // Convert megawatts into 2.5 MegaWatt hours
 			},
 		);
-
-		entity.addComponent("shipMap", {
-			decks: template.decks || [],
-			deckNodes,
-			deckEdges: template.deckEdges || [],
-		});
-
-		// Place cargo containers
-		Array.from({ length: template.cargoContainers || 0 }).forEach((_, i) => {
-			// TODO June 24, 2022: Maybe make this use the ECS PRNG
-			const randomRoom = randomFromList(deckNodes.filter((n) => n.isRoom));
-			if (!randomRoom) return;
-			const cargoContainer = new Entity();
-			cargoContainer.addComponent("identity", {
-				name: `Container ${greekLetters[i]}${i > 25 ? i : ""}`,
-			});
-			cargoContainer.addComponent("isCargoContainer");
-			cargoContainer.addComponent("cargoContainer", {
-				volume: template.cargoContainerVolume || 1,
-			});
-			cargoContainer.addComponent("position", {
-				x: randomRoom.x,
-				y: randomRoom.y,
-				z: randomRoom.deckIndex,
-				type: "ship",
-				parentId: entity.id,
-			});
-			cargoContainer.addComponent("passengerMovement", {
-				destinationNode: randomRoom.id,
-			});
-			extraEntities.push(cargoContainer);
-		});
 	} else {
-		// Give the ship some cargo space without creating any rooms
-		entity.addComponent("cargoContainer", {
-			// TODO June 24, 2022: Make this a configurable value
-			volume: 500,
-		});
 		generateShipInventory(
 			[
 				{

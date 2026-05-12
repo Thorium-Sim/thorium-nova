@@ -10,7 +10,6 @@ export function CargoContainerDot(props: {
 	id: number;
 	position: { x: number; y: number; z: number };
 	deckIndex: number;
-	widthScale: number;
 }) {
 	const { interpolate } = useLiveQuery();
 	const { cardLoaded } = useCardContext();
@@ -37,16 +36,13 @@ export function CargoContainerDot(props: {
 	return (
 		<g
 			transform={`translate(${props.position.x * 1.086}, ${props.position.y * 1.086})`}
+			style={{ display: Math.round(props.position.z || 0) === props.deckIndex ? "" : "none" }}
 			ref={dotRef}
 		>
 			<circle r={2} className={cn("fill-purple-400", { "animate-ping": isSelected })} />
 			<circle
 				r={2}
 				className={cn({ "fill-orange-400": !isSelected, "fill-purple-400": isSelected })}
-				style={{
-					transform: `translate(${props.position.x & 1.086} ${props.position.y * 1.086})`,
-					display: Math.round(props.position.z || 0) === props.deckIndex ? "" : "none",
-				}}
 
 				// <div
 				// 	className={`inline-flex h-2 w-2 rounded-full transition-colors ${
