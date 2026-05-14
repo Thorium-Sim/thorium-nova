@@ -125,7 +125,7 @@ function Waypoints() {
 													await q.waypoints.deactivate.netSend({ waypointId: id });
 												}
 											}}
-											className="group mr-2 flex items-center"
+											className="group waypoints-activate-switch mr-2 flex items-center"
 										>
 											<div
 												className="flex h-4 w-7 items-center rounded-full border transition"
@@ -263,7 +263,7 @@ function AddWaypoint() {
 	if (existingWaypoint?.isActive) {
 		return (
 			<Button
-				className="btn-notice pointer-events-auto flex-1"
+				className="btn-notice deactivate-waypoint-button pointer-events-auto flex-1"
 				onClick={() => q.waypoints.deactivate.netSend({ waypointId: existingWaypoint.id })}
 			>
 				Deactivate Waypoint
@@ -274,7 +274,7 @@ function AddWaypoint() {
 	if (existingWaypoint) {
 		return (
 			<Button
-				className="btn-warning pointer-events-auto flex-1"
+				className="btn-warning activate-waypoint-button pointer-events-auto flex-1"
 				onClick={() => q.waypoints.activate.netSend({ waypointId: existingWaypoint.id })}
 			>
 				Activate Waypoint

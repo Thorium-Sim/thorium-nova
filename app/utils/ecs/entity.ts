@@ -92,7 +92,7 @@ class Entity {
 			try {
 				this.components[componentId as ComponentIds] = component.parse(data) as any;
 			} catch (err) {
-				console.error("Error initializing component:", componentId, err);
+				console.error("Error initializing component:", componentId, data, err);
 			}
 		}
 	}
