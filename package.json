@@ -59,7 +59,6 @@
 		"@tanstack/react-query-devtools": "^5.100.9",
 		"@thorium-sim/rapier3d-node": "^0.13.2",
 		"@use-gesture/react": "^10.3.1",
-		"browser-tab-id": "^0.0.8",
 		"change-case": "^5.4.4",
 		"chroma-js": "^3.2.0",
 		"dot-beat-time": "^1.2.1",
