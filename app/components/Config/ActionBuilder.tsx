@@ -92,7 +92,7 @@ export function ActionCombobox({
 					<Icon name="chevrons-up-down" />
 				</Button>
 			</Group>
-			<Popover className="entering:animate-in entering:fade-in exiting:animate-out exiting:fade-out max-h-60 w-(--trigger-width) overflow-auto rounded-md border border-gray-400 bg-gray-900/90 text-base shadow-lg ring-1 ring-black/5">
+			<Popover className="entering:animate-in entering:fade-in exiting:animate-out exiting:fade-out max-h-60 min-w-(--trigger-width) overflow-auto rounded-md border border-gray-400 bg-gray-900/90 text-base shadow-lg ring-1 ring-black/5">
 				<ListBox className="p-1 outline-hidden" items={filteredActions}>
 					{(item) => (
 						<ListBoxItem

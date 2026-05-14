@@ -395,7 +395,6 @@ describe("Exocomp System", () => {
 		for (let i = 0; i < 550; i++) {
 			ecs.update(16);
 		}
-		console.log(exocomps[0].components);
 		expect(damageAssignment.components.damageControlAssignment?.progress).toBeGreaterThan(0);
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);

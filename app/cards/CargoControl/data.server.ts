@@ -567,7 +567,9 @@ export function getRoomsForInventory(ship: Entity | null, inventoryName: string)
 	if (!ship) return [];
 
 	const cargoRooms = getCargoRooms(ship);
-	return cargoRooms.filter((r) => inventoryName in r.contents);
+	return cargoRooms.filter(
+		(r) => inventoryName in r.contents && r.contents[inventoryName].count > 0,
+	);
 }
 
 export function getRoomByFlag(ship: Entity, flag: NodeFlag) {

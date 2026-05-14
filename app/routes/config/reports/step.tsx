@@ -86,15 +86,20 @@ export default function ReportStep() {
 				<div className="flex-1">
 					<Input
 						as="textarea"
-						className="!h-24"
+						className="h-24!"
 						labelHidden={false}
 						label={
 							<>
 								Instructions
-								<InterpolateInfo />
+								<InterpolateInfo className="static" />
 							</>
 						}
-						helperText="The instructions that will be displayed to the crew in the damage report for this step. You can use variables from your blocks in this field."
+						helperText={
+							<>
+								The instructions that will be displayed to the crew in the damage report for this
+								step. You can use variables from your blocks in this field.
+							</>
+						}
 						key={step.id}
 						defaultValue={step.description}
 						onBlur={(e: any) =>

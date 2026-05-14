@@ -183,7 +183,6 @@ function Exocomp({
 		const data = interpolate(exocomp.id);
 		if (powerRef.current && data && tooltipRef.current) {
 			const powerPercent = (data.f / exocomp.maxCharge) * 100;
-			console.log(data.f, exocomp.maxCharge);
 			powerRef.current.style.background = `conic-gradient(var(--color-yellow-400), var(--color-yellow-400) ${powerPercent}%, transparent ${powerPercent}%)`;
 			tooltipRef.current.innerText = `${powerPercent.toFixed(0)}% Charged`;
 		}
@@ -217,22 +216,23 @@ function Exocomp({
 		</div>
 	);
 }
+const instructionItems = damageControlInstruction._def.options.flatMap((u) =>
+	u._def.options.map((i) => {
+		const { type: typeShape, ...rest } = i._def.shape();
+		const type = typeShape._def.value;
+		const keys = Object.keys(rest);
+		return {
+			id: type,
+			label: capitalCase(type),
+			config: keys,
+		};
+	}),
+);
 
 const EXOCOMP_INSTRUCTION_COUNT = 5;
 function Instructions() {
 	const { shipId } = useStation();
-	const instructionItems = damageControlInstruction._def.options.flatMap((u) =>
-		u._def.options.map((i) => {
-			const { type: typeShape, ...rest } = i._def.shape();
-			const type = typeShape._def.value;
-			const keys = Object.keys(rest);
-			return {
-				id: type,
-				label: capitalCase(type),
-				config: keys,
-			};
-		}),
-	);
+
 	const [exocompInstructions, setExocompInstructions] = useState<InstructionsList>(
 		Array.from({ length: EXOCOMP_INSTRUCTION_COUNT }).map(() => null),
 	);
@@ -275,27 +275,17 @@ function Instructions() {
 							)
 						: exocompInstructions
 					).map((instruction, i) => (
-						<button
-							className={cn("aspect-square border border-white p-2 ", {
-								"bg-alert-color/30 hover:bg-alert-color/40 active:bg-alert-color/50":
-									i === instructionIndex,
-								"hover:bg-white/10 focus:border-white/80 active:bg-white/30":
-									!exocompHasInstructions,
-								"border-warning inset-ring-warning inset-ring-2":
-									selectedExocomp?.instructionIndex === i,
-							})}
+						<InstructionButton
 							key={i}
-							disabled={exocompHasInstructions}
-							onClick={() => {
-								if (!instruction || "config" in instruction) {
-									setInstructionIndex(i);
-									setSelectedItem(instructionItems.find((i) => i.id === instruction?.type) || null);
-									setConfig(instruction?.config || {});
-								}
-							}}
-						>
-							{instruction ? <Icon name={instruction.type} className="h-full w-full" /> : null}
-						</button>
+							instruction={instruction}
+							i={i}
+							exocompHasInstructions={exocompHasInstructions}
+							instructionIndex={instructionIndex}
+							selectedExocomp={selectedExocomp}
+							setConfig={setConfig}
+							setInstructionIndex={setInstructionIndex}
+							setSelectedItem={setSelectedItem}
+						/>
 					))}
 				</div>
 			</div>
@@ -453,6 +443,67 @@ function Instructions() {
 	);
 }
 
+function InstructionButton({
+	instruction,
+	i,
+	instructionIndex,
+	exocompHasInstructions,
+	selectedExocomp,
+	setInstructionIndex,
+	setSelectedItem,
+	setConfig,
+}: {
+	instruction: { type: DamageControlInstructions } | null;
+	i: number;
+	instructionIndex: number | null;
+	exocompHasInstructions: boolean | undefined;
+	selectedExocomp: { id: number; instructionIndex: number } | undefined;
+	setInstructionIndex: (index: number) => void;
+	setSelectedItem: (item: (typeof instructionItems)[0] | null) => void;
+	setConfig: (config: any) => void;
+}) {
+	const { interpolate } = useLiveQuery();
+	const { cardLoaded } = useCardContext();
+	const buttonRef = useRef<HTMLButtonElement>(null);
+	useAnimationFrame(() => {
+		if (!buttonRef.current) return;
+		if (selectedExocomp?.instructionIndex !== i) {
+			buttonRef.current.style.background = "";
+		} else {
+			if (!selectedExocomp) return;
+			const exocompEntity = interpolate(selectedExocomp.id);
+			if (!exocompEntity) {
+				buttonRef.current.style.background = "";
+				return;
+			}
+			const progress = exocompEntity.c * 100;
+			buttonRef.current.style.background = `conic-gradient(color-mix(in oklab, var(--color-white) 60%, transparent 90%), color-mix(in oklab, var(--color-white) 30%, transparent 100%) ${progress}%, transparent ${progress}%)`;
+		}
+	}, cardLoaded);
+	return (
+		<button
+			className={cn("aspect-square border border-white p-2 ", {
+				"bg-alert-color/30 hover:bg-alert-color/40 active:bg-alert-color/50":
+					i === instructionIndex,
+				"hover:bg-white/10 focus:border-white/80 active:bg-white/30": !exocompHasInstructions,
+				"border-warning inset-ring-warning inset-ring-2": selectedExocomp?.instructionIndex === i,
+			})}
+			key={i}
+			disabled={exocompHasInstructions}
+			onClick={() => {
+				if (!instruction || "config" in instruction) {
+					setInstructionIndex(i);
+					setSelectedItem(instructionItems.find((i) => i.id === instruction?.type) || null);
+					setConfig(instruction?.config || {});
+				}
+			}}
+			ref={buttonRef}
+		>
+			{instruction ? <Icon name={instruction.type} className="h-full w-full" /> : null}
+		</button>
+	);
+}
+
 function Parts({
 	parts,
 	setParts,
@@ -465,27 +516,29 @@ function Parts({
 	return (
 		<>
 			<div className="faded-scroll-y grid min-h-0 flex-1 grid-cols-[4rem_auto] flex-wrap place-items-center gap-4 overflow-y-auto py-2 @sm:grid-cols-[repeat(2,4rem_auto)] @lg:grid-cols-[repeat(3,4rem_auto)]">
-				{exocompParts.map((e) => (
-					<div key={e.name} className="contents">
-						<img
-							className="aspect-square border border-white bg-black/80 object-cover hover:bg-white/10 focus:border-white/80 active:bg-white/30"
-							src={e.image}
-							onClick={() =>
-								setParts(
-									produce((draft) => {
-										const foundItem = draft.find((i) => i.name === e.name);
-										if (!foundItem) {
-											draft.push({ name: e.name, count: 1 });
-										} else {
-											foundItem.count += 1;
-										}
-									}),
-								)
-							}
-						/>
-						<p className="w-full text-sm leading-tight text-balance">{e.name}</p>
-					</div>
-				))}
+				{exocompParts
+					.sort((a, b) => a.name.localeCompare(b.name))
+					.map((e) => (
+						<div key={e.name} className="contents">
+							<img
+								className="aspect-square border border-white bg-black/80 object-cover hover:bg-white/10 focus:border-white/80 active:bg-white/30"
+								src={e.image}
+								onClick={() =>
+									setParts(
+										produce((draft) => {
+											const foundItem = draft.find((i) => i.name === e.name);
+											if (!foundItem) {
+												draft.push({ name: e.name, count: 1 });
+											} else {
+												foundItem.count += 1;
+											}
+										}),
+									)
+								}
+							/>
+							<p className="w-full text-sm leading-tight text-balance">{e.name}</p>
+						</div>
+					))}
 			</div>
 			<CargoList
 				className="min-h-40 border border-white bg-black/80"
@@ -526,12 +579,14 @@ function Logs() {
 		<>
 			<p className="-mb-2">Logs</p>
 			<div className="panel flex-auto">
-				<div className="faded-scroll-y overflow-y-auto p-4">
-					{selectedExocomp?.logs.map((log) => (
-						<p key={log.timestamp}>
-							{fromDate(new Date(log.timestamp))} — {log.text}
-						</p>
-					))}
+				<div className="faded-scroll-y flex flex-col-reverse overflow-y-auto p-4">
+					{selectedExocomp?.logs
+						.sort((a, b) => b.timestamp - a.timestamp)
+						.map((log) => (
+							<p key={log.timestamp}>
+								{fromDate(new Date(log.timestamp))} — {log.text}
+							</p>
+						))}
 				</div>
 			</div>
 		</>

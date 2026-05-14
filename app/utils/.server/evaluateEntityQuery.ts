@@ -433,6 +433,7 @@ export async function processTriggers(ecs: ECS, event?: { event: string; values:
 		const { conditions, blocks, stepId, localVariables, callReturnBlocks } =
 			trigger.components.isTrigger;
 		const match = evaluateTriggerCondition(ecs, conditions, event);
+
 		if (match) {
 			await executeBlocks(
 				ecs,

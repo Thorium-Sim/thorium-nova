@@ -10,7 +10,7 @@ export const exocomp = z
 		shipId: z.number().default(-1),
 		instructions: damageControlInstruction.array().default([]),
 		instructionIndex: z.number().default(-1),
-
+		instructionProgress: z.number().default(0),
 		logs: z
 			.object({
 				timestamp: z.number(),

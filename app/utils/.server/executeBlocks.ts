@@ -141,7 +141,7 @@ export async function executeBlocks(
 					localVariables[block.variable] = getShipSystem(ecs, {
 						systemType: block.systemType as any,
 						shipId: entity.id,
-					}).id;
+					})?.id;
 				} else {
 					localVariables[block.variable] = getShipSystems(ecs, {
 						systemType: block.systemType as any,
@@ -269,8 +269,8 @@ export async function executeBlocks(
 					...Object.fromEntries(
 						Object.entries(block.values).map(([key, value]) => {
 							let val = getValueReference(value, localVariables, ecs);
-							// Special handling for certain keys we know are entity id references
-							if (key === "shipId" || key === "entityId") {
+							// Special handling for certain keys we know are entity id references or numbers
+							if (key === "shipId" || key === "entityId" || key === "requiredPartCount") {
 								val = Number(val);
 							} else if (typeof val === "string") {
 								// Other values get interpolated automatically

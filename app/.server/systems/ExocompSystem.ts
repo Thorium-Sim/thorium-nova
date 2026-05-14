@@ -10,6 +10,7 @@ import {
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { getGraph } from "@thorium/utils/.server/ship/shipMapGraph";
 import { calculateShipMapPath } from "@thorium/utils/.server/ship/shipMapPathfinder";
+import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { noCase } from "change-case";
@@ -158,6 +159,7 @@ export class ExocompSystem extends System {
 						`Unable to retrieve cargo${error instanceof Error ? `: ${error.message}.` : "."}`,
 					);
 				}
+				break;
 			}
 			case "useCargo": {
 				let hasTransferred = false;
@@ -207,6 +209,7 @@ export class ExocompSystem extends System {
 					this.log(entity, { state: "warning", text: `Failed to use cargo.` });
 				}
 				this.advanceInstruction(entity);
+				break;
 			}
 
 			// Doing repair stuff
@@ -244,14 +247,34 @@ export class ExocompSystem extends System {
 							progress + (1 / requiredAction.duration) * elapsedRatio,
 						);
 						assignmentEntity.updateComponent("damageControlAssignment", { progress: newProgress });
-
+						entity.updateComponent("exocomp", {
+							instructionProgress:
+								(entity.components.exocomp?.instructionProgress || 0) +
+								(1 / currentInstruction.duration) * elapsedRatio,
+						});
 						if (newProgress === 1) {
 							this.log(entity, {
 								state: "normal",
 								text: `Completed ${noCase(currentInstruction.type)} on ${systemEntity.components.identity?.name || "system"}.`,
 							});
 							pubsub.publish.exocomps.exocomps({ shipId });
+							triggerAction("damageReports.completeDamageAssignment", {
+								damageAssignmentId: assignmentEntity.id,
+							});
 							this.advanceInstruction(entity);
+						} else {
+							// If we haven't logged about starting this work, then put the log in there
+							if (
+								!entity.components.exocomp?.logs
+									.at(-1)
+									?.text.startsWith(`Started ${currentInstruction.type} operation.`)
+							) {
+								this.log(entity, {
+									state: "normal",
+									text: `Started ${currentInstruction.type} operation.`,
+								});
+								pubsub.publish.exocomps.exocomps({ shipId });
+							}
 						}
 						potentialFailure = [];
 					},
@@ -311,9 +334,16 @@ export class ExocompSystem extends System {
 
 		if (instructionIndex + 1 >= instructions.length) {
 			this.log(entity, { state: "normal", text: "Instructions complete. Ready for new orders." });
-			entity.updateComponent("exocomp", { instructionIndex: -1, instructions: [] });
+			entity.updateComponent("exocomp", {
+				instructionIndex: -1,
+				instructions: [],
+				instructionProgress: 0,
+			});
 		} else {
-			entity.updateComponent("exocomp", { instructionIndex: instructionIndex + 1 });
+			entity.updateComponent("exocomp", {
+				instructionIndex: instructionIndex + 1,
+				instructionProgress: 0,
+			});
 		}
 		pubsub.publish.exocomps.exocomps({ shipId });
 	}
@@ -364,7 +394,12 @@ export class ExocompSystem extends System {
 				nodePath,
 				nextNodeIndex: 0,
 			});
-			this.log(entity, { state: "normal", text: `Going to ${room?.name || "room"}.` });
+			const decks = ship.components.shipMap.decks;
+			const deck = decks[room?.deckIndex || -1]?.name;
+			this.log(entity, {
+				state: "normal",
+				text: `Going to ${room?.name || "room"}${decks.length > 0 && deck ? `, ${deck}` : ""}.`,
+			});
 			pubsub.publish.exocomps.exocomps({ shipId: entity.components.exocomp?.shipId || -1 });
 		}
 	}

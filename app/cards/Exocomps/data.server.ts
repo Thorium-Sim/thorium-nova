@@ -1,10 +1,13 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
-import { calculateCargoUsed } from "@thorium/cards/CargoControl/data.server";
-import { damageControlInstruction } from "@thorium/ecs-components/damageControl";
+import { calculateCargoUsed, inventoryToString } from "@thorium/cards/CargoControl/data.server";
+import {
+	damageControlActions,
+	damageControlInstruction,
+} from "@thorium/ecs-components/damageControl";
 import { shipMap } from "@thorium/ecs-components/list";
 import { getInventoryTemplates } from "@thorium/utils/.server/getInventoryTemplates";
-import type { Entity } from "@thorium/utils/ecs";
+import { ECS, Entity } from "@thorium/utils/ecs";
 import { produce } from "immer";
 import z from "zod";
 
@@ -36,23 +39,7 @@ export const exocomps = t.router({
 		})
 		.autoPublish([], () => null)
 		.request(({ ctx, input }) => {
-			const ship = ctx.ecs.getEntityById(input.shipId);
-			const inventory = getInventoryTemplates(ctx.ecs);
-			if (!ship) throw new Error("No ship selected");
-			const parts = new Map<string, { name: string; count: number; image?: string }>();
-			for (const room of ship.components.shipMap?.deckNodes || []) {
-				for (const item in room.contents) {
-					const inventoryItem = inventory[item];
-					if (inventoryItem.flags.repair?.type.includes("Exocomp")) {
-						parts.set(item, {
-							name: inventoryItem.name,
-							image: inventoryItem.assets.image,
-							count: (parts.get(item)?.count || 0) + 1,
-						});
-					}
-				}
-			}
-			return [...parts.values()];
+			return getExocompInventory(ctx.ecs, input.shipId);
 		}),
 	exocomps: t.procedure
 		.input(z.object({ shipId: z.number() }))
@@ -144,6 +131,122 @@ export const exocomps = t.router({
 
 	// 	return {id: exocomps.id, meh: exocompData.}
 	// })
+	createExocompAssignment: t.procedure
+		.input(
+			z.object({
+				damageReportId: z.number().optional(),
+				shipId: z.number().optional(),
+				systemId: z.number().optional(),
+				requiredAction: z.string(),
+				requiredPartCount: z.number().optional(),
+			}),
+		)
+		.meta({
+			action: () => {
+				return {
+					damageReportId: {
+						name: "Damage Report ID",
+					},
+					shipId: {
+						name: "Ship ID",
+						helper: "Optional. Can be inferred from the Damage Report ID",
+					},
+					systemId: {
+						name: "System ID",
+						helper: "Optional. Can be inferred from the Damage Report ID",
+					},
+					requiredAction: {
+						name: "Required Action",
+						type: "select",
+						values: damageControlActions._def.options.map((o) => o._def.shape().type._def.value),
+					},
+					requiredPartCount: {
+						name: "Required Part Count",
+						type: "number",
+						helper:
+							"Optional. Randomly chooses parts required before the action can make progress.",
+					},
+				};
+			},
+		})
+		.output(
+			z.object({
+				assignmentId: z.number(),
+				room: z.string(),
+				parts: z.string(),
+				action: z.string(),
+				actionDuration: z.number(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			let { shipId, systemId, damageReportId, requiredAction, requiredPartCount } = input;
+			const damageReport = ctx.ecs.getEntityById(damageReportId || -1);
+			if (damageReport?.components.damageReport && !shipId) {
+				shipId = damageReport.components.damageReport?.shipId;
+			}
+			if (!shipId) throw new Error("Either shipId or damageReportId is required");
+			if (damageReport?.components.damageReport && !systemId) {
+				systemId = damageReport.components.damageReport.systemId;
+			}
+			if (!systemId) throw new Error("Either systemId or damageReportId is required");
+			// Different inventory depending on the type
+			const chosenInventory: string[] = [];
+			if (requiredPartCount && requiredPartCount > 0) {
+				const allInventory = getExocompInventory(ctx.ecs, shipId).flatMap(({ name, count }) => {
+					return Array.from({ length: count }).map(() => name);
+				});
+				for (let i = 0; i < requiredPartCount; i++) {
+					const randomIndex = ctx.ecs.rng.nextInt(0, allInventory.length - 1);
+					chosenInventory.push(allInventory.splice(randomIndex, 1)[0]);
+				}
+			}
+
+			// Pick a room based on the system's rooms
+			const ship = ctx.ecs.getEntityById(shipId);
+			const system = ctx.ecs.getEntityById(systemId);
+			const room = ship?.components.shipMap?.deckNodes.find(
+				(n) => n.isRoom && n.systems.includes(system?.components.isShipSystem?.type || ""),
+			);
+			if (!room) throw new Error("Unable to find room to assign exocomps to visit.");
+			const deck = ship?.components.shipMap?.decks[room.deckIndex].name;
+			const assignmentProps = {
+				requiredAction: { type: requiredAction as any, duration: ctx.ecs.rng.nextInt(10, 60) },
+				requiredInventory: chosenInventory.reduce(
+					(acc: { name: string; count: number; present: 0 }[], r) => {
+						const item = acc.find((i) => i.name === r);
+						if (!item) {
+							acc.push({ name: r, count: 1, present: 0 });
+							return acc;
+						}
+						item.count++;
+
+						return acc;
+					},
+					[],
+				),
+			};
+			const assignment = new Entity();
+			assignment.addComponent("damageControlAssignment", {
+				damageReportId,
+				shipId,
+				systemId,
+				...assignmentProps,
+			});
+
+			ctx.ecs.addEntity(assignment);
+			return {
+				assignmentId: assignment.id,
+				room: `${room.name}, ${deck}`,
+				action: assignmentProps.requiredAction.type,
+				actionDuration: assignmentProps.requiredAction.duration,
+				parts: inventoryToString(
+					ctx.ecs,
+					Object.fromEntries(
+						assignmentProps.requiredInventory.map(({ name, count }) => [name, count]),
+					),
+				),
+			};
+		}),
 });
 
 type ShipMapDeckNode = z.infer<typeof shipMap>["deckNodes"][number];
@@ -173,4 +276,24 @@ function getSystemRooms(ship: Entity | null) {
 		}) || [];
 
 	return rooms;
+}
+
+export function getExocompInventory(ecs: ECS, shipId: number) {
+	const ship = ecs.getEntityById(shipId);
+	const inventory = getInventoryTemplates(ecs);
+	if (!ship) throw new Error("No ship selected");
+	const parts = new Map<string, { name: string; count: number; image?: string }>();
+	for (const room of ship.components.shipMap?.deckNodes || []) {
+		for (const item in room.contents) {
+			const inventoryItem = inventory[item];
+			if (inventoryItem.flags.repair?.type.includes("Exocomp")) {
+				parts.set(item, {
+					name: inventoryItem.name,
+					image: inventoryItem.assets.image,
+					count: (parts.get(item)?.count || 0) + 1,
+				});
+			}
+		}
+	}
+	return [...parts.values()];
 }

@@ -2,10 +2,10 @@ import InfoTip from "@thorium/ui/InfoTip";
 import { cn } from "@thorium/utils/cn";
 import type { DetailedHTMLProps, HTMLAttributes } from "react";
 
-export function InterpolateInfo() {
+export function InterpolateInfo({ className }: { className?: string }) {
 	return (
 		<InfoTip
-			className="absolute -right-4 -bottom-4"
+			className={cn("absolute -right-4 -bottom-4", className)}
 			dialogClassName="max-w-xl max-h-96 overflow-y-auto"
 		>
 			Use the following rules to generate text:

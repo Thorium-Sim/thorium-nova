@@ -30,9 +30,9 @@ export function RoomSelector({
 				buttonClassName="btn-primary"
 				placeholder="Select Room"
 				disabled={selectedDeckIndex === null}
-				items={rooms.flatMap((d) =>
-					d.deckIndex === deckIndex ? { id: d.id, label: d.name || "" } : [],
-				)}
+				items={rooms
+					.flatMap((d) => (d.deckIndex === deckIndex ? { id: d.id, label: d.name || "" } : []))
+					.sort((a, b) => a.label.localeCompare(b.label))}
 				label="Room"
 				selected={roomId}
 				setSelected={(room) => setRoomId(room)}

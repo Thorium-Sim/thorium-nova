@@ -54,13 +54,13 @@ export function EventCombobox({
 			<Group className="flex h-6 min-h-6 rounded-lg border border-teal-300 shadow-md ring-1 ring-black/10 transition focus-visible:ring-2 focus-visible:ring-black">
 				<Input
 					placeholder={placeholder}
-					className="w-full flex-1 border-none bg-transparent px-3 py-2 pr-10 pl-3 text-xs leading-5 text-teal-300 outline-none placeholder:font-semibold placeholder:text-teal-300 focus:ring-0"
+					className="w-full flex-1 border-none bg-transparent py-2 pr-0 pl-3 text-xs leading-5 text-teal-300 outline-none placeholder:font-semibold placeholder:text-teal-300 focus:ring-0"
 				/>
 				<Button className="pressed:bg-teal-300/50 flex cursor-pointer items-center rounded-r-lg border-0 border-l border-solid border-l-teal-300 bg-teal-300/20 px-3 text-teal-300 transition hover:bg-teal-300/50">
 					<Icon name="chevrons-up-down" />
 				</Button>
 			</Group>
-			<Popover className="entering:animate-in entering:fade-in exiting:animate-out exiting:fade-out max-h-60 w-(--trigger-width) overflow-auto rounded-md border border-gray-400 bg-gray-900/90 text-base shadow-lg ring-1 ring-black/5">
+			<Popover className="entering:animate-in entering:fade-in exiting:animate-out exiting:fade-out max-h-60 min-w-(--trigger-width) overflow-auto rounded-md border border-gray-400 bg-gray-900/90 text-base shadow-lg ring-1 ring-black/5">
 				<ListBox className="p-1 outline-hidden" items={filteredEvents}>
 					{(item) => (
 						<ListBoxItem

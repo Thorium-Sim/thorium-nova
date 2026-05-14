@@ -7,9 +7,9 @@ export function spawnTimeline(
 	timeline: MissionPlugin | ReportPlugin | TrainingPlugin,
 	addEntity: (entity: Entity) => void,
 	shipId?: number,
+	timelineEntity = new Entity(),
 ) {
 	// Create the timeline entity
-	const timelineEntity = new Entity();
 	const stepIds: number[] = [];
 	for (const stepItem of timeline.steps) {
 		const step = new Entity();

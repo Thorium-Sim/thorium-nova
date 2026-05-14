@@ -557,9 +557,9 @@ function ReportCandidates({
 
 	return (
 		<div className="col-span-3 mx-auto flex h-full w-5/6 flex-col justify-around overflow-hidden">
-			<div className="flex items-center justify-center gap-4">
+			<div className="grid grid-cols-3 grid-rows-[auto_auto_auto] gap-4">
 				{reports.map((report) => (
-					<div key={report.id} className="panel p-4">
+					<div key={report.id} className="panel row-span-3 grid grid-rows-subgrid p-4">
 						<h2 className="text-center text-xl font-bold">{report.type} Maintenance</h2>
 						<ul>
 							{report.affectedSystems.map((sys) => (

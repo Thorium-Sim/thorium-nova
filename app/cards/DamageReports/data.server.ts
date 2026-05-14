@@ -220,6 +220,8 @@ export const damageReports = t.router({
 			if (!systemType) throw new Error("Invalid system.");
 			const systemName = system?.components.identity?.name || capitalCase(systemType);
 
+			const reportEntity = new Entity();
+
 			const reportVariables = {
 				damageType: reportCandidate.type,
 				damageMetric,
@@ -227,6 +229,7 @@ export const damageReports = t.router({
 				systemName,
 				systemId: diagnostic.targetSystemId,
 				shipId: diagnostic.shipId,
+				damageReportId: reportEntity.id,
 			} satisfies ReportVariables;
 
 			const timelines = await selectAvailableTimelines(
@@ -249,6 +252,7 @@ export const damageReports = t.router({
 				timeline,
 				(entity) => ctx.ecs.addEntity(entity),
 				diagnostic.shipId,
+				reportEntity,
 			);
 
 			damageReport.updateComponent("identity", {
@@ -264,6 +268,11 @@ export const damageReports = t.router({
 			// Put all the necessary variables on the timeline
 			damageReport.addComponent("variables", {
 				variables: [
+					{
+						name: "damageReportId",
+						type: "any",
+						value: damageReport.id,
+					},
 					{
 						name: "damageType",
 						type: "any",
@@ -292,6 +301,7 @@ export const damageReports = t.router({
 			await triggerStep(
 				ctx.flight.ecs.getEntityById(damageReport.components.isTimeline?.steps[0] || -1)!,
 			);
+
 			// And delete the diagnostic
 			ctx.ecs.removeEntityById(input.diagnosticId);
 			pubsub.publish.damageReports.systemDiagnostic({
@@ -317,6 +327,11 @@ export const damageReports = t.router({
 					stepIds.includes(trigger.components.isTrigger.stepId)
 				) {
 					ctx.ecs.removeEntity(trigger);
+				}
+			}
+			for (const assignment of ctx.ecs.componentCache.get("damageControlAssignment") || []) {
+				if (assignment.components.damageControlAssignment?.damageReportId === input.reportId) {
+					ctx.ecs.removeEntity(assignment);
 				}
 			}
 			ctx.ecs.removeEntity(damageReport);
@@ -349,6 +364,16 @@ export const damageReports = t.router({
 			// Report timelines might apply their damage metrics upon completion
 			applyDamageReportMetrics(timeline);
 			return;
+		}),
+	// This is mostly used for listening for the event
+	completeDamageAssignment: t.procedure
+		.meta({ event: true })
+		.input(z.object({ damageAssignmentId: z.number() }))
+		.output(z.object({ damageAssignmentId: z.number() }))
+		.send(({ ctx, input }) => {
+			ctx.ecs.removeEntityById(input.damageAssignmentId);
+
+			return input;
 		}),
 	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
 		const set = new Set<Entity>();

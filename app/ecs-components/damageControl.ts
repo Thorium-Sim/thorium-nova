@@ -1,6 +1,6 @@
 import z from "zod";
 
-const damageControlActions = z.union([
+export const damageControlActions = z.union([
 	// Electrical
 	z.object({ type: z.literal("energize"), duration: z.number().default(10) }),
 	// Heat

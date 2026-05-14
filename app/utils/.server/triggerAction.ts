@@ -19,7 +19,7 @@ export async function triggerAction<A extends AllSends>(
 		rawInput: input,
 		ctx: context,
 		onCall: (opts, result) => {
-			const ecs = ctx?.flight?.ecs;
+			const ecs = context?.flight?.ecs;
 			if (!ecs || opts.type !== "send") return;
 
 			processTriggers(ecs, {

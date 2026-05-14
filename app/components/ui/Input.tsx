@@ -7,7 +7,7 @@ interface CommonProps {
 	invalidMessage?: string;
 	fixed?: boolean;
 	labelProps?: React.LabelHTMLAttributes<HTMLLabelElement>;
-	helperText?: string;
+	helperText?: React.ReactNode;
 	inputButton?: React.ReactNode;
 }
 const Input = forwardRef<

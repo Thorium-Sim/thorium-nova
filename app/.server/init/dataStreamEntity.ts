@@ -96,7 +96,8 @@ export function dataStreamEntity(e: Entity) {
 		return {
 			id: e.id.toString(),
 			...position,
-			f: e.components.exocomp.currentCharge || 1,
+			f: e.components.exocomp.currentCharge ?? 1,
+			c: e.components.exocomp.instructionProgress || 0,
 			s: shouldSnap,
 		};
 	}
