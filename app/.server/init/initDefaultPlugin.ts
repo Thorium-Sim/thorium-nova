@@ -1,10 +1,10 @@
 import { promises as fs } from "node:fs";
+import { readdir } from "node:fs/promises";
 import path from "node:path";
 
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { unzip } from "@thorium/utils/.server/zip";
 import { embeddedFiles } from "bun";
-import { readdir } from "node:fs/promises";
 
 export async function initDefaultPlugin() {
 	if (process.env.NODE_ENV !== "production") return;
@@ -28,12 +28,8 @@ export async function initDefaultPlugin() {
 			const filename = (await readdir(import.meta.dirname)).find(
 				(f) => f.startsWith("clientBundle") && f.endsWith(".dat"),
 			);
-			if (!filename)
-				throw new Error("Client assets are not bundled for an unknown reason");
-			await Bun.write(
-				tempFile,
-				Bun.file(path.join(import.meta.dirname, filename)),
-			);
+			if (!filename) throw new Error("Client assets are not bundled for an unknown reason");
+			await Bun.write(tempFile, Bun.file(path.join(import.meta.dirname, filename)));
 		} else {
 			await Bun.write(
 				tempFile,

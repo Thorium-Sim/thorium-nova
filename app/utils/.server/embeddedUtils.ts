@@ -1,7 +1,8 @@
-import { embeddedFiles } from "bun";
-import { getMimeType } from "hono/utils/mime";
 import { readdir } from "node:fs/promises";
 import path from "node:path";
+
+import { embeddedFiles } from "bun";
+import { getMimeType } from "hono/utils/mime";
 
 export async function getClientBundleFile(filePath: string) {
 	// @ts-expect-error
@@ -16,8 +17,7 @@ export async function getClientBundleFile(filePath: string) {
 		const filename = (await readdir(import.meta.dirname)).find(
 			(f) => f.startsWith("clientBundle") && f.endsWith(".dat"),
 		);
-		if (!filename)
-			throw new Error("Client assets are not bundled for an unknown reason");
+		if (!filename) throw new Error("Client assets are not bundled for an unknown reason");
 		file = Bun.file(path.join(import.meta.dirname, filename));
 	}
 

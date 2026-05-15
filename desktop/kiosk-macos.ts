@@ -1,13 +1,5 @@
 // kiosk-macos.ts
-import {
-	dlopen,
-	FFIType,
-	suffix,
-	ptr,
-	type Pointer,
-	CFunction,
-	JSCallback,
-} from "bun:ffi";
+import { dlopen, FFIType, suffix, ptr, type Pointer, JSCallback } from "bun:ffi";
 
 // Load Objective-C runtime
 const objc = dlopen(`/usr/lib/libobjc.A.${suffix}`, {
@@ -59,10 +51,7 @@ export function enableKioskMode(windowHandle: number) {
 	const NSThread = getClass("NSThread");
 	const isMainThreadSel = selector("isMainThread");
 
-	const isMain = objc_msgSend_ptr.symbols.objc_msgSend(
-		NSThread,
-		isMainThreadSel,
-	);
+	const isMain = objc_msgSend_ptr.symbols.objc_msgSend(NSThread, isMainThreadSel);
 	if (!isMain) {
 		throw new Error("Cocoa called off main thread");
 	}
@@ -80,30 +69,17 @@ export function enableKioskMode(windowHandle: number) {
 		console.log("Setting Level");
 		// Set window level to status (above menu bar)
 		const setLevelSel = selector("setLevel:");
-		objc_uint.symbols.objc_msgSend(
-			windowHandle,
-			setLevelSel,
-			NSStatusWindowLevel,
-		);
+		objc_uint.symbols.objc_msgSend(windowHandle, setLevelSel, NSStatusWindowLevel);
 		console.log("Setting collection behavior");
 		// Set collection behavior
 		const setCollectionBehaviorSel = selector("setCollectionBehavior:");
 		const behavior =
-			NSWindowCollectionBehaviorCanJoinAllSpaces |
-			NSWindowCollectionBehaviorFullScreenPrimary;
-		objc_uint.symbols.objc_msgSend(
-			windowHandle,
-			setCollectionBehaviorSel,
-			behavior,
-		);
+			NSWindowCollectionBehaviorCanJoinAllSpaces | NSWindowCollectionBehaviorFullScreenPrimary;
+		objc_uint.symbols.objc_msgSend(windowHandle, setCollectionBehaviorSel, behavior);
 
 		// Enter fullscreen
 		const toggleFullScreenSel = selector("toggleFullScreen:");
-		objc.symbols.objc_msgSend(
-			windowHandle as Pointer,
-			toggleFullScreenSel,
-			null,
-		);
+		objc.symbols.objc_msgSend(windowHandle as Pointer, toggleFullScreenSel, null);
 
 		// Get shared NSApplication instance
 		const NSApp = getClass("NSApplication");
@@ -149,11 +125,7 @@ export function disableKioskMode(windowHandle: number) {
 
 		// Exit fullscreen
 		const toggleFullScreenSel = selector("toggleFullScreen:");
-		objc.symbols.objc_msgSend(
-			windowHandle as Pointer,
-			toggleFullScreenSel,
-			null,
-		);
+		objc.symbols.objc_msgSend(windowHandle as Pointer, toggleFullScreenSel, null);
 
 		console.log("Kiosk mode disabled successfully");
 	} catch (error) {
@@ -168,26 +140,18 @@ export function makeFullscreen(windowHandle: number) {
 	try {
 		// Check if already in fullscreen
 		const styleMaskSel = selector("styleMask");
-		const currentStyleMask = objc.symbols.objc_msgSend(
-			windowHandle as Pointer,
-			styleMaskSel,
-		);
+		const currentStyleMask = objc.symbols.objc_msgSend(windowHandle as Pointer, styleMaskSel);
 
 		// NSWindowStyleMask constants
 		const NSWindowStyleMaskFullScreen = 1 << 14;
 
 		// Check if already fullscreen
-		const isFullscreen =
-			(Number(currentStyleMask) & NSWindowStyleMaskFullScreen) !== 0;
+		const isFullscreen = (Number(currentStyleMask) & NSWindowStyleMaskFullScreen) !== 0;
 
 		if (!isFullscreen) {
 			// Toggle fullscreen
 			const toggleFullScreenSel = selector("toggleFullScreen:");
-			objc.symbols.objc_msgSend(
-				windowHandle as Pointer,
-				toggleFullScreenSel,
-				null,
-			);
+			objc.symbols.objc_msgSend(windowHandle as Pointer, toggleFullScreenSel, null);
 			console.log("Toggled to fullscreen");
 		} else {
 			console.log("Window is already fullscreen");
@@ -204,23 +168,15 @@ export function exitFullscreen(windowHandle: number) {
 	try {
 		// Check if in fullscreen
 		const styleMaskSel = selector("styleMask");
-		const currentStyleMask = objc.symbols.objc_msgSend(
-			windowHandle as Pointer,
-			styleMaskSel,
-		);
+		const currentStyleMask = objc.symbols.objc_msgSend(windowHandle as Pointer, styleMaskSel);
 
 		const NSWindowStyleMaskFullScreen = 1 << 14;
-		const isFullscreen =
-			(Number(currentStyleMask) & NSWindowStyleMaskFullScreen) !== 0;
+		const isFullscreen = (Number(currentStyleMask) & NSWindowStyleMaskFullScreen) !== 0;
 
 		if (isFullscreen) {
 			// Toggle fullscreen to exit
 			const toggleFullScreenSel = selector("toggleFullScreen:");
-			objc.symbols.objc_msgSend(
-				windowHandle as Pointer,
-				toggleFullScreenSel,
-				null,
-			);
+			objc.symbols.objc_msgSend(windowHandle as Pointer, toggleFullScreenSel, null);
 			console.log("Exited fullscreen");
 		} else {
 			console.log("Window is not in fullscreen");
@@ -249,7 +205,7 @@ export function callMainThread() {
 
 	// Create a thread-safe callback that will run on the main thread
 	const callback = new JSCallback(
-		(context) => {
+		() => {
 			console.log("This is running on the main thread!");
 			// Your main-thread code here
 		},

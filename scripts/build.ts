@@ -1,5 +1,5 @@
 import { exec, type ExecException } from "node:child_process";
-import { mkdir, rm } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
 import { thoriumPath } from "@thorium/utils/.server/appPaths";

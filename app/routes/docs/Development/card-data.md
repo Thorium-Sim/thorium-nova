@@ -194,7 +194,7 @@ export const pilot = t.router({
 			const set = new Set<Entity>();
 			for (const entity of ctx.ecs.componentCache.get("position") || []) {
 				if (entity.components.position?.parentId === input.systemId) {
-					set.add(entity)
+					set.add(entity);
 				}
 			}
 			return set;
@@ -210,7 +210,7 @@ You still need to request the data stream once per card using the `q` utility.
 This is where you would pass params, if they were needed.
 
 ```ts
-q.cargoControl.stream.useDataStream({systemId});
+q.cargoControl.stream.useDataStream({ systemId });
 ```
 
 The challenge with DataStreams is making sure the UI remains responsive while

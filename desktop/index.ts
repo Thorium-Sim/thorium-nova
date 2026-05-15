@@ -1,7 +1,6 @@
-import Electrobun, { BrowserWindow, BrowserView, Utils } from "electrobun/bun";
-import type { ThoriumRPC } from "./rpc";
+import { BrowserWindow, BrowserView, Utils } from "electrobun/bun";
 
-let mainWindow: BrowserWindow<any>;
+import type { ThoriumRPC } from "./rpc";
 
 // Create RPC instance using BrowserView.defineRPC
 const photoBoothRPC = BrowserView.defineRPC<ThoriumRPC>({
@@ -19,14 +18,16 @@ const photoBoothRPC = BrowserView.defineRPC<ThoriumRPC>({
 
 process.env.IS_KIOSK = "true";
 
-const server = await (await import("../app/bunServer")).startHttpServer({
+const server = await (
+	await import("../app/bunServer")
+).startHttpServer({
 	isProd: true,
 	isKiosk: true,
 });
 
 // Create the main window
 // Use native renderer (WKWebView) by default, but allow overriding with CEF
-mainWindow = new BrowserWindow({
+new BrowserWindow({
 	title: "Thorium Nova",
 	url: server,
 	frame: {
