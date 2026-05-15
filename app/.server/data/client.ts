@@ -99,7 +99,12 @@ export const client = t.router({
 				pubsub.publish.client.get({ clientId });
 				pubsub.publish.station.get({ clientId });
 				pubsub.publish.theme.get({ clientId });
-				pubsub.publish.ship.get({ clientId });
+				pubsub.publish.ship.get({
+					clientId,
+				});
+				pubsub.publish.ship.get({
+					shipId: flightClient.components.flightClient?.shipId || -1,
+				});
 				return flightClient;
 			}
 			const ship = ctx.ecs.getEntityById(input.shipId);
@@ -127,6 +132,10 @@ export const client = t.router({
 			pubsub.publish.station.get({ clientId });
 			pubsub.publish.theme.get({ clientId });
 			pubsub.publish.ship.get({ clientId });
+			pubsub.publish.ship.player({ shipId: input.shipId });
+			pubsub.publish.ship.get({
+				shipId: input.shipId,
+			});
 			return flightClient;
 		}),
 	setCard: t.procedure

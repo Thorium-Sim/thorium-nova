@@ -10,7 +10,7 @@ import SearchableList from "@thorium/ui/SearchableList";
 import { cn } from "@thorium/utils/cn";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { Header, Button as RAButton } from "react-aria-components";
-import { Link, useNavigate } from "react-router";
+import { Link, Outlet, useNavigate } from "react-router";
 
 import { LobbyHeader } from "./LobbyHeader";
 import { staticStations } from "./staticStations";
@@ -45,6 +45,7 @@ export function HostLobby() {
 			</div>
 
 			<FlightButtons />
+			<Outlet />
 		</Menubar>
 	);
 }

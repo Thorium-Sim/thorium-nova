@@ -16,11 +16,11 @@ export default function FlightQuickStart() {
 	const navigate = useNavigate();
 
 	const match = useMatch("/flight/quick/:step");
+	const lobbyMatch = useMatch("/flight/lobby/quick/:step");
 
-	if (!match) return <Navigate to="/flight/quick/ship" replace />;
 	if (flight) return <Navigate to="/flight/lobby" replace />;
 
-	const { step } = match.params;
+	const { step } = match ? match.params : lobbyMatch!.params;
 
 	return (
 		<Modal

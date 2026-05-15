@@ -96,35 +96,36 @@ export function spawnShipSystem(
 			);
 			if (!room) {
 				room = randomFromList(shipRooms.filter((r) => r.isRoom));
-				console.warn(
+				console.error(
 					"Exocomps system is not assigned to a room, which means exocomps have no place to return to.",
 				);
-			}
-			for (let i = 0; i < template.exocompCount; i++) {
-				const exocompEntity = new Entity();
-				exocompEntity.addComponent("identity", { name: `${exocompName} ${i + 1}` });
-				exocompEntity.addComponent("exocomp", {
-					shipId,
-					maxCharge,
-					currentCharge: maxCharge,
-					chargeRate,
-					idleDischargeRate,
-					workingDischargeRate,
-					movingDischargeRate,
-				});
-				exocompEntity.addComponent("cargoContainer", { volume });
-				exocompEntity.addComponent("passengerMovement", {
-					movementMaxVelocity: { x: movementSpeed, y: movementSpeed, z: movementSpeed / 10 },
-					destinationNode: room.id,
-				});
-				// Place this exocomp inside the exocomp room. Otherwise, put it in a random place on the ship and log a warning.
-				const [x, y] = randomPointInCircle(room?.radius || 0);
-				exocompEntity.addComponent("position", {
-					parentId: shipId,
-					type: "ship",
-					...(room ? { x: room.x + x, y: room.y + y, z: room.deckIndex } : null),
-				});
-				entities.push(exocompEntity);
+			} else {
+				for (let i = 0; i < template.exocompCount; i++) {
+					const exocompEntity = new Entity();
+					exocompEntity.addComponent("identity", { name: `${exocompName} ${i + 1}` });
+					exocompEntity.addComponent("exocomp", {
+						shipId,
+						maxCharge,
+						currentCharge: maxCharge,
+						chargeRate,
+						idleDischargeRate,
+						workingDischargeRate,
+						movingDischargeRate,
+					});
+					exocompEntity.addComponent("cargoContainer", { volume });
+					exocompEntity.addComponent("passengerMovement", {
+						movementMaxVelocity: { x: movementSpeed, y: movementSpeed, z: movementSpeed / 10 },
+						destinationNode: room.id,
+					});
+					// Place this exocomp inside the exocomp room. Otherwise, put it in a random place on the ship and log a warning.
+					const [x, y] = randomPointInCircle(room?.radius || 0);
+					exocompEntity.addComponent("position", {
+						parentId: shipId,
+						type: "ship",
+						...(room ? { x: room.x + x, y: room.y + y, z: room.deckIndex } : null),
+					});
+					entities.push(exocompEntity);
+				}
 			}
 		}
 		const {

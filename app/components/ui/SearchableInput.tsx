@@ -1,5 +1,5 @@
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
-import { type ReactElement, type ReactNode, useEffect } from "react";
+import { type ReactElement, type ReactNode } from "react";
 import { Button, ComboBox, Input, ListBox, ListBoxItem, Popover } from "react-aria-components";
 import { useAsyncList } from "react-stately";
 
@@ -75,17 +75,12 @@ export default function SearchableInput<T extends { id: any }>({
 		},
 	});
 
-	useEffect(() => {
-		if (selected === null && list.filterText) {
-			list.setFilterText("");
-		}
-	}, [selected, list.filterText, list.setFilterText]);
 	return (
 		<ComboBox
 			inputValue={list.filterText}
 			onInputChange={list.setFilterText}
-			selectedKey={selected === null ? null : selected?.id}
-			onSelectionChange={(key) => {
+			value={selected === null ? null : selected?.id}
+			onChange={(key) => {
 				const item = list.items.find((d) => d.id === key) || null;
 				setSelected?.(item);
 				list.setFilterText(displayValue(item as T));

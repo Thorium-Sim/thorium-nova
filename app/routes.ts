@@ -12,7 +12,15 @@ export default [
 		]),
 	]),
 	route("flight", "routes/flight/redirect.tsx"),
-	route("flight/lobby", "routes/flight/lobby.tsx"),
+	route("flight/lobby", "routes/flight/lobby.tsx", [
+		index("routes/blank.tsx", { id: "lobby-blank" }),
+		layout("routes/quickStart/layout.tsx", { id: "lobby-quickstart-layout" }, [
+			route("quick", "routes/quickStart/quickStart.tsx", { id: "lobby-quickstart-parent" }, [
+				route("ship", "routes/quickStart/ship.tsx", { id: "lobby-quickstart-ship" }),
+				route("mission", "routes/quickStart/mission.tsx", { id: "lobby-quickstart-mission" }),
+			]),
+		]),
+	]),
 	route("flight/station", "routes/station/index.tsx", [
 		route("settings", "routes/station/settingsLayout.tsx", [
 			index("routes/station/settingsIndex.tsx"),

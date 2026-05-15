@@ -199,7 +199,14 @@ export async function executeBlocks(
 					{
 						type: "entityMatch" as const,
 						matchCount: block.match,
-						query: block.checks,
+						query: block.checks.map((check) => {
+							return {
+								...check,
+								value: check.value
+									? getValueReference(check.value, localVariables, ecs)
+									: undefined,
+							};
+						}),
 					},
 				];
 				if (executionType === "main") {

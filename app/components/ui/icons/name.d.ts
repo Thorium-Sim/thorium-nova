@@ -51,6 +51,7 @@ export const iconNames = [
   "map",
   "log-out",
   "loader",
+  "loader-circle",
   "joystick",
   "info",
   "inbox",

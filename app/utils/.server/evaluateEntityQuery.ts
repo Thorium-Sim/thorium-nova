@@ -433,8 +433,11 @@ export async function processTriggers(ecs: ECS, event?: { event: string; values:
 		const { conditions, blocks, stepId, localVariables, callReturnBlocks } =
 			trigger.components.isTrigger;
 		const match = evaluateTriggerCondition(ecs, conditions, event);
-
 		if (match) {
+			trigger.updateComponent("isTrigger", {
+				triggeredAt: new Date(),
+				...(trigger.components.isTrigger.multiple ? {} : { active: false }),
+			});
 			await executeBlocks(
 				ecs,
 				blocks.map((action) => {
@@ -451,10 +454,6 @@ export async function processTriggers(ecs: ECS, event?: { event: string; values:
 				}),
 				{ stepId, localVariables, theResult: match, callReturnBlocks },
 			);
-			trigger.updateComponent("isTrigger", {
-				triggeredAt: new Date(),
-				...(trigger.components.isTrigger.multiple ? {} : { active: false }),
-			});
 		}
 	}
 }

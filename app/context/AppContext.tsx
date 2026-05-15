@@ -15,7 +15,7 @@ import { ThoriumAccountContextProvider } from "./ThoriumAccountContext";
 import ToastContainer from "./ToastContext";
 
 const PERSISTENT_ID_KEY = "thorium_clientPersistentId";
-const PING_TIMEOUT = 100;
+const PING_TIMEOUT = 500;
 export let clientId =
 	typeof window !== "undefined"
 		? sessionStorage.getItem("test-clientId") || sessionStorage.getItem(PERSISTENT_ID_KEY) || ""
@@ -27,10 +27,9 @@ export let clientId =
  * - Request all open tabs to let us know what their clientId is.
  * - After a timeout, pick one of the available clientIds, or create a new one and add it to the overall list
  */
+const broadcastChannel = new BroadcastChannel("thorium_clientCount");
+const claimedByOthers = new Set();
 export async function initializeClient() {
-	if (clientId) return clientId;
-	const claimedByOthers = new Set();
-	const broadcastChannel = new BroadcastChannel("thorium_clientCount");
 	broadcastChannel.addEventListener("message", (event) => {
 		if (event.data === "clientPing") {
 			if (clientId) {
@@ -40,6 +39,7 @@ export async function initializeClient() {
 			claimedByOthers.add(event.data);
 		}
 	});
+	if (clientId) return clientId;
 
 	broadcastChannel.postMessage("clientPing");
 	await new Promise<void>((res) => setTimeout(() => res(), PING_TIMEOUT));
