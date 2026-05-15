@@ -6,7 +6,4 @@ export const trainingVariableNames = [
 	"stationComplement",
 ] as const;
 
-export type TrainingVariables = Record<
-	(typeof trainingVariableNames)[number],
-	any
->;
+export type TrainingVariables = Record<(typeof trainingVariableNames)[number], any>;

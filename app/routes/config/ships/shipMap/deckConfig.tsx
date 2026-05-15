@@ -1,36 +1,35 @@
-import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
-import { useParams, useNavigate } from "react-router";
+import type { DeckEdge as DeckEdgeT, DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import PanZoom from "@thorium/components/ui/PanZoom";
-import useMeasure from "@thorium/hooks/useMeasure";
-import { useEffect, useRef, useState } from "react";
-import Button from "@thorium/ui/Button";
-import UploadWell from "@thorium/ui/UploadWell";
-import { useConfirm } from "@thorium/ui/AlertDialog";
-import type {
-	DeckEdge as DeckEdgeT,
-	DeckNode,
-} from "@thorium/.server/classes/Plugins/Ship/Deck";
-import { useDeckNode } from "./DeckNodeContext";
-import { NodeCircle } from "./NodeCircle";
-import { EdgeContextProvider } from "./EdgeContextProvider";
-import { DeckEdges } from "./DeckEdges";
 import { q } from "@thorium/context/AppContext";
-import { usePrompt } from "@thorium/ui/AlertDialog";
+import useMeasure from "@thorium/hooks/useMeasure";
+import { useConfirm } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
+import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
+import UploadWell from "@thorium/ui/UploadWell";
 import type { NodeFlag } from "@thorium/utils/flags/DeckNode";
+import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router";
+
+import { DeckEdges } from "./DeckEdges";
+import { useDeckNode } from "./DeckNodeContext";
+import { EdgeContextProvider } from "./EdgeContextProvider";
+import { NodeCircle } from "./NodeCircle";
 
 export interface PanStateI {
 	x: number;
 	y: number;
 	scale: number;
 }
-export type updateNodeParams =
-	| { x: number; y: number }
-	| { isRoom: boolean }
-	| { name: string }
-	| { radius: number }
-	| { volume: number }
-	| { flags: NodeFlag[] }
-	| { systems: string[] };
+export type updateNodeParams = {
+	x?: number;
+	y?: number;
+	isRoom?: boolean;
+	name?: string;
+	radius?: number;
+	volume?: number;
+	flags?: NodeFlag[];
+	systems?: string[];
+};
 const pixelRatio = typeof window === "undefined" ? 1 : window.devicePixelRatio;
 
 export default function DeckConfig() {
@@ -59,15 +58,13 @@ export default function DeckConfig() {
 	const panned = useRef(false);
 
 	const confirm = useConfirm();
-	const navigate = useNavigate();
 
 	const elementNameRef = useRef<HTMLParagraphElement>(null);
 	useEffect(() => {
 		if (node) {
 			function handleMouseOver(e: MouseEvent) {
 				if (elementNameRef.current) {
-					elementNameRef.current.textContent =
-						(e.target as any)?.getAttribute("name") || "";
+					elementNameRef.current.textContent = (e.target as any)?.getAttribute("name") || "";
 				}
 			}
 			node.addEventListener("mouseover", handleMouseOver);
@@ -88,7 +85,7 @@ export default function DeckConfig() {
 
 	if (!deckImage) {
 		return (
-			<div className="flex flex-col flex-1 justify-center items-center">
+			<div className="flex flex-1 flex-col items-center justify-center">
 				<UploadWell
 					accept="image/*"
 					onChange={async (files) => {
@@ -106,7 +103,7 @@ export default function DeckConfig() {
 	}
 
 	return (
-		<div className="flex-1 flex flex-col gap-4 h-full " ref={ref}>
+		<div className="flex h-full flex-1 flex-col gap-4" ref={ref}>
 			<PanZoom
 				// TODO March 3, 2022 - Set the initial pan and zoom state so the item is centered
 				key={`${deck.name}-${deckName}-${deckImage}`}
@@ -116,7 +113,7 @@ export default function DeckConfig() {
 					setSelectedEdgeId(null);
 				}}
 				style={{ outline: "none", flex: 1 }}
-				className="text-purple-400 border-2 border-white/10 rounded-lg bg-gray-800 overflow-hidden"
+				className="overflow-hidden rounded-lg border-2 border-white/10 bg-gray-800 text-purple-400"
 				maxZoom={8}
 				minZoom={0.5}
 				noStateUpdate={false}
@@ -158,7 +155,7 @@ export default function DeckConfig() {
 					{nodes.map((deckNode) => (
 						<NodeCircle
 							key={deckNode.id}
-							{...deckNode}
+							node={deckNode}
 							panState={panState}
 							updateNode={async (params: updateNodeParams) => {
 								await q.plugin.ship.deck.updateNode.netSend({
@@ -273,14 +270,8 @@ export default function DeckConfig() {
 	);
 }
 
-function getCrossDeckConnection(
-	nodeId: number,
-	edges: DeckEdgeT[],
-	deckNodeIds: number[],
-) {
-	const roomEdges = edges.filter(
-		(edge) => edge.from === nodeId || edge.to === nodeId,
-	);
+function getCrossDeckConnection(nodeId: number, edges: DeckEdgeT[], deckNodeIds: number[]) {
+	const roomEdges = edges.filter((edge) => edge.from === nodeId || edge.to === nodeId);
 	if (
 		roomEdges.some((edge) => {
 			const otherNode = edge.from === nodeId ? edge.to : edge.from;

@@ -1,10 +1,11 @@
+import { Navigate } from "@thorium/components/Navigate";
 import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import Input from "@thorium/ui/Input";
 import { useContext, useReducer } from "react";
 import { useParams } from "react-router";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+
 import { OverrideResetButton } from "./OverrideResetButton";
-import { Navigate } from "@thorium/components/Navigate";
 
 export default function Damage() {
 	const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
@@ -30,7 +31,7 @@ export default function Damage() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Offline Efficiency"
@@ -56,7 +57,7 @@ export default function Damage() {
 							className="mt-6"
 						/>
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Online Efficiency"
@@ -76,13 +77,9 @@ export default function Damage() {
 								});
 							}}
 						/>
-						<OverrideResetButton
-							property="onlineEfficiency"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="onlineEfficiency" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Overload Damage Multiplier"
@@ -108,7 +105,7 @@ export default function Damage() {
 							className="mt-6"
 						/>
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Minimum Signature"
@@ -128,13 +125,9 @@ export default function Damage() {
 								});
 							}}
 						/>
-						<OverrideResetButton
-							property="minSignature"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="minSignature" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Minimum Signature"
@@ -154,13 +147,9 @@ export default function Damage() {
 								});
 							}}
 						/>
-						<OverrideResetButton
-							property="maxSignature"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="maxSignature" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Signature Spike"
@@ -180,13 +169,9 @@ export default function Damage() {
 								});
 							}}
 						/>
-						<OverrideResetButton
-							property="signatureSpike"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="signatureSpike" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Signature Spike Duration"
@@ -212,7 +197,7 @@ export default function Damage() {
 							className="mt-6"
 						/>
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							labelHidden={false}
 							label="Entropy Multiplier"

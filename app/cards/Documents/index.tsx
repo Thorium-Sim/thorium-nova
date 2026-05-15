@@ -1,6 +1,8 @@
 import { DocViewer } from "@thorium/cards/Documents/DocViewer";
 import { q } from "@thorium/context/AppContext";
+import { useCardContext } from "@thorium/context/CardContext";
 import { useStation } from "@thorium/routes/station/useStation";
+import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 import { cn } from "@thorium/utils/cn";
 import { useState } from "react";
 import {
@@ -8,11 +10,8 @@ import {
 	DialogTrigger,
 	Modal,
 	Dialog,
-	Heading,
 	ModalOverlay,
 } from "react-aria-components";
-import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
-import { useCardContext } from "@thorium/context/CardContext";
 
 export function Documents() {
 	const { shipId } = useStation();
@@ -21,9 +20,9 @@ export function Documents() {
 	const doc = documents.find((d) => d.id === selectedDoc);
 	const { isWidget } = useCardContext();
 	return (
-		<div className="grid grid-cols-5 max-h-full h-screen overflow-hidden">
-			<div className="h-full flex flex-col min-h-0">
-				<ul className="flex-1 overflow-y">
+		<div className="grid h-screen max-h-full grid-cols-5 overflow-hidden">
+			<div className="flex h-full min-h-0 flex-col">
+				<ul className="overflow-y flex-1">
 					{documents.map((doc) => (
 						<li
 							key={doc.id}
@@ -40,13 +39,13 @@ export function Documents() {
 					))}
 				</ul>
 			</div>
-			<div className="col-span-4 overflow-hidden relative">
+			<div className="relative col-span-4 overflow-hidden">
 				{doc ? (
 					<>
 						<DocViewer {...doc} />
 						{isWidget ? (
 							<DialogTrigger>
-								<RAButton className="btn btn-info btn-sm absolute bottom-2 right-2 z-10">
+								<RAButton className="btn btn-info btn-sm absolute right-2 bottom-2 z-10">
 									Full Size
 								</RAButton>
 								<ModalOverlay
@@ -55,14 +54,12 @@ export function Documents() {
 										"transition-all duration-200 data-[entering]:opacity-0 data-[exiting]:opacity-0",
 									)}
 								>
-									<Modal
-										className={cn("theme-container", popoverTransitionClasses)}
-									>
-										<Dialog className="z-30 outline-none panel panel-alert inline-block max-w-full max-h-full h-screen w-screen align-bottom rounded-lg px-4 pt-5 pb-4 text-left shadow-xl transform transition-all sm:my-8 sm:align-middle m:w-full sm:p-6 mx-8">
+									<Modal className={cn("theme-container", popoverTransitionClasses)}>
+										<Dialog className="panel panel-alert m:w-full z-30 mx-8 inline-block h-screen max-h-full w-screen max-w-full transform rounded-lg px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all outline-none sm:my-8 sm:p-6 sm:align-middle">
 											<DocViewer {...doc} />
 											<RAButton
 												slot="close"
-												className="btn btn-info btn-sm absolute bottom-2 right-2 z-10"
+												className="btn btn-info btn-sm absolute right-2 bottom-2 z-10"
 											>
 												Close
 											</RAButton>

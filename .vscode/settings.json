@@ -1,18 +1,14 @@
 {
-	"editor.defaultFormatter": "biomejs.biome",
-	"[typescript]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[typescriptreact]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"[json]": {
-		"editor.defaultFormatter": "vscode.json-language-features"
-	},
 	"[markdown]": {
 		"editor.defaultFormatter": "yzhang.markdown-all-in-one"
 	},
-	"[jsonc]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	}
+	"typescript.native-preview.tsdk": "/Users/alexanderson/Projects/thorium-nova/node_modules/@typescript/native-preview",
+	"oxc.enable": true,
+	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"editor.formatOnSave": true,
+	"js/ts.preferences.autoImportFileExcludePatterns": [
+		"node:stream/consumers",
+		"node:test",
+		"node:console"
+	]
 }

@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
+
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { unzip } from "@thorium/utils/.server/zip";
 import { embeddedFiles } from "bun";

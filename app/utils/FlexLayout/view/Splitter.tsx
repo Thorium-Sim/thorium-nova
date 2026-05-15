@@ -1,12 +1,13 @@
 import * as React from "react";
+
 import { Actions } from "../model/Actions";
 import { BorderNode } from "../model/BorderNode";
 import { RowNode } from "../model/RowNode";
 import { Orientation } from "../Orientation";
+import { Rect } from "../Rect";
 import { CLASSES } from "../Types";
 import type { LayoutInternal } from "./Layout";
 import { enablePointerOnIFrames, isDesktop, startDrag } from "./Utils";
-import { Rect } from "../Rect";
 
 /** @internal */
 export interface ISplitterProps {
@@ -43,7 +44,6 @@ export const Splitter = (props: ISplitterProps) => {
 		extra = Math.max(20, extra + size) - size;
 	}
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useEffect(() => {
 		// Android fix: must have passive touchstart handler to prevent default handling
 		selfRef.current?.addEventListener("touchstart", onTouchStart, {
@@ -70,29 +70,19 @@ export const Splitter = (props: ISplitterProps) => {
 		}
 
 		enablePointerOnIFrames(false, layout.getCurrentDocument()!);
-		startDrag(
-			event.currentTarget.ownerDocument,
-			event,
-			onDragMove,
-			onDragEnd,
-			onDragCancel,
-		);
+		startDrag(event.currentTarget.ownerDocument, event, onDragMove, onDragEnd, onDragCancel);
 
 		pBounds.current = node.getSplitterBounds(index, true);
 		const rootdiv = layout.getRootDiv();
 		outlineDiv.current = layout.getCurrentDocument()!.createElement("div");
 		outlineDiv.current.style.flexDirection = horizontal ? "row" : "column";
-		outlineDiv.current.className = layout.getClassName(
-			CLASSES.FLEXLAYOUT__SPLITTER_DRAG,
-		);
+		outlineDiv.current.className = layout.getClassName(CLASSES.FLEXLAYOUT__SPLITTER_DRAG);
 		outlineDiv.current.style.cursor =
 			node.getOrientation() === Orientation.VERT ? "ns-resize" : "ew-resize";
 
 		if (node.getModel().isSplitterEnableHandle()) {
 			handleDiv.current = layout.getCurrentDocument()!.createElement("div");
-			handleDiv.current.className = `${cm(
-				CLASSES.FLEXLAYOUT__SPLITTER_HANDLE,
-			)} ${
+			handleDiv.current.className = `${cm(CLASSES.FLEXLAYOUT__SPLITTER_HANDLE)} ${
 				horizontal
 					? cm(CLASSES.FLEXLAYOUT__SPLITTER_HANDLE_HORZ)
 					: cm(CLASSES.FLEXLAYOUT__SPLITTER_HANDLE_VERT)
@@ -219,9 +209,7 @@ export const Splitter = (props: ISplitterProps) => {
 	if (node instanceof BorderNode) {
 		className += ` ${cm(CLASSES.FLEXLAYOUT__SPLITTER_BORDER)}`;
 	} else {
-		if (
-			node.getModel().getMaximizedTabset(layout.getWindowId()) !== undefined
-		) {
+		if (node.getModel().getMaximizedTabset(layout.getWindowId()) !== undefined) {
 			style.display = "none";
 		}
 	}
@@ -283,12 +271,7 @@ export const Splitter = (props: ISplitterProps) => {
 			data-layout-path={`${node.getPath()}/s${index - 1}`}
 			onPointerDown={onPointerDown}
 		>
-			<div
-				style={style2}
-				ref={extendedRef}
-				className={className2}
-				onPointerDown={onPointerDown}
-			/>
+			<div style={style2} ref={extendedRef} className={className2} onPointerDown={onPointerDown} />
 		</div>
 	);
 };

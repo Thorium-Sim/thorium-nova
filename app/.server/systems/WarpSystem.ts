@@ -7,17 +7,12 @@ const SOFT_BRAKE_CONST = 5;
 export class WarpSystem extends System {
 	static flightMode = ["nova"];
 	test(entity: Entity) {
-		return !!(
-			entity.components.isWarpEngines && entity.components.isShipSystem
-		);
+		return !!(entity.components.isWarpEngines && entity.components.isShipSystem);
 	}
 	update(entity: Entity, elapsed: number) {
 		const elapsedRatio = elapsed / 1000;
-		const ship = this.ecs.getEntityById(
-			entity.components.isShipSystem?.shipId || -1,
-		);
-		if (!ship || !ship.components.isShip || !entity.components.isWarpEngines)
-			return;
+		const ship = this.ecs.getEntityById(entity.components.isShipSystem?.shipId || -1);
+		if (!ship || !ship.components.isShip || !entity.components.isWarpEngines) return;
 
 		const { isWarpEngines: warp } = entity.components;
 		const {
@@ -43,9 +38,7 @@ export class WarpSystem extends System {
 		if (currentWarpFactor === 1) {
 			warpSpeed = minWarp;
 		} else if (currentWarpFactor > 1) {
-			warpSpeed =
-				(cruisingSpeed - minWarp) *
-				((currentWarpFactor - 1) / (warpFactorCount - 1));
+			warpSpeed = (cruisingSpeed - minWarp) * ((currentWarpFactor - 1) / (warpFactorCount - 1));
 		}
 
 		// Calculate max warp speed based on the factor and the number of warp factors
@@ -72,10 +65,7 @@ export class WarpSystem extends System {
 			forwardAcceleration < 0
 		) {
 			forwardVelocity += forwardAcceleration * elapsedRatio;
-		} else if (
-			forwardVelocity + forwardAcceleration * elapsedRatio >
-			maxVelocity
-		) {
+		} else if (forwardVelocity + forwardAcceleration * elapsedRatio > maxVelocity) {
 			forwardVelocity = maxVelocity;
 		}
 

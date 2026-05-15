@@ -1,8 +1,6 @@
-import { type Mesh, Vector3 } from "three";
-import { useMemo } from "react";
-import { BufferAttribute, BufferGeometry } from "three";
-import { Face3 } from "three-stdlib";
 import type { ElementProps } from "@react-three/fiber";
+import { type Mesh, Vector3 } from "three";
+import { BufferGeometry } from "three";
 
 const geometry = new BufferGeometry();
 
@@ -105,10 +103,7 @@ const arrowFaces = [
 
 geometry.setFromPoints(arrowFaces);
 
-export function Arrow({
-	opacity = 0,
-	...props
-}: ElementProps<typeof Mesh> & { opacity?: number }) {
+export function Arrow({ opacity = 0, ...props }: ElementProps<typeof Mesh> & { opacity?: number }) {
 	return (
 		<mesh {...props} geometry={geometry} scale={0.4}>
 			<meshBasicMaterial color={0xffff00} opacity={opacity} transparent />

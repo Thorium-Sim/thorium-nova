@@ -11,9 +11,7 @@ export function spawnTorpedo(launcher: Entity) {
 		launcher.components.isTorpedoLauncher?.torpedoEntity || -1,
 	);
 	if (!torpedoInventory) throw new Error("Torpedo not found");
-	const ship = launcher.ecs?.getEntityById(
-		launcher.components.isShipSystem?.shipId || -1,
-	);
+	const ship = launcher.ecs?.getEntityById(launcher.components.isShipSystem?.shipId || -1);
 	if (!ship) throw new Error("Ship not found");
 	const targeting = getTargeting(ship);
 	const shipPosition = ship.components.position;
@@ -24,29 +22,20 @@ export function spawnTorpedo(launcher: Entity) {
 		height: 0,
 	};
 	const distance = (Math.max(width, length, height) / 2 / 1000) * 1.05;
-	if (!shipPosition || !rotation)
-		throw new Error("Invalid ship. Missing position or rotation.");
+	if (!shipPosition || !rotation) throw new Error("Invalid ship. Missing position or rotation.");
 
 	positionVector.set(shipPosition.x, shipPosition.y, shipPosition.z);
 	launcherQuat.setFromEuler(
 		rotationEuler.set(
-			((launcher.components.isTorpedoLauncher?.pitchDegree || 0) * Math.PI) /
-				180,
-			((launcher.components.isTorpedoLauncher?.headingDegree || 0) * Math.PI) /
-				180,
+			((launcher.components.isTorpedoLauncher?.pitchDegree || 0) * Math.PI) / 180,
+			((launcher.components.isTorpedoLauncher?.headingDegree || 0) * Math.PI) / 180,
 			0,
 			"YXZ",
 		),
 	);
 
-	rotationQuat
-		.set(rotation.x, rotation.y, rotation.z, rotation.w)
-		.multiply(launcherQuat);
-	directionVector
-		.set(0, 0, 1)
-		.applyQuaternion(rotationQuat)
-		.normalize()
-		.multiplyScalar(distance);
+	rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w).multiply(launcherQuat);
+	directionVector.set(0, 0, 1).applyQuaternion(rotationQuat).normalize().multiplyScalar(distance);
 	positionVector.add(directionVector);
 	const torpedoEntity = new Entity();
 	const flags = torpedoInventory.components.isInventory?.flags;

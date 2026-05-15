@@ -1,17 +1,15 @@
-import { q } from "@thorium/context/AppContext";
-import { toast } from "@thorium/context/ToastContext";
-import Input from "@thorium/ui/Input";
-import TagInput from "@thorium/ui/TagInput";
-import { Outlet, useParams } from "react-router";
 import { Navigate } from "@thorium/components/Navigate";
-import { Button } from "react-aria-components";
-import InfoTip from "@thorium/ui/InfoTip";
 import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
-import { reportVariableNames } from "@thorium/routes/config/reports/reportAvailableVariables";
-import type { DetailedHTMLProps, HTMLAttributes } from "react";
-import { cn } from "@thorium/utils/cn";
+import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
 import { InterpolateInfo } from "@thorium/routes/config/reports/InterpolateInfo";
+import { reportVariableNames } from "@thorium/routes/config/reports/reportAvailableVariables";
+import InfoTip from "@thorium/ui/InfoTip";
+import Input from "@thorium/ui/Input";
+import TagInput from "@thorium/ui/TagInput";
+import { Button } from "react-aria-components";
+import { Outlet, useParams } from "react-router";
 
 export default function ReportStep() {
 	const { pluginId, timelineId, stepId } = useParams() as {
@@ -27,12 +25,11 @@ export default function ReportStep() {
 
 	const step = timeline.steps.find((s) => s.id === stepId);
 
-	if (!step)
-		return <Navigate to={`/config/${pluginId}/timelines/${timelineId}`} />;
+	if (!step) return <Navigate to={`/config/${pluginId}/timelines/${timelineId}`} />;
 
 	return (
-		<div className="flex-1 flex flex-col">
-			<div className="flex justify-between w-full gap-2">
+		<div className="flex flex-1 flex-col">
+			<div className="flex w-full justify-between gap-2">
 				<div className="flex-1">
 					<Input
 						labelHidden={false}
@@ -89,15 +86,20 @@ export default function ReportStep() {
 				<div className="flex-1">
 					<Input
 						as="textarea"
-						className="!h-24"
+						className="h-24!"
 						labelHidden={false}
 						label={
 							<>
 								Instructions
-								<InterpolateInfo />
+								<InterpolateInfo className="static" />
 							</>
 						}
-						helperText="The instructions that will be displayed to the crew in the damage report for this step. You can use variables from your blocks in this field."
+						helperText={
+							<>
+								The instructions that will be displayed to the crew in the damage report for this
+								step. You can use variables from your blocks in this field.
+							</>
+						}
 						key={step.id}
 						defaultValue={step.description}
 						onBlur={(e: any) =>
@@ -116,9 +118,8 @@ export default function ReportStep() {
 				Blocks{" "}
 				<InfoTip>
 					<p>
-						Compose blocks together to create the logic for your timeline step.
-						Get entity references, store properties in variables, and execute
-						actions.
+						Compose blocks together to create the logic for your timeline step. Get entity
+						references, store properties in variables, and execute actions.
 					</p>
 					<p>The following variables are available:</p>
 					<ul className="ml-4 list-disc">
@@ -128,7 +129,7 @@ export default function ReportStep() {
 					</ul>
 				</InfoTip>
 			</h3>
-			<div className="flex-1 overflow-y-auto overflow-x-hidden">
+			<div className="flex-1 overflow-x-hidden overflow-y-auto">
 				{!step?.blocks || step?.blocks?.length === 0 ? (
 					<div>
 						<p>No blocks added to step.</p>
@@ -145,9 +146,7 @@ export default function ReportStep() {
 								});
 							}}
 						>
-							<Button className="btn btn-sm btn-outline btn-success">
-								Add Block
-							</Button>
+							<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
 						</AddBlockButton>
 					</div>
 				) : (
@@ -166,7 +165,7 @@ export default function ReportStep() {
 							})
 						}
 						onUpdate={(block, property, value) => {
-							const { id, type, ...properties } = block;
+							const { id: _, type: __, ...properties } = block;
 							q.plugin.timeline.step.block.update.netSend({
 								pluginId,
 								timelineId,
@@ -211,9 +210,7 @@ export default function ReportStep() {
 					});
 				}}
 			>
-				<Button className="btn btn-sm btn-outline btn-success">
-					Add Block
-				</Button>
+				<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
 			</AddBlockButton>
 
 			<Outlet />

@@ -134,10 +134,7 @@
 	}
 }
 
-.mde-header
-	ul.mde-header-group
-	li.mde-header-item
-	button.tooltipped:hover::before {
+.mde-header ul.mde-header-group li.mde-header-item button.tooltipped:hover::before {
 	animation-name: tooltip-appear;
 	animation-duration: 0.2s;
 	animation-delay: 0.5s;
@@ -158,10 +155,7 @@
 	border-top-color: rgba(0, 0, 0, 0.8);
 }
 
-.mde-header
-	ul.mde-header-group
-	li.mde-header-item
-	button.tooltipped:hover::after {
+.mde-header ul.mde-header-group li.mde-header-item button.tooltipped:hover::after {
 	animation-name: tooltip-appear;
 	animation-duration: 0.2s;
 	animation-delay: 0.5s;

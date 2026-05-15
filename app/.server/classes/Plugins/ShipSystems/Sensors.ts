@@ -1,4 +1,5 @@
 import type { Sound } from "@thorium/ecs-components/sound";
+
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
@@ -35,8 +36,7 @@ export default class SensorsPlugin extends BaseShipSystemPlugin {
 		this.pingActive = params.pingActive || false;
 		this.autoTargeting = params.autoTargeting || false;
 		this.scanHistory = params.scanHistory || false;
-		this.scanAnswers =
-			params.scanAnswers || structuredClone(defaultScanAnswers);
+		this.scanAnswers = params.scanAnswers || structuredClone(defaultScanAnswers);
 
 		this.soundEffects = params.soundEffects || {
 			ambiance: [],
@@ -66,8 +66,7 @@ const defaultScanAnswers = [
 	},
 	{
 		label: "Eta",
-		value:
-			"At current speed this vessel will reach its destination in **minutes, **seconds.",
+		value: "At current speed this vessel will reach its destination in **minutes, **seconds.",
 	},
 	{
 		label: "Destination",

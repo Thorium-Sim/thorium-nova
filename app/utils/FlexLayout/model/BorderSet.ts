@@ -9,9 +9,7 @@ export class BorderSet {
 	/** @internal */
 	static fromJson(json: any, model: Model) {
 		const borderSet = new BorderSet(model);
-		borderSet.borders = json.map((borderJson: any) =>
-			BorderNode.fromJson(borderJson, model),
-		);
+		borderSet.borders = json.map((borderJson: any) => BorderNode.fromJson(borderJson, model));
 		for (const border of borderSet.borders) {
 			borderSet.borderMap.set(border.getLocation(), border);
 		}
@@ -74,11 +72,7 @@ export class BorderSet {
 	}
 
 	/** @internal */
-	findDropTargetNode(
-		dragNode: Node & IDraggable,
-		x: number,
-		y: number,
-	): DropInfo | undefined {
+	findDropTargetNode(dragNode: Node & IDraggable, x: number, y: number): DropInfo | undefined {
 		for (const border of this.borders) {
 			if (border.isShowing()) {
 				const dropInfo = border.canDrop(dragNode, x, y);

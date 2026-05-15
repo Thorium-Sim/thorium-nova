@@ -16,21 +16,17 @@ const Login = () => {
 	};
 	if (!ship) throw new Error("Station is not assigned to a ship.");
 	return (
-		<div className="card-login flex flex-col items-center justify-center h-full">
+		<div className="card-login flex h-full flex-col items-center justify-center">
 			{ship.assets?.logo ? (
 				<img
-					className="card-login-image max-h-72 mb-8"
+					className="card-login-image mb-8 max-h-72"
 					draggable={false}
 					src={ship.assets?.logo}
 					alt={ship.name}
 				/>
 			) : null}
-			<h2 className="card-login-ship-name text-6xl font-bold mb-4">
-				{ship.name}
-			</h2>
-			<h3 className="card-login-ship-registry text-4xl font-bold mb-8">
-				{ship.registry}
-			</h3>
+			<h2 className="card-login-ship-name mb-4 text-6xl font-bold">{ship.name}</h2>
+			<h3 className="card-login-ship-registry mb-8 text-4xl font-bold">{ship.registry}</h3>
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();
@@ -47,11 +43,7 @@ const Login = () => {
 					autoCorrect="off"
 					value={loginName}
 				/>
-				<Button
-					className="w-72 btn-primary"
-					type="submit"
-					disabled={loginName.trim().length === 0}
-				>
+				<Button className="btn-primary w-72" type="submit" disabled={loginName.trim().length === 0}>
 					Login
 				</Button>
 			</form>

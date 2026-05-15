@@ -1,12 +1,7 @@
 import type { Range } from "@thorium/utils/operations/randomFromRange";
-import type {
-	Degree,
-	Kelvin,
-	SolarMass,
-	SolarRadius,
-	Year,
-} from "../unitTypes";
-import { z } from "zod";
+import z from "zod";
+
+import type { Degree, Kelvin, SolarMass, SolarRadius, Year } from "../unitTypes";
 export const spectralTypes = z.union([
 	z.literal("O"),
 	z.literal("B"),

@@ -1,10 +1,7 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { spawnTorpedo } from "@thorium/.server/spawners/torpedo";
 import { getSystemsOfType } from "@thorium/.server/systems/NPCDecisionSystem";
-import {
-	getPhaserCharge,
-	getTargetIsInPhaserRange,
-} from "@thorium/.server/systems/PhasersSystem";
+import { getPhaserCharge, getTargetIsInPhaserRange } from "@thorium/.server/systems/PhasersSystem";
 import { playShipSound } from "@thorium/utils/.server/playRangedSound";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { Quaternion, Vector3 } from "three";
@@ -22,24 +19,16 @@ export const TORPEDO_FIRE_DISTANCE_SECONDS = 10;
 export class NPCFireWeaponsSystem extends System {
 	static flightMode = ["nova"];
 	test(entity: Entity) {
-		return !!(
-			entity.components.isShip && !entity.components.isPlayerShip?.value
-		);
+		return !!(entity.components.isShip && !entity.components.isPlayerShip?.value);
 	}
 	update(entity: Entity, _elapsedMs: number): void {
-		const targetingSystem = getSystemsOfType(
-			this.ecs,
-			entity.id,
-			"Targeting",
-		)[0];
+		const targetingSystem = getSystemsOfType(this.ecs, entity.id, "Targeting")[0];
 		const shipAction = entity.components.shipBehavior?.action;
 
 		if (!["firePhasers", "fireTorpedo"].includes(shipAction!)) {
 			return;
 		}
-		const target = this.ecs.getEntityById(
-			targetingSystem?.components.isTargeting?.target || -1,
-		);
+		const target = this.ecs.getEntityById(targetingSystem?.components.isTargeting?.target || -1);
 
 		if (!target) return;
 
@@ -75,8 +64,7 @@ export class NPCFireWeaponsSystem extends System {
 			for (const phaserSystem of phaserSystems) {
 				if (!phaserSystem.components.isPhasers) continue;
 				// We can adjust the phaser system's arc based on the distance to the target.
-				const { maxRange, arc, maxArc, headingDegree, pitchDegree } =
-					phaserSystem.components.isPhasers;
+				const { maxRange, arc, maxArc } = phaserSystem.components.isPhasers;
 				const idealRange = distance * 1.1;
 				const idealArc = Math.max(
 					0,
@@ -90,11 +78,7 @@ export class NPCFireWeaponsSystem extends System {
 				}
 				const currentCharge = getPhaserCharge(phaserSystem);
 				const inRange = getTargetIsInPhaserRange(phaserSystem);
-				if (
-					phaserSystem.components.isPhasers.firePercent === 0 &&
-					inRange &&
-					currentCharge > 0.1
-				) {
+				if (phaserSystem.components.isPhasers.firePercent === 0 && inRange && currentCharge > 0.1) {
 					phaserSystem.updateComponent("isPhasers", { firePercent: 1 });
 					phasersChanged = true;
 				}
@@ -113,16 +97,11 @@ export class NPCFireWeaponsSystem extends System {
 			}
 		}
 		if (shipAction === "fireTorpedo") {
-			const torpedoSystems = getSystemsOfType(
-				this.ecs,
-				entity.id,
-				"TorpedoLauncher",
-			);
+			const torpedoSystems = getSystemsOfType(this.ecs, entity.id, "TorpedoLauncher");
 
 			// Determine the speed of the loaded torpedo. Fire when the distance would take 10 seconds for the torpedo to hit.
 			for (const launcher of torpedoSystems) {
-				if (launcher.components.isTorpedoLauncher?.status !== "loaded")
-					continue;
+				if (launcher.components.isTorpedoLauncher?.status !== "loaded") continue;
 				const inventoryTemplate = this.ecs.getEntityById(
 					launcher.components.isTorpedoLauncher?.torpedoEntity || -1,
 				);
@@ -130,8 +109,7 @@ export class NPCFireWeaponsSystem extends System {
 				if (!torp) continue;
 
 				// Check to see if the torpedo launcher is currently pointing at the target
-				const { pitchDegree, headingDegree } =
-					launcher.components.isTorpedoLauncher;
+				const { pitchDegree, headingDegree } = launcher.components.isTorpedoLauncher;
 
 				const pointingAtTarget = isPointingAtTarget(
 					shipPosition,
@@ -151,8 +129,7 @@ export class NPCFireWeaponsSystem extends System {
 
 				launcher.updateComponent("isTorpedoLauncher", {
 					status: "firing",
-					progress:
-						launcher.components.isTorpedoLauncher.fireTime * powerMultiplier,
+					progress: launcher.components.isTorpedoLauncher.fireTime * powerMultiplier,
 				});
 				pubsub.publish.starmapCore.torpedos({
 					systemId: torpedo.components.position?.parentId || null,
@@ -192,14 +169,10 @@ function isPointingAtTarget(
 	);
 
 	// Transform the local launcher direction to world space using ship rotation
-	const worldLauncherDirection = localLauncherDirection
-		.clone()
-		.applyQuaternion(shipRotation);
+	const worldLauncherDirection = localLauncherDirection.clone().applyQuaternion(shipRotation);
 
 	// Calculate direction from ship to target
-	const shipToTarget = new Vector3()
-		.subVectors(targetPosition, shipPosition)
-		.normalize();
+	const shipToTarget = new Vector3().subVectors(targetPosition, shipPosition).normalize();
 
 	// Calculate the angle between launcher direction and target direction
 	const dotProduct = worldLauncherDirection.dot(shipToTarget);

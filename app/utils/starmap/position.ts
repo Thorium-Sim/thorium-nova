@@ -1,9 +1,10 @@
+import type { position as TPosition } from "@thorium/ecs-components/position";
 import { Vector3 } from "three";
+import type { z } from "zod";
+
 import type { Entity } from "../ecs";
 import { solarRadiusToKilometers, type SolarRadius } from "../unitTypes";
 import { getOrbitPosition } from "./getOrbitPosition";
-import type { z } from "zod";
-import type { position as TPosition } from "@thorium/ecs-components/position";
 /** Gets a point that is some distance from object, in the direction of ship. Used for setting waypoints. */
 export function getObjectOffsetPosition(
 	object: Entity,
@@ -26,18 +27,13 @@ export function getObjectOffsetPosition(
 	const shipPosition = new Vector3(position.x, position.y, position.z);
 	// Determine the angle between the ship's location and the waypoint
 	const objectSystem = getObjectSystem(object);
-	if (
-		objectSystem?.id === position.parentId ||
-		(!objectSystem?.id && !position.parentId)
-	) {
+	if (objectSystem?.id === position.parentId || (!objectSystem?.id && !position.parentId)) {
 		// The waypoint is in the same system as the ship or both the waypoint and ship are in interstellar space.
 		objectAngle.subVectors(shipPosition, objectCenter).normalize();
 	} else if (objectSystem && !position.parentId) {
 		// The ship is in interstellar space, but the waypoint is in a system.
 		// Get the angle between the ship's position  and  the system's position.
-		const system = object.ecs?.getEntityById(
-			object.components.position?.parentId || -1,
-		);
+		const system = object.ecs?.getEntityById(object.components.position?.parentId || -1);
 		if (!system) {
 			// This is an unlikely case, so we'll just do nothing. It won't be the end of the world.
 		} else {
@@ -81,13 +77,9 @@ export function getObjectOffsetPosition(
 	// with a bit of distance. The distance is proportional to the radius of the object itself
 	// and the size of the ship: distanceFromCenter = crewShipSize * 2 + objectSize * 2
 	const objectSize =
-		(object.components.size?.length
-			? object.components.size.length / 1000
-			: null) ||
+		(object.components.size?.length ? object.components.size.length / 1000 : null) ||
 		object.components.isPlanet?.radius ||
-		solarRadiusToKilometers(
-			(object.components.isStar?.radius || 1) as SolarRadius,
-		) ||
+		solarRadiusToKilometers((object.components.isStar?.radius || 1) as SolarRadius) ||
 		1;
 	const distanceFromCenter = distance + objectSize * 3;
 
@@ -99,9 +91,7 @@ export function getCompletePositionFromOrbit(object: Entity) {
 	const origin = new Vector3(0, 0, 0);
 	if (object.components.satellite) {
 		if (object.components.satellite.parentId) {
-			const parent = object.ecs?.getEntityById(
-				object.components.satellite?.parentId,
-			);
+			const parent = object.ecs?.getEntityById(object.components.satellite?.parentId);
 			if (parent?.components?.satellite) {
 				const parentPosition = getOrbitPosition(parent.components.satellite);
 				origin.copy(parentPosition);
@@ -125,13 +115,14 @@ export function getCompletePositionFromOrbit(object: Entity) {
 
 /** Gets the system entity which an object resides in, including if it is a satellite */
 export function getObjectSystem(obj: Entity): Entity | null {
+	if (obj.components.isSolarSystem) return obj;
+
 	const objSystemId = obj.components.position?.parentId;
 	if (objSystemId) {
 		const parentObject = obj.ecs?.getEntityById(objSystemId);
 		if (parentObject) return parentObject;
 	}
 
-	if (obj.components.isSolarSystem) return obj;
 	const parentObjId = obj.components?.satellite?.parentId;
 	const parent = obj.ecs?.getEntityById(parentObjId || -1);
 	if (!parent) return null;

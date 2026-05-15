@@ -1,17 +1,19 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { getPowerSupplierPowerNeeded } from "@thorium/.server/systems/ReactorFuelSystem";
+import { getRoomBySystem } from "@thorium/cards/CargoControl/data.server";
 import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
+import type { Entity } from "@thorium/utils/ecs";
 import type { MegaWattHour } from "@thorium/utils/unitTypes";
-import { z } from "zod";
+import z from "zod";
 
 export const systemsMonitor = t.router({
 	reactors: t.router({
 		get: t.procedure
 			.input(z.object({ shipId: z.number() }))
-			.filter((publish: { shipId: number }, { ctx, input }) => {
+			.filter((publish: { shipId: number }, { input }) => {
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
@@ -39,10 +41,7 @@ export const systemsMonitor = t.router({
 					const output = r.components.isReactor!.currentOutput;
 					// The reserve is considered full if we can maintain the current output
 					// for one hour
-					const reserve = Math.min(
-						1,
-						Math.max(0, fuelPower / (output || Number.EPSILON)),
-					);
+					const reserve = Math.min(1, Math.max(0, fuelPower / (output || Number.EPSILON)));
 
 					return {
 						id: r.id,
@@ -75,9 +74,7 @@ export const systemsMonitor = t.router({
 				return reactors.map((r) => ({
 					id: r.id,
 					// Reactor volume is based on the ratio of the current output to the max output
-					volumePercent:
-						r.components.isReactor!.currentOutput /
-						r.components.isReactor!.maxOutput,
+					volumePercent: r.components.isReactor!.currentOutput / r.components.isReactor!.maxOutput,
 					playbackRate: 1,
 					ambiance: r.components.soundEffects?.soundBank.ambiance,
 				}));
@@ -86,7 +83,7 @@ export const systemsMonitor = t.router({
 	batteries: t.router({
 		get: t.procedure
 			.input(z.object({ shipId: z.number() }))
-			.filter((publish: { shipId: number }, { ctx, input }) => {
+			.filter((publish: { shipId: number }, { input }) => {
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
@@ -123,7 +120,7 @@ export const systemsMonitor = t.router({
 	systems: t.router({
 		get: t.procedure
 			.input(z.object({ shipId: z.number() }))
-			.filter((publish: { shipId: number }, { ctx, input }) => {
+			.filter((publish: { shipId: number }, { input }) => {
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
@@ -149,16 +146,18 @@ export const systemsMonitor = t.router({
 						maxSafeHeat: number;
 						nominalHeat: number;
 					};
+					roomIds: number[];
 				}[] = [];
 				const ship = ctx.ecs.getEntityById(input.shipId);
-				for (const systemId of ship?.components.shipSystems?.shipSystems.keys() ||
-					[]) {
+				for (const systemId of ship?.components.shipSystems?.shipSystems.keys() || []) {
 					const system = ctx.flight?.ecs.getEntityById(systemId);
 					if (!system?.components.isShipSystem) continue;
 					// Filter out reactors and batteries
-					if (system.components.isReactor || system.components.isBattery)
-						continue;
+					if (system.components.isReactor || system.components.isBattery) continue;
 
+					const roomIds = getRoomBySystem(ship, system.components.isShipSystem.type).map(
+						(room) => room.id,
+					);
 					systems.push({
 						id: systemId,
 						name: system.components.identity!.name,
@@ -178,6 +177,7 @@ export const systemsMonitor = t.router({
 									nominalHeat: system.components.heat.nominalHeat,
 								}
 							: undefined,
+						roomIds,
 					});
 				}
 
@@ -197,18 +197,14 @@ export const systemsMonitor = t.router({
 				if (!shipId) return;
 
 				if (system.components.power) {
-					const newPowerSources = [
-						...(system?.components.power.powerSources || []),
-					];
+					const newPowerSources = [...(system?.components.power.powerSources || [])];
 					newPowerSources.splice(input.powerSourceIndex, 1);
 					system.updateComponent("power", {
 						powerSources: newPowerSources,
 					});
 				}
 				if (system.components.isBattery) {
-					const newPowerSources = [
-						...(system?.components.isBattery.powerSources || []),
-					];
+					const newPowerSources = [...(system?.components.isBattery.powerSources || [])];
 					newPowerSources.splice(input.powerSourceIndex, 1);
 					system.updateComponent("isBattery", {
 						powerSources: newPowerSources,
@@ -222,6 +218,9 @@ export const systemsMonitor = t.router({
 				if (system.components.isPhasers) {
 					// Update the output megawatts of the phasers
 					pubsub.publish.targeting.phasers.list({ shipId });
+				}
+				if (system.components.isLongRangeComm) {
+					pubsub.publish.longRangeComm.get({ shipId });
 				}
 				return null;
 			}),
@@ -240,17 +239,10 @@ export const systemsMonitor = t.router({
 
 				const powerSource = ctx.flight?.ecs.getEntityById(input.powerSourceId);
 				if (!powerSource)
-					throw new Error(
-						"Invalid power source. Power source must be a reactor or battery.",
-					);
+					throw new Error("Invalid power source. Power source must be a reactor or battery.");
 
-				if (
-					system.components.isPhasers &&
-					!powerSource.components.isPhaseCapacitor
-				) {
-					throw new Error(
-						"Invalid power source. Power source must be a phase capacitor.",
-					);
+				if (system.components.isPhasers && !powerSource.components.isPhaseCapacitor) {
+					throw new Error("Invalid power source. Power source must be a phase capacitor.");
 				}
 
 				const powerSupplied = getPowerSupplierPowerNeeded(powerSource);
@@ -295,18 +287,29 @@ export const systemsMonitor = t.router({
 					// Update the output megawatts of the phasers
 					pubsub.publish.targeting.phasers.list({ shipId });
 				}
+				if (system.components.isLongRangeComm) {
+					pubsub.publish.longRangeComm.get({ shipId });
+				}
 				return null;
 			}),
 	}),
-	stream: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.dataStream(({ input, entity }) => {
-			if (!entity) return false;
-			return Boolean(
-				entity.components.isShipSystem?.shipId === input.shipId &&
-					(entity.components.power ||
-						entity.components.isBattery ||
-						entity.components.isReactor),
-			);
-		}),
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
+		const set = new Set<Entity>();
+		for (const entity of ctx.ecs.componentCache.get("power") || []) {
+			if (entity.components.isShipSystem?.shipId === input.shipId) {
+				set.add(entity);
+			}
+		}
+		for (const entity of ctx.ecs.componentCache.get("isBattery") || []) {
+			if (entity.components.isShipSystem?.shipId === input.shipId) {
+				set.add(entity);
+			}
+		}
+		for (const entity of ctx.ecs.componentCache.get("isReactor") || []) {
+			if (entity.components.isShipSystem?.shipId === input.shipId) {
+				set.add(entity);
+			}
+		}
+		return set;
+	}),
 });

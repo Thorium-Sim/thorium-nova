@@ -1,7 +1,7 @@
-import { isTrigger } from "@thorium/ecs-components/isTrigger";
 import { t } from "@thorium/.server/init/t";
-import { z } from "zod";
 import { spawnTrigger } from "@thorium/.server/spawners/trigger";
+import { isTrigger } from "@thorium/ecs-components/isTrigger";
+import z from "zod";
 
 export const triggers = t.router({
 	create: t.procedure

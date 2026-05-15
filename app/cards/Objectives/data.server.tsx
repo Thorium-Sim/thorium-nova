@@ -1,12 +1,12 @@
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { z } from "zod";
+import { t } from "@thorium/.server/init/t";
 import { Entity } from "@thorium/utils/ecs";
+import z from "zod";
 
 export const objectives = t.router({
 	get: t.procedure
 		.input(z.object({ shipId: z.number() }))
-		.filter((publish: { shipId: number }, { ctx, input }) => {
+		.filter((publish: { shipId: number }, { input }) => {
 			if (publish && input.shipId !== publish.shipId) return false;
 			return true;
 		})
@@ -30,15 +30,10 @@ export const objectives = t.router({
 				crewComplete: boolean;
 				priority: number;
 			}[] = [];
-			const objectiveEntities =
-				ctx.flight?.ecs.componentCache.get("isObjective") || [];
+			const objectiveEntities = ctx.flight?.ecs.componentCache.get("isObjective") || [];
 			for (const objective of objectiveEntities) {
-				if (
-					objective.components.isObjective?.shipId === ship.id &&
-					objective.components.identity
-				) {
-					const { state, crewComplete, priority } =
-						objective.components.isObjective;
+				if (objective.components.isObjective?.shipId === ship.id && objective.components.identity) {
+					const { state, crewComplete, priority } = objective.components.isObjective;
 					const { name, description } = objective.components.identity;
 					objectives.push({
 						id: objective.id,

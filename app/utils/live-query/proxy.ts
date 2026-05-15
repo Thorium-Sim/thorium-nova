@@ -34,17 +34,14 @@ function createInnerProxy(callback: ProxyCallback, path: string[]) {
  *
  * @internal
  */
-export const createRecursiveProxy = (callback: ProxyCallback) =>
-	createInnerProxy(callback, []);
+export const createRecursiveProxy = (callback: ProxyCallback) => createInnerProxy(callback, []);
 
 /**
  * Used in place of `new Proxy` where each handler will map 1 level deep to another value.
  *
  * @internal
  */
-export const createFlatProxy = <TFaux>(
-	callback: (path: keyof TFaux & string) => any,
-): TFaux => {
+export const createFlatProxy = <TFaux>(callback: (path: keyof TFaux & string) => any): TFaux => {
 	return new Proxy(noop, {
 		get(_obj, name) {
 			if (typeof name !== "string" || name === "then") {

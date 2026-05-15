@@ -2,6 +2,7 @@
 // @ts-nocheck
 import * as glm from "gl-matrix";
 import rng from "rng";
+
 import * as webgl from "./webgl";
 
 const imageUrl = "/assets/stars.jpg";
@@ -17,9 +18,8 @@ self.onmessage = (e) => {
 		return;
 	}
 	if (e.data.type === "render") {
-		const canvases =
-			e.data.which === "primary" ? primaryCanvases : secondaryCanvases;
-		generateTexture(e.data.seed, canvases, e.data.which);
+		const canvases = e.data.which === "primary" ? primaryCanvases : secondaryCanvases;
+		void generateTexture(e.data.seed, canvases, e.data.which);
 		return postMessage({ which: e.data.which });
 	}
 };
@@ -194,12 +194,7 @@ function generateTexture(seed, canvases) {
 				var p = nebulaParams[j];
 				storage.pNebula.setUniform("uModel", "Matrix4fv", false, model);
 				storage.pNebula.setUniform("uView", "Matrix4fv", false, view);
-				storage.pNebula.setUniform(
-					"uProjection",
-					"Matrix4fv",
-					false,
-					projection,
-				);
+				storage.pNebula.setUniform("uProjection", "Matrix4fv", false, projection);
 				storage.pNebula.setUniform("uScale", "1f", p.scale);
 				storage.pNebula.setUniform("uColor", "3fv", p.color);
 				storage.pNebula.setUniform("uIntensity", "1f", p.intensity);

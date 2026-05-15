@@ -1,50 +1,39 @@
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
 import { spawnShip } from "@thorium/.server/spawners/ship";
-import { z } from "zod";
-import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
-import type { ECS, Entity } from "@thorium/utils/ecs";
-import {
-	getCompletePositionFromOrbit,
-	getObjectSystem,
-} from "@thorium/utils/starmap/position";
-import { Vector3 } from "three";
-import type { DataContext } from "@thorium/.server/DataContext";
+import { alertTypes } from "@thorium/ecs-components/shipAlerts";
 import { destroyShip } from "@thorium/utils/.server/ship/collisionDamage";
+import type { ECS, Entity } from "@thorium/utils/ecs";
+import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import type { RNG } from "@thorium/utils/rng";
+import { getCompletePositionFromOrbit, getObjectSystem } from "@thorium/utils/starmap/position";
+import { Vector3 } from "three";
+import z from "zod";
 
 export const ship = t.router({
 	get: t.procedure
-		.input(
-			z.union([
-				z.object({ clientId: z.string() }),
-				z.object({ shipId: z.number() }),
-			]),
-		)
-		.filter(
-			(publish: { shipId: number } | { clientId: string }, { ctx, input }) => {
-				if (!publish) return true;
-				if (
-					"shipId" in publish &&
-					publish.shipId !==
-						("shipId" in input
-							? input.shipId
-							: ctx.getFlightClient(input.clientId)?.components.flightClient
-									?.shipId)
-				)
-					return false;
-				if (
-					"clientId" in publish &&
-					("clientId" in input
-						? publish.clientId !== input.clientId
-						: Object.values(ctx.flight?.clients || {}).some(
-								(c) => c?.components.flightClient?.shipId === input.shipId,
-							))
-				)
-					return false;
-				return true;
-			},
-		)
+		.input(z.union([z.object({ clientId: z.string() }), z.object({ shipId: z.number() })]))
+		.filter((publish: { shipId: number } | { clientId: string }, { ctx, input }) => {
+			if (!publish) return true;
+			if (
+				"shipId" in publish &&
+				publish.shipId !==
+					("shipId" in input
+						? input.shipId
+						: ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId)
+			)
+				return false;
+			if (
+				"clientId" in publish &&
+				("clientId" in input
+					? publish.clientId !== input.clientId
+					: Object.values(ctx.flight?.clients || {}).some(
+							(c) => c?.components.flightClient?.shipId === input.shipId,
+						))
+			)
+				return false;
+			return true;
+		})
 		.autoPublish(["isShip", "flightClient"], (entity) => {
 			if (entity.components.flightClient) {
 				return { clientId: entity.components.flightClient.clientId };
@@ -54,17 +43,48 @@ export const ship = t.router({
 			}
 		})
 		.request(({ ctx, input }) => {
-			// TODO February 28, 2025 - Replace this with a more carefully crafted object
-			const ship =
-				ctx.ecs
-					.getEntityById(
-						"shipId" in input
-							? input.shipId
-							: ctx.getFlightClient(input.clientId)?.components.flightClient
-									?.shipId || -1,
-					)
-					?.toJSON() || null;
-			return ship;
+			const shipId =
+				"shipId" in input
+					? input.shipId
+					: ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId || -1;
+			let ship: Entity | null = null;
+			try {
+				ship = ctx.ecs?.getEntityById(shipId) || null;
+			} catch {}
+			if (!ship)
+				return {
+					id: shipId,
+					isShip: false,
+					name: "",
+					registry: "",
+					currentSystem: null,
+					alertLevel: "5",
+					systemPosition: {
+						parentId: null,
+						type: "interstellar",
+						x: 0,
+						y: 0,
+						z: 0,
+					},
+					stations: [],
+				};
+			const systemId = ship.components.position?.parentId;
+			const systemPosition = systemId
+				? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
+				: null;
+			const assets = ship.components.isShip!.assets;
+			return {
+				id: ship.id,
+				isShip: true,
+				name: ship.components.identity!.name,
+				registry: ship.components.isShip!.registry,
+				alertLevel: ship.components.isShip!.alertLevel,
+				currentSystem: systemId || null,
+				systemPosition,
+				assets,
+				isDestroyed: ship.components.isDestroyed,
+				stations: ship.components.stationComplement?.stations || [],
+			};
 		}),
 	players: t.procedure
 		.autoPublish(["isPlayerShip"], () => null)
@@ -73,8 +93,7 @@ export const ship = t.router({
 				ctx.flight?.playerShips.map((ship) => {
 					const systemId = ship.components.position?.parentId;
 					const systemPosition = systemId
-						? ctx.flight?.ecs.getEntityById(systemId)?.components.position ||
-							null
+						? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
 						: null;
 					return {
 						id: ship.id,
@@ -87,18 +106,13 @@ export const ship = t.router({
 			);
 		}),
 	player: t.procedure
-		.input(
-			z.object({ clientId: z.string(), playerShipId: z.number().optional() }),
-		)
+		.input(z.union([z.object({ clientId: z.string() }), z.object({ shipId: z.number() })]))
 		.filter((publish: { shipId: number }, { ctx, input }) => {
-			const shipId = ctx.getFlightClient(input.clientId)?.components
-				.flightClient?.shipId;
-			if (
-				publish &&
-				publish.shipId !== shipId &&
-				publish.shipId !== input?.playerShipId
-			)
-				return false;
+			const shipId =
+				"shipId" in input
+					? input.shipId
+					: ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId;
+			if (publish && publish.shipId !== shipId) return false;
 			return true;
 		})
 		.autoPublish(["position", "isShip"], (entity) =>
@@ -106,18 +120,19 @@ export const ship = t.router({
 		)
 		.request(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(
-				input?.playerShipId ||
-					ctx.getFlightClient(input.clientId)?.components.flightClient
-						?.shipId ||
-					-1,
+				"shipId" in input
+					? input.shipId
+					: ctx.getFlightClient(input.clientId)?.components.flightClient?.shipId || -1,
 			);
 			if (!ship)
 				return {
-					id: input?.playerShipId || -1,
+					id: -1,
 					name: "",
 					registry: "",
 					currentSystem: null,
 					alertLevel: "5",
+					category: "",
+					shipClass: "",
 					systemPosition: {
 						parentId: null,
 						type: "interstellar",
@@ -130,21 +145,48 @@ export const ship = t.router({
 			const systemPosition = systemId
 				? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
 				: null;
-			const assets = ship.components.isShip!.assets;
+			const assets = ship.components.isShip?.assets || {};
 			return {
 				id: ship.id,
-				name: ship.components.identity!.name,
-				registry: ship.components.isShip!.registry,
-				alertLevel: ship.components.isShip!.alertLevel,
+				name: ship.components.identity?.name || "Unnamed",
+				registry: ship.components.isShip?.registry || "",
+				alertLevel: ship.components.isShip?.alertLevel || "5",
+				category: ship.components.isShip?.category || "",
+				shipClass: ship.components.isShip?.shipClass || "",
 				currentSystem: systemId || null,
 				systemPosition,
 				assets,
 				isDestroyed: ship.components.isDestroyed,
 			};
 		}),
+	rooms: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.filter((publish: { shipId: number } | null, { input }) => {
+			if (publish && publish.shipId !== input.shipId) return false;
+			return true;
+		})
+		.autoPublish(["shipMap"], (entity) => [{ shipId: entity.id }])
+		.request(({ ctx, input }) => {
+			const ship = ctx.ecs.getEntityById(input.shipId);
+			return {
+				rooms:
+					ship?.components.shipMap?.deckNodes.flatMap((n) =>
+						n.isRoom
+							? {
+									id: n.id,
+									name: n.name,
+									systems: n.systems,
+									deckIndex: n.deckIndex,
+									flags: n.flags,
+								}
+							: [],
+					) || [],
+				decks: ship?.components.shipMap?.decks.map((d) => ({ name: d.name })) || [],
+			};
+		}),
 	spawn: t.procedure
 		.meta({
-			action: (ctx: DataContext) => {
+			action: () => {
 				return {
 					template: {
 						name: "Ship Template",
@@ -159,13 +201,11 @@ export const ship = t.router({
 					},
 					entityId: {
 						name: "Nearby Entity",
-						helper:
-							"Place the ship nearby this entity. This option is preferred.",
+						helper: "Place the ship nearby this entity. This option is preferred.",
 					},
 					distance: {
 						type: "number",
-						helper:
-							"How far to place the ship from the nearby entity in kilometers.",
+						helper: "How far to place the ship from the nearby entity in kilometers.",
 					},
 				};
 			},
@@ -178,10 +218,7 @@ export const ship = t.router({
 				position: z
 					.object({
 						parentId: z
-							.union([
-								z.number(),
-								z.object({ name: z.string(), pluginId: z.string() }),
-							])
+							.union([z.number(), z.object({ name: z.string(), pluginId: z.string() })])
 							.nullable(),
 						x: z.number(),
 						y: z.number(),
@@ -201,16 +238,12 @@ export const ship = t.router({
 
 			if (!shipTemplate) throw new Error("Ship template not found.");
 
-			const { ship: shipEntity, extraEntities } = await spawnShip(
-				ctx,
-				shipTemplate,
-				{
-					// TODO: August 20, 2022 - Generate a name for this ship somehow
-					name: randomNameGenerator(),
-					tags: input.tags,
-					flightMode: ctx.flight.mode,
-				},
-			);
+			const { ship: shipEntity, extraEntities } = await spawnShip(ctx, shipTemplate, {
+				// TODO: August 20, 2022 - Generate a name for this ship somehow
+				name: randomNameGenerator(),
+				tags: input.tags,
+				flightMode: ctx.flight.mode,
+			});
 
 			const { position, systemId } = getPosition(ctx.ecs, input);
 			shipEntity.updateComponent("position", {
@@ -238,8 +271,7 @@ export const ship = t.router({
 				},
 				entityId: {
 					name: "Nearby Entity",
-					helper:
-						"Place the ship nearby this entity. This option is preferred.",
+					helper: "Place the ship nearby this entity. This option is preferred.",
 				},
 			}),
 		})
@@ -250,10 +282,7 @@ export const ship = t.router({
 				position: z
 					.object({
 						parentId: z
-							.union([
-								z.number(),
-								z.object({ name: z.string(), pluginId: z.string() }),
-							])
+							.union([z.number(), z.object({ name: z.string(), pluginId: z.string() })])
 							.nullable(),
 						x: z.number(),
 						y: z.number(),
@@ -284,6 +313,31 @@ export const ship = t.router({
 
 			destroyShip(ship);
 		}),
+	shipAlerts: t.router({
+		get: t.procedure
+			.input(
+				z.object({
+					shipId: z.number(),
+					types: z.array(alertTypes).optional(),
+				}),
+			)
+			.filter((publish: { shipId: number }, { input }) => {
+				if (publish && publish.shipId !== input.shipId) return false;
+				return true;
+			})
+			.autoPublish(
+				["shipAlerts"],
+				(entity) => entity.components.isPlayerShip && { shipId: entity.id },
+			)
+			.request(({ ctx, input }) => {
+				const ship = ctx.ecs.getEntityById(input.shipId);
+				const allAlerts = ship?.components.shipAlerts?.alerts ?? [];
+				const alerts = input.types
+					? allAlerts.filter((a) => input.types!.includes(a.type))
+					: allAlerts;
+				return { alerts };
+			}),
+	}),
 });
 
 function getPosition(
@@ -343,11 +397,7 @@ function getPosition(
 	return { position, systemId };
 }
 const objectPosition = new Vector3();
-function getNearbyEntityPoint(
-	objectEntity: Entity,
-	rng: RNG,
-	distance?: number,
-) {
+function getNearbyEntityPoint(objectEntity: Entity, rng: RNG, distance?: number) {
 	if (objectEntity.components.position) {
 		objectPosition.set(
 			objectEntity.components.position.x,

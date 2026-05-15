@@ -1,14 +1,13 @@
-import Input from "@thorium/ui/Input";
-import Checkbox from "@thorium/ui/Checkbox";
 import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
 import type StarPlugin from "@thorium/.server/classes/Plugins/Universe/Star";
-import { PaletteDisclosure } from "../SolarSystemMap";
-import { useSystemIds } from "../useSystemIds";
 import { q } from "@thorium/context/AppContext";
+import Checkbox from "@thorium/ui/Checkbox";
+import Input from "@thorium/ui/Input";
 
-export function OrbitDisclosure({
-	object,
-}: { object: PlanetPlugin | StarPlugin }) {
+import { useSystemIds } from "../useSystemIds";
+import { PaletteDisclosure } from "./PaletteDisclosure";
+
+export function OrbitDisclosure({ object }: { object: PlanetPlugin | StarPlugin }) {
 	const [pluginId, solarSystemId] = useSystemIds();
 
 	return (

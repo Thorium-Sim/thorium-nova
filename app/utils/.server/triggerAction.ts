@@ -1,15 +1,16 @@
 import { DataContext } from "@thorium/.server/DataContext";
-import { database } from "@thorium/.server/init/buildDatabase";
-import { router } from "@thorium/.server/init/router";
+import { router, type AllSends, type SendInputs } from "@thorium/.server/init/router";
 import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
 import { callProcedure } from "@thorium/utils/live-query/.server/router";
 
-export async function triggerAction(
-	path: string,
-	input: any,
+import { DataStore } from "./db-fs";
+
+export async function triggerAction<A extends AllSends>(
+	path: A,
+	input: SendInputs<A>,
 	ctx?: DataContext,
 ) {
-	const context = ctx || new DataContext("thorium", database);
+	const context = ctx || new DataContext("thorium", DataStore.operations.getStore()!.database);
 
 	return await callProcedure({
 		procedures: router._def.procedures,
@@ -18,16 +19,14 @@ export async function triggerAction(
 		rawInput: input,
 		ctx: context,
 		onCall: (opts, result) => {
-			const ecs = ctx?.flight?.ecs;
+			const ecs = context?.flight?.ecs;
 			if (!ecs || opts.type !== "send") return;
 
 			processTriggers(ecs, {
 				event: opts.path,
 				values: {
 					...(opts.rawInput as any),
-					...(typeof result === "object" && !Array.isArray(result)
-						? result
-						: {}),
+					...(typeof result === "object" && !Array.isArray(result) ? result : {}),
 				},
 			});
 		},

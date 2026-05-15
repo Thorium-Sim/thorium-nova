@@ -1,8 +1,8 @@
-import type {DatabaseContext} from "@thorium/typeguards/isDatabaseContext";
-import type { ServerDataModel } from "./classes/ServerDataModel";
-import type { FlightDataModel } from "./classes/FlightDataModel";
+import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { Entity } from "@thorium/utils/ecs";
+
+import type { FlightDataModel } from "./classes/FlightDataModel";
 
 /**
  * An instance of this class is available in every input and subscription handler
@@ -28,20 +28,22 @@ export class DataContext {
 	get ecs() {
 		return this.database.flight!.ecs;
 	}
-	readFile = DataStore.operations.getStore()?.readAsset!;
-	uploadFile = DataStore.operations.getStore()?.uploadAsset!;
-	removeFile = DataStore.operations.getStore()?.removeAsset!;
+	readFile = DataStore.operations.getStore()!.readAsset;
+	uploadFile = DataStore.operations.getStore()!.uploadAsset;
+	removeFile = DataStore.operations.getStore()!.removeAsset;
 	getPlayerShip(clientId: string) {
 		return this.flight?.playerShips.find(
-			(s) =>
-				s.id ===
-				this.getFlightClient(clientId)?.components.flightClient?.shipId,
+			(s) => s.id === this.getFlightClient(clientId)?.components.flightClient?.shipId,
 		);
 	}
 	getClient(clientId: string) {
 		return this.database.server.clients[clientId];
 	}
 	getFlightClient(clientId: string) {
+		const serverClient = this.database.server.getClientByName(clientId);
+		if (serverClient) {
+			clientId = serverClient.id;
+		}
 		if (!this.database.flight) return null;
 		if (!this.database.flight.flightClientIndex.has(clientId)) {
 			for (const entity of this.ecs.componentCache.get("flightClient") || []) {

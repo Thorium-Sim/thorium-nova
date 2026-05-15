@@ -1,6 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { type Entity, System } from "@thorium/utils/ecs";
 import { cancelLoopingSound } from "@thorium/utils/.server/playRangedSound";
+import { type Entity, System } from "@thorium/utils/ecs";
 
 /**
  * Loads and unloads torpedoes
@@ -8,9 +8,7 @@ import { cancelLoopingSound } from "@thorium/utils/.server/playRangedSound";
 export class TorpedoLoadingSystem extends System {
 	static flightMode = ["nova"];
 	test(entity: Entity) {
-		return !!(
-			entity.components.isTorpedoLauncher && entity.components.isShipSystem
-		);
+		return !!(entity.components.isTorpedoLauncher && entity.components.isShipSystem);
 	}
 	update(entity: Entity, deltaTime: number) {
 		const component = entity.components.isTorpedoLauncher;
@@ -25,9 +23,7 @@ export class TorpedoLoadingSystem extends System {
 			const requiredPower = powerLevels[0];
 			adjustedTime =
 				deltaTime +
-				deltaTime *
-					(Math.max(0, currentPower - requiredPower) /
-						(maxSafePower - requiredPower));
+				deltaTime * (Math.max(0, currentPower - requiredPower) / (maxSafePower - requiredPower));
 		}
 
 		let { status, progress } = component;

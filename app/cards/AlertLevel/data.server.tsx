@@ -1,6 +1,6 @@
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { z } from "zod";
+import { t } from "@thorium/.server/init/t";
+import z from "zod";
 
 const alertLevelValues = z.union([
 	z.literal("5"),
@@ -25,6 +25,7 @@ export const alertLevel = t.router({
 			if (!ship?.components.isShip) throw new Error("Ship not found");
 
 			ship.updateComponent("isShip", { alertLevel: input.alertLevel });
+			pubsub.publish.ship.player({ shipId: ship.id });
 			pubsub.publish.ship.get({ shipId: ship.id });
 			pubsub.publish.starmapCore.object({ objectId: ship.id });
 

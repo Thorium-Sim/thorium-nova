@@ -1,14 +1,10 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
-import { z } from "zod";
+import type { Entity } from "@thorium/utils/ecs";
+import z from "zod";
 
-const legacyCoolantSystemTypes = [
-	"impulseEngines",
-	"warpEngines",
-	"phasers",
-	"reactor",
-];
+const legacyCoolantSystemTypes = ["impulseEngines", "warpEngines", "phasers", "reactor"];
 export const coolantControl = t.router({
 	tank: t.procedure
 		.input(z.object({ shipId: z.number() }))
@@ -23,8 +19,7 @@ export const coolantControl = t.router({
 		.request(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("Ship not found");
-			for (const systemId of ship.components.shipSystems?.shipSystems.keys() ||
-				[]) {
+			for (const systemId of ship.components.shipSystems?.shipSystems.keys() || []) {
 				const system = ctx.ecs.getEntityById(systemId || -1);
 
 				if (system?.components.isCoolantTank) {
@@ -32,8 +27,7 @@ export const coolantControl = t.router({
 						id: system.id,
 						name: system.components.identity?.name || "Coolant Tank",
 						transferSystem: system.components.isCoolantTank.transferSystem,
-						transferDirection:
-							system.components.isCoolantTank.transferDirection,
+						transferDirection: system.components.isCoolantTank.transferDirection,
 					};
 				}
 			}
@@ -58,21 +52,15 @@ export const coolantControl = t.router({
 				nominalHeat: number;
 				maxHeat: number;
 			}[] = [];
-			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() ||
-				[]) {
+			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() || []) {
 				const system = ctx.ecs.getEntityById(systemId);
 				if (
 					system?.components.heat &&
-					legacyCoolantSystemTypes.includes(
-						system.components.isShipSystem?.type || "",
-					)
+					legacyCoolantSystemTypes.includes(system.components.isShipSystem?.type || "")
 				) {
 					systems.push({
 						id: system.id,
-						name:
-							system.components.identity?.name ||
-							system.components.isShipSystem?.type ||
-							"",
+						name: system.components.identity?.name || system.components.isShipSystem?.type || "",
 						heatRate: system.components.heat.legacyHeatRate || 1,
 						nominalHeat: system.components.heat?.nominalHeat || 295,
 						maxHeat: system.components.heat?.maxHeat || 1000,
@@ -119,10 +107,7 @@ export const coolantControl = t.router({
 			system.updateComponent("heat", {
 				heat: Math.min(
 					maxHeat,
-					Math.max(
-						nominalHeat,
-						input.heat * (maxHeat - nominalHeat) + nominalHeat,
-					),
+					Math.max(nominalHeat, input.heat * (maxHeat - nominalHeat) + nominalHeat),
 				),
 			});
 		}),
@@ -174,18 +159,18 @@ export const coolantControl = t.router({
 				cooling: input.cooling,
 			});
 		}),
-	stream: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.dataStream(({ ctx, input, entity }) => {
-			if (!entity) return false;
-
-			return Boolean(
-				entity.components.isShipSystem?.shipId === input.shipId &&
-					(entity.components.isCoolantTank ||
-						(entity.components.legacyCoolant &&
-							legacyCoolantSystemTypes.includes(
-								entity.components.isShipSystem.type,
-							))),
-			);
-		}),
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
+		const set = new Set<Entity>();
+		for (const entity of ctx.ecs.componentCache.get("isCoolantTank") || []) {
+			if (entity.components.isShipSystem?.shipId === input.shipId) {
+				set.add(entity);
+			}
+		}
+		for (const entity of ctx.ecs.componentCache.get("legacyCoolant") || []) {
+			if (legacyCoolantSystemTypes.includes(entity.components.isShipSystem?.type || "")) {
+				set.add(entity);
+			}
+		}
+		return set;
+	}),
 });

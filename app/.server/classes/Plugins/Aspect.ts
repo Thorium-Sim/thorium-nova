@@ -1,6 +1,7 @@
-import type BasePlugin from "./index";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+
+import type BasePlugin from "./index";
 
 type AspectKinds = keyof BasePlugin["aspects"];
 
@@ -53,7 +54,7 @@ export abstract class Aspect extends DataStore {
 	 * Used for serializing the data before it is stored in the file system.
 	 */
 	toJSON() {
-		const { plugin, ...data } = this;
+		const { plugin: _, ...data } = this;
 		return data;
 	}
 	async rename(name: string) {

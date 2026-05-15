@@ -1,12 +1,9 @@
 import type { AllShipSystems } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
 import type { DataContext } from "@thorium/.server/DataContext";
-
-import { z } from "zod";
+import z from "zod";
 
 export function getPlugin(context: DataContext, pluginId: string) {
-	const plugin = context.server.plugins.find(
-		(plugin) => plugin.id === pluginId,
-	);
+	const plugin = context.server.plugins.find((plugin) => plugin.id === pluginId);
 	if (!plugin) throw null;
 	return plugin;
 }
@@ -58,11 +55,9 @@ export function getShipSystem({
 		}
 	}
 	const plugin = getPlugin(ctx, input.pluginId);
-	const shipSystem = plugin.aspects.shipSystems.find(
-		(system) => system.name === systemId,
-	);
+	const shipSystem = plugin.aspects.shipSystems.find((system) => system.name === systemId);
 	if (!shipSystem) throw new Error(`System not found: ${systemId}`);
-	const { plugin: sysPlugin, ...system } = shipSystem;
+	const { plugin: _, ...system } = shipSystem;
 	return {
 		...system,
 		...override,
@@ -96,9 +91,7 @@ export function getShipSystemForInput<T extends keyof AllShipSystems>(
 			throw new Error("Ship not found");
 		}
 		const system = ship.shipSystems.find(
-			(s) =>
-				s.id === systemId ||
-				(s.systemId === systemId && s.pluginId === shipPluginId),
+			(s) => s.id === systemId || (s.systemId === systemId && s.pluginId === shipPluginId),
 		);
 		if (!system) {
 			throw new Error("Ship system is not assigned to ship");
@@ -118,11 +111,7 @@ export function getShipSystemForInput<T extends keyof AllShipSystems>(
 	return [shipSystem, override] as const;
 }
 
-export function getSolarSystem(
-	context: DataContext,
-	pluginId: string,
-	solarSystemId: string,
-) {
+export function getSolarSystem(context: DataContext, pluginId: string, solarSystemId: string) {
 	const plugin = getPlugin(context, pluginId);
 	const solarSystem = plugin.aspects.solarSystems.find(
 		(solarSystem) => solarSystem.name === solarSystemId,

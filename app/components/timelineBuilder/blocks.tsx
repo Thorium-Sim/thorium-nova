@@ -5,35 +5,35 @@
  * can then be used throughout the entire timeline.
  */
 
-import {
-	timelineBlockDefaults,
-	type TimelineBlock,
-} from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+import { arrayMove } from "@dnd-kit/sortable";
 import { ActionBlock } from "@thorium/components/timelineBuilder/ActionBlock";
-import type { BlockProps } from "@thorium/components/timelineBuilder/BlockInputs";
+import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { BlockWrapper } from "@thorium/components/timelineBuilder/BlockWrapper";
+import { DebugBlock } from "@thorium/components/timelineBuilder/DebugBlock";
 import { DistanceCondition } from "@thorium/components/timelineBuilder/DistanceCondition";
 import { EntityCondition } from "@thorium/components/timelineBuilder/EntityCondition";
 import { EntityPropertyIntoVariable } from "@thorium/components/timelineBuilder/EntityPropertyIntoVariable";
 import { EventCondition } from "@thorium/components/timelineBuilder/EventCondition";
+import { ForEachEntity } from "@thorium/components/timelineBuilder/ForEachEntity";
 import { IfCondition } from "@thorium/components/timelineBuilder/IfCondition";
+import { MacroBlock } from "@thorium/components/timelineBuilder/MacroBlock";
+import { MacroSlotBlock } from "@thorium/components/timelineBuilder/MacroSlotBlock";
+import { MathIntoVariable } from "@thorium/components/timelineBuilder/MathIntoVariableBlock";
+import { NoteBlock } from "@thorium/components/timelineBuilder/NoteBlock";
+import { RandomIntoVariable } from "@thorium/components/timelineBuilder/RandomBlock";
 import { ResultPropertyIntoVariable } from "@thorium/components/timelineBuilder/ResultPropertyGetter";
 import { ShipSystemGetter } from "@thorium/components/timelineBuilder/ShipSystemGetter";
+import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
+import { TimelineAvailabilityBlock } from "@thorium/components/timelineBuilder/TimelineAvailabilityBlock";
+import {
+	timelineBlockDefaults,
+	type TimelineBlock,
+} from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { VariableGetter } from "@thorium/components/timelineBuilder/VariableGetter";
 import { SetVariable } from "@thorium/components/timelineBuilder/VariableSetter";
 import { WaitBlock } from "@thorium/components/timelineBuilder/WaitBlock";
-import { Suspense } from "react";
-import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
-import { arrayMove } from "@dnd-kit/sortable";
-import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import uniqid from "@thorium/utils/uniqid";
-import { RandomIntoVariable } from "@thorium/components/timelineBuilder/RandomBlock";
-import { MathIntoVariable } from "@thorium/components/timelineBuilder/MathIntoVariableBlock";
-import { MacroBlock } from "@thorium/components/timelineBuilder/MacroBlock";
-import { TimelineAvailabilityBlock } from "@thorium/components/timelineBuilder/TimelineAvailabilityBlock";
-import { DebugBlock } from "@thorium/components/timelineBuilder/DebugBlock";
-import { MacroSlotBlock } from "@thorium/components/timelineBuilder/MacroSlotBlock";
-import { NoteBlock } from "@thorium/components/timelineBuilder/NoteBlock";
+import { Suspense } from "react";
 
 export function RenderBlock({
 	onRemove,
@@ -59,18 +59,14 @@ export function RenderBlock({
 			<BlockWrapper onRemove={() => onRemove(block.id)}>
 				{block.type === "Wait" ? (
 					<WaitBlock {...block} update={update} />
-				) : block.type === "DistanceCondition" ? (
+				) : block.type === "WaitComplete" ? null : block.type === "DistanceCondition" ? (
 					<DistanceCondition {...block} update={update} />
 				) : block.type === "EntityCondition" ? (
 					<EntityCondition {...block} update={update} />
 				) : block.type === "EventCondition" ? (
 					<EventCondition {...block} update={update} />
 				) : block.type === "IfCondition" ? (
-					<IfCondition
-						{...block}
-						definedVariables={definedVariables}
-						update={update}
-					/>
+					<IfCondition {...block} definedVariables={definedVariables} update={update} />
 				) : block.type === "ShipSystemGetter" ? (
 					<ShipSystemGetter {...block} update={update} />
 				) : block.type === "ResultPropertyIntoVariable" ? (
@@ -91,6 +87,8 @@ export function RenderBlock({
 					<RandomIntoVariable {...block} update={update} />
 				) : block.type === "MathIntoVariable" ? (
 					<MathIntoVariable {...block} update={update} />
+				) : block.type === "ForEachEntity" ? (
+					<ForEachEntity {...block} update={update} />
 				) : block.type === "Macro" ? (
 					<MacroBlock
 						{...block}
@@ -113,7 +111,7 @@ export function RenderBlock({
 			</BlockWrapper>
 			{"triggerBlocks" in block ? (
 				<div className="relative mb-8">
-					<div className="h-[calc(100%-1rem)] w-4 left-2  border-white/50 border-l border-b absolute rounded-bl-full" />
+					<div className="absolute left-2 h-[calc(100%-1rem)] w-4 rounded-bl-full border-b border-l border-white/50" />
 					<div className="pl-8">
 						<SortableBlocks
 							executionType={executionType}
@@ -133,7 +131,7 @@ export function RenderBlock({
 								);
 							}}
 							onUpdate={(innerBlock, property, value) => {
-								const { id, type, ...properties } = innerBlock;
+								const { id, type: _, ...properties } = innerBlock;
 								(update as any)(
 									"triggerBlocks",
 									block.triggerBlocks.map((b) => {

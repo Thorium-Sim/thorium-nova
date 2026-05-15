@@ -1,9 +1,9 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { Matrix4, Quaternion, Vector3 } from "three";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
-import { lightMinuteToLightYear } from "@thorium/utils/unitTypes";
 import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
+import { lightMinuteToLightYear } from "@thorium/utils/unitTypes";
+import { Matrix4, Quaternion, Vector3 } from "three";
 
 const MIN_SYSTEM_SIZE = 10_000;
 const SYSTEM_PADDING = 1.05;
@@ -49,18 +49,12 @@ const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 export class InterstellarTransitionSystem extends System {
 	static flightMode = ["nova"];
 	test(entity: Entity) {
-		return !!(
-			entity.components.isShip &&
-			entity.components.position &&
-			entity.components.velocity
-		);
+		return !!(entity.components.isShip && entity.components.position && entity.components.velocity);
 	}
-	update(entity: Entity, elapsed: number) {
+	update(entity: Entity) {
 		// const warpSystem = this.ecs.systems.find(sys =>sys.constructor.name === "WarpSystem")
 		if (!entity.components.position) return;
-		const system = this.ecs.getEntityById(
-			entity.components.position?.parentId || -1,
-		);
+		const system = this.ecs.getEntityById(entity.components.position?.parentId || -1);
 		const autopilot = entity.components.autopilot;
 
 		if (system) {
@@ -72,8 +66,7 @@ export class InterstellarTransitionSystem extends System {
 				...(this.ecs.componentCache.get("position") || []),
 				...(this.ecs.componentCache.get("satellite") || []),
 			];
-			const maxDistance =
-				getMaxDistance(entitiesWithPosition, system.id) * SYSTEM_PADDING;
+			const maxDistance = getMaxDistance(entitiesWithPosition, system.id) * SYSTEM_PADDING;
 			const entityDistance = Math.hypot(
 				entity.components.position.x,
 				entity.components.position.y,
@@ -123,27 +116,22 @@ export class InterstellarTransitionSystem extends System {
 				// }
 				pubsub.publish.starmapCore.ships({ systemId: system.id });
 				pubsub.publish.starmapCore.ships({ systemId: null });
+				pubsub.publish.shortRangeComm.hailableEntities({ systemId: null });
+				pubsub.publish.shortRangeComm.hailableEntities({ systemId: system.id });
 				pubsub.publish.starmapCore.ship({ shipId: entity.id });
 
 				if (entity.components.isPlayerShip) {
 					pubsub.publish.navigation.ship({ shipId: entity.id });
 					pubsub.publish.ship.player({ shipId: entity.id });
+					pubsub.publish.ship.players();
 				}
 			}
 		} else {
 			// Transition from interstellar space to within a solar system
 			// Check if the ship has locked course on to a solar system, and is within range
-			const destinationWaypoint = this.ecs.getEntityById(
-				autopilot?.destinationWaypointId || -1,
-			);
-			const destinationSystem = this.ecs.getEntityById(
-				autopilot?.desiredSolarSystemId || -1,
-			);
-			if (
-				!destinationSystem?.components.position ||
-				!entity.components.position
-			)
-				return;
+			const destinationWaypoint = this.ecs.getEntityById(autopilot?.destinationWaypointId || -1);
+			const destinationSystem = this.ecs.getEntityById(autopilot?.desiredSolarSystemId || -1);
+			if (!destinationSystem?.components.position || !entity.components.position) return;
 			const distance = Math.hypot(
 				entity.components.position.x - destinationSystem.components.position.x,
 				entity.components.position.y - destinationSystem.components.position.y,
@@ -157,10 +145,7 @@ export class InterstellarTransitionSystem extends System {
 				];
 
 				// create a vector of the ship from the center of the system, and position it outside the heliopause
-				const maxDistance = getMaxDistance(
-					entitiesWithPosition,
-					destinationSystem.id,
-				);
+				const maxDistance = getMaxDistance(entitiesWithPosition, destinationSystem.id);
 				shipPosition.set(
 					entity.components.position.x,
 					entity.components.position.y,
@@ -171,10 +156,7 @@ export class InterstellarTransitionSystem extends System {
 					destinationSystem.components.position.y,
 					destinationSystem.components.position.z,
 				);
-				direction
-					.subVectors(shipPosition, systemPosition)
-					.normalize()
-					.multiplyScalar(maxDistance);
+				direction.subVectors(shipPosition, systemPosition).normalize().multiplyScalar(maxDistance);
 				entity.updateComponent("position", {
 					x: direction.x,
 					y: direction.y,
@@ -186,8 +168,7 @@ export class InterstellarTransitionSystem extends System {
 
 				// Also set the rotation to the destination to be spot-on to the destination
 				if (
-					destinationWaypoint?.components.isWaypoint?.attachedObjectId !==
-						destinationSystem.id &&
+					destinationWaypoint?.components.isWaypoint?.attachedObjectId !== destinationSystem.id &&
 					destinationWaypoint?.components.position
 				) {
 					desiredDestination.set(
@@ -197,9 +178,7 @@ export class InterstellarTransitionSystem extends System {
 					);
 
 					up.set(0, 1, 0);
-					matrix
-						.lookAt(direction, desiredDestination, up)
-						.multiply(rotationMatrix);
+					matrix.lookAt(direction, desiredDestination, up).multiply(rotationMatrix);
 					desiredRotationQuat.setFromRotationMatrix(matrix);
 					entity.updateComponent("rotation", {
 						x: desiredRotationQuat.x,
@@ -222,11 +201,16 @@ export class InterstellarTransitionSystem extends System {
 				}
 				pubsub.publish.starmapCore.ships({ systemId: destinationSystem.id });
 				pubsub.publish.starmapCore.ships({ systemId: null });
+				pubsub.publish.shortRangeComm.hailableEntities({ systemId: null });
+				pubsub.publish.shortRangeComm.hailableEntities({
+					systemId: destinationSystem.id,
+				});
 				pubsub.publish.starmapCore.ship({ shipId: entity.id });
 
 				if (entity.components.isPlayerShip) {
 					pubsub.publish.navigation.ship({ shipId: entity.id });
 					pubsub.publish.ship.player({ shipId: entity.id });
+					pubsub.publish.ship.players();
 				}
 				// // Update the warp engines
 				// const warpEngines = this.ecs.entities.find(

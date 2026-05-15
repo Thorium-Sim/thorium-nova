@@ -57,4 +57,3 @@ database.
 A convenience property for accessing the flight client object in the current
 flight database, if there is any. It will automatically create an entry for the
 client in the flight database the first time it is accessed.
-

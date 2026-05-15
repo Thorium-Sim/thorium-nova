@@ -1,4 +1,5 @@
 export const reportVariableNames = [
+	"damageReportId",
 	"damageType",
 	"damageMetric",
 	"systemType",

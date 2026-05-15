@@ -13,9 +13,9 @@ export function Batteries() {
 	});
 
 	return batteries.length > 0 ? (
-		<div className="panel max-h-96 h-full px-8 flex flex-col text-center col-span-2 row-span-2">
+		<div className="panel col-span-2 row-span-2 flex h-full max-h-96 flex-col px-8 text-center">
 			Batteries
-			<div className="flex justify-between gap-8 flex-auto pt-4">
+			<div className="flex flex-auto justify-between gap-8 pt-4">
 				{batteries.map((battery, i) => (
 					<Battery key={battery.id} index={i} batteries={batteries} />
 				))}
@@ -27,7 +27,10 @@ export function Batteries() {
 function Battery({
 	index,
 	batteries,
-}: { index: number; batteries: { id: number; capacity: number }[] }) {
+}: {
+	index: number;
+	batteries: { id: number; capacity: number }[];
+}) {
 	const { cardLoaded } = useCardContext();
 	const { interpolate } = useLiveQuery();
 	const textRef = useRef<HTMLParagraphElement>(null);
@@ -35,17 +38,13 @@ function Battery({
 	useAnimationFrame(() => {
 		const collectiveCharge = batteries.reduce(
 			(prev, battery) =>
-				prev +
-				(interpolate(battery.id)?.x || 0) / battery.capacity / batteries.length,
+				prev + (interpolate(battery.id)?.x || 0) / battery.capacity / batteries.length,
 			0,
 		);
 
 		const value = Math.min(
 			1,
-			Math.max(
-				0,
-				(collectiveCharge - (1 / batteries.length) * index) * batteries.length,
-			),
+			Math.max(0, (collectiveCharge - (1 / batteries.length) * index) * batteries.length),
 		);
 
 		if (barRef.current) {
@@ -56,17 +55,17 @@ function Battery({
 		}
 	}, cardLoaded);
 	return (
-		<div className="w-full flex h-full flex-col">
-			<div className="flex-auto flex flex-col justify-end">
+		<div className="flex h-full w-full flex-col">
+			<div className="flex flex-auto flex-col justify-end">
 				<div
 					ref={barRef}
-					className="rounded-xl bg-green-500 striped-gradient border-2 border-green-900"
+					className="striped-gradient rounded-xl border-2 border-green-900 bg-green-500"
 					style={{
 						height: `0%`,
 					}}
 				/>
 			</div>
-			<p className="tabular-nums text-center" ref={textRef}>
+			<p className="text-center tabular-nums" ref={textRef}>
 				0%
 			</p>
 		</div>

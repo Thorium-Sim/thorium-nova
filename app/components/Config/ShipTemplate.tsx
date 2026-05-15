@@ -1,7 +1,5 @@
-import SearchableInput, {
-	DefaultResultLabel,
-} from "@thorium/ui/SearchableInput";
 import { q } from "@thorium/context/AppContext";
+import SearchableInput, { DefaultResultLabel } from "@thorium/ui/SearchableInput";
 
 export function ShipTemplate({
 	value,
@@ -27,7 +25,7 @@ export function ShipTemplate({
 			category: string;
 			vanity: string;
 		}>
-			inputClassName="input-sm"
+			inputClassName="input-xs"
 			queryKey="spawn"
 			getOptions={async ({ queryKey, signal }) => {
 				const result = await q.starmapCore.spawnSearch.netRequest(
@@ -39,7 +37,7 @@ export function ShipTemplate({
 			ResultLabel={({ active, result, selected }) => (
 				<DefaultResultLabel active={active} selected={selected}>
 					<div className="flex gap-4">
-						<img src={result.vanity} alt="" className="w-8 h-8" />
+						<img src={result.vanity} alt="" className="h-8 w-8" />
 						<div>
 							<p className="m-0 leading-none">{result.name}</p>
 							<p className="m-0 leading-none">

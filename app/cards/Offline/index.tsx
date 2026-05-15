@@ -2,6 +2,7 @@ import { clientId, q } from "@thorium/context/AppContext";
 import { Fragment } from "react";
 
 // Messages go here
+/*
 const messages: Record<string, { title: string; message: string }> = {
 	blackout: { title: "blackout", message: "" },
 	offline: {
@@ -24,7 +25,7 @@ const messages: Record<string, { title: string; message: string }> = {
 			"This station is down for maintenance. Please contact your system administrator for more information.",
 	},
 };
-
+*/
 const Offline: React.FC = () => {
 	const [client] = q.client.get.useNetRequest({ clientId });
 
@@ -32,7 +33,7 @@ const Offline: React.FC = () => {
 	return (
 		<div className="card-offline">
 			{client.offlineState.title === "blackout" ? (
-				<div className="blackout-back fixed z-50 top-0 w-full h-full" />
+				<div className="blackout-back fixed top-0 z-50 h-full w-full" />
 			) : (
 				<Fragment>
 					<p className="offline-title">{client.offlineState.title}</p>

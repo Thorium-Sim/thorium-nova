@@ -1,7 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { pursue } from "@thorium/utils/starmap/steering";
-
 import { Vector3 } from "three";
 
 const positionVector = new Vector3();
@@ -29,9 +28,7 @@ export class TorpedoMovementSystem extends System {
 			const { x, y, z } = entity.components.velocity || { x: 0, y: 0, z: 0 };
 			velocityVector.set(x, y, z);
 		}
-		const target = component.targetId
-			? this.ecs.getEntityById(component.targetId)
-			: null;
+		const target = component.targetId ? this.ecs.getEntityById(component.targetId) : null;
 		// If there's no target, continue traveling at the current velocity
 		if (!target) {
 			this.handleTorpedoDistance(
@@ -50,8 +47,7 @@ export class TorpedoMovementSystem extends System {
 			const { x, y, z } = target.components.velocity || { x: 0, y: 0, z: 0 };
 			targetVelocityVector.set(x, y, z);
 		}
-		const predictionTime =
-			positionVector.distanceTo(targetPositionVector) / speed;
+		const predictionTime = positionVector.distanceTo(targetPositionVector) / speed;
 
 		const desiredVelocity = pursue(
 			positionVector,
@@ -88,8 +84,7 @@ export class TorpedoMovementSystem extends System {
 		maxRange: number,
 	) {
 		entity.updateComponent("isTorpedo", {
-			distanceTraveled:
-				(distanceTraveled || 0) + velocityVector.length() * deltaInSeconds,
+			distanceTraveled: (distanceTraveled || 0) + velocityVector.length() * deltaInSeconds,
 		});
 		if (distanceTraveled > maxRange) {
 			// TODO May 11, 2024: Make a small explosion on the viewscreen

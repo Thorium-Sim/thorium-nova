@@ -1,11 +1,11 @@
-import { Vector3, Matrix4 } from "three";
-import { type Entity, System } from "@thorium/utils/ecs";
-import { KM_TO_LY, lightYearToLightMinute } from "@thorium/utils/unitTypes";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { getAutopilotPositionAndRotation } from "@thorium/utils/starmap/autopilotGetCoordinates";
 import type { isWarpEngines } from "@thorium/ecs-components/shipSystems";
-import { lerp } from "three/src/math/MathUtils.js";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { type Entity, System } from "@thorium/utils/ecs";
+import { getAutopilotPositionAndRotation } from "@thorium/utils/starmap/autopilotGetCoordinates";
+import { KM_TO_LY, lightYearToLightMinute } from "@thorium/utils/unitTypes";
+import { Vector3, Matrix4 } from "three";
+import { lerp } from "three/src/math/MathUtils.js";
 import type z from "zod";
 
 const emptyVector = new Vector3(0, 0, 0);
@@ -26,7 +26,7 @@ export class AutoThrustSystem extends System {
 	preUpdate() {
 		this.updateCount = (this.updateCount + 1) % 15;
 	}
-	update(entity: Entity, elapsed: number) {
+	update(entity: Entity) {
 		const { position, rotation, autopilot } = entity.components;
 		if (!position || !rotation || !autopilot?.forwardAutopilot) return;
 
@@ -128,15 +128,11 @@ export class AutoThrustSystem extends System {
 			const slowDownSlope = distanceInKM < 100 ? 2 : 1;
 			let desiredSpeed = Math.min(
 				impulseMaxSpeed,
-				Math.max(
-					0,
-					(correctDirectionCoefficient * distanceInKM) / slowDownSlope,
-				),
+				Math.max(0, (correctDirectionCoefficient * distanceInKM) / slowDownSlope),
 			);
 
 			// Smooth out the speed changes a little bit if we're increasing speed
-			const currentTargetSpeed =
-				impulseEntity.components.isImpulseEngines?.targetSpeed || 0;
+			const currentTargetSpeed = impulseEntity.components.isImpulseEngines?.targetSpeed || 0;
 			desiredSpeed =
 				desiredSpeed > currentTargetSpeed
 					? lerp(currentTargetSpeed, desiredSpeed, 0.05)
@@ -156,11 +152,7 @@ export class AutoThrustSystem extends System {
 
 		if (thrusters) {
 			// Use thrusters to apply the minute steering force
-			steeringForce
-				.set(0, 0, 0)
-				.add(separation(entity))
-				.add(leaderFollowing(entity))
-				.normalize();
+			steeringForce.set(0, 0, 0).add(separation(entity)).add(leaderFollowing()).normalize();
 
 			// Apply the steering force to the thrusters
 			thrustersEntity.updateComponent("isThrusters", {
@@ -203,32 +195,23 @@ function separation(entity: Entity) {
 	const minSafeDistance = (length * 15) / 1000;
 
 	// Get all of the nearby entities
-	entity.components.nearbyObjects?.objects.forEach(
-		(distance: number, id: number) => {
-			if (distance > minSafeDistance) return;
-			const nearbyEntity = entity.ecs?.getEntityById(id);
-			if (!nearbyEntity) return;
-			const nearbyPosition = nearbyEntity.components.position;
-			if (!nearbyPosition) return;
-			otherEntityPosition.set(
-				nearbyPosition.x,
-				nearbyPosition.y,
-				nearbyPosition.z,
-			);
+	entity.components.nearbyObjects?.objects.forEach((distance: number, id: number) => {
+		if (distance > minSafeDistance) return;
+		const nearbyEntity = entity.ecs?.getEntityById(id);
+		if (!nearbyEntity) return;
+		const nearbyPosition = nearbyEntity.components.position;
+		if (!nearbyPosition) return;
+		otherEntityPosition.set(nearbyPosition.x, nearbyPosition.y, nearbyPosition.z);
 
-			separationPosition
-				.sub(otherEntityPosition)
-				.normalize()
-				.divideScalar(distance);
-			separationVector.add(otherEntityPosition);
-		},
-	);
+		separationPosition.sub(otherEntityPosition).normalize().divideScalar(distance);
+		separationVector.add(otherEntityPosition);
+	});
 
 	return separationVector;
 }
 
 const leaderFollowingVector = new Vector3();
-function leaderFollowing(entity: Entity) {
+function leaderFollowing() {
 	return leaderFollowingVector;
 }
 
@@ -237,15 +220,8 @@ function getWarpFactorFromDesiredSpeed(
 	warp: z.infer<typeof isWarpEngines>,
 	isInterstellar = false,
 ) {
-	const {
-		interstellarCruisingSpeed,
-		solarCruisingSpeed,
-		minSpeedMultiplier,
-		speeds,
-	} = warp;
-	const cruisingSpeed = isInterstellar
-		? interstellarCruisingSpeed
-		: solarCruisingSpeed;
+	const { interstellarCruisingSpeed, solarCruisingSpeed, minSpeedMultiplier, speeds } = warp;
+	const cruisingSpeed = isInterstellar ? interstellarCruisingSpeed : solarCruisingSpeed;
 
 	const minWarp = cruisingSpeed * minSpeedMultiplier;
 
@@ -256,8 +232,7 @@ function getWarpFactorFromDesiredSpeed(
 	if (desiredSpeed > 1000 && desiredSpeed < minWarp) return 1;
 	if (desiredSpeed > cruisingSpeed) return warpFactorCount + 1;
 
-	const speedOutput =
-		(desiredSpeed * (warpFactorCount - 1)) / (cruisingSpeed - minWarp) + 1;
+	const speedOutput = (desiredSpeed * (warpFactorCount - 1)) / (cruisingSpeed - minWarp) + 1;
 
 	return Math.max(1, speedOutput);
 }

@@ -1,5 +1,7 @@
+import { skipN } from "pure-rand/utils/skipN";
 import { describe, expect, it } from "vitest";
-import { createRNG, skipN } from ".";
+
+import { createRNG } from ".";
 
 describe("rng", () => {
 	it("should generate a series of random numbers", () => {
@@ -35,7 +37,7 @@ describe("rng", () => {
 		}
 		expect(num1).toEqual(num2);
 		let rng3 = createRNG(1);
-		rng3 = skipN(rng3, 10);
+		skipN(rng3.rng, 10);
 		num2 = rng3.next();
 		expect(num1).toEqual(num2);
 	});
@@ -52,9 +54,7 @@ describe("rng", () => {
 		numbers.push(rng.nextInt(-100, 500));
 		numbers.push(rng.nextInt(10, 5));
 
-		expect(JSON.stringify(numbers)).toMatchInlineSnapshot(
-			`"[7,36,950,968,942,-91,-95,284,10]"`,
-		);
+		expect(JSON.stringify(numbers)).toMatchInlineSnapshot(`"[7,36,950,968,942,-91,-95,284,10]"`);
 	});
 	it("should pick random values from a list", () => {
 		const list = ["a", "b", "c", "d", "e"];

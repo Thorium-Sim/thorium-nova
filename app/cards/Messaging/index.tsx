@@ -6,24 +6,25 @@ import { Icon } from "@thorium/ui/Icon";
 import Input from "@thorium/ui/Input";
 import Select from "@thorium/ui/Select";
 import { cn } from "@thorium/utils/cn";
-import { useEffect, useRef, useState } from "react";
-import "./messaging.css";
 import { fromDate } from "dot-beat-time";
+
+import "./messaging.css";
+import { useEffect, useRef, useState } from "react";
 
 export function Messaging() {
 	const { station, shipId } = useStation();
 	const messageGroups = station.messageGroups;
 	const conversations = useConversations(station.name);
-	const [selectedConversationDestination, setSelectedConversationDestination] =
-		useState<string | null>(null);
+	const [selectedConversationDestination, setSelectedConversationDestination] = useState<
+		string | null
+	>(null);
 
 	const selectedConversation = conversations.find(
 		(c) => c.sender === selectedConversationDestination,
 	);
 	const [ship] = q.ship.get.useNetRequest({ shipId });
 
-	const stations =
-		ship?.components.stationComplement?.stations.map((s) => s.name) || [];
+	const stations = ship?.stations.map((s) => s.name) || [];
 
 	// Group messages by participant and timestamps 5 minutes or more apart
 	const groupedMessages: {
@@ -38,8 +39,7 @@ export function Messaging() {
 		const isStation = message.sender === station.name;
 		const lastGrouped = groupedMessages[groupedMessages.length - 1];
 		if (
-			(lastGrouped?.isStation === isStation &&
-				lastGrouped?.sender === message.sender) ||
+			(lastGrouped?.isStation === isStation && lastGrouped?.sender === message.sender) ||
 			(lastGrouped?.isStation &&
 				isStation &&
 				message.timestamp - (lastGrouped.timestamp || 0) < 5 * 60 * 1000)
@@ -66,10 +66,10 @@ export function Messaging() {
 		}
 	}, [selectedConversation]);
 	return (
-		<div className="grid grid-cols-3 gap-4 h-screen max-h-full min-h-64 flex-auto">
+		<div className="grid h-screen max-h-full min-h-64 flex-auto grid-cols-3 gap-4">
 			<div className="flex flex-col gap-1">
 				<p>Conversations</p>
-				<ul className="list-group flex-1 panel">
+				<ul className="list-group panel flex-1">
 					{conversations.map((c) => (
 						<li
 							key={`${c.recipient}-${c.sender}`}
@@ -98,9 +98,7 @@ export function Messaging() {
 					items={[
 						{
 							header: "Stations",
-							items: stations
-								.filter((s) => s !== station.name)
-								.map((s) => ({ id: s, label: s })),
+							items: stations.filter((s) => s !== station.name).map((s) => ({ id: s, label: s })),
 						},
 						...(messageGroups.length > 0
 							? [
@@ -115,14 +113,14 @@ export function Messaging() {
 					setSelected={(value) => setSelectedConversationDestination(value)}
 				/>
 			</div>
-			<div className="flex flex-col col-span-2 min-h-0">
+			<div className="col-span-2 flex min-h-0 flex-col">
 				<div
-					className="flex-auto flex flex-col overflow-y-auto overflow-x-hidden pr-2"
+					className="flex flex-auto flex-col overflow-x-hidden overflow-y-auto pr-2"
 					ref={scrollRef}
 				>
 					{!selectedConversationDestination ? null : !selectedConversation ||
-						selectedConversation.messages.length === 0 ? (
-						<div className="self-center py-1 px-2 rounded-lg bg-gray-800 mb-4">
+					  selectedConversation.messages.length === 0 ? (
+						<div className="mb-4 self-center rounded-lg bg-gray-800 px-2 py-1">
 							Start of Conversation with {selectedConversationDestination}
 						</div>
 					) : (
@@ -133,18 +131,14 @@ export function Messaging() {
 								})}
 								key={`group-${group.timestamp}`}
 							>
-								<div className="flex gap-1 items-end">
+								<div className="flex items-end gap-1">
 									<div
 										className={cn("flex flex-col gap-px flex-auto", {
 											"items-end": group.isStation,
 										})}
 									>
 										{!group.isStation ? (
-											<div
-												className={cn(
-													"text-xs block text-foreground/60 text-left",
-												)}
-											>
+											<div className={cn("text-xs block text-foreground/60 text-left")}>
 												{group.sender}
 											</div>
 										) : null}
@@ -156,13 +150,10 @@ export function Messaging() {
 											/>
 										))}
 										<time
-											className={cn(
-												"text-xs block text-foreground/60 col-span-2",
-												{
-													"text-right": group.isStation,
-													"text-left col-span-2": !group.isStation,
-												},
-											)}
+											className={cn("text-xs block text-foreground/60 col-span-2", {
+												"text-right": group.isStation,
+												"text-left col-span-2": !group.isStation,
+											})}
 										>
 											{fromDate(new Date(group.timestamp), true)}
 										</time>
@@ -197,11 +188,7 @@ export function Messaging() {
 						labelHidden
 						name="message"
 					/>
-					<Button
-						className="btn-sm"
-						disabled={!selectedConversationDestination}
-						type="submit"
-					>
+					<Button className="btn-sm" disabled={!selectedConversationDestination} type="submit">
 						Send Message
 					</Button>
 				</form>
@@ -210,13 +197,7 @@ export function Messaging() {
 	);
 }
 
-function Message({
-	message,
-	isStation,
-}: {
-	message: string;
-	isStation: boolean;
-}) {
+function Message({ message, isStation }: { message: string; isStation: boolean }) {
 	return (
 		<div
 			className={cn(
@@ -224,11 +205,9 @@ function Message({
 				"after:hidden last-of-type:after:block after:absolute after:bottom-0 after:right-0 after:w-3 after:h-4",
 				{
 					"bg-gray-600 after:bg-gray-600 after:left-0": !isStation,
-					"station bg-primary text-primary-foreground after:bg-primary after:right-0":
-						isStation,
+					"station bg-primary text-primary-foreground after:bg-primary after:right-0": isStation,
 				},
 			)}
-			// biome-ignore lint/security/noDangerouslySetInnerHtml: We want to include markdown syntax here.
 			dangerouslySetInnerHTML={{ __html: message }}
 		/>
 	);

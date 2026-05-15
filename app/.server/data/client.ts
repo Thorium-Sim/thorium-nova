@@ -1,16 +1,26 @@
 import type TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
-import { staticStations } from "@thorium/.server/classes/Station";
 import type { DataContext } from "@thorium/.server/DataContext";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { spawnTimeline } from "@thorium/.server/spawners/timeline";
 import type { TrainingVariables } from "@thorium/routes/config/trainings/trainingAvailableVariables";
+import { staticStations } from "@thorium/routes/flight/staticStations";
+import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
 import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
 import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
 import type { Entity } from "@thorium/utils/ecs";
-import { z } from "zod";
 import MarkdownIt from "markdown-it";
+import z from "zod";
 const md = MarkdownIt();
+
+const clientSettings = z.object({
+	soundPlayer: z.boolean(),
+	ambiancePlayer: z.boolean(),
+	musicPlayer: z.boolean(),
+	dialoguePlayer: z.boolean(),
+});
+
+export type ClientSettings = z.infer<typeof clientSettings>;
 
 export const client = t.router({
 	get: t.procedure
@@ -26,13 +36,13 @@ export const client = t.router({
 				: null,
 		)
 		.request(({ ctx, input }) => {
-			const { id, name, connected } = ctx.server.clients[input.clientId];
+			const { id, name, connected, settings } = ctx.server.clients[input.clientId];
 			const {
-				officersLog,
+				officersLog: _,
 				clientId: _id,
 				...flightClient
 			} = ctx.getFlightClient(input.clientId)?.components.flightClient || {};
-			return { id, name, connected, ...flightClient };
+			return { id, name, connected, settings, ...flightClient };
 		}),
 	all: t.procedure
 		.autoPublish(["flightClient"], () => null)
@@ -44,6 +54,7 @@ export const client = t.router({
 					return {
 						name: client.name,
 						connected: client.connected,
+						settings: client.settings,
 						...flightClient?.components.flightClient!,
 					};
 				})
@@ -88,16 +99,22 @@ export const client = t.router({
 				pubsub.publish.client.get({ clientId });
 				pubsub.publish.station.get({ clientId });
 				pubsub.publish.theme.get({ clientId });
-				pubsub.publish.ship.get({ clientId });
+				pubsub.publish.ship.get({
+					clientId,
+				});
+				pubsub.publish.ship.get({
+					shipId: flightClient.components.flightClient?.shipId || -1,
+				});
 				return flightClient;
 			}
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			if (!ship?.components.isShip) {
 				throw new Error("No ship with that ID exists.");
 			}
-			const station = staticStations
-				.concat(ship.components.stationComplement?.stations || [])
-				.find((station) => station.name === input.stationId);
+			const station = [
+				...staticStations,
+				...(ship.components.stationComplement?.stations || []),
+			].find((station) => station.name === input.stationId);
 
 			if (!station) {
 				throw new Error("No station with that ID exists.");
@@ -115,6 +132,10 @@ export const client = t.router({
 			pubsub.publish.station.get({ clientId });
 			pubsub.publish.theme.get({ clientId });
 			pubsub.publish.ship.get({ clientId });
+			pubsub.publish.ship.player({ shipId: input.shipId });
+			pubsub.publish.ship.get({
+				shipId: input.shipId,
+			});
 			return flightClient;
 		}),
 	setCard: t.procedure
@@ -139,16 +160,40 @@ export const client = t.router({
 			const flightClient = getFlightClient(ctx, input);
 			flightClient.updateComponent("flightClient", { currentCard: input.card });
 
+			// Turn off the highlight for this card
+			applyCardHighlight(
+				ctx.ecs,
+				flightClient.components.flightClient?.shipId || -1,
+				flightClient.components.flightClient?.stationId,
+				[input.card],
+				false,
+			);
+
+			const clientId = flightClient.components.flightClient?.clientId || "";
 			pubsub.publish.client.all();
 			pubsub.publish.client.get({
-				clientId: flightClient.components.flightClient?.clientId || "",
+				clientId,
+			});
+			pubsub.publish.station.get({
+				clientId,
 			});
 			return {
 				card: input.card,
-				clientId: flightClient.components.flightClient?.clientId,
+				clientId,
 				station: flightClient.components.flightClient?.stationId,
 				shipId: flightClient.components.flightClient?.shipId,
 			};
+		}),
+	setSettings: t.procedure
+		.input(z.object({ clientId: z.string(), settings: clientSettings }))
+		.send(({ ctx, input }) => {
+			const client = ctx.getClient(input.clientId);
+
+			client.settings = input.settings;
+			pubsub.publish.client.all();
+			pubsub.publish.client.get({
+				clientId: input.clientId,
+			});
 		}),
 	startTraining: t.procedure
 		.input(z.object({ clientId: z.string() }))
@@ -156,10 +201,8 @@ export const client = t.router({
 		.send(async ({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("Flight has not started.");
 			const flightClient = ctx.getFlightClient(input.clientId);
-			if (!flightClient?.components.flightClient)
-				throw new Error("Invalid flight client");
-			const { shipId, stationId, currentCard } =
-				flightClient.components.flightClient;
+			if (!flightClient?.components.flightClient) throw new Error("Invalid flight client");
+			const { shipId, stationId, currentCard } = flightClient.components.flightClient;
 			if (!shipId) throw new Error("Invalid flight client");
 			const ship = ctx.ecs.getEntityById(shipId);
 
@@ -187,11 +230,7 @@ export const client = t.router({
 			if (!timeline) throw new Error("No training available.");
 
 			// This automatically adds the timeline entity to ECS
-			const training = spawnTimeline(
-				timeline,
-				(entity) => ctx.ecs.addEntity(entity),
-				shipId,
-			);
+			const training = spawnTimeline(timeline, (entity) => ctx.ecs.addEntity(entity), shipId);
 
 			training.addComponent("variables", {
 				variables: [
@@ -216,9 +255,7 @@ export const client = t.router({
 			});
 			// Trigger the first step
 			await triggerStep(
-				ctx.flight.ecs.getEntityById(
-					training.components.isTimeline?.steps[0] || -1,
-				)!,
+				ctx.flight.ecs.getEntityById(training.components.isTimeline?.steps[0] || -1)!,
 			);
 			pubsub.publish.client.all();
 			pubsub.publish.client.get({
@@ -249,8 +286,7 @@ export const client = t.router({
 					inputProps: { rows: 5 },
 				},
 				card: {
-					helper:
-						"Which card the training will automatically move the crew to.",
+					helper: "Which card the training will automatically move the crew to.",
 				},
 				selector: {
 					type: "tags",
@@ -263,15 +299,13 @@ export const client = t.router({
 				},
 				allowAdvance: {
 					type: "checkbox",
-					helper:
-						"Whether the crew member can advance the training on their own.",
+					helper: "Whether the crew member can advance the training on their own.",
 				},
 			}),
 		})
 		.send(({ ctx, input }) => {
 			const flightClient = getFlightClient(ctx, input);
-			const selector =
-				typeof input.selector === "string" ? [input.selector] : input.selector;
+			const selector = typeof input.selector === "string" ? [input.selector] : input.selector;
 			flightClient.updateComponent("flightClient", {
 				training:
 					input.text === null
@@ -308,20 +342,18 @@ export const client = t.router({
 			pubsub.publish.client.get({ clientId: input.clientId });
 			return { clientId: input.clientId, name: input.name };
 		}),
-	logout: t.procedure
-		.input(z.object({ clientId: z.string() }))
-		.send(({ ctx, input }) => {
-			const flightClient = ctx.getFlightClient(input.clientId);
-			if (flightClient) {
-				flightClient.updateComponent("flightClient", {
-					loginName: "",
-				});
+	logout: t.procedure.input(z.object({ clientId: z.string() })).send(({ ctx, input }) => {
+		const flightClient = ctx.getFlightClient(input.clientId);
+		if (flightClient) {
+			flightClient.updateComponent("flightClient", {
+				loginName: "",
+			});
 
-				pubsub.publish.client.all();
-				pubsub.publish.client.get({ clientId: input.clientId });
-			}
-			return null;
-		}),
+			pubsub.publish.client.all();
+			pubsub.publish.client.get({ clientId: input.clientId });
+		}
+		return null;
+	}),
 	testStation: t.procedure
 		.input(z.object({ clientId: z.string(), component: z.string().nullable() }))
 		.send(({ ctx, input }) => {

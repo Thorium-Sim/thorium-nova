@@ -1,11 +1,12 @@
 import type * as React from "react";
+import { useEffect, useRef } from "react";
+
+import type { BorderNode } from "../model/BorderNode";
 import type { TabNode } from "../model/TabNode";
+import type { TabSetNode } from "../model/TabSetNode";
 import { CLASSES } from "../Types";
 import type { LayoutInternal } from "./Layout";
 import { TabButtonStamp } from "./TabButtonStamp";
-import type { TabSetNode } from "../model/TabSetNode";
-import type { BorderNode } from "../model/BorderNode";
-import { useEffect, useRef } from "react";
 
 /** @internal */
 export function showPopup(
@@ -19,8 +20,7 @@ export function showPopup(
 	const classNameMapper = layout.getClassName;
 	const currentDocument = triggerElement.ownerDocument;
 	const triggerRect = triggerElement.getBoundingClientRect();
-	const layoutRect =
-		layoutDiv?.getBoundingClientRect() ?? new DOMRect(0, 0, 100, 100);
+	const layoutRect = layoutDiv?.getBoundingClientRect() ?? new DOMRect(0, 0, 100, 100);
 
 	const elm = currentDocument.createElement("div");
 	elm.className = classNameMapper(CLASSES.FLEXLAYOUT__POPUP_MENU_CONTAINER);
@@ -90,8 +90,7 @@ interface IPopupMenuProps {
 
 /** @internal */
 const PopupMenu = (props: IPopupMenuProps) => {
-	const { parentNode, items, onHide, onSelect, classNameMapper, layout } =
-		props;
+	const { parentNode, items, onHide, onSelect, classNameMapper, layout } = props;
 	const divRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -131,9 +130,7 @@ const PopupMenu = (props: IPopupMenuProps) => {
 	const itemElements = items.map((item, i) => {
 		let classes = classNameMapper(CLASSES.FLEXLAYOUT__POPUP_MENU_ITEM);
 		if (parentNode.getSelected() === item.index) {
-			classes += ` ${classNameMapper(
-				CLASSES.FLEXLAYOUT__POPUP_MENU_ITEM__SELECTED,
-			)}`;
+			classes += ` ${classNameMapper(CLASSES.FLEXLAYOUT__POPUP_MENU_ITEM__SELECTED)}`;
 		}
 		return (
 			<div

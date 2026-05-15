@@ -52,17 +52,9 @@ export class Rect {
 		const borderBottomWidth = Number.parseFloat(style.borderBottomWidth);
 
 		const contentWidth =
-			rect.width -
-			borderLeftWidth -
-			paddingLeft -
-			paddingRight -
-			borderRightWidth;
+			rect.width - borderLeftWidth - paddingLeft - paddingRight - borderRightWidth;
 		const contentHeight =
-			rect.height -
-			borderTopWidth -
-			paddingTop -
-			paddingBottom -
-			borderBottomWidth;
+			rect.height - borderTopWidth - paddingTop - paddingBottom - borderBottomWidth;
 
 		return new Rect(
 			rect.left + borderLeftWidth + paddingLeft,
@@ -131,23 +123,13 @@ export class Rect {
 	}
 
 	contains(x: number, y: number) {
-		if (
-			this.x <= x &&
-			x <= this.getRight() &&
-			this.y <= y &&
-			y <= this.getBottom()
-		) {
+		if (this.x <= x && x <= this.getRight() && this.y <= y && y <= this.getBottom()) {
 			return true;
 		}
 		return false;
 	}
 
-	removeInsets(insets: {
-		top: number;
-		left: number;
-		bottom: number;
-		right: number;
-	}) {
+	removeInsets(insets: { top: number; left: number; bottom: number; right: number }) {
 		return new Rect(
 			this.x + insets.left,
 			this.y + insets.top,

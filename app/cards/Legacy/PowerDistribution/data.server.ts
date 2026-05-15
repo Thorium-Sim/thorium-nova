@@ -1,17 +1,11 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
-import {
-	getShipSystem,
-	getShipSystems,
-} from "@thorium/utils/.server/ship/getShipSystem";
-import {
-	shipPubsubFilter,
-	systemPubsubFilter,
-} from "@thorium/utils/.server/shipPubsubFilter";
+import { getShipSystem, getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
+import { shipPubsubFilter, systemPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import type { Entity } from "@thorium/utils/ecs";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { capitalCase } from "change-case";
-import { z } from "zod";
+import z from "zod";
 
 export const powerDistribution = t.router({
 	systems: t.procedure
@@ -35,14 +29,9 @@ export const powerDistribution = t.router({
 				currentPower: number;
 				offline: boolean;
 			}[] = [];
-			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() ||
-				[]) {
+			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() || []) {
 				const system = ctx.ecs.getEntityById(systemId);
-				if (
-					(!system?.components.power && !input.all) ||
-					!system?.components.isShipSystem
-				)
-					continue;
+				if ((!system?.components.power && !input.all) || !system?.components.isShipSystem) continue;
 				systems.push({
 					id: system.id,
 					name:
@@ -99,14 +88,9 @@ export const powerDistribution = t.router({
 		.send(({ ctx, input }) => {
 			function fluxPower(sys: Entity) {
 				if (sys.components.power) {
-					const level =
-						Math.round(1 + ctx.ecs.rng.next() + 0.5) *
-						Math.sign(ctx.ecs.rng.next());
+					const level = Math.round(1 + ctx.ecs.rng.next() + 0.5) * Math.sign(ctx.ecs.rng.next());
 					sys.updateComponent("power", {
-						currentPower: Math.max(
-							0,
-							Math.min(40, sys.components.power.currentPower + level),
-						),
+						currentPower: Math.max(0, Math.min(40, sys.components.power.currentPower + level)),
 					});
 					pubsub.publish.legacy.powerDistribution.systemPower({
 						systemId: sys.id,
@@ -128,8 +112,7 @@ export const powerDistribution = t.router({
 
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			const shipSystems: Entity[] = [];
-			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() ||
-				[]) {
+			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() || []) {
 				const system = ctx.ecs.getEntityById(systemId);
 				if (system?.components.power) {
 					shipSystems.push(system);

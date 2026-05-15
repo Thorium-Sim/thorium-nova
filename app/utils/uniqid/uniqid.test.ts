@@ -1,5 +1,6 @@
-import uniqid from "./index";
 import { describe, expect, it } from "vitest";
+
+import uniqid from "./index";
 
 describe("uniqid", () => {
 	it("should return a string", () => {

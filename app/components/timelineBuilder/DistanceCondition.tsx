@@ -17,18 +17,9 @@ export function DistanceCondition({
 }: BlockProps<"DistanceCondition">) {
 	return (
 		<>
-			<div className="flex gap-1 items-center">
-				Wait until{" "}
-				<EntityInput
-					value={entity1}
-					onChange={(value) => update("entity1", value)}
-				/>{" "}
-				and{" "}
-				<EntityInput
-					value={entity2}
-					onChange={(value) => update("entity2", value)}
-				/>{" "}
-				are{" "}
+			<div className="flex items-center gap-1">
+				Wait until <EntityInput value={entity1} onChange={(value) => update("entity1", value)} />{" "}
+				and <EntityInput value={entity2} onChange={(value) => update("entity2", value)} /> are{" "}
 				<MadLibSelect
 					value={comparison}
 					onChange={(value) => update("comparison", value as any)}
@@ -49,10 +40,9 @@ export function DistanceCondition({
 						<>
 							Persist{" "}
 							<InfoTip>
-								Whether this trigger condition will continue to exist after the
-								timeline step has proceeded. Set this to true if you want the
-								trigger remain active. It will still automatically deactivate
-								once it has been triggered once.
+								Whether this trigger condition will continue to exist after the timeline step has
+								proceeded. Set this to true if you want the trigger remain active. It will still
+								automatically deactivate once it has been triggered once.
 							</InfoTip>
 						</>
 					}

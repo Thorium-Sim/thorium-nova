@@ -1,24 +1,23 @@
-import { test as base, type BrowserContext, type Page } from "@playwright/test";
+import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
+import { cp, mkdir, rm } from "node:fs/promises";
+import path from "node:path";
 
+import { test as base } from "@playwright/test";
 import type { AppRouter } from "@thorium/.server/init/router";
 import { createLiveQueryReact } from "@thorium/utils/live-query/client";
 import getPort from "get-port";
-import { cp, mkdir, rm } from "node:fs/promises";
-import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import path from "node:path";
 export const test = base.extend<
 	{
-		// biome-ignore lint/suspicious/noConfusingVoidType: Override
 		forEachTest: void;
 		loadCard: (cardName: string) => Promise<void>;
 	},
 	{
 		serverURL: string;
-		q: ReturnType<typeof createLiveQueryReact<AppRouter>>;
+		q: ReturnType<typeof createLiveQueryReact<AppRouter>>[0];
 	}
 >({
 	serverURL: [
-		async ({ headless }, use) => {
+		async (_, use) => {
 			let port = 3000;
 			try {
 				const abortController = new AbortController();
@@ -27,11 +26,7 @@ export const test = base.extend<
 					port = await getPort();
 
 					const targetArch =
-						process.arch === "arm64"
-							? "aarch64"
-							: process.arch === "x64"
-								? "x86_64"
-								: "unknown";
+						process.arch === "arm64" ? "aarch64" : process.arch === "x64" ? "x86_64" : "unknown";
 					const targetPlatform =
 						process.platform === "darwin"
 							? "apple-darwin"
@@ -102,20 +97,19 @@ export const test = base.extend<
 	],
 	q: [
 		async ({ serverURL }, use) => {
-			const q = createLiveQueryReact<AppRouter>({
+			const [q] = createLiveQueryReact<AppRouter>({
 				baseUrl: serverURL,
 				headers: async () => ({
 					"client-id": "test",
 				}),
 			});
-
 			await use(q);
 		},
 		{ scope: "worker" },
 	],
 	baseURL: [
 		async ({ serverURL }, use) => {
-			use(serverURL);
+			await use(serverURL);
 		},
 		{ scope: "test" },
 	],

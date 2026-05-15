@@ -1,10 +1,5 @@
-import type {
-	HeatCapacity,
-	Kelvin,
-	Kilograms,
-	MegaWatt,
-} from "@thorium/utils/unitTypes";
 import { type Entity, System } from "@thorium/utils/ecs";
+import type { HeatCapacity, Kelvin, Kilograms, MegaWatt } from "@thorium/utils/unitTypes";
 
 // W = Q / 𝚫t = (c * m * 𝚫T)/𝚫t
 // W = watts
@@ -38,8 +33,7 @@ export class ReactorHeatSystem extends System {
 
 		const heatInWatts = heatGenerated * 1e6;
 
-		const changeInHeat: Kelvin =
-			(heatInWatts * elapsedInSeconds) / (HEAT_CAPACITY * MASS * 1000);
+		const changeInHeat: Kelvin = (heatInWatts * elapsedInSeconds) / (HEAT_CAPACITY * MASS * 1000);
 
 		entity.components.heat.heat += changeInHeat;
 	}

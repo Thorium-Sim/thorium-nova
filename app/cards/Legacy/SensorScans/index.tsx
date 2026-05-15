@@ -1,10 +1,10 @@
-import Button from "@thorium/ui/Button";
-import { useRef, useState } from "react";
-import { cn } from "@thorium/utils/cn";
 import { SensorScans } from "@thorium/cards/Legacy/SensorScans/SensorScans";
-import { useStation } from "@thorium/routes/station/useStation";
 import { q } from "@thorium/context/AppContext";
+import { useStation } from "@thorium/routes/station/useStation";
+import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
+import { cn } from "@thorium/utils/cn";
+import { useRef, useState } from "react";
 
 export function LegacySensorScans() {
 	const [scanType, setScanType] = useState("Standard");
@@ -14,19 +14,16 @@ export function LegacySensorScans() {
 	const [selectedScan, setSelectedScan] = useState<number | null>(null);
 	const focusRef = useRef<{ newScan: () => void }>(null);
 	return (
-		<div className="grid grid-cols-7 gap-8 h-full">
+		<div className="grid h-full grid-cols-7 gap-8">
 			{sensors.scanHistory ? (
-				<div className="col-span-2 flex flex-col h-full min-h-0 gap-2">
-					<ul className="panel panel-alert list-group overflow-y-auto flex-1 gap-2">
+				<div className="col-span-2 flex h-full min-h-0 flex-col gap-2">
+					<ul className="panel panel-alert list-group flex-1 gap-2 overflow-y-auto">
 						{scans.map((scan) => (
 							<li
 								key={scan.id}
-								className={cn(
-									"list-group-item flex justify-between break-all gap-2",
-									{
-										selected: selectedScan === scan.id,
-									},
-								)}
+								className={cn("list-group-item flex justify-between break-all gap-2", {
+									selected: selectedScan === scan.id,
+								})}
 								onClick={() => setSelectedScan(scan.id)}
 							>
 								{scan.request}
@@ -62,7 +59,7 @@ export function LegacySensorScans() {
 					focusRef={focusRef}
 				/>
 			</div>
-			<div className="space-y-2 col-span-2">
+			<div className="col-span-2 space-y-2">
 				<p className="-mb-2">Scan Type</p>
 				<Button
 					className={cn("btn-primary w-full", {

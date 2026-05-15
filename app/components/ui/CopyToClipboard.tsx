@@ -9,10 +9,7 @@ export const CopyToClipboard: React.FC<
 > = ({ text, children, copyContents = <span>Copied! 👍</span>, ...props }) => {
 	const [contents, setContents] = React.useState(children);
 	const timeoutRef = React.useRef<any>(undefined);
-	const copyToClipboard = async (
-		event: React.MouseEvent<HTMLButtonElement>,
-		str: string,
-	) => {
+	const copyToClipboard = async (event: React.MouseEvent<HTMLButtonElement>, str: string) => {
 		if ("clipboard" in navigator) {
 			await navigator.clipboard.writeText(str);
 		} else {

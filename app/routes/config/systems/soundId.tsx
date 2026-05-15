@@ -1,45 +1,26 @@
-import { q } from "@thorium/context/AppContext";
-import Input from "@thorium/ui/Input";
-import { type ReactNode, useContext, useId, useReducer, useState } from "react";
-import { Link, useParams } from "react-router";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
-import { OverrideResetButton } from "./OverrideResetButton";
 import { Navigate } from "@thorium/components/Navigate";
-import Button from "@thorium/ui/Button";
+import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import type { Sound } from "@thorium/ecs-components/sound";
-import { produce, type WritableDraft } from "immer";
-import { cn } from "@thorium/utils/cn";
-import { RangeInput } from "@thorium/ui/RangeInput";
-import InfoTip from "@thorium/ui/InfoTip";
+import Button from "@thorium/ui/Button";
 import Checkbox from "@thorium/ui/Checkbox";
-import { Icon } from "@thorium/ui/Icon";
-import {
-	playSound,
-	removeAllSounds,
-	stopLooping,
-} from "@thorium/utils/sounds/playSound";
-import {
-	MenuTrigger,
-	Button as RAButton,
-	Popover,
-	Menu,
-	SubmenuTrigger,
-} from "react-aria-components";
-import {
-	popoverClass,
-	StyledMenuItem,
-} from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { FilesMenu } from "@thorium/ui/FilesMenu";
+import { Icon } from "@thorium/ui/Icon";
+import InfoTip from "@thorium/ui/InfoTip";
+import Input from "@thorium/ui/Input";
+import { RangeInput } from "@thorium/ui/RangeInput";
+import { cn } from "@thorium/utils/cn";
+import { playSound, removeAllSounds, stopLooping } from "@thorium/utils/sounds/playSound";
+import { produce, type WritableDraft } from "immer";
+import { type ReactNode, useContext, useId, useState } from "react";
+import { useParams } from "react-router";
 export default function Sounds() {
-	const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
-
 	const { pluginId, systemId, shipId, sound } = useParams() as {
 		pluginId: string;
 		systemId: string;
 		shipId: string;
 		sound: string;
 	};
-	const key = `${systemId}${rekey}`;
 	const shipPluginId = useContext(ShipPluginIdContext);
 
 	const [system] = q.plugin.systems.get.useNetRequest({
@@ -54,7 +35,7 @@ export default function Sounds() {
 	if (!system || !Array.isArray(soundEffects[sound]))
 		return <Navigate to={`/config/${pluginId}/systems/${systemId}`} />;
 	return (
-		<div className="flex flex-col gap-2 mb-2 w-72">
+		<div className="mb-2 flex w-72 flex-col gap-2">
 			<div className="flex-1 overflow-y-auto">
 				{soundEffects[sound].length === 0 ? (
 					<div>No sound effects</div>
@@ -105,7 +86,12 @@ function SoundConfig({
 	index,
 	soundCount,
 	ambiance,
-}: { sound: Sound; index: number; soundCount: number; ambiance?: boolean }) {
+}: {
+	sound: Sound;
+	index: number;
+	soundCount: number;
+	ambiance?: boolean;
+}) {
 	const {
 		pluginId,
 		systemId,
@@ -130,9 +116,7 @@ function SoundConfig({
 
 	const soundEffects = system.soundEffects as Record<string, Sound[]>;
 
-	async function updateSound(
-		updater: (draft: WritableDraft<Record<string, Sound[]>>) => void,
-	) {
+	async function updateSound(updater: (draft: WritableDraft<Record<string, Sound[]>>) => void) {
 		await q.plugin.systems.update.netSend({
 			pluginId,
 			systemId,
@@ -144,15 +128,8 @@ function SoundConfig({
 	return (
 		<div className="list-group-item relative">
 			{soundCount > 1 ? (
-				<Button
-					className="absolute right-0 top-0 btn-xs"
-					onClick={() => setIsOpen((o) => !o)}
-				>
-					{isOpen ? (
-						<Icon name="chevron-down" />
-					) : (
-						<Icon name="chevron-right" />
-					)}
+				<Button className="btn-xs absolute top-0 right-0" onClick={() => setIsOpen((o) => !o)}>
+					{isOpen ? <Icon name="chevron-down" /> : <Icon name="chevron-right" />}
 				</Button>
 			) : null}
 			<SoundConfigForm
@@ -209,9 +186,7 @@ export function SoundConfigForm({
 							const id = Math.random();
 							setPlaying(id);
 							//@ts-expect-error
-							playSound({ id, ...sound, type: "soundEffect" }, () =>
-								setPlaying(null),
-							);
+							playSound({ id, ...sound, type: "soundEffect" }, () => setPlaying(null));
 						}}
 					>
 						<Icon name="volume-2" />
@@ -247,14 +222,13 @@ export function SoundConfigForm({
 								Volume Range{" "}
 								{ambiance ? (
 									<InfoTip>
-										Ambiance volume is chosen based on the properties of the
-										system playing the ambiance. Eg. Reactors using more power
-										use the higher end of the range.
+										Ambiance volume is chosen based on the properties of the system playing the
+										ambiance. Eg. Reactors using more power use the higher end of the range.
 									</InfoTip>
 								) : (
 									<InfoTip>
-										Each time the sound is played it will randomly pick a value
-										from within the range.
+										Each time the sound is played it will randomly pick a value from within the
+										range.
 									</InfoTip>
 								)}
 							</>
@@ -262,7 +236,7 @@ export function SoundConfigForm({
 						defaultValue={sound.volume}
 						placeholder={["1", "1"]}
 						onBlur={(values) =>
-							updateSound("volume", [...values].sort() as [number, number])
+							updateSound("volume", [...values].sort((a, b) => a - b) as [number, number])
 						}
 					/>
 					<RangeInput
@@ -271,8 +245,8 @@ export function SoundConfigForm({
 								Playback Rate Range{" "}
 								{ambiance ? (
 									<InfoTip>
-										Ambiance playback rate is chosen based on the properties of
-										the system playing the ambiance.
+										Ambiance playback rate is chosen based on the properties of the system playing
+										the ambiance.
 									</InfoTip>
 								) : null}
 							</>
@@ -280,10 +254,7 @@ export function SoundConfigForm({
 						defaultValue={sound.playbackRate}
 						placeholder={["1", "1"]}
 						onBlur={(values) =>
-							updateSound(
-								"playbackRate",
-								[...values].sort() as [number, number],
-							)
+							updateSound("playbackRate", [...values].sort((a, b) => a - b) as [number, number])
 						}
 					/>
 					{!ambiance ? (
@@ -309,8 +280,7 @@ export function SoundConfigForm({
 									onChange={() => setLoopStartError(false)}
 									onBlur={(e) => {
 										if (
-											(e.target.value !== "" &&
-												Number.isNaN(Number.parseFloat(e.target.value))) ||
+											(e.target.value !== "" && Number.isNaN(Number.parseFloat(e.target.value))) ||
 											Number.parseFloat(e.target.value) < 0 ||
 											Number.parseFloat(e.target.value) > 1
 										)
@@ -318,18 +288,15 @@ export function SoundConfigForm({
 
 										updateSound(
 											"loopStart",
-											e.target.value === ""
-												? null
-												: Number.parseFloat(e.target.value),
+											e.target.value === "" ? null : Number.parseFloat(e.target.value),
 										);
 									}}
 									label={
 										<>
 											Loop Start{" "}
 											<InfoTip>
-												What point the sound should return to when it loops as a
-												percentage of the duration, eg. 0.5 is halfway through
-												the sound.
+												What point the sound should return to when it loops as a percentage of the
+												duration, eg. 0.5 is halfway through the sound.
 											</InfoTip>
 										</>
 									}
@@ -344,8 +311,7 @@ export function SoundConfigForm({
 									onChange={() => setLoopEndError(false)}
 									onBlur={(e) => {
 										if (
-											(e.target.value !== "" &&
-												Number.isNaN(Number.parseFloat(e.target.value))) ||
+											(e.target.value !== "" && Number.isNaN(Number.parseFloat(e.target.value))) ||
 											Number.parseFloat(e.target.value) < 0 ||
 											Number.parseFloat(e.target.value) > 1
 										)
@@ -353,17 +319,15 @@ export function SoundConfigForm({
 
 										updateSound(
 											"loopEnd",
-											e.target.value === ""
-												? null
-												: Number.parseFloat(e.target.value),
+											e.target.value === "" ? null : Number.parseFloat(e.target.value),
 										);
 									}}
 									label={
 										<>
 											Loop End{" "}
 											<InfoTip>
-												What point the sound should loop at as a percentage of
-												the duration, eg. 0.5 is halfway through the sound.
+												What point the sound should loop at as a percentage of the duration, eg. 0.5
+												is halfway through the sound.
 											</InfoTip>
 										</>
 									}
@@ -378,25 +342,20 @@ export function SoundConfigForm({
 								onChange={() => setLoopGapError(false)}
 								onBlur={(e) => {
 									if (
-										(e.target.value !== "" &&
-											Number.isNaN(Number.parseFloat(e.target.value))) ||
+										(e.target.value !== "" && Number.isNaN(Number.parseFloat(e.target.value))) ||
 										Number.parseFloat(e.target.value) < 0
 									)
 										return setLoopGapError(true);
 
 									updateSound(
 										"loopGap",
-										e.target.value === ""
-											? 0
-											: Number.parseFloat(e.target.value),
+										e.target.value === "" ? 0 : Number.parseFloat(e.target.value),
 									);
 								}}
 								label={
 									<>
 										Loop Gap{" "}
-										<InfoTip>
-											How long to wait between loops of the sound in seconds.
-										</InfoTip>
+										<InfoTip>How long to wait between loops of the sound in seconds.</InfoTip>
 									</>
 								}
 							/>
@@ -412,23 +371,16 @@ export function SoundConfigForm({
 							onChange={() => setDelayError(false)}
 							onBlur={(e) => {
 								if (
-									(e.target.value !== "" &&
-										Number.isNaN(Number.parseFloat(e.target.value))) ||
+									(e.target.value !== "" && Number.isNaN(Number.parseFloat(e.target.value))) ||
 									Number.parseFloat(e.target.value) < 0
 								)
 									return setDelayError(true);
 
-								updateSound(
-									"delay",
-									e.target.value === "" ? 0 : Number.parseFloat(e.target.value),
-								);
+								updateSound("delay", e.target.value === "" ? 0 : Number.parseFloat(e.target.value));
 							}}
 							label={
 								<>
-									Delay{" "}
-									<InfoTip>
-										How long to wait before playing the sound in seconds.
-									</InfoTip>
+									Delay <InfoTip>How long to wait before playing the sound in seconds.</InfoTip>
 								</>
 							}
 						/>
@@ -444,42 +396,31 @@ export function SoundConfigForm({
 							if (e.target.value.trim() === "") {
 								return updateSound("channel", null);
 							}
-							const channels = e.target.value
-								.trim()
-								.replace(" ", "")
-								.split(",")
-								.map(Number);
+							const channels = e.target.value.trim().replace(" ", "").split(",").map(Number);
 							if (channels.some(Number.isNaN)) return setChannelError(true);
-							if (channels.some((channel) => channel < 0))
-								return setChannelError(true);
+							if (channels.some((channel) => channel < 0)) return setChannelError(true);
 							updateSound("channel", channels);
 						}}
 						label={
 							<>
 								Channels (Advanced)
 								<InfoTip>
-									Which audio channels the sound should play on, numerical and
-									separated by commas. Leave blank to leave the sound's channels
-									unchanged. If set, the sound is downmixed to the number of
-									channels. <br />
+									Which audio channels the sound should play on, numerical and separated by commas.
+									Leave blank to leave the sound's channels unchanged. If set, the sound is
+									downmixed to the number of channels. <br />
 									<br />
-									If the sound is stereo and just one channel is set, the
-									channels are mixed to mono. If the sound is mono and two
-									channels are set, the sound is copied to both channels. If the
-									number of channels specified is the same as the channels in
-									the sound, the channels of the sound are copied to the
-									specified channels. Otherwise the sound is mixed to mono and
-									copied to the specified channels.
+									If the sound is stereo and just one channel is set, the channels are mixed to
+									mono. If the sound is mono and two channels are set, the sound is copied to both
+									channels. If the number of channels specified is the same as the channels in the
+									sound, the channels of the sound are copied to the specified channels. Otherwise
+									the sound is mixed to mono and copied to the specified channels.
 								</InfoTip>
 							</>
 						}
 					/>
 					{removeSound ? (
 						<div className="px-2 pb-2">
-							<Button
-								className="btn-error btn-sm w-full "
-								onClick={removeSound}
-							>
+							<Button className="btn-error btn-sm w-full" onClick={removeSound}>
 								Remove Sound
 							</Button>
 						</div>
@@ -493,7 +434,7 @@ export function SoundConfigForm({
 function UploadButton({
 	disabled,
 	accept,
-	onChange = (files) => {},
+	onChange = () => {},
 	children,
 	className,
 }: {

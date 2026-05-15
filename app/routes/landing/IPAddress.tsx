@@ -13,11 +13,8 @@ export function IPAddress() {
 	const connectionAddress = useConnectionAddress();
 
 	return connectionAddress ? (
-		<h3 className="text-xl font-semi-bold mt-2">
-			Connect:{" "}
-			<CopyToClipboard text={connectionAddress}>
-				{connectionAddress}
-			</CopyToClipboard>
+		<h3 className="font-semi-bold mt-2 text-xl">
+			Connect: <CopyToClipboard text={connectionAddress}>{connectionAddress}</CopyToClipboard>
 		</h3>
 	) : null;
 }

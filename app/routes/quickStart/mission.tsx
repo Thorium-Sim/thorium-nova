@@ -1,8 +1,8 @@
 import { q } from "@thorium/context/AppContext";
-import SearchableList from "@thorium/ui/SearchableList";
-import * as React from "react";
-import { cn } from "@thorium/utils/cn";
 import { useFlightQuickStart } from "@thorium/routes/quickStart/quickStartContext";
+import SearchableList from "@thorium/ui/SearchableList";
+import { cn } from "@thorium/utils/cn";
+import * as React from "react";
 
 const ShipConfig = () => {
 	const [state, dispatch] = useFlightQuickStart();
@@ -30,14 +30,12 @@ const ShipConfig = () => {
 
 	const allowedMissions = missions.filter(
 		({ flightMode, pluginId, name }) =>
-			flightMode === state.mode ||
-			(pluginId === "Thorium Default" && name === "Sandbox"),
+			flightMode === state.mode || (pluginId === "Thorium Default" && name === "Sandbox"),
 	);
 
 	const mission = allowedMissions.find(
 		(mission) =>
-			mission.pluginId === state.missionId?.pluginId &&
-			mission.name === state.missionId.missionId,
+			mission.pluginId === state.missionId?.pluginId && mission.name === state.missionId.missionId,
 	);
 
 	const isSandbox =
@@ -46,13 +44,11 @@ const ShipConfig = () => {
 		state.mode !== "legacy";
 
 	return (
-		<div className="h-[70vh] grid grid-cols-3 grid-rows-[auto_1fr] w-[60vw] gap-8">
+		<div className="grid h-[70vh] w-[60vw] grid-cols-3 grid-rows-[auto_1fr] gap-8">
 			<div className="row-span-2">
 				<SearchableList
 					selectedItem={state.missionId}
-					setSelectedItem={({ id }) =>
-						dispatch({ type: "missionId", missionId: id })
-					}
+					setSelectedItem={({ id }) => dispatch({ type: "missionId", missionId: id })}
 					items={allowedMissions.map((item) => ({
 						id: { pluginId: item.pluginId, missionId: item.name },
 						label: item.name,
@@ -68,23 +64,18 @@ const ShipConfig = () => {
 				className={cn("shadow-xl rounded-lg", { "col-span-2": !isSandbox })}
 			/>
 			<p
-				className={cn(
-					"text-xl flex-1 overflow-y-auto row-start-2 col-start-2",
-					{
-						"col-span-2": !isSandbox,
-					},
-				)}
+				className={cn("text-xl flex-1 overflow-y-auto row-start-2 col-start-2", {
+					"col-span-2": !isSandbox,
+				})}
 			>
 				{mission?.description}
 			</p>
 			{isSandbox ? (
 				<div className="col-start-3 row-span-2">
-					<p className="font-bold text-lg">Starting Point</p>
+					<p className="text-lg font-bold">Starting Point</p>
 					<SearchableList
 						selectedItem={state.startingPointId}
-						setSelectedItem={({ id }) =>
-							dispatch({ type: "startingPointId", startingPointId: id })
-						}
+						setSelectedItem={({ id }) => dispatch({ type: "startingPointId", startingPointId: id })}
 						items={startingPoints.map((item) => ({
 							id: item,
 							label: item.objectId,

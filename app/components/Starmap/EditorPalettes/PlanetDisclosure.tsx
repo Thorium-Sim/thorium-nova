@@ -1,10 +1,11 @@
-import * as React from "react";
-import Input from "@thorium/ui/Input";
-import Checkbox from "@thorium/ui/Checkbox";
 import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
-import { PaletteDisclosure } from "../SolarSystemMap";
-import { useSystemIds } from "../useSystemIds";
 import { q } from "@thorium/context/AppContext";
+import Checkbox from "@thorium/ui/Checkbox";
+import Input from "@thorium/ui/Input";
+import * as React from "react";
+
+import { useSystemIds } from "../useSystemIds";
+import { PaletteDisclosure } from "./PaletteDisclosure";
 
 export function PlanetDisclosure({ object }: { object: PlanetPlugin }) {
 	const [pluginId, solarSystemId] = useSystemIds();

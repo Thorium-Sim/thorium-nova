@@ -2,14 +2,15 @@
  * Entity Component System module
  */
 
-import type Entity from "./entity";
-import type System from "./system";
-import performance from "./performance";
-import { type RNG, createRNG } from "@thorium/utils/rng";
 import type { ColliderDesc, World } from "@thorium-sim/rapier3d-node";
-import type { ComponentIds } from "@thorium/ecs-components";
-import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import RAPIER from "@thorium-sim/rapier3d-node";
+import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
+import type { ComponentIds } from "@thorium/ecs-components";
+import { type RNG, createRNG } from "@thorium/utils/rng";
+
+import type Entity from "./entity";
+import performance from "./performance";
+import type System from "./system";
 
 class ECS {
 	/**
@@ -28,7 +29,7 @@ class ECS {
 	 * Count how many updates have been done.
 	 */
 	updateCounter = 0;
-	lastUpdate = performance.now();
+	lastUpdate = this.now();
 	rng: RNG;
 	maxEntityId = 1;
 	componentCache = new Map<ComponentIds, Set<Entity>>();
@@ -75,9 +76,7 @@ class ECS {
 		}
 
 		Object.keys(entity.components).forEach((componentName) => {
-			const componentCache = this.componentCache.get(
-				componentName as ComponentIds,
-			);
+			const componentCache = this.componentCache.get(componentName as ComponentIds);
 			if (!componentCache) return;
 			componentCache.forEach((e) => {
 				if (e.id === entity.id) {
@@ -153,13 +152,20 @@ class ECS {
 
 		this.entitiesSystemsDirty.clear();
 	}
+	now() {
+		if (typeof Bun === "undefined") {
+			return performance.now();
+		}
+		// Convert nanoseconds to milliseconds
+		return Bun.nanoseconds() / 1_000_000;
+	}
 	/**
 	 * Update the ecs.
 	 *
 	 * @method update
 	 */
 	update(testElapsed?: number) {
-		const now = performance.now();
+		const now = this.now();
 		const elapsed = testElapsed ?? now - this.lastUpdate;
 		if (this.entitiesSystemsDirty.size > 0) {
 			this.cleanDirtyEntities();

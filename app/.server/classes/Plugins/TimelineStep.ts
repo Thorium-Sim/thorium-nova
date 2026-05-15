@@ -11,7 +11,7 @@ export type ValueQuery = {
 };
 export type ComponentQuery = {
 	component: keyof typeof components | "";
-	property: string | "";
+	property: string;
 	comparison: string | null;
 	value: string | ValueQuery;
 };
@@ -20,7 +20,7 @@ export interface TimelineAction {
 	id: string;
 	name: string;
 	action: string;
-	values: Record<string, (any & {}) | ValueQuery>;
+	values: Record<string, any>;
 }
 export interface TimelineStep {
 	id: string;

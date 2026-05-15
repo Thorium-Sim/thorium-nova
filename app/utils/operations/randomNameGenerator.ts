@@ -621,31 +621,9 @@ const sometimesASuccessor = [
 	" II",
 	" III",
 ];
-const maleTitles = [
-	"Lord",
-	"Prince",
-	"King",
-	"Emperor",
-	"Duke",
-	"Baron",
-	"Master",
-];
-const femaleTitles = [
-	"Lady",
-	"Princess",
-	"Queen",
-	"Empress",
-	"Duchess",
-	"Mistress",
-];
-const genderNeutralTitles = [
-	"Saint",
-	"Captain",
-	"Champion",
-	"Admiral",
-	"Sovereign",
-	"Commodore",
-];
+const maleTitles = ["Lord", "Prince", "King", "Emperor", "Duke", "Baron", "Master"];
+const femaleTitles = ["Lady", "Princess", "Queen", "Empress", "Duchess", "Mistress"];
+const genderNeutralTitles = ["Saint", "Captain", "Champion", "Admiral", "Sovereign", "Commodore"];
 function allTitles() {
 	return maleTitles.concat(femaleTitles).concat(genderNeutralTitles);
 }

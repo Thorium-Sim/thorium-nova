@@ -1,6 +1,6 @@
-import { z } from "zod";
+import z from "zod";
 
-/** 
+/**
  Sensor contacts also include
  - identity
  - rotation
@@ -15,16 +15,12 @@ export const isSensorContact = z
 		shipId: z.number().default(-1),
 		/** The sensors system the contact is associated with */
 		sensorsId: z.number().default(-1),
-		type: z
-			.enum(["contact", "planet", "border", "ping", "projectile"])
-			.default("contact"),
+		type: z.enum(["contact", "planet", "border", "ping", "projectile"]).default("contact"),
 		icon: z.string().default(""),
 		picture: z.string().nullable().default(null),
 		speed: z.number().default(0),
 		/** Where the contact is moving towards */
-		destination: z
-			.object({ x: z.number(), y: z.number() })
-			.default({ x: 0, y: 0 }),
+		destination: z.object({ x: z.number(), y: z.number() }).default({ x: 0, y: 0 }),
 		/** Whether the contact should appear on infrared sensors */
 		infrared: z.boolean().default(false),
 		/** The contact remains on core but does not appear on the crew's sensors */

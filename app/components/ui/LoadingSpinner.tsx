@@ -1,4 +1,5 @@
 import { useEffect, useReducer } from "react";
+
 import { Icon } from "./Icon";
 
 export const LoadingSpinner = ({ compact = false }) => {
@@ -9,11 +10,7 @@ export const LoadingSpinner = ({ compact = false }) => {
 	}, []);
 	if (!show) return null;
 	return (
-		<div
-			className={`p-4 ${
-				compact ? "" : "h-screen"
-			} w-full flex justify-center items-center`}
-		>
+		<div className={`p-4 ${compact ? "" : "h-screen"} flex w-full items-center justify-center`}>
 			<Icon name="loader" className="animate-spin text-4xl text-white" />
 		</div>
 	);

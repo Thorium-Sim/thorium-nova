@@ -4,12 +4,12 @@ import { Outlet } from "react-router";
 export default function ConfigRoutes() {
 	return (
 		<>
-			<div className="z-10 relative h-full">
+			<div className="relative z-10 h-full">
 				<Menubar>
 					<Outlet />
 				</Menubar>
 			</div>
-			<div className="w-full h-full bg-black/60 fixed backdrop-filter backdrop-blur top-0 z-0" />
+			<div className="fixed top-0 z-0 h-full w-full bg-black/60 backdrop-blur backdrop-filter" />
 		</>
 	);
 }

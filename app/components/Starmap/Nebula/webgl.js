@@ -54,13 +54,7 @@ export function Framebuffer(gl, color, depth, ext) {
 			);
 		}
 		if (depth !== undefined) {
-			gl.framebufferTexture2D(
-				gl.FRAMEBUFFER,
-				gl.DEPTH_ATTACHMENT,
-				gl.TEXTURE_2D,
-				depth.texture,
-				0,
-			);
+			gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, depth.texture, 0);
 		}
 	};
 
@@ -88,14 +82,7 @@ export function Texture(gl, index, data, width, height, options) {
 		this.activate();
 		this.texture = gl.createTexture();
 		this.bind();
-		gl.texImage2D(
-			options.target,
-			0,
-			options.internalFormat,
-			options.format,
-			options.type,
-			data,
-		);
+		gl.texImage2D(options.target, 0, options.internalFormat, options.format, options.type, data);
 		gl.texParameteri(options.target, gl.TEXTURE_MAG_FILTER, options.mag);
 		gl.texParameteri(options.target, gl.TEXTURE_MIN_FILTER, options.min);
 		gl.texParameteri(options.target, gl.TEXTURE_WRAP_S, options.wraps);
@@ -176,13 +163,7 @@ export function Renderable(gl, program, buffers, primitiveCount) {
 }
 
 /*...........................................................................*/
-export function InstancedRenderable(
-	gl,
-	program,
-	buffers,
-	primitiveCount,
-	instancedExt,
-) {
+export function InstancedRenderable(gl, program, buffers, primitiveCount, instancedExt) {
 	this.initialize = () => {};
 
 	this.render = () => {
@@ -196,12 +177,7 @@ export function InstancedRenderable(
 			gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0);
 			instancedExt.vertexAttribDivisorANGLE(location, buffers[name].divisor);
 		}
-		instancedExt.drawArraysInstancedANGLE(
-			gl.TRIANGLES,
-			0,
-			6 * 2 * 3,
-			primitiveCount,
-		);
+		instancedExt.drawArraysInstancedANGLE(gl.TRIANGLES, 0, 6 * 2 * 3, primitiveCount);
 		for (const name in this.buffers) {
 			gl.disableVertexAttribArray(program.attributes[name].location);
 		}
@@ -223,10 +199,7 @@ export class Program {
 
 	compileProgram(vertexSource, fragmentSource) {
 		var vertexShader = this.compileShader(vertexSource, this.gl.VERTEX_SHADER);
-		var fragmentShader = this.compileShader(
-			fragmentSource,
-			this.gl.FRAGMENT_SHADER,
-		);
+		var fragmentShader = this.compileShader(fragmentSource, this.gl.FRAGMENT_SHADER);
 		var program = this.gl.createProgram();
 		this.gl.attachShader(program, vertexShader);
 		this.gl.attachShader(program, fragmentShader);
@@ -268,10 +241,7 @@ export class Program {
 
 	gatherUniforms() {
 		var uniforms = {};
-		var nUniforms = this.gl.getProgramParameter(
-			this.program,
-			this.gl.ACTIVE_UNIFORMS,
-		);
+		var nUniforms = this.gl.getProgramParameter(this.program, this.gl.ACTIVE_UNIFORMS);
 		for (var i = 0; i < nUniforms; i++) {
 			var uniform = this.gl.getActiveUniform(this.program, i);
 			uniforms[uniform.name] = {
@@ -286,10 +256,7 @@ export class Program {
 
 	gatherAttribs() {
 		var attribs = {};
-		var nAttribs = this.gl.getProgramParameter(
-			this.program,
-			this.gl.ACTIVE_ATTRIBUTES,
-		);
+		var nAttribs = this.gl.getProgramParameter(this.program, this.gl.ACTIVE_ATTRIBUTES);
 		for (var i = 0; i < nAttribs; i++) {
 			var attrib = this.gl.getActiveAttrib(this.program, i);
 			attribs[attrib.name] = {

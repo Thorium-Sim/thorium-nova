@@ -1,9 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import {
-	type InventoryFlags,
-	InventoryFlagValues,
-} from "../../utils/flags/InventoryFlags";
+
 import { Entity } from "../../../app/utils/ecs";
+import { type InventoryFlags, InventoryFlagValues } from "../../utils/flags/InventoryFlags";
 import { generateShipInventory } from "./inventory";
 let oldRandom: any;
 describe("Inventory Generator", () => {
@@ -116,7 +114,7 @@ describe("Inventory Generator", () => {
 					contents: room.components.cargoContainer?.contents || {},
 					flags: room.components.isRoom?.flags || [],
 					volume: room.components.cargoContainer?.volume || 1,
-					systems: [],
+					systems: ["torpedoLauncher", "reactor"],
 				};
 			}),
 			flightInventory,
@@ -358,7 +356,7 @@ describe("Inventory Generator", () => {
 					contents: room.components.cargoContainer?.contents || {},
 					flags: ["cargo"],
 					volume: room.components.cargoContainer?.volume || 1,
-					systems: [],
+					systems: ["torpedoLauncher", "reactor"],
 				};
 			}),
 			flightInventory,
@@ -525,7 +523,7 @@ describe("Inventory Generator", () => {
 					contents: room.components.cargoContainer?.contents || {},
 					flags: room.components.isRoom?.flags || [],
 					volume: room.components.cargoContainer?.volume || 1,
-					systems: room.id === 444 ? ["reactor"] : [],
+					systems: room.id === 444 ? ["reactor"] : ["torpedoLauncher"],
 				};
 			}),
 			flightInventory,

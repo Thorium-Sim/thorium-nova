@@ -1,8 +1,8 @@
-import { q } from "@thorium/context/AppContext";
-import { useContext, useReducer } from "react";
-import { Link, Outlet, useParams } from "react-router";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import { Navigate } from "@thorium/components/Navigate";
+import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import { useContext } from "react";
+import { Link, Outlet, useParams } from "react-router";
 
 export default function Sounds() {
 	const { pluginId, systemId, shipId, sound } = useParams() as {
@@ -28,11 +28,7 @@ export default function Sounds() {
 				<h3>Sound Effects</h3>
 				{/* @ts-expect-error */}
 				{Object.keys(system.soundEffects).map((key) => (
-					<Link
-						key={key}
-						to={key}
-						className={`list-group-item ${sound === key ? "selected" : ""}`}
-					>
+					<Link key={key} to={key} className={`list-group-item ${sound === key ? "selected" : ""}`}>
 						{key}
 					</Link>
 				))}

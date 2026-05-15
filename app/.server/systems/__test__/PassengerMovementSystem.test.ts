@@ -1,12 +1,21 @@
-import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
-import { PassengerMovementSystem } from "../PassengerMovementSystem";
-import { beforeEach, describe, expect, it } from "vitest";
-import { ECS, Entity } from "@thorium/utils/ecs";
 import { DeckEdge, DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
+import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import {
 	calculateShipMapPath,
 	createShipMapGraph,
 } from "@thorium/utils/.server/ship/shipMapPathfinder";
+import { ECS, Entity } from "@thorium/utils/ecs";
+import { aroundEach, beforeEach, describe, expect, it } from "vitest";
+
+import { PassengerMovementSystem } from "../PassengerMovementSystem";
+
+aroundEach(async (runTest) => {
+	await DataStore.operations.run(testDataStoreProps, async () => {
+		await runTest();
+	});
+});
 
 describe("PassengerMovementSystem", () => {
 	let ecs: ECS;

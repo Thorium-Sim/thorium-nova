@@ -1,12 +1,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
-import {
-	type Color,
-	MathUtils,
-	type Object3D,
-	Quaternion,
-	Vector3,
-} from "three";
+import { type Color, MathUtils, type Object3D, Quaternion, Vector3 } from "three";
+
 import { useEmitter } from "./Emitter";
 import type { CellProps } from "./types";
 
@@ -55,8 +50,7 @@ export function useParticles({
 		timeToNextParticle: number;
 		instanceProps: Map<number, InstanceProps>;
 	} | null>(null);
-	const { emissionAngleRange, getEmitterPosition, onParticlesExpired } =
-		useEmitter();
+	const { emissionAngleRange, getEmitterPosition, onParticlesExpired } = useEmitter();
 
 	const maxParticles = useMemo(
 		() =>
@@ -67,13 +61,7 @@ export function useParticles({
 				lifeInSeconds,
 				lifeVariance,
 			),
-		[
-			birthRatePerSecond,
-			initialCount,
-			lifeVariance,
-			birthRateVariance,
-			lifeInSeconds,
-		],
+		[birthRatePerSecond, initialCount, lifeVariance, birthRateVariance, lifeInSeconds],
 	);
 
 	useFrame((state, delta) => {
@@ -111,12 +99,7 @@ export function useParticles({
 		}
 	});
 
-	function updateParticle(
-		index: number,
-		transform: Object3D,
-		color: Color,
-		delta: number,
-	) {
+	function updateParticle(index: number, transform: Object3D, color: Color, delta: number) {
 		const userData = userDataRef.current;
 		if (!userData) throw new Error("userData is null");
 
@@ -129,8 +112,7 @@ export function useParticles({
 		}
 		up.set(0, 1, 0);
 
-		let instanceProps: InstanceProps | undefined =
-			userData.instanceProps.get(index);
+		let instanceProps: InstanceProps | undefined = userData.instanceProps.get(index);
 
 		// Initialize the particle
 		if (!instanceProps) {
@@ -142,10 +124,8 @@ export function useParticles({
 
 			// Randomize the direction of the particle
 			{
-				const phi =
-					(rng() - 0.5) * 2 * MathUtils.degToRad(emissionAngleRange.longitude);
-				const theta =
-					(rng() - 0.5) * 2 * MathUtils.degToRad(emissionAngleRange.latitude);
+				const phi = (rng() - 0.5) * 2 * MathUtils.degToRad(emissionAngleRange.longitude);
+				const theta = (rng() - 0.5) * 2 * MathUtils.degToRad(emissionAngleRange.latitude);
 				const x = Math.cos(theta) * Math.sin(phi);
 				const y = Math.sin(theta);
 				const z = Math.cos(theta) * Math.cos(phi);
@@ -259,7 +239,6 @@ function calculateMaxParticles(
 	lifeVariance: number,
 ) {
 	return Math.ceil(
-		(birthRatePerSecond + birthRateVariance) * (lifeInSeconds + lifeVariance) +
-			initialCount,
+		(birthRatePerSecond + birthRateVariance) * (lifeInSeconds + lifeVariance) + initialCount,
 	);
 }

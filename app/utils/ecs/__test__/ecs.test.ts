@@ -1,8 +1,10 @@
+import { beforeEach, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+
+// oxlint-disable typescript/unbound-method
 import ECS from "../ecs";
 import Entity from "../entity";
 import System from "../system";
-import { beforeEach, vi } from "vitest";
-import { describe, expect, it } from "vitest";
 
 const server: any = {};
 describe("ECS", () => {
@@ -72,7 +74,7 @@ describe("ECS", () => {
 
 			ecs.update();
 
-			expect(system.enter).toBeCalledWith(entity);
+			expect(system.enter).toHaveBeenCalledWith(entity);
 		});
 
 		it("should call enter() when removing and re-adding a system", () => {
@@ -114,7 +116,7 @@ describe("ECS", () => {
 
 			ecs.removeSystem(system);
 
-			expect(system.exit).toBeCalledWith(entity);
+			expect(system.exit).toHaveBeenCalledWith(entity);
 		});
 
 		it("should call exit(entity) of all systems when removed", () => {
@@ -128,7 +130,7 @@ describe("ECS", () => {
 
 			ecs.removeSystem(system);
 
-			expect(system.exit).toBeCalledWith(entity);
+			expect(system.exit).toHaveBeenCalledWith(entity);
 		});
 	});
 
@@ -156,7 +158,7 @@ describe("ECS", () => {
 
 			ecs.removeEntity(entity);
 
-			expect(system1.exit).toBeCalledWith(entity);
+			expect(system1.exit).toHaveBeenCalledWith(entity);
 		});
 
 		it("should call exit(entity) of all systems when removed", async () => {
@@ -173,7 +175,7 @@ describe("ECS", () => {
 
 			ecs.removeEntity(entity);
 
-			expect(system1.exit).toBeCalledWith(entity);
+			expect(system1.exit).toHaveBeenCalledWith(entity);
 		});
 	});
 });

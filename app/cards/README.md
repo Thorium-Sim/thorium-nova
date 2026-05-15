@@ -60,31 +60,31 @@ Let's look at a complete example to see how all the parts work together.
 ```ts
 // /app/cards/WeaponsControl/subscriptions.ts
 export const subscriptions = {
-  phasers: {
-    filter: (params: {shipId: string}, context: DataContext) => {
-      return context.ship.id === params.shipId;
-    },
-    fetch: (context: DataContext) => {
-      const phaserSystems = context.flight.ecs.entities.filter(
-        entity =>
-          !!entity.components.phasers &&
-          entity.components.shipAssignment.shipId === context.ship.id
-      );
+	phasers: {
+		filter: (params: { shipId: string }, context: DataContext) => {
+			return context.ship.id === params.shipId;
+		},
+		fetch: (context: DataContext) => {
+			const phaserSystems = context.flight.ecs.entities.filter(
+				(entity) =>
+					!!entity.components.phasers &&
+					entity.components.shipAssignment.shipId === context.ship.id,
+			);
 
-      return phaserSystems;
-    },
-  },
+			return phaserSystems;
+		},
+	},
 };
 
 // /server/src/inputs/phasers.ts
 export const phasersInput = {
-  phasersCharge(context: DataContext, params: {phaserId: number}) {
-    const phaserEntity = context.flight.ecs.getEntityById(params.phaserId);
-    phaserEntity.updateComponent("phasers", {charging: true});
-    pubsub.publish("phasers", {
-      shipId: phaserEntity.components.shipAssignment.shipId,
-    });
-  },
+	phasersCharge(context: DataContext, params: { phaserId: number }) {
+		const phaserEntity = context.flight.ecs.getEntityById(params.phaserId);
+		phaserEntity.updateComponent("phasers", { charging: true });
+		pubsub.publish("phasers", {
+			shipId: phaserEntity.components.shipAssignment.shipId,
+		});
+	},
 };
 ```
 

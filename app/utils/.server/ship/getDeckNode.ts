@@ -1,8 +1,6 @@
 import type { Entity } from "@thorium/utils/ecs";
 
-type DeckNode = NonNullable<
-	Entity["components"]["shipMap"]
->["deckNodes"][number];
+type DeckNode = NonNullable<Entity["components"]["shipMap"]>["deckNodes"][number];
 const shipCache = new Map<number, Map<number, DeckNode>>();
 
 function getShipCache(ship: Entity): Map<number, DeckNode> {
@@ -17,9 +15,7 @@ export function getDeckNode(id?: number, ship?: Entity) {
 	if (!ship) return undefined;
 	const deckNodeCache = getShipCache(ship);
 	if (!deckNodeCache.get(id)) {
-		const deckNode = ship.components.shipMap?.deckNodes.find(
-			(d) => d.id === id,
-		);
+		const deckNode = ship.components.shipMap?.deckNodes.find((d) => d.id === id);
 		if (deckNode) {
 			deckNodeCache.set(id, deckNode);
 		}

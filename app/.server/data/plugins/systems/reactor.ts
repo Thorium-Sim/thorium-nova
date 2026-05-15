@@ -2,13 +2,9 @@ import type ReactorPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Rea
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
-import {
-	getShipSystem,
-	getShipSystemForInput,
-	pluginFilter,
-	systemInput,
-} from "../utils";
+import z from "zod";
+
+import { getShipSystem, getShipSystemForInput, pluginFilter, systemInput } from "../utils";
 
 export const reactor = t.router({
 	get: t.procedure
@@ -39,10 +35,7 @@ export const reactor = t.router({
 			const shipSystem = override || system;
 
 			if (typeof input.optimalOutputPercent === "number") {
-				shipSystem.optimalOutputPercent = Math.min(
-					1,
-					Math.max(0, input.optimalOutputPercent),
-				);
+				shipSystem.optimalOutputPercent = Math.min(1, Math.max(0, input.optimalOutputPercent));
 			}
 			if (typeof input.reactorCount === "number") {
 				shipSystem.reactorCount = Math.max(0, input.reactorCount);

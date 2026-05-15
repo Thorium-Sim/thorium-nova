@@ -1,12 +1,13 @@
+import { Navigate } from "@thorium/components/Navigate";
 import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import { toast } from "@thorium/context/ToastContext";
+import Checkbox from "@thorium/ui/Checkbox";
 import Input from "@thorium/ui/Input";
 import { useContext, useReducer } from "react";
 import { useParams } from "react-router";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+
 import { OverrideResetButton } from "../OverrideResetButton";
-import { Navigate } from "@thorium/components/Navigate";
-import Checkbox from "@thorium/ui/Checkbox";
 
 export default function SensorsConfig() {
 	const { pluginId, systemId, shipId } = useParams() as {
@@ -30,20 +31,17 @@ export default function SensorsConfig() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-2 flex items-start">
+					<div className="flex items-start pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
 							pattern="[0-9]*"
 							label="Passive Range"
 							placeholder={"1000000"}
-							helperText={
-								"The maximum distance that can be seen on sensors in kilometers."
-							}
+							helperText={"The maximum distance that can be seen on sensors in kilometers."}
 							defaultValue={system.passiveRange}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.sensors.update.netSend({
 										pluginId,
@@ -63,14 +61,10 @@ export default function SensorsConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="passiveRange"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="passiveRange" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-2 flex items-start">
+					<div className="flex items-start pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -82,8 +76,7 @@ export default function SensorsConfig() {
 							}
 							defaultValue={system.activeRange}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.sensors.update.netSend({
 										pluginId,
@@ -103,14 +96,10 @@ export default function SensorsConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="activeRange"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="activeRange" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-2 flex items-start">
+					<div className="flex items-start pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -122,8 +111,7 @@ export default function SensorsConfig() {
 							}
 							defaultValue={system.minScanEnergyCost}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.sensors.update.netSend({
 										pluginId,
@@ -150,7 +138,7 @@ export default function SensorsConfig() {
 						/>
 					</div>
 
-					<div className="pb-2 flex items-start">
+					<div className="flex items-start pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -162,8 +150,7 @@ export default function SensorsConfig() {
 							}
 							defaultValue={system.maxScanEnergyCost}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.sensors.update.netSend({
 										pluginId,
@@ -189,7 +176,7 @@ export default function SensorsConfig() {
 							className="mt-6"
 						/>
 					</div>
-					<div className="pb-2 flex items-start">
+					<div className="flex items-start pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -201,8 +188,7 @@ export default function SensorsConfig() {
 							}
 							defaultValue={system.shieldPenaltyMultiplier}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.sensors.update.netSend({
 										pluginId,
@@ -254,11 +240,7 @@ export default function SensorsConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="pingActive"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="pingActive" setRekey={setRekey} className="mt-6" />
 					</div>
 					<div className="pb-2">
 						<Checkbox
@@ -286,11 +268,7 @@ export default function SensorsConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="autoTargeting"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="autoTargeting" setRekey={setRekey} className="mt-6" />
 					</div>
 					<div className="pb-2">
 						<Checkbox
@@ -318,20 +296,14 @@ export default function SensorsConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="scanHistory"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="scanHistory" setRekey={setRekey} className="mt-6" />
 					</div>
 					<div>
 						<Input
 							as="textarea"
 							label="Scan Answers (legacy)"
 							helperText="Easily available scan answers. Place each answer on its own line. Separate labels from answers with a semicolon. #SIM = ship name, #omnicourse for random coordinates, #thrusterdodge for random thruster direction, and #weakness for random targeting weakness."
-							defaultValue={system.scanAnswers
-								.map((a) => `${a.label};${a.value}`)
-								.join("\n")}
+							defaultValue={system.scanAnswers.map((a) => `${a.label};${a.value}`).join("\n")}
 							rows={8}
 							onBlur={async (e) => {
 								try {

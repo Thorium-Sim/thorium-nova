@@ -1,11 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import uuid from "@thorium/utils/uniqid";
-import Spark from "./spark";
-import "./effects.css";
 import { clientId, q } from "@thorium/context/AppContext";
-import { useNavigate } from "react-router";
+import { toast } from "@thorium/context/ToastContext";
+import { useStation } from "@thorium/routes/station/useStation";
+
+import "./effects.css";
 import type { EffectPayload } from "@thorium/utils/flags/effects";
 import { useAmbiance } from "@thorium/utils/sounds/Ambiance/useAmbiance";
+import { useDialogue } from "@thorium/utils/sounds/useDialogue";
+import uuid from "@thorium/utils/uniqid";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
+
+import Spark from "./spark";
 
 let synth: SpeechSynthesis | undefined;
 try {
@@ -69,34 +74,51 @@ export function useEscapeHotkey() {
 const Effects = () => {
 	const { flash, doFlash } = useFlash();
 	const { doSpark, sparks } = useSpark();
-
+	const { station } = useStation();
 	useAmbiance();
+	useDialogue();
 
 	const doEffect = useCallback(
 		(payload: EffectPayload) => {
 			if (typeof payload === "boolean" || !payload) return;
-			const { effect, config } = payload;
-			switch (effect) {
+			const { effect } = payload;
+			switch (effect.type) {
 				case "flash":
-					return doFlash(config?.duration || 1000);
+					return doFlash(effect.duration || 1000);
 				case "spark":
-					return doSpark(config?.duration || 5000);
+					return doSpark(effect.duration || 5000);
 				case "reload":
 					return window.location.reload();
 				case "speak": {
 					try {
 						const voices = synth?.getVoices() || [];
-						if (!config?.message) return;
-						const words = new SpeechSynthesisUtterance(config.message);
+						if (!effect?.message) return;
+						const words = new SpeechSynthesisUtterance(effect.message);
 						if (words) {
-							const voice =
-								voices.find((v) => v.name === config.voice) || voices[0];
+							const voice = voices.find((v) => v.name === effect.voice) || voices[0];
 							if (voice) {
 								words.voice = voice;
 							}
 						}
 						return synth?.speak(words);
 					} catch {}
+					break;
+				}
+				case "message": {
+					let action = () => {};
+					switch (effect.action?.type) {
+						case "cardChange":
+							for (const card of effect.action.cards) {
+								if (station.cards.some((c) => c.name === card)) {
+									action = () => {
+										q.client.setCard.netSend({ clientId, card });
+									};
+									break;
+								}
+							}
+							break;
+					}
+					toast({ ...effect, action });
 					break;
 				}
 				// case "shutdown":
@@ -112,7 +134,7 @@ const Effects = () => {
 					return;
 			}
 		},
-		[doFlash, doSpark],
+		[doFlash, doSpark, station.cards.some],
 	);
 
 	q.effects.sub.useNetSubscribe({ clientId }, doEffect);

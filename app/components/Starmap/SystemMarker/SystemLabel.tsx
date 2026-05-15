@@ -1,7 +1,8 @@
-import React from "react";
-import TextTexture from "@seregpie/three.text-texture";
-import { AdditiveBlending, type Mesh, Sprite } from "three";
 import { useFrame } from "@react-three/fiber";
+import TextTexture from "@seregpie/three.text-texture";
+import React from "react";
+import { AdditiveBlending, type Mesh } from "three";
+
 import { useGetStarmapStore } from "../starmapStore";
 
 const SystemLabel: React.FC<{
@@ -10,13 +11,7 @@ const SystemLabel: React.FC<{
 	color?: string;
 	scale?: number;
 	hoveringDirection: React.RefObject<number>;
-}> = ({
-	systemId,
-	color = "rgb(0,255,255)",
-	scale = 3 / 128,
-	name,
-	hoveringDirection,
-}) => {
+}> = ({ systemId, color = "rgb(0,255,255)", scale = 3 / 128, name, hoveringDirection }) => {
 	const useStarmapStore = useGetStarmapStore();
 
 	React.useEffect(() => {
@@ -41,7 +36,7 @@ const SystemLabel: React.FC<{
 
 	const text = React.useRef<Mesh>(null);
 	const selected = React.useRef(false);
-	useFrame(({ camera }) => {
+	useFrame(() => {
 		const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
 		const isSelected = selectedObjectIds.includes(systemId);
 		if (text.current) {
@@ -55,10 +50,7 @@ const SystemLabel: React.FC<{
 			if (hoveringDirection.current !== 0) {
 				text.current.material.opacity = Math.max(
 					0.5,
-					Math.min(
-						1,
-						text.current.material.opacity + 0.05 * hoveringDirection.current,
-					),
+					Math.min(1, text.current.material.opacity + 0.05 * hoveringDirection.current),
 				);
 			} else if (selected.current) {
 				text.current.material.opacity = 0.5;
@@ -74,10 +66,7 @@ const SystemLabel: React.FC<{
 			ref={text}
 			renderOrder={1000}
 		>
-			<planeGeometry
-				args={[textTexture.width, textTexture.height, 1]}
-				attach="geometry"
-			/>
+			<planeGeometry args={[textTexture.width, textTexture.height, 1]} attach="geometry" />
 			<meshBasicMaterial
 				attach="material"
 				map={textTexture}

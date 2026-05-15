@@ -1,7 +1,4 @@
-import {
-	torpedoDamageType,
-	torpedoGuidanceMode,
-} from "@thorium/utils/flags/InventoryFlags";
+import { torpedoDamageType, torpedoGuidanceMode } from "@thorium/utils/flags/InventoryFlags";
 import z from "zod";
 
 export const isTorpedo = z

@@ -1,7 +1,9 @@
 import { useFrame } from "@react-three/fiber";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import {
+	AdditiveBlending,
 	DoubleSide,
 	Euler,
 	type Group,
@@ -11,12 +13,10 @@ import {
 	PlaneGeometry,
 	Quaternion,
 	Vector3,
-	AdditiveBlending,
-	type Sprite,
 } from "three";
-import Explosion from "./Effects/Explosion";
+
 import blob from "./Effects/blob.png?url";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
+import Explosion from "./Effects/Explosion";
 
 export function Torpedo({
 	color,
@@ -32,7 +32,6 @@ export function Torpedo({
 	const blur = useShipSprite(blob);
 	const { interpolate } = useLiveQuery();
 	const ref = useRef<Group>(null);
-	const sprite = useRef<Sprite>(null);
 
 	useFrame(() => {
 		const position = interpolate(id);
@@ -46,15 +45,12 @@ export function Torpedo({
 			{isDestroyed ? (
 				<Explosion />
 			) : (
-				// <Nucleus color={color} />
-				<sprite scale={[scale, scale, scale]}>
-					<spriteMaterial
-						map={blur}
-						color={color}
-						sizeAttenuation={false}
-						depthWrite={false}
-					/>
-				</sprite>
+				<>
+					<Nucleus color={color} />
+					<sprite scale={[scale, scale, scale]}>
+						<spriteMaterial map={blur} color={color} sizeAttenuation={false} depthWrite={false} />
+					</sprite>
+				</>
 			)}
 
 			{/* TODO May 14, 2024 - Add some kind of cool trail. But it has to be with instanced meshes,
@@ -83,11 +79,7 @@ function Nucleus({ color }: { color: string }) {
 		const mesh = new InstancedMesh(geometry, material, PLANE_COUNT);
 		for (let i = 0; i < PLANE_COUNT; i++) {
 			rotation.setFromEuler(
-				euler.set(
-					Math.random() * Math.PI,
-					Math.random() * Math.PI,
-					Math.random() * Math.PI,
-				),
+				euler.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI),
 			);
 			matrix.compose(position, rotation, scale);
 			mesh.setMatrixAt(i, matrix);

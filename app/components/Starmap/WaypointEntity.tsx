@@ -1,16 +1,40 @@
-import { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
+import {
+	deriveDarkerThemeColor,
+	getThemeButtonBorderColor,
+} from "@thorium/utils/processThemeColor";
+import type { Coordinates } from "@thorium/utils/unitTypes";
+import { useMemo, useRef } from "react";
 import type { Group } from "three";
 
 import WaypointSvg from "./Waypoint.svg";
 import WaypointStroke from "./WaypointStroke.svg";
-import { useFrame } from "@react-three/fiber";
-import type { Coordinates } from "@thorium/utils/unitTypes";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
 
 export const WaypointEntity = ({
 	position,
-}: { position: Coordinates<number> }) => {
-	const color = "rgb(230,153,0)";
+	isActive,
+	isFacing,
+	isLocked,
+}: {
+	position: Coordinates<number>;
+	isActive: boolean;
+	isFacing?: boolean;
+	isLocked?: boolean;
+}) => {
+	const isFacingOrLocked = isFacing || isLocked;
+	const { color, strokeColor } = useMemo(() => {
+		const primary = getThemeButtonBorderColor("btn-primary", "#65abc4");
+		const warning = getThemeButtonBorderColor("btn-warning", "#c7935e");
+		const notice = getThemeButtonBorderColor("btn-notice", "#935dc9");
+		const primaryFocus = deriveDarkerThemeColor(primary);
+		const warningFocus = deriveDarkerThemeColor(warning);
+		const noticeFocus = deriveDarkerThemeColor(notice);
+		return {
+			color: isFacingOrLocked ? primary : isActive ? warning : notice,
+			strokeColor: isFacingOrLocked ? primaryFocus : isActive ? warningFocus : noticeFocus,
+		};
+	}, [isFacingOrLocked, isActive]);
 	const spriteMap = useShipSprite(WaypointSvg);
 	const strokeMap = useShipSprite(WaypointStroke);
 	const group = useRef<Group>(null);
@@ -35,14 +59,16 @@ export const WaypointEntity = ({
 					map={spriteMap}
 					color={color}
 					sizeAttenuation={true}
+					toneMapped={false}
 				/>
 			</sprite>
 			<sprite renderOrder={100} position={[0, 0, -0.5]}>
 				<spriteMaterial
 					attach="material"
 					map={strokeMap}
-					color={"rgb(110,73,0)"}
+					color={strokeColor}
 					sizeAttenuation={true}
+					toneMapped={false}
 				/>
 			</sprite>
 		</group>

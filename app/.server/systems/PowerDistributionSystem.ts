@@ -34,7 +34,7 @@ export class PowerDistributionSystem extends System {
 		const powerSuppliedSources = new Map<number, number>();
 
 		// Apply power to the systems from batteries and reactors
-		for (const [id, system] of poweredSystems) {
+		for (const [_, system] of poweredSystems) {
 			const power = system.components.power;
 			if (!power) continue;
 			const { powerDraw, powerSources } = power;
@@ -49,11 +49,7 @@ export class PowerDistributionSystem extends System {
 					if (typeof source === "number") {
 						const sourceEntity = this.ecs.getEntityById(source);
 						// Phasers can only get power from phase capacitors
-						if (
-							system.components.isPhasers &&
-							!sourceEntity?.components.isPhaseCapacitor
-						)
-							continue;
+						if (system.components.isPhasers && !sourceEntity?.components.isPhaseCapacitor) continue;
 						if (system.components.isPhasers) {
 							powerSupply = system.components.isPhasers.yieldMultiplier;
 						}
@@ -62,10 +58,7 @@ export class PowerDistributionSystem extends System {
 						if (sourceEntity?.components.isBattery?.storage === 0) continue;
 
 						suppliedPower += powerSupply;
-						powerSuppliedSources.set(
-							source,
-							(powerSuppliedSources.get(source) || 0) + powerSupply,
-						);
+						powerSuppliedSources.set(source, (powerSuppliedSources.get(source) || 0) + powerSupply);
 					}
 				}
 			} else {
@@ -76,16 +69,13 @@ export class PowerDistributionSystem extends System {
 			system.updateComponent("power", { currentPower: suppliedPower });
 		}
 		// Apply power to batteries from reactors
-		for (const [id, battery] of batteries) {
+		for (const [_, battery] of batteries) {
 			const isBattery = battery.components.isBattery;
 			if (!isBattery) continue;
 			let suppliedPower = 0;
 			for (const source of isBattery.powerSources) {
 				suppliedPower++;
-				powerSuppliedSources.set(
-					source,
-					(powerSuppliedSources.get(source) || 0) + 1,
-				);
+				powerSuppliedSources.set(source, (powerSuppliedSources.get(source) || 0) + 1);
 			}
 			const outputAmount = powerSuppliedSources.get(battery.id) || 0;
 			const storage = isBattery.storage;
@@ -102,7 +92,7 @@ export class PowerDistributionSystem extends System {
 		}
 
 		// Update the reactor metrics
-		for (const [id, reactor] of reactors) {
+		for (const [_, reactor] of reactors) {
 			const powerSupplied = powerSuppliedSources.get(reactor.id) || 0;
 			reactor.updateComponent("isReactor", {
 				currentOutput: powerSupplied,

@@ -1,14 +1,16 @@
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import { z } from "zod";
-import type { Entity } from "@thorium/utils/ecs";
+import { t } from "@thorium/.server/init/t";
+import { cancelLoopingSound, playShipSound } from "@thorium/utils/.server/playRangedSound";
+import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
 import {
-	cancelLoopingSound,
-	playShipSound,
-} from "@thorium/utils/.server/playRangedSound";
-import { Vector3 } from "three";
+	clearAutopilotState,
+	deactivateForwardAutopilot,
+} from "@thorium/utils/.server/ship/clearAutopilotState";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import type { Entity } from "@thorium/utils/ecs";
 import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
+import { Vector3 } from "three";
+import z from "zod";
 
 export const pilot = t.router({
 	impulseEngines: t.router({
@@ -32,18 +34,15 @@ export const pilot = t.router({
 					systemType: "impulseEngines",
 					shipId,
 				});
-				const targetSpeed =
-					impulseEngines.components.isImpulseEngines?.targetSpeed || 0;
-				const cruisingSpeed =
-					impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1;
+				const targetSpeed = impulseEngines.components.isImpulseEngines?.targetSpeed || 0;
+				const cruisingSpeed = impulseEngines.components.isImpulseEngines?.cruisingSpeed || 1;
 
 				return {
 					id: impulseEngines.id,
 					name: impulseEngines.components.identity?.name || "Impulse",
 					targetSpeed,
 					cruisingSpeed,
-					emergencySpeed:
-						impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
+					emergencySpeed: impulseEngines.components.isImpulseEngines?.emergencySpeed || 1,
 					speeds: impulseEngines.components.isImpulseEngines?.speeds || [],
 				};
 			}),
@@ -97,8 +96,13 @@ export const pilot = t.router({
 							shipId,
 						});
 
-				if (!system.components.isImpulseEngines)
-					throw new Error("System is not a impulse engine");
+				if (!system.components.isImpulseEngines) throw new Error("System is not a impulse engine");
+
+				checkSystemStability(system, "Failed to set impulse speed");
+
+				// Deactivate autopilot when manually setting impulse speed
+				const ship = ctx.ecs.getEntityById(shipId);
+				if (ship) deactivateForwardAutopilot(ship);
 
 				system.updateComponent("isImpulseEngines", {
 					targetSpeed: speed,
@@ -136,14 +140,10 @@ export const pilot = t.router({
 				return {
 					id: warpEngines.id,
 					maxVelocity: warpEngines.components.isWarpEngines?.maxVelocity || 0,
-					currentWarpFactor:
-						warpEngines.components.isWarpEngines?.currentWarpFactor || 0,
+					currentWarpFactor: warpEngines.components.isWarpEngines?.currentWarpFactor || 0,
 					interstellarCruisingSpeed:
-						warpEngines.components.isWarpEngines?.interstellarCruisingSpeed ||
-						599600000000,
-					solarCruisingSpeed:
-						warpEngines.components.isWarpEngines?.solarCruisingSpeed ||
-						29980000,
+						warpEngines.components.isWarpEngines?.interstellarCruisingSpeed || 599600000000,
+					solarCruisingSpeed: warpEngines.components.isWarpEngines?.solarCruisingSpeed || 29980000,
 					speeds: warpEngines.components.isWarpEngines?.speeds || [],
 				};
 			}),
@@ -172,8 +172,13 @@ export const pilot = t.router({
 							systemType: "warpEngines",
 							shipId,
 						});
-				if (!system.components.isWarpEngines)
-					throw new Error("System is not a warp engine");
+				if (!system.components.isWarpEngines) throw new Error("System is not a warp engine");
+
+				checkSystemStability(system, "Failed to set warp engine factor");
+
+				// Deactivate autopilot when manually setting warp factor
+				const ship = ctx.ecs.getEntityById(shipId);
+				if (ship) deactivateForwardAutopilot(ship);
 
 				system.updateComponent("isWarpEngines", {
 					currentWarpFactor: factor,
@@ -194,7 +199,9 @@ export const pilot = t.router({
 				if (publish && publish.shipId !== input.shipId) return false;
 				return true;
 			})
-			.autoPublish(["autopilot"], (entity) => ({ shipId: entity.id }))
+			.autoPublish(["autopilot", "facingWaypoints"], (entity) => ({
+				shipId: entity.id,
+			}))
 
 			.request(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);
@@ -204,24 +211,23 @@ export const pilot = t.router({
 				if (typeof waypointId === "number") {
 					waypoint = ctx.flight?.ecs.getEntityById(waypointId);
 					destinationName =
-						waypoint?.components.identity?.name
-							.replace(" Waypoint", "")
-							.trim() || "";
+						waypoint?.components.identity?.name.replace(" Waypoint", "").trim() || "";
 				}
 				const waypointParentId = waypoint?.components.position?.parentId;
 
 				const waypointSystemPosition =
 					typeof waypointParentId === "number"
-						? ctx.flight?.ecs.getEntityById(waypointParentId)?.components
-								.position || null
+						? ctx.flight?.ecs.getEntityById(waypointParentId)?.components.position || null
 						: null;
 
 				return {
 					forwardAutopilot: ship?.components.autopilot?.forwardAutopilot,
 					destinationName,
+					destinationWaypointId: waypointId ?? null,
 					destinationPosition: waypoint?.components.position || null,
 					destinationSystemPosition: waypointSystemPosition,
 					locked: !!ship?.components.autopilot?.desiredCoordinates,
+					facingWaypointIds: ship?.components.facingWaypoints?.ids ?? [],
 				};
 			}),
 		lockCourse: t.procedure
@@ -268,16 +274,7 @@ export const pilot = t.router({
 			.output(z.object({ shipId: z.number() }))
 			.send(({ ctx, input }) => {
 				const ship = ctx.ecs.getEntityById(input.shipId);
-				ship?.updateComponent("autopilot", {
-					destinationWaypointId: null,
-					desiredCoordinates: undefined,
-					desiredRotation: null,
-					desiredSolarSystemId: undefined,
-					path: [],
-					nextCoordinates: null,
-					rotationAutopilot: false,
-					forwardAutopilot: false,
-				});
+				if (ship) clearAutopilotState(ship);
 
 				// Clear out the current thruster adjustments
 				const thrusters = getShipSystem(ctx.ecs, {
@@ -363,8 +360,13 @@ export const pilot = t.router({
 							systemType: "thrusters",
 							shipId,
 						});
-				if (!system.components.isThrusters)
-					throw new Error("System is not thrusters");
+				if (!system.components.isThrusters) throw new Error("System is not thrusters");
+
+				checkSystemStability(system, "Failed to set thruster direction");
+
+				// Deactivate autopilot when manually using direction thrusters
+				const ship = ctx.ecs.getEntityById(shipId);
+				if (ship) deactivateForwardAutopilot(ship);
 
 				const current = system.components.isThrusters.direction;
 				system.updateComponent("isThrusters", {
@@ -381,8 +383,11 @@ export const pilot = t.router({
 					// Cancel the looping sound
 					cancelLoopingSound(system, "thrust");
 				} else if (system.components.soundEffects?.soundBank.thrust) {
-					const ship = ctx.ecs.getEntityById(shipId);
-					playShipSound(system, ship!, "thrust");
+					// Only play one instance of the sound
+					if (!system.components.soundEffects.looping.some((s) => s.key === "thrust")) {
+						const ship = ctx.ecs.getEntityById(shipId);
+						playShipSound(system, ship!, "thrust");
+					}
 				}
 
 				return { systemId, shipId, direction };
@@ -420,8 +425,13 @@ export const pilot = t.router({
 							systemType: "thrusters",
 							shipId,
 						});
-				if (!system.components.isThrusters)
-					throw new Error("System is not thrusters");
+				if (!system.components.isThrusters) throw new Error("System is not thrusters");
+
+				checkSystemStability(system, "Failed to rotate");
+
+				// Deactivate autopilot when manually using rotation thrusters
+				const ship = ctx.ecs.getEntityById(shipId);
+				if (ship) deactivateForwardAutopilot(ship);
 
 				const current = system.components.isThrusters.rotationDelta;
 				system.updateComponent("isThrusters", {
@@ -436,33 +446,41 @@ export const pilot = t.router({
 					// Cancel the looping sound
 					cancelLoopingSound(system, "thrust");
 				} else if (system.components.soundEffects?.soundBank.thrust) {
-					const ship = ctx.ecs.getEntityById(shipId);
-					playShipSound(system, ship!, "thrust");
+					// Only play one instance of the sound
+					if (!system.components.soundEffects.looping.some((s) => s.key === "thrust")) {
+						const ship = ctx.ecs.getEntityById(shipId);
+						playShipSound(system, ship!, "thrust");
+					}
 				}
 
-				// TODO: September 21 2022 - Deactivate the ships autopilot when the thruster rotation change
 				return { systemId, shipId, rotation };
 			}),
 	}),
 	stream: t.procedure
 		.input(z.object({ shipId: z.number(), systemId: z.number().nullable() }))
-		.dataStream(({ ctx, input, entity }) => {
-			if (!entity) return false;
+		.dataStream(({ ctx, input }) => {
+			const set = new Set<Entity>();
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			const systemId = input?.systemId || ship?.components.position?.parentId;
 			if (typeof systemId === "undefined") {
-				return false;
+				return set;
 			}
-			if (
-				(entity.components.isImpulseEngines ||
-					entity.components.isWarpEngines) &&
-				ship?.components.shipSystems?.shipSystems.has(entity.id)
-			) {
-				return true;
+			for (const entity of ctx.ecs.componentCache.get("isImpulseEngines") || []) {
+				if (entity.components.isShipSystem?.shipId === input.shipId) {
+					set.add(entity);
+				}
 			}
-			return Boolean(
-				entity.components.position &&
-					entity.components.position.parentId === systemId,
-			);
+			for (const entity of ctx.ecs.componentCache.get("isWarpEngines") || []) {
+				if (entity.components.isShipSystem?.shipId === input.shipId) {
+					set.add(entity);
+				}
+			}
+
+			for (const entity of ctx.ecs.componentCache.get("position") || []) {
+				if (entity.components.position?.parentId === systemId) {
+					set.add(entity);
+				}
+			}
+			return set;
 		}),
 });

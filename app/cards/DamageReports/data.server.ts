@@ -1,26 +1,26 @@
-import z from "zod";
+import type ReportPlugin from "@thorium/.server/classes/Plugins/Report";
+import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
+import { spawnTimeline } from "@thorium/.server/spawners/timeline";
+import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
+import type { ReportVariables } from "@thorium/routes/config/reports/reportAvailableVariables";
+import { applyDamageReportMetrics } from "@thorium/utils/.server/applyDamageReportMetrics";
+import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
+import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
+import { Entity } from "@thorium/utils/ecs";
 import {
 	damageEffects,
 	damageTypeValues,
 	getAggregateDamage,
 	getReportEffects,
 } from "@thorium/utils/flags/damageTypes";
-import { Entity } from "@thorium/utils/ecs";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
-import type ReportPlugin from "@thorium/.server/classes/Plugins/Report";
 import { capitalCase } from "change-case";
-import type { ReportVariables } from "@thorium/routes/config/reports/reportAvailableVariables";
-import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
-import { spawnTimeline } from "@thorium/.server/spawners/timeline";
-import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
-import { applyDamageReportMetrics } from "@thorium/utils/.server/applyDamageReportMetrics";
+import z from "zod";
 
 export const damageReports = t.router({
 	systems: t.procedure
 		.input(z.object({ shipId: z.number() }))
-		.filter((publish: { shipId: number }, { ctx, input }) => {
+		.filter((publish: { shipId: number }, { input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
@@ -36,11 +36,9 @@ export const damageReports = t.router({
 				offline: boolean;
 			}[] = [];
 			const ship = ctx.ecs.getEntityById(input.shipId);
-			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() ||
-				[]) {
+			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() || []) {
 				const system = ctx.ecs.getEntityById(systemId);
-				if (!system?.components.isShipSystem || !system.components.damage)
-					continue;
+				if (!system?.components.isShipSystem || !system.components.damage) continue;
 				systems.push({
 					id: systemId,
 					type: system.components.isShipSystem.type,
@@ -55,7 +53,7 @@ export const damageReports = t.router({
 		}),
 	systemDiagnostic: t.procedure
 		.input(z.object({ systemId: z.number() }))
-		.filter((publish: { systemId: number }, { ctx, input }) => {
+		.filter((publish: { systemId: number }, { input }) => {
 			if (publish && publish.systemId !== input.systemId) return false;
 			return true;
 		})
@@ -85,15 +83,12 @@ export const damageReports = t.router({
 		)
 		.send(({ ctx, input }) => {
 			const system = ctx.ecs.getEntityById(input.systemId);
-			const ship = ctx.ecs.getEntityById(
-				system?.components.isShipSystem?.shipId || -1,
-			);
-			if (!ship)
-				throw new Error("Invalid system ID: System is not assigned to a ship");
+			const ship = ctx.ecs.getEntityById(system?.components.isShipSystem?.shipId || -1);
+			if (!ship) throw new Error("Invalid system ID: System is not assigned to a ship");
 
 			const diagnostic = new Entity();
 			diagnostic.addComponent("identity", {
-				name: `Level ${input.level} ${system?.components.identity || ""} Diagnostic`,
+				name: `Level ${input.level} ${system?.components.identity?.name || ""} Diagnostic`,
 			});
 			diagnostic.addComponent("diagnostic", {
 				level: input.level,
@@ -131,13 +126,10 @@ export const damageReports = t.router({
 			const diagnostic = ctx.ecs.getEntityById(input.diagnosticId);
 			if (!diagnostic) return;
 
-			const reportCount =
-				Number(diagnostic.components.diagnostic?.level || 1) - 1;
+			const reportCount = Number(diagnostic.components.diagnostic?.level || 1) - 1;
 			if (reportCount <= 0) return;
 
-			const system = ctx.ecs.getEntityById(
-				diagnostic.components.diagnostic?.targetSystemId || -1,
-			);
+			const system = ctx.ecs.getEntityById(diagnostic.components.diagnostic?.targetSystemId || -1);
 			if (!system) return;
 
 			diagnostic.updateComponent("diagnostic", {
@@ -169,7 +161,7 @@ export const damageReports = t.router({
 		}),
 	damageReports: t.procedure
 		.input(z.object({ shipId: z.number() }))
-		.filter((publish: { shipId: number }, { ctx, input }) => {
+		.filter((publish: { shipId: number }, { input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
@@ -199,29 +191,23 @@ export const damageReports = t.router({
 					continue;
 
 				const currentStepIndex = timeline.currentStep;
-				const currentTimelineStep = ctx.ecs.getEntityById(
-					timeline.steps[currentStepIndex],
-				);
+				const currentTimelineStep = ctx.ecs.getEntityById(timeline.steps[currentStepIndex]);
 				reports.push({
 					id: report.id,
 					systemId: report.components.damageReport.systemId,
 					name: report.components.identity?.name || "Report",
 					stepCount: timeline.steps.length,
 					currentStepIndex,
-					currentStepText:
-						currentTimelineStep?.components.identity?.description || "",
+					currentStepText: currentTimelineStep?.components.identity?.description || "",
 				});
 			}
 			return reports;
 		}),
 	beginDamageReport: t.procedure
-		.input(
-			z.object({ diagnosticId: z.number(), reportCandidateId: z.string() }),
-		)
+		.input(z.object({ diagnosticId: z.number(), reportCandidateId: z.string() }))
 		.send(async ({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("Flight is not started.");
-			const diagnostic = ctx.ecs.getEntityById(input.diagnosticId)?.components
-				.diagnostic;
+			const diagnostic = ctx.ecs.getEntityById(input.diagnosticId)?.components.diagnostic;
 			if (!diagnostic) throw new Error("Diagnostic not found.");
 			const reportCandidate = diagnostic.reportCandidates?.find(
 				(r) => r.id === input.reportCandidateId,
@@ -232,8 +218,9 @@ export const damageReports = t.router({
 			const system = ctx.ecs.getEntityById(diagnostic.targetSystemId);
 			const systemType = system?.components.isShipSystem?.type;
 			if (!systemType) throw new Error("Invalid system.");
-			const systemName =
-				system?.components.identity?.name || capitalCase(systemType);
+			const systemName = system?.components.identity?.name || capitalCase(systemType);
+
+			const reportEntity = new Entity();
 
 			const reportVariables = {
 				damageType: reportCandidate.type,
@@ -242,6 +229,7 @@ export const damageReports = t.router({
 				systemName,
 				systemId: diagnostic.targetSystemId,
 				shipId: diagnostic.shipId,
+				damageReportId: reportEntity.id,
 			} satisfies ReportVariables;
 
 			const timelines = await selectAvailableTimelines(
@@ -264,6 +252,7 @@ export const damageReports = t.router({
 				timeline,
 				(entity) => ctx.ecs.addEntity(entity),
 				diagnostic.shipId,
+				reportEntity,
 			);
 
 			damageReport.updateComponent("identity", {
@@ -279,6 +268,11 @@ export const damageReports = t.router({
 			// Put all the necessary variables on the timeline
 			damageReport.addComponent("variables", {
 				variables: [
+					{
+						name: "damageReportId",
+						type: "any",
+						value: damageReport.id,
+					},
 					{
 						name: "damageType",
 						type: "any",
@@ -305,10 +299,9 @@ export const damageReports = t.router({
 			});
 			// Trigger the first step
 			await triggerStep(
-				ctx.flight.ecs.getEntityById(
-					damageReport.components.isTimeline?.steps[0] || -1,
-				)!,
+				ctx.flight.ecs.getEntityById(damageReport.components.isTimeline?.steps[0] || -1)!,
 			);
+
 			// And delete the diagnostic
 			ctx.ecs.removeEntityById(input.diagnosticId);
 			pubsub.publish.damageReports.systemDiagnostic({
@@ -334,6 +327,11 @@ export const damageReports = t.router({
 					stepIds.includes(trigger.components.isTrigger.stepId)
 				) {
 					ctx.ecs.removeEntity(trigger);
+				}
+			}
+			for (const assignment of ctx.ecs.componentCache.get("damageControlAssignment") || []) {
+				if (assignment.components.damageControlAssignment?.damageReportId === input.reportId) {
+					ctx.ecs.removeEntity(assignment);
 				}
 			}
 			ctx.ecs.removeEntity(damageReport);
@@ -367,13 +365,23 @@ export const damageReports = t.router({
 			applyDamageReportMetrics(timeline);
 			return;
 		}),
-	stream: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.dataStream(({ ctx, input, entity }) => {
-			if (!entity) return false;
-			return Boolean(
-				entity.components.diagnostic &&
-					entity.components.diagnostic.shipId === input.shipId,
-			);
+	// This is mostly used for listening for the event
+	completeDamageAssignment: t.procedure
+		.meta({ event: true })
+		.input(z.object({ damageAssignmentId: z.number() }))
+		.output(z.object({ damageAssignmentId: z.number() }))
+		.send(({ ctx, input }) => {
+			ctx.ecs.removeEntityById(input.damageAssignmentId);
+
+			return input;
 		}),
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
+		const set = new Set<Entity>();
+		for (const diagnostic of ctx.ecs.componentCache.get("diagnostic") || []) {
+			if (diagnostic.components.diagnostic?.shipId === input.shipId) {
+				set.add(diagnostic);
+			}
+		}
+		return set;
+	}),
 });

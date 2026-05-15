@@ -1,6 +1,8 @@
+import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 import type { DataStoreOperations } from "@thorium/utils/.server/db-fs";
 
 export const testDataStoreProps: DataStoreOperations = {
+	database: {} as DatabaseContext,
 	async getData() {
 		return "";
 	},
@@ -12,21 +14,16 @@ export const testDataStoreProps: DataStoreOperations = {
 	},
 	async remove() {},
 	async removeAsset() {},
-	async uploadAsset(asset, fileName) {
+	async uploadAsset() {
 		return "";
 	},
-	async write(force) {},
-	async loadAspect() {
-		return [];
-	},
-	async rename(newName, otherNames) {},
-	async processCSS(css) {
-		return { assetUrl: "", processedCSS: "" };
-	},
+	async write() {},
+	async loadAllAspects() {},
+	async rename() {},
 	async getFlights() {
 		return [];
 	},
-	async getFlightSnapshots(flightName) {
+	async getFlightSnapshots() {
 		return [];
 	},
 };

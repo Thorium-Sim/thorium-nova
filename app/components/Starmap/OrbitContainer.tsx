@@ -1,10 +1,7 @@
 import React from "react";
 import { BufferGeometry, EllipseCurve, MathUtils } from "three";
 
-export const OrbitLine: React.FC<{ radiusX: number; radiusY: number }> = ({
-	radiusX,
-	radiusY,
-}) => {
+export const OrbitLine: React.FC<{ radiusX: number; radiusY: number }> = ({ radiusX, radiusY }) => {
 	const geometry = React.useMemo(() => {
 		const curve = new EllipseCurve(
 			0,
@@ -17,9 +14,7 @@ export const OrbitLine: React.FC<{ radiusX: number; radiusY: number }> = ({
 			0,
 		);
 
-		const points = curve.getPoints(
-			Math.round(Math.max(10000, radiusX / 400000)),
-		);
+		const points = curve.getPoints(Math.round(Math.max(10000, radiusX / 400000)));
 
 		const geometry = new BufferGeometry().setFromPoints(points);
 		return geometry;

@@ -1,16 +1,9 @@
-import { useLocalStorageReducer } from "@thorium/hooks/useLocalStorage";
-import { Outlet } from "react-router";
-import {
-	createContext,
-	use,
-	useContext,
-	useEffect,
-	type ReactNode,
-} from "react";
-import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
-import { produce } from "immer";
-import uniqid from "@thorium/utils/uniqid";
 import type { FlightStartingPoint } from "@thorium/.server/spawners/flight";
+import { useLocalStorageReducer } from "@thorium/hooks/useLocalStorage";
+import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
+import uniqid from "@thorium/utils/uniqid";
+import { produce } from "immer";
+import { createContext, useContext, useEffect, type ReactNode } from "react";
 
 export interface FlightConfigState {
 	hasFlightDirector: boolean;
@@ -123,8 +116,7 @@ function quickStartReducer(
 			return {
 				...state,
 				mode: action.mode,
-				hasFlightDirector:
-					action.mode === "legacy" ? true : state.hasFlightDirector,
+				hasFlightDirector: action.mode === "legacy" ? true : state.hasFlightDirector,
 				missionId: undefined,
 			};
 		default:
@@ -132,13 +124,11 @@ function quickStartReducer(
 	}
 }
 
-const QuickStartContext = createContext<
-	[FlightConfigState, React.Dispatch<FlightConfigAction>]
->(null!);
+const QuickStartContext = createContext<[FlightConfigState, React.Dispatch<FlightConfigAction>]>(
+	null!,
+);
 
-export function FlightQuickStartProvider({
-	children,
-}: { children: ReactNode }) {
+export function FlightQuickStartProvider({ children }: { children: ReactNode }) {
 	const value = useLocalStorageReducer<
 		typeof quickStartReducer,
 		FlightConfigState,
@@ -179,18 +169,11 @@ export function FlightQuickStartProvider({
 		}
 	}, [ships, set]);
 
-	return (
-		<QuickStartContext.Provider value={value}>
-			{children}
-		</QuickStartContext.Provider>
-	);
+	return <QuickStartContext.Provider value={value}>{children}</QuickStartContext.Provider>;
 }
 
 export const useFlightQuickStart = () => {
 	const returnVal = useContext(QuickStartContext);
-	if (!returnVal)
-		throw new Error(
-			"useFlightQuickStart must be used within a QuickStartProvider",
-		);
+	if (!returnVal) throw new Error("useFlightQuickStart must be used within a QuickStartProvider");
 	return returnVal;
 };

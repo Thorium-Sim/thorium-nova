@@ -1,9 +1,10 @@
 import { t } from "@thorium/.server/init/t";
-import { z } from "zod";
+import z from "zod";
+
 import { getPlugin, pluginFilter } from "../utils";
+import { planet } from "./planet";
 import { solarSystem } from "./solarSystem";
 import { star } from "./star";
-import { planet } from "./planet";
 
 export const starmap = t.router({
 	solarSystem,
@@ -19,24 +20,18 @@ export const starmap = t.router({
 				name: solarSystem.name,
 				position: solarSystem.position,
 				description: solarSystem.description,
+				commSatellite: !!solarSystem.commSatellite,
+				commSatelliteRadius: solarSystem.commSatellite?.radius,
 			}));
 		}),
 	get: t.procedure
-		.input(
-			z.object({ pluginId: z.string(), solarSystemId: z.string().nullable() }),
-		)
-		.filter(
-			(
-				publish: { pluginId: string; solarSystemId: string } | null,
-				{ input },
-			) => {
-				if (!publish) return true;
-				if (publish && input.pluginId !== publish.pluginId) return false;
-				if (publish && input.solarSystemId !== publish.solarSystemId)
-					return false;
-				return true;
-			},
-		)
+		.input(z.object({ pluginId: z.string(), solarSystemId: z.string().nullable() }))
+		.filter((publish: { pluginId: string; solarSystemId: string } | null, { input }) => {
+			if (!publish) return true;
+			if (publish && input.pluginId !== publish.pluginId) return false;
+			if (publish && input.solarSystemId !== publish.solarSystemId) return false;
+			return true;
+		})
 		.request(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
 			const solarSystem = plugin.aspects.solarSystems.find(

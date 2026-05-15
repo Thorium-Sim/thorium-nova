@@ -47,11 +47,13 @@ yourself by going to http://localhost:3000.
 > default plugin from Github, you can run `bun run init:plugin`.
 
 ## Tests
+
 You may need to install playwright for running e2e tests locally. You can do this by running:
+
 ```bash
 npx playwright install
 npx playwright install-deps
-``` 
+```
 
 ## Project Vision
 

@@ -12,15 +12,9 @@ export const EdgeContext = createContext<
 >(null!);
 
 export const EdgeContextProvider = ({ children }: { children: ReactNode }) => {
-	const edgeRenderFunctions = useRef<
-		Set<(nodeId: number, x: number, y: number) => void>[]
-	>([]);
+	const edgeRenderFunctions = useRef<Set<(nodeId: number, x: number, y: number) => void>[]>([]);
 
-	return (
-		<EdgeContext.Provider value={edgeRenderFunctions}>
-			{children}
-		</EdgeContext.Provider>
-	);
+	return <EdgeContext.Provider value={edgeRenderFunctions}>{children}</EdgeContext.Provider>;
 };
 export function useEdgeRerender(
 	from: number,

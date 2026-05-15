@@ -1,69 +1,41 @@
-import Button from "@thorium/ui/Button";
-import { Fragment, Suspense, useRef, useState } from "react";
-import { GridCanvas, CircleGrid, CircleGridTiltButton } from "./CircleGrid";
-import { PilotZoomSlider } from "./PilotZoomSlider";
-import {
-	CircleGridStoreProvider,
-	useCircleGridStore,
-} from "./useCircleGridStore";
-import { ImpulseControls } from "./ImpulseControls";
-import { Joystick, LinearJoystick } from "@thorium/ui/Joystick";
-import type { ReactNode } from "react";
-import type { Coordinates } from "@thorium/utils/unitTypes";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import { clientId, q } from "@thorium/context/AppContext";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
-import { CircleGridContacts, CircleGridWaypoints } from "./PilotContacts";
 import type { CardProps } from "@thorium/cards/CardProps";
-import { useStation } from "@thorium/routes/station/useStation";
+import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
-import {
-	Dialog,
-	DialogTrigger,
-	ModalOverlay,
-	Modal,
-	Button as RAButton,
-} from "react-aria-components";
+import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
+import { useStation } from "@thorium/routes/station/useStation";
+import Button from "@thorium/ui/Button";
+import { Joystick, LinearJoystick } from "@thorium/ui/Joystick";
+import { ShipWarning, useShipWarnings } from "@thorium/ui/ShipWarning";
+import { useServerAlerts } from "@thorium/ui/useServerAlerts";
 import { cn } from "@thorium/utils/cn";
-import { Navigation } from "@thorium/cards/Navigation";
-import useEventListener from "@thorium/hooks/useEventListener";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
+import type { Coordinates } from "@thorium/utils/unitTypes";
+import type { MutableRefObject, ReactNode } from "react";
+import { Fragment, Suspense, useCallback, useEffect, useRef } from "react";
 
-async function rotation({
-	shipId,
-	x,
-	y,
-	z,
-}: { shipId: number } & Partial<Coordinates<number>>) {
+import { CircleGrid, CircleGridTiltButton, GridCanvas } from "./CircleGrid";
+import { ImpulseControls } from "./ImpulseControls";
+import { CircleGridContacts, CircleGridWaypoints } from "./PilotContacts";
+import { PilotZoomSlider } from "./PilotZoomSlider";
+import { CircleGridStoreProvider } from "./useCircleGridStore";
+
+async function rotation({ shipId, x, y, z }: { shipId: number } & Partial<Coordinates<number>>) {
 	await q.pilot.thrusters.setRotationDelta.netSend({
 		shipId,
 		rotation: { x, y, z },
 	});
 }
-async function direction({
-	shipId,
-	x,
-	y,
-	z,
-}: { shipId: number } & Partial<Coordinates<number>>) {
+
+async function direction({ shipId, x, y, z }: { shipId: number } & Partial<Coordinates<number>>) {
 	await q.pilot.thrusters.setDirection.netSend({
 		shipId,
 		direction: { x, y, z },
 	});
 }
 
-function UntouchableLabel({
-	children,
-	className,
-}: {
-	children: ReactNode;
-	className?: string;
-}) {
-	return (
-		<p className={`select-none pointer-events-none absolute ${className}`}>
-			{children}
-		</p>
-	);
+function UntouchableLabel({ children, className }: { children: ReactNode; className?: string }) {
+	return <p className={`pointer-events-none absolute select-none ${className}`}>{children}</p>;
 }
 
 export function Pilot({ cardLoaded }: CardProps) {
@@ -72,50 +44,87 @@ export function Pilot({ cardLoaded }: CardProps) {
 	const [targetedContact] = q.targeting.targetedContact.useNetRequest({
 		shipId,
 	});
-	const [showNavigation, setShowNavigation] = useState(false);
+	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 
-	function setIsNavOpen(open: boolean) {
-		q.thorium.genericEvent.netSend({
-			clientId,
-			eventName: "navigation-open",
-			properties: `${open}`,
-		});
-		setShowNavigation(open);
-	}
-	useEventListener("waypoint-activated", () => {
-		setShowNavigation(false);
-	});
+	const {
+		showWarning,
+		dismissWarning,
+		displayedWarning,
+		isEntering,
+		isExiting,
+		onEntryComplete,
+		onExitComplete,
+	} = useShipWarnings();
 
-	if (showNavigation) {
-		return (
-			<div className="relative h-full">
-				<Navigation cardLoaded={cardLoaded} />
-				<div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-					<RAButton
-						className="btn btn-error clear-waypoint"
-						onPress={() => {
-							q.waypoints.deactivate.netSend({ shipId });
-							setShowNavigation(false);
-						}}
-					>
-						Clear Waypoint
-					</RAButton>
-				</div>
-			</div>
-		);
+	// Bridge server-side ship alerts (collision warnings, etc.) into the warning system
+	useServerAlerts(shipId, showWarning, dismissWarning);
+
+	// Detect when the course is unlocked server-side while forward autopilot was off
+	// (e.g., ship overshot the final waypoint with manual engine controls).
+	// userUnlockedRef distinguishes user-initiated unlocks (button/gamepad) from
+	// server-initiated unlocks (overshoot detection) so only the latter shows a warning.
+	const userUnlockedRef = useRef(false);
+	const prevLockedRef = useRef(autopilot.locked);
+	const prevForwardAutopilotRef = useRef(!!autopilot.forwardAutopilot);
+	useEffect(() => {
+		if (prevLockedRef.current && !autopilot.locked && !prevForwardAutopilotRef.current) {
+			if (userUnlockedRef.current) {
+				userUnlockedRef.current = false;
+			} else {
+				showWarning({
+					id: "course-lock-released",
+					priority: 5,
+					content: "Course Lock Released",
+					duration: 5000,
+				});
+			}
+		}
+		prevLockedRef.current = autopilot.locked;
+		prevForwardAutopilotRef.current = !!autopilot.forwardAutopilot;
+	}, [autopilot.locked, autopilot.forwardAutopilot, showWarning]);
+
+	const autopilotActiveRef = useRef(false);
+	const prevAutopilotActiveRef = useRef(false);
+	autopilotActiveRef.current = !!autopilot.forwardAutopilot;
+	const alertActiveRef = useRef(false);
+
+	// Reset the guard when autopilot is re-engaged so the warning can trigger again
+	if (autopilotActiveRef.current && !prevAutopilotActiveRef.current) {
+		alertActiveRef.current = false;
 	}
+	prevAutopilotActiveRef.current = autopilotActiveRef.current;
+
+	const onFlightControlInteraction = useCallback(() => {
+		if (autopilotActiveRef.current && !alertActiveRef.current) {
+			alertActiveRef.current = true;
+			// Server-side handlers deactivate forwardAutopilot; just show the warning here.
+			showWarning({
+				id: "autopilot-deactivated",
+				priority: 5,
+				content: "Autopilot Deactivated",
+				duration: 5000,
+			});
+		}
+	}, [showWarning]);
 
 	return (
 		<CircleGridStoreProvider>
-			<div className="grid grid-cols-4 grid-rows-1 h-full place-content-center gap-4">
+			<div className="grid h-full grid-cols-4 grid-rows-1 place-content-center gap-4">
 				<div className="flex flex-col justify-between">
-					<ImpulseControls cardLoaded={cardLoaded} />
-					<div className="flex-1 mt-2">
-						<div className="flex items-stretch gap-4 direction-thrusters">
+					<ImpulseControls
+						cardLoaded={cardLoaded}
+						onFlightControlInteraction={onFlightControlInteraction}
+						forwardAutopilot={!!autopilot.forwardAutopilot}
+					/>
+					<div className="mt-2 flex-1">
+						<div className="direction-thrusters flex items-stretch gap-4">
 							<LinearJoystick
 								id="direction-foreaft"
 								className="h-auto"
-								onDrag={({ y }) => direction({ shipId, z: -y })}
+								onDrag={({ y }) => {
+									onFlightControlInteraction();
+									direction({ shipId, z: -y });
+								}}
 								vertical
 								gamepadKey="z-thrusters"
 							>
@@ -124,21 +133,22 @@ export function Pilot({ cardLoaded }: CardProps) {
 							</LinearJoystick>
 							<Joystick
 								id="direction"
-								className="w-[calc(100%-2.5rem)] h-[calc(100%-2.5rem)]"
-								onDrag={({ x, y }) => direction({ shipId, y: -y, x: -x })}
+								className="h-[calc(100%-2.5rem)] w-[calc(100%-2.5rem)]"
+								onDrag={({ x, y }) => {
+									onFlightControlInteraction();
+									direction({ shipId, y: -y, x: -x });
+								}}
 								gamepadKeys={{ x: "x-thrusters", y: "y-thrusters" }}
 							>
 								<UntouchableLabel className="bottom-1">Down</UntouchableLabel>
 								<UntouchableLabel className="top-1">Up</UntouchableLabel>
-								<UntouchableLabel className="right-1">
-									Starboard
-								</UntouchableLabel>
+								<UntouchableLabel className="right-1">Starboard</UntouchableLabel>
 								<UntouchableLabel className="left-1">Port</UntouchableLabel>
 							</Joystick>
 						</div>
 					</div>
 				</div>
-				<div className="col-span-2 w-full aspect-square self-center pilot-radar">
+				<div className="pilot-radar col-span-2 aspect-square w-full self-center">
 					<Suspense fallback={null}>
 						<GridCanvas shouldRender={cardLoaded}>
 							<CircleGrid>
@@ -149,8 +159,8 @@ export function Pilot({ cardLoaded }: CardProps) {
 					</Suspense>
 				</div>
 
-				<div className="h-full flex flex-col justify-between gap-2">
-					<LockOnButton setShowNavigation={setIsNavOpen} />
+				<div className="flex h-full flex-col justify-between gap-2">
+					<LockOnButton userUnlockedRef={userUnlockedRef} />
 					<div>
 						<div className="pilot-slider">
 							<PilotZoomSlider />
@@ -160,34 +170,41 @@ export function Pilot({ cardLoaded }: CardProps) {
 						</div>
 					</div>
 					<div className="flex-1" />
-					<div className="flex flex-col gap-2 rotation-thrusters">
+					<div className="rotation-thrusters flex flex-col gap-2">
 						<Joystick
 							id="rotation"
-							onDrag={({ x, y }) => rotation({ shipId, z: x, x: y })}
+							onDrag={({ x, y }) => {
+								onFlightControlInteraction();
+								rotation({ shipId, z: x, x: y });
+							}}
 							gamepadKeys={{ x: "roll", y: "pitch" }}
 						>
-							<UntouchableLabel className="bottom-1">
-								Pitch Down
-							</UntouchableLabel>
+							<UntouchableLabel className="bottom-1">Pitch Down</UntouchableLabel>
 							<UntouchableLabel className="top-1">Pitch Up</UntouchableLabel>
-							<UntouchableLabel className="right-1">
-								Starboard Roll
-							</UntouchableLabel>
+							<UntouchableLabel className="right-1">Starboard Roll</UntouchableLabel>
 							<UntouchableLabel className="left-1">Port Roll</UntouchableLabel>
 						</Joystick>
 						<LinearJoystick
 							id="rotation-yaw"
-							onDrag={({ x }) => rotation({ shipId, y: -x })}
+							onDrag={({ x }) => {
+								onFlightControlInteraction();
+								rotation({ shipId, y: -x });
+							}}
 							gamepadKey="yaw"
 						>
 							<UntouchableLabel className="left-1">Port Yaw</UntouchableLabel>
-							<UntouchableLabel className="right-1">
-								Starboard Yaw
-							</UntouchableLabel>
+							<UntouchableLabel className="right-1">Starboard Yaw</UntouchableLabel>
 						</LinearJoystick>
 					</div>
 				</div>
 			</div>
+			<ShipWarning
+				warning={displayedWarning}
+				isEntering={isEntering}
+				isExiting={isExiting}
+				onEntryComplete={onEntryComplete}
+				onExitComplete={onExitComplete}
+			/>
 		</CircleGridStoreProvider>
 	);
 }
@@ -208,40 +225,23 @@ function getInterstellarDistance(
 		);
 		if (typeof position1.parentId === "number") unit = "km";
 	} else if (system1 && system2) {
-		value = Math.hypot(
-			system2.x - system1.x,
-			system2.y - system1.y,
-			system2.z - system1.z,
-		);
+		value = Math.hypot(system2.x - system1.x, system2.y - system1.y, system2.z - system1.z);
 	} else if (!system1 && system2) {
-		value = Math.hypot(
-			system2.x - position1.x,
-			system2.y - position1.y,
-			system2.z - position1.z,
-		);
+		value = Math.hypot(system2.x - position1.x, system2.y - position1.y, system2.z - position1.z);
 	} else if (!system2 && system1) {
-		value = Math.hypot(
-			system1.x - position2.x,
-			system1.y - position2.y,
-			system1.z - position2.z,
-		);
+		value = Math.hypot(system1.x - position2.x, system1.y - position2.y, system1.z - position2.z);
 	}
 	return `${value.toLocaleString("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${unit}`;
 }
 
-const LockOnButton = ({
-	setShowNavigation,
-}: {
-	setShowNavigation: (value: boolean) => void;
-}) => {
+const LockOnButton = ({ userUnlockedRef }: { userUnlockedRef: MutableRefObject<boolean> }) => {
 	const { cardLoaded } = useCardContext();
 	const {
 		shipId,
 		ship: { currentSystem, systemPosition },
 	} = useStation();
-	const store = useCircleGridStore();
-	const waypoint = store((store) => store.facingWaypoints?.[0]);
 	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
+	const waypoint = autopilot.facingWaypointIds[0] ?? undefined;
 	const distanceRef = useRef<HTMLSpanElement>(null);
 
 	const { interpolate } = useLiveQuery();
@@ -263,6 +263,7 @@ const LockOnButton = ({
 	useGamepadPress("autopilot-lock-on", {
 		onDown: () => {
 			if (autopilot.locked) {
+				userUnlockedRef.current = true;
 				q.pilot.autopilot.unlockCourse.netSend({ shipId });
 			} else if (typeof waypoint === "number") {
 				q.pilot.autopilot.lockCourse.netSend({ shipId, waypointId: waypoint });
@@ -281,9 +282,9 @@ const LockOnButton = ({
 
 	return (
 		<Fragment>
-			<div className="text-center panel panel-primary h-24">
+			<div className="panel panel-primary h-24 text-center">
 				<div>Current Course:</div>
-				<div className="font-bold text-3xl my-1 ">
+				<div className="my-1 text-3xl font-bold">
 					{autopilot.destinationName || "No Course Set"}
 				</div>
 				<div className="tabular-nums">
@@ -297,24 +298,23 @@ const LockOnButton = ({
 				</div>
 			</div>
 
-			<RAButton
-				className="btn w-full btn-info set-course"
-				onPress={() => setShowNavigation(true)}
-			>
-				Set Course
-			</RAButton>
-
 			<div className="flex gap-2">
 				{autopilot.locked ? (
 					<Button
-						className="w-full btn-error"
-						onClick={() => q.pilot.autopilot.unlockCourse.netSend({ shipId })}
+						className="btn-error flex-auto"
+						onClick={() => {
+							userUnlockedRef.current = true;
+							q.pilot.autopilot.unlockCourse.netSend({ shipId });
+						}}
 					>
 						Unlock Course
 					</Button>
 				) : (
 					<Button
-						className="w-full btn-warning lock-on-course"
+						className={cn(
+							"flex-auto lock-on-course",
+							typeof waypoint === "number" ? "btn-warning" : "btn-disabled",
+						)}
 						disabled={typeof waypoint !== "number"}
 						onClick={() =>
 							q.pilot.autopilot.lockCourse.netSend({
@@ -328,7 +328,10 @@ const LockOnButton = ({
 				)}
 				{!autopilot.forwardAutopilot ? (
 					<Button
-						className="w-full btn-error activate-autopilot"
+						className={cn(
+							"flex-auto activate-autopilot",
+							autopilot.locked ? "btn-warning" : "btn-disabled",
+						)}
 						disabled={!autopilot.locked}
 						onClick={() => q.pilot.autopilot.activate.netSend({ shipId })}
 					>
@@ -336,7 +339,7 @@ const LockOnButton = ({
 					</Button>
 				) : (
 					<Button
-						className="w-full btn-error"
+						className="btn-error deactivate-autopilot flex-auto"
 						disabled={!autopilot.locked}
 						onClick={() => q.pilot.autopilot.deactivate.netSend({ shipId })}
 					>

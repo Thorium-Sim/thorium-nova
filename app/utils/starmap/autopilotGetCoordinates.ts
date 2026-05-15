@@ -1,5 +1,5 @@
-import { Matrix4, Quaternion, Vector3 } from "three";
 import type { Entity } from "@thorium/utils/ecs";
+import { Matrix4, Quaternion, Vector3 } from "three";
 
 const positionVec = new Vector3();
 const desiredDestination = new Vector3();
@@ -43,11 +43,7 @@ export function autopilotGetCoordinates(
 			nextCoordinates = autopilot.path.shift() || null;
 		}
 		if (nextCoordinates) {
-			nextDestination.set(
-				nextCoordinates.x,
-				nextCoordinates.y,
-				nextCoordinates.z,
-			);
+			nextDestination.set(nextCoordinates.x, nextCoordinates.y, nextCoordinates.z);
 		} else {
 			nextDestination.copy(desiredDestination);
 		}
@@ -127,9 +123,7 @@ export function getAutopilotPositionAndRotation(entity: Entity) {
 		? entity.ecs!.getEntityById(entity.components.position.parentId)
 		: null;
 	const destinationSystem = entity.components.autopilot?.desiredSolarSystemId
-		? entity.ecs!.getEntityById(
-				entity.components.autopilot.desiredSolarSystemId,
-			)
+		? entity.ecs!.getEntityById(entity.components.autopilot.desiredSolarSystemId)
 		: null;
 
 	const { isInInterstellar, desiredDestination, nextDestination, positionVec } =

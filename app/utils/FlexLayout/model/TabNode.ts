@@ -1,3 +1,5 @@
+import { Actions } from "@thorium/utils/FlexLayout/model/Actions";
+
 import { Attribute } from "../Attribute";
 import { AttributeDefinitions } from "../AttributeDefinitions";
 import { Rect } from "../Rect";
@@ -103,11 +105,13 @@ export class TabNode extends Node implements IDraggable {
 	}
 
 	isSelected() {
-		return (
-			(this.getParent() as TabSetNode | BorderNode).getSelectedNode() === this
-		);
+		return (this.getParent() as TabSetNode | BorderNode).getSelectedNode() === this;
 	}
 
+	activate() {
+		const layoutWindow = this.model.getwindowsMap().get(this.getWindowId());
+		layoutWindow?.layout?.doAction(Actions.selectTab(this.getId()));
+	}
 	getIcon() {
 		return this.getAttr("icon") as string | undefined;
 	}
@@ -332,22 +336,16 @@ export class TabNode extends Node implements IDraggable {
 	}
 
 	/** @internal */
-	private static attributeDefinitions: AttributeDefinitions =
-		TabNode.createAttributeDefinitions();
+	private static attributeDefinitions: AttributeDefinitions = TabNode.createAttributeDefinitions();
 
 	/** @internal */
 	private static createAttributeDefinitions(): AttributeDefinitions {
 		const attributeDefinitions = new AttributeDefinitions();
-		attributeDefinitions
-			.add("type", TabNode.TYPE, true)
-			.setType(Attribute.STRING)
-			.setFixed();
+		attributeDefinitions.add("type", TabNode.TYPE, true).setType(Attribute.STRING).setFixed();
 		attributeDefinitions
 			.add("id", undefined)
 			.setType(Attribute.STRING)
-			.setDescription(
-				`the unique id of the tab, if left undefined a uuid will be assigned`,
-			);
+			.setDescription(`the unique id of the tab, if left undefined a uuid will be assigned`);
 
 		attributeDefinitions
 			.add("name", "[Unnamed Tab]")
@@ -362,15 +360,11 @@ export class TabNode extends Node implements IDraggable {
 		attributeDefinitions
 			.add("helpText", undefined)
 			.setType(Attribute.STRING)
-			.setDescription(
-				`An optional help text for the tab to be displayed upon tab hover.`,
-			);
+			.setDescription(`An optional help text for the tab to be displayed upon tab hover.`);
 		attributeDefinitions
 			.add("component", undefined)
 			.setType(Attribute.STRING)
-			.setDescription(
-				`string identifying which component to run (for factory)`,
-			);
+			.setDescription(`string identifying which component to run (for factory)`);
 		attributeDefinitions
 			.add("config", undefined)
 			.setType("any")
@@ -417,9 +411,7 @@ export class TabNode extends Node implements IDraggable {
 		attributeDefinitions
 			.addInherited("enableRenderOnDemand", "tabEnableRenderOnDemand")
 			.setType(Attribute.BOOLEAN)
-			.setDescription(
-				`whether to avoid rendering component until tab is visible`,
-			);
+			.setDescription(`whether to avoid rendering component until tab is visible`);
 		attributeDefinitions
 			.addInherited("enablePopout", "tabEnablePopout")
 			.setType(Attribute.BOOLEAN)

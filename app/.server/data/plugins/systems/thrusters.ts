@@ -1,14 +1,10 @@
 import type ThrustersPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Thrusters";
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
-import {
-	getShipSystem,
-	getShipSystemForInput,
-	pluginFilter,
-	systemInput,
-} from "../utils";
+import z from "zod";
+
+import { getShipSystem, getShipSystemForInput, pluginFilter, systemInput } from "../utils";
 
 export const thrusters = t.router({
 	get: t.procedure
@@ -17,8 +13,7 @@ export const thrusters = t.router({
 		.request(({ ctx, input }) => {
 			const system = getShipSystem({ input, ctx });
 
-			if (system.type !== "thrusters")
-				throw new Error("System is not Thrusters");
+			if (system.type !== "thrusters") throw new Error("System is not Thrusters");
 
 			return system as ThrustersPlugin;
 		}),

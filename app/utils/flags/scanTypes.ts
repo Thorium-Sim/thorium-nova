@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 export const scanTypes = z.enum([
 	// For ships
 	"identification",
@@ -33,6 +33,7 @@ export const shipScanTypes: z.infer<typeof scanTypes>[] = [
 
 export const planetScanTypes: z.infer<typeof scanTypes>[] = [
 	"life",
+	"communications",
 	"atmosphere",
 	"temperature",
 ];
@@ -117,10 +118,11 @@ export const scanRecord = z.object({
 			damage: z.record(z.number()),
 		})
 		.optional(),
-	// TODO February 15, 2025: Add this once we have a better idea what communications looks like
 	communications: z
 		.object({
 			scanTime: z.number(),
+			status: z.string(),
+			frequency: z.string(),
 		})
 		.optional(),
 	// TODO February 15, 2025: Add this once we have a better idea what life support looks like
@@ -148,7 +150,5 @@ export const scanRecord = z.object({
 			),
 		})
 		.optional(),
-	temperature: z
-		.object({ scanTime: z.number(), temperature: z.number() })
-		.optional(),
+	temperature: z.object({ scanTime: z.number(), temperature: z.number() }).optional(),
 });

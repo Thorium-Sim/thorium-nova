@@ -1,11 +1,9 @@
-import React, { type ReactNode } from "react";
 import { cn } from "@thorium/utils/cn";
+import React, { type ReactNode } from "react";
+
 import { Icon } from "./Icon";
 
-const Tag: React.FC<{ tag: string; onClick: () => void }> = ({
-	tag,
-	onClick,
-}) => {
+const Tag: React.FC<{ tag: string; onClick: () => void }> = ({ tag, onClick }) => {
 	return (
 		<button className="badge" data-testid="tag-remove">
 			{tag}{" "}
@@ -28,7 +26,7 @@ const TagInput: React.FC<{
 	className?: string;
 	omitChars?: string[];
 }> = ({
-	tags = [],
+	tags,
 	onRemove,
 	onAdd,
 	label,
@@ -69,10 +67,7 @@ const TagInput: React.FC<{
 								setTagInput("");
 							}
 						}
-						if (
-							(e.key === "Backspace" || e.key === "Delete") &&
-							tagInput === ""
-						) {
+						if ((e.key === "Backspace" || e.key === "Delete") && tagInput === "") {
 							e.preventDefault();
 							onRemove(tags[tags.length - 1]);
 						}

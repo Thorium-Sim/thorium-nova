@@ -1,4 +1,6 @@
 import type { ComponentIds } from "@thorium/ecs-components";
+import type { Entity } from "@thorium/utils/ecs";
+
 import { getParseFn } from "./getParseFn";
 import {
 	createInputMiddleware,
@@ -29,7 +31,6 @@ import type {
 	Simplify,
 	UndefinedKeys,
 } from "./types";
-import type { Entity } from "@thorium/utils/ecs";
 
 type ErrorMessage<TMessage extends string> = TMessage;
 
@@ -41,17 +42,17 @@ export interface BuildProcedure<
 	TParams extends ProcedureParams,
 	TOutput,
 > extends Procedure<
-		TType,
-		UnsetMarker extends TParams["_output_out"]
-			? OverwriteKnown<
-					TParams,
-					{
-						_output_in: TOutput;
-						_output_out: TOutput;
-					}
-				>
-			: TParams
-	> {
+	TType,
+	UnsetMarker extends TParams["_output_out"]
+		? OverwriteKnown<
+				TParams,
+				{
+					_output_in: TOutput;
+					_output_out: TOutput;
+				}
+			>
+		: TParams
+> {
 	_empty?: never;
 }
 
@@ -72,16 +73,12 @@ export type OverwriteKnown<TType, TWith> = {
 
 type OverwriteIfDefined<TType, TWith> = UnsetMarker extends TType
 	? TWith
-	: Simplify<
-			InferOptional<Merge<TType, TWith>, UndefinedKeys<Merge<TType, TWith>>>
-		>;
+	: Simplify<InferOptional<Merge<TType, TWith>, UndefinedKeys<Merge<TType, TWith>>>>;
 
 /**
  * @internal
  */
-export type FallbackValue<TValue, TFallback> = UnsetMarker extends TValue
-	? TFallback
-	: TValue;
+export type FallbackValue<TValue, TFallback> = UnsetMarker extends TValue ? TFallback : TValue;
 
 type AnyProcedureBuilder = ProcedureBuilder<any>;
 
@@ -120,14 +117,8 @@ export interface ProcedureBuilder<TParams extends ProcedureParams> {
 		_publish: TParams["_publish"];
 		_entity: TParams["_entity"];
 		_ctx_out: TParams["_ctx_out"];
-		_input_in: OverwriteIfDefined<
-			TParams["_input_in"],
-			inferParser<$Parser>["in"]
-		>;
-		_input_out: OverwriteIfDefined<
-			TParams["_input_out"],
-			inferParser<$Parser>["out"]
-		>;
+		_input_in: OverwriteIfDefined<TParams["_input_in"], inferParser<$Parser>["in"]>;
+		_input_out: OverwriteIfDefined<TParams["_input_out"], inferParser<$Parser>["out"]>;
 
 		_output_in: TParams["_output_in"];
 		_output_out: TParams["_output_out"];
@@ -151,7 +142,17 @@ export interface ProcedureBuilder<TParams extends ProcedureParams> {
 	/**
 	 * Add a meta data to the procedure.
 	 */
-	meta(meta: TParams["_meta"]): ProcedureBuilder<TParams>;
+	meta<$Meta>(meta: $Meta): ProcedureBuilder<{
+		_config: TParams["_config"];
+		_meta: $Meta;
+		_publish: TParams["_publish"];
+		_entity: TParams["_entity"];
+		_ctx_out: TParams["_ctx_out"];
+		_input_in: TParams["_input_in"];
+		_input_out: TParams["_input_out"];
+		_output_in: TParams["_output_in"];
+		_output_out: TParams["_output_out"];
+	}>;
 	/**
 	 * Automatically trigger a publish call when these components change on entities.
 	 */
@@ -219,7 +220,7 @@ export interface ProcedureBuilder<TParams extends ProcedureParams> {
 	dataStream(
 		resolver: (
 			opts: ResolveOptions<TParams>,
-		) => MaybePromise<FallbackValue<TParams["_output_in"], boolean>>,
+		) => MaybePromise<FallbackValue<TParams["_output_in"], Set<Entity>>>,
 	): BuildProcedure<"dataStream", TParams, boolean>;
 	/**
 	 * @internal
@@ -246,10 +247,7 @@ export function mergeWithoutOverrides<TType extends Record<string, unknown>>(
 	return newObj;
 }
 
-function createNewBuilder(
-	def1: AnyProcedureBuilderDef,
-	def2: Partial<AnyProcedureBuilderDef>,
-) {
+function createNewBuilder(def1: AnyProcedureBuilderDef, def2: Partial<AnyProcedureBuilderDef>) {
 	const { middlewares = [], inputs, ...rest } = def2;
 
 	// TODO: maybe have a fn here to warn about calls
@@ -322,22 +320,13 @@ export function createBuilder<TConfig extends AnyRootConfig>(
 			}) as AnyProcedureBuilder;
 		},
 		request(resolver) {
-			return createResolver(
-				{ ..._def, request: true },
-				resolver,
-			) as AnyRequestProcedure;
+			return createResolver({ ..._def, request: true }, resolver) as AnyRequestProcedure;
 		},
 		send(resolver) {
-			return createResolver(
-				{ ..._def, send: true },
-				resolver,
-			) as AnySendProcedure;
+			return createResolver({ ..._def, send: true }, resolver) as AnySendProcedure;
 		},
 		dataStream(resolver) {
-			return createResolver(
-				{ ..._def, dataStream: true },
-				resolver,
-			) as AnyDataStreamProcedure;
+			return createResolver({ ..._def, dataStream: true }, resolver) as AnyDataStreamProcedure;
 		},
 	};
 }
@@ -390,7 +379,6 @@ function createProcedureCaller(_def: AnyProcedureBuilderDef): AnyProcedure {
 			},
 		): Promise<MiddlewareResult<any>> => {
 			try {
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 				const middleware = _def.middlewares[callOpts.index]!;
 				const result = await middleware({
 					ctx: callOpts.ctx,
@@ -400,18 +388,12 @@ function createProcedureCaller(_def: AnyProcedureBuilderDef): AnyProcedure {
 					meta: _def.meta,
 					input: callOpts.input,
 					publish: opts.publish,
-					entity: opts.entity,
 					next: async (nextOpts?: { ctx: any; input?: any }) => {
 						return await callRecursive({
 							index: callOpts.index + 1,
 							ctx:
-								nextOpts && "ctx" in nextOpts
-									? { ...callOpts.ctx, ...nextOpts.ctx }
-									: callOpts.ctx,
-							input:
-								nextOpts && "input" in nextOpts
-									? nextOpts.input
-									: callOpts.input,
+								nextOpts && "ctx" in nextOpts ? { ...callOpts.ctx, ...nextOpts.ctx } : callOpts.ctx,
+							input: nextOpts && "input" in nextOpts ? nextOpts.input : callOpts.input,
 						});
 					},
 				});
@@ -429,9 +411,7 @@ function createProcedureCaller(_def: AnyProcedureBuilderDef): AnyProcedure {
 		const result = await callRecursive();
 
 		if (!result) {
-			throw new Error(
-				"No result from middlewares - did you forget to `return next()`?",
-			);
+			throw new Error("No result from middlewares - did you forget to `return next()`?");
 		}
 		if (!result.ok) {
 			// re-throw original error

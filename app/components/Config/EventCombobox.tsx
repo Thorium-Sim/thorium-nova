@@ -1,8 +1,8 @@
 import { q } from "@thorium/context/AppContext";
-import { useState } from "react";
-import { matchSorter } from "match-sorter";
-import { cn } from "@thorium/utils/cn";
 import { Icon } from "@thorium/ui/Icon";
+import { cn } from "@thorium/utils/cn";
+import { matchSorter } from "match-sorter";
+import { useState } from "react";
 import {
 	Button,
 	ComboBox,
@@ -17,7 +17,6 @@ export function EventCombobox({
 	value,
 	onChange,
 	placeholder = "Events",
-	className,
 }: {
 	value: {
 		name: string;
@@ -52,22 +51,22 @@ export function EventCombobox({
 			}}
 			aria-label={placeholder}
 		>
-			<Group className="flex rounded-lg border-teal-300 border transition shadow-md ring-1 min-h-6 h-6 ring-black/10 focus-visible:ring-2 focus-visible:ring-black">
+			<Group className="flex h-6 min-h-6 rounded-lg border border-teal-300 shadow-md ring-1 ring-black/10 transition focus-visible:ring-2 focus-visible:ring-black">
 				<Input
 					placeholder={placeholder}
-					className="flex-1 w-full border-none py-2 px-3 leading-5 placeholder:text-teal-300 placeholder:font-semibold text-teal-300 bg-transparent outline-none focus:ring-0 pl-3 pr-10 text-xs "
+					className="w-full flex-1 border-none bg-transparent py-2 pr-0 pl-3 text-xs leading-5 text-teal-300 outline-none placeholder:font-semibold placeholder:text-teal-300 focus:ring-0"
 				/>
-				<Button className="px-3 flex items-center text-teal-300 transition border-0 border-solid border-l border-l-teal-300 rounded-r-lg pressed:bg-teal-300/50 bg-teal-300/20 hover:bg-teal-300/50 cursor-pointer">
+				<Button className="pressed:bg-teal-300/50 flex cursor-pointer items-center rounded-r-lg border-0 border-l border-solid border-l-teal-300 bg-teal-300/20 px-3 text-teal-300 transition hover:bg-teal-300/50">
 					<Icon name="chevrons-up-down" />
 				</Button>
 			</Group>
-			<Popover className="max-h-60 w-(--trigger-width) overflow-auto rounded-md bg-gray-900/90 border-gray-400 border text-base shadow-lg ring-1 ring-black/5 entering:animate-in entering:fade-in exiting:animate-out exiting:fade-out">
-				<ListBox className="outline-hidden p-1" items={filteredEvents}>
+			<Popover className="entering:animate-in entering:fade-in exiting:animate-out exiting:fade-out max-h-60 min-w-(--trigger-width) overflow-auto rounded-md border border-gray-400 bg-gray-900/90 text-base shadow-lg ring-1 ring-black/5">
+				<ListBox className="p-1 outline-hidden" items={filteredEvents}>
 					{(item) => (
 						<ListBoxItem
 							textValue={item.name}
 							key={item.key}
-							className="group flex items-center gap-0.5 cursor-default select-none outline-hidden rounded-sm text-gray-900 focus:bg-sky-600 focus:text-white"
+							className="group flex cursor-default items-center gap-0.5 rounded-sm text-gray-900 outline-hidden select-none focus:bg-sky-600 focus:text-white"
 						>
 							{({ isSelected, isFocusVisible, isHovered }) => (
 								<>
@@ -83,7 +82,7 @@ export function EventCombobox({
 										{item.name}
 									</span>
 									{isSelected && (
-										<span className="w-5 flex items-center text-teal-300 group-focus:text-white">
+										<span className="flex w-5 items-center text-teal-300 group-focus:text-white">
 											<Icon name="check" />
 										</span>
 									)}

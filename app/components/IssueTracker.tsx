@@ -1,3 +1,9 @@
+import { toast } from "@thorium/context/ToastContext";
+import Button from "@thorium/ui/Button";
+import Input from "@thorium/ui/Input";
+import MarkdownInput from "@thorium/ui/MarkdownInput";
+import Modal from "@thorium/ui/Modal";
+import randomWords from "@thorium/utils/random-words";
 import {
 	createContext,
 	type Dispatch,
@@ -7,25 +13,13 @@ import {
 	useEffect,
 	useState,
 } from "react";
-import Button from "@thorium/ui/Button";
-import LoginButton from "./LoginButton";
-import Modal from "@thorium/ui/Modal";
-import { useThoriumAccount } from "../context/ThoriumAccountContext";
-import Input from "@thorium/ui/Input";
-import MarkdownInput from "@thorium/ui/MarkdownInput";
-import randomWords from "@thorium/utils/random-words";
-import { toast } from "@thorium/context/ToastContext";
+
 import packageJson from "../../package.json" with { type: "json" };
+import { useThoriumAccount } from "../context/ThoriumAccountContext";
+import LoginButton from "./LoginButton";
 import { Icon } from "./ui/Icon";
 
-const availableLabels = [
-	"Feature",
-	"Bug",
-	"Design",
-	"Documentation",
-	"Question",
-	"Compliment",
-];
+const availableLabels = ["Feature", "Bug", "Design", "Documentation", "Question", "Compliment"];
 const IssueTrackerContext = createContext<{
 	open: boolean;
 	setOpen: Dispatch<SetStateAction<boolean>>;
@@ -44,8 +38,7 @@ export const IssueTrackerProvider = ({ children }: { children: ReactNode }) => {
 
 export const useIssueTracker = () => {
 	const value = useContext(IssueTrackerContext);
-	if (!value)
-		throw new Error("useIssueTracker used outside of context provider");
+	if (!value) throw new Error("useIssueTracker used outside of context provider");
 	return value;
 };
 
@@ -67,8 +60,7 @@ function IssueTracker({
 				refresh();
 			}
 			window.addEventListener("visibilitychange", onVisibilityChange);
-			return () =>
-				window.removeEventListener("visibilitychange", onVisibilityChange);
+			return () => window.removeEventListener("visibilitychange", onVisibilityChange);
 		},
 		[refresh, open],
 	);
@@ -84,28 +76,23 @@ function IssueTracker({
 		[refresh, open],
 	);
 	return (
-		<Modal
-			isOpen={open}
-			setIsOpen={(open) => setOpen(open)}
-			title="Submit an Issue"
-		>
+		<Modal isOpen={open} setIsOpen={(open) => setOpen(open)} title="Submit an Issue">
 			{!account ? (
-				<div className="text-center flex items-center justify-center flex-col gap-8 my-8">
-					<h2 className="font-bold text-3xl">Sign in to Submit Issues</h2>
+				<div className="my-8 flex flex-col items-center justify-center gap-8 text-center">
+					<h2 className="text-3xl font-bold">Sign in to Submit Issues</h2>
 					<p className="w-64">
-						To better track issues and collect feedback, you must be logged in
-						to a Thorium Nova account.
+						To better track issues and collect feedback, you must be logged in to a Thorium Nova
+						account.
 					</p>
 					<div>
 						<LoginButton buttonClassName="btn-notice" />
 					</div>
 				</div>
 			) : !account.accounts?.includes("github") ? (
-				<div className="text-center flex items-center justify-center flex-col gap-8 my-8">
-					<h2 className="font-bold text-3xl">Connect to Github</h2>
+				<div className="my-8 flex flex-col items-center justify-center gap-8 text-center">
+					<h2 className="text-3xl font-bold">Connect to Github</h2>
 					<p className="w-64">
-						To submit issues, you must connect your Thorium Nova account to
-						Github.
+						To submit issues, you must connect your Thorium Nova account to Github.
 					</p>
 					<div>
 						<a
@@ -119,7 +106,7 @@ function IssueTracker({
 				</div>
 			) : (
 				<form
-					className="flex flex-col gap-4 my-4 w-96"
+					className="my-4 flex w-96 flex-col gap-4"
 					onSubmit={async (event) => {
 						event.preventDefault();
 						const title = event.currentTarget.issueTitle.value;
@@ -146,17 +133,14 @@ function IssueTracker({
 						};
 						setOpen(false);
 						try {
-							const response = await fetch(
-								`${process.env.THORIUMSIM_URL}/api/issues`,
-								{
-									method: "POST",
-									body: JSON.stringify(requestBody),
-									headers: {
-										"Content-Type": "application/json",
-										Authorization: `Bearer ${account.access_token}`,
-									},
+							const response = await fetch(`${process.env.THORIUMSIM_URL}/api/issues`, {
+								method: "POST",
+								body: JSON.stringify(requestBody),
+								headers: {
+									"Content-Type": "application/json",
+									Authorization: `Bearer ${account.access_token}`,
 								},
-							);
+							});
 							const result = (await response.json()) as any;
 							if (!response.ok || result.error) {
 								toast({
@@ -233,10 +217,7 @@ function IssueTracker({
 									headers: {
 										Authorization: uploadData.authorizationToken,
 										"Content-Type": "b2/x-auto",
-										"X-Bz-File-Name": `issue_uploads/${image.name.replace(
-											/\s/gm,
-											"-",
-										)}`,
+										"X-Bz-File-Name": `issue_uploads/${image.name.replace(/\s/gm, "-")}`,
 										"X-Bz-Content-Sha1": "do_not_verify",
 									},
 								}).then((res) => res.json())) as any;
@@ -251,12 +232,11 @@ function IssueTracker({
 					<Input
 						as="select"
 						label="Type"
-						className="form-select block w-full select max-w-xs select-sm"
+						className="form-select select select-sm block w-full max-w-xs"
 						isInvalid={invalid.includes("type")}
 						invalidMessage="Type is required."
 						onChange={(e) =>
-							e.target.value !== "Select One" &&
-							setInvalid(invalid.filter((i) => i !== "type"))
+							e.target.value !== "Select One" && setInvalid(invalid.filter((i) => i !== "type"))
 						}
 						name="label"
 					>

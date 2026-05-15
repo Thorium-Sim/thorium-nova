@@ -1,13 +1,7 @@
-import { cn } from "@thorium/utils/cn";
-import {
-	Link,
-	matchPath,
-	Outlet,
-	useLocation,
-	useNavigate,
-} from "react-router";
 import Modal from "@thorium/ui/Modal";
+import { cn } from "@thorium/utils/cn";
 import type { ReactNode } from "react";
+import { Link, matchPath, Outlet, useLocation, useNavigate } from "react-router";
 
 export default function SettingsOptions() {
 	const navigate = useNavigate();
@@ -19,7 +13,7 @@ export default function SettingsOptions() {
 					<SettingListItem path="audio">Audio</SettingListItem>
 					<SettingListItem path="gamepad">Gamepad</SettingListItem>
 				</div>
-				<div className="flex-1 max-h-[80vh] overflow-y-auto">
+				<div className="max-h-[80vh] flex-1 overflow-y-auto">
 					<Outlet />
 				</div>
 			</div>
@@ -27,14 +21,9 @@ export default function SettingsOptions() {
 	);
 }
 
-function SettingListItem({
-	children,
-	path,
-}: { children: ReactNode; path: string }) {
-	const setting = matchPath(
-		"/flight/station/settings/:setting",
-		useLocation().pathname,
-	)?.params.setting;
+function SettingListItem({ children, path }: { children: ReactNode; path: string }) {
+	const setting = matchPath("/flight/station/settings/:setting", useLocation().pathname)?.params
+		.setting;
 
 	return (
 		<Link

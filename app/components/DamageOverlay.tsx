@@ -2,10 +2,7 @@ import { q } from "@thorium/context/AppContext";
 import { cn } from "@thorium/utils/cn";
 import { useState } from "react";
 
-export function DamageOverlay({
-	systemId,
-	className,
-}: { systemId: number; className?: string }) {
+export function DamageOverlay({ systemId, className }: { systemId: number; className?: string }) {
 	const [reason, setReason] = useState("");
 	const [system] = q.legacy.powerDistribution.systemPower.useNetRequest(
 		{
@@ -17,8 +14,8 @@ export function DamageOverlay({
 					system.offline
 						? "System Damaged"
 						: typeof system.currentPower === "number" &&
-								Array.isArray(system.powerLevels) &&
-								system.currentPower < system.powerLevels[0]
+							  Array.isArray(system.powerLevels) &&
+							  system.currentPower < system.powerLevels[0]
 							? "Insufficient Power"
 							: reason,
 				);
@@ -43,8 +40,8 @@ export function DamageOverlay({
 				},
 			)}
 		>
-			<p className="text-red-500 font-bold text-3xl">{system.name} Offline</p>
-			<p className="text-red-500 font-bold text-xl">{reason}</p>
+			<p className="text-3xl font-bold text-red-500">{system.name} Offline</p>
+			<p className="text-xl font-bold text-red-500">{reason}</p>
 		</div>
 	);
 }

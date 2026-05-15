@@ -1,14 +1,14 @@
+import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
 import { usePrompt } from "@thorium/ui/AlertDialog";
+import Dropdown, { DropdownItem } from "@thorium/ui/Dropdown";
+import { Icon } from "@thorium/ui/Icon";
 import { useMenubar } from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
-import { Outlet, useParams, useNavigate } from "react-router";
-import { Fragment, Suspense } from "react";
-import { toast } from "@thorium/context/ToastContext";
-import Dropdown, { DropdownItem } from "@thorium/ui/Dropdown";
 import { capitalCase } from "change-case";
-import { q } from "@thorium/context/AppContext";
-import { Icon } from "@thorium/ui/Icon";
+import { Fragment, Suspense } from "react";
 import { Button } from "react-aria-components";
+import { Outlet, useParams, useNavigate } from "react-router";
 
 export default function ShipSystemsList() {
 	const { pluginId } = useParams() as {
@@ -36,12 +36,10 @@ function ShipSystemsInner() {
 	const system = data.find((d) => d.name === systemId);
 
 	return (
-		<div className="p-8 h-[calc(100%-2rem)]">
-			<h1 className="font-bold text-white text-3xl mb-4">
-				Ship Systems Config
-			</h1>
-			<div className="flex gap-8 h-[calc(100%-3rem)]">
-				<div className="flex flex-col w-80 h-full">
+		<div className="h-[calc(100%-2rem)] p-8">
+			<h1 className="mb-4 text-3xl font-bold text-white">Ship Systems Config</h1>
+			<div className="flex h-[calc(100%-3rem)] gap-8">
+				<div className="flex h-full w-80 flex-col">
 					<Dropdown
 						triggerEl={
 							<Button className="btn btn-success btn-sm w-full">
@@ -95,7 +93,7 @@ function ShipSystemsInner() {
 						selectedItem={systemId || null}
 						setSelectedItem={({ id }) => navigate(`${id}`)}
 						renderItem={(c) => (
-							<div className="flex justify-between items-center" key={c.id}>
+							<div className="flex items-center justify-between" key={c.id}>
 								<div>
 									{c.name}
 									<div>
@@ -103,10 +101,7 @@ function ShipSystemsInner() {
 										{c.flightModes.length === 1 ? (
 											<>
 												{" "}
-												-{" "}
-												<small className="italic">
-													{capitalCase(c.flightModes[0])}
-												</small>
+												- <small className="italic">{capitalCase(c.flightModes[0])}</small>
 											</>
 										) : null}
 									</div>

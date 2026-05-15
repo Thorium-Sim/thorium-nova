@@ -1,14 +1,7 @@
-import type {
-	Snapshot,
-	InterpolatedSnapshot,
-	Time,
-	Value,
-	State,
-	Entity,
-} from "./types";
-import { Vault } from "./vault";
 import { lerp, degreeLerp, radianLerp } from "./lerp";
 import { quatSlerp } from "./slerp";
+import type { Snapshot, InterpolatedSnapshot, Time, Value, State, Entity } from "./types";
+import { Vault } from "./vault";
 
 interface Config {
 	autoCorrectTimeOffset?: boolean;
@@ -70,21 +63,15 @@ export class SnapshotInterpolation {
 	}
 
 	/** Create a new Snapshot */
-	public static CreateSnapshot(
-		state: State | { [key: string]: State },
-	): Snapshot {
+	public static CreateSnapshot(state: State | { [key: string]: State }): Snapshot {
 		const check = (state: State) => {
 			// check if state is an array
-			if (!Array.isArray(state))
-				throw new Error("You have to pass an Array to createSnapshot()");
+			if (!Array.isArray(state)) throw new Error("You have to pass an Array to createSnapshot()");
 
 			// check if each entity has an id
-			const withoutID = state.filter(
-				(e) => typeof e.id !== "string" && typeof e.id !== "number",
-			);
+			const withoutID = state.filter((e) => typeof e.id !== "string" && typeof e.id !== "number");
 
-			if (withoutID.length > 0)
-				throw new Error("Each Entity needs to have a id");
+			if (withoutID.length > 0) throw new Error("Each Entity needs to have a id");
 		};
 
 		if (Array.isArray(state)) {
@@ -131,13 +118,7 @@ export class SnapshotInterpolation {
 		parameters: string,
 		deep = "",
 	): InterpolatedSnapshot {
-		return this._interpolate(
-			snapshotA,
-			snapshotB,
-			timeOrPercentage,
-			parameters,
-			deep,
-		);
+		return this._interpolate(snapshotA, snapshotB, timeOrPercentage, parameters, deep);
 	}
 
 	private _interpolate(
@@ -169,8 +150,7 @@ export class SnapshotInterpolation {
 		// ------ 0% ------ x% --- 100% --->> NOW
 		const zeroPercent = tn - t1;
 		const hundredPercent = t0 - t1;
-		const pPercent =
-			timeOrPercentage <= 1 ? timeOrPercentage : zeroPercent / hundredPercent;
+		const pPercent = timeOrPercentage <= 1 ? timeOrPercentage : zeroPercent / hundredPercent;
 
 		this.serverTime = lerp(t1, t0, pPercent);
 
@@ -200,22 +180,14 @@ export class SnapshotInterpolation {
 		if (Array.isArray(newer.state) && deep !== "")
 			throw new Error('No "deep" needed it state is an array.');
 
-		const newerState: State = Array.isArray(newer.state)
-			? newer.state
-			: newer.state[deep];
-		const olderState: State = Array.isArray(older.state)
-			? older.state
-			: older.state[deep];
+		const newerState: State = Array.isArray(newer.state) ? newer.state : newer.state[deep];
+		const olderState: State = Array.isArray(older.state) ? older.state : older.state[deep];
 
-		const tmpSnapshot: Snapshot = JSON.parse(
-			JSON.stringify({ ...newer, state: newerState }),
-		);
+		const tmpSnapshot: Snapshot = JSON.parse(JSON.stringify({ ...newer, state: newerState }));
 
 		newerState.forEach((e: Entity, i: number) => {
 			const id = e.id;
-			const other: Entity | undefined = olderState.find(
-				(e: any) => e.id === id,
-			);
+			const other: Entity | undefined = olderState.find((e: any) => e.id === id);
 			if (!other) return;
 
 			// A special property which indicates the interpolation
@@ -248,15 +220,9 @@ export class SnapshotInterpolation {
 	}
 
 	/** Get the calculated interpolation on the client. */
-	public calcInterpolation(
-		parameters: string,
-		deep = "",
-	): InterpolatedSnapshot | undefined {
+	public calcInterpolation(parameters: string, deep = ""): InterpolatedSnapshot | undefined {
 		// get the snapshots [this._interpolationBuffer] ago
-		const serverTime =
-			SnapshotInterpolation.Now() -
-			this._timeOffset -
-			this._interpolationBuffer;
+		const serverTime = SnapshotInterpolation.Now() - this._timeOffset - this._interpolationBuffer;
 
 		const shots = this.vault.get(serverTime);
 		if (!shots) return;

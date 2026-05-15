@@ -1,15 +1,12 @@
-import { TabSetNode } from "./TabSetNode";
 import { BorderNode } from "./BorderNode";
 import type { RowNode } from "./RowNode";
 import type { TabNode } from "./TabNode";
+import { TabSetNode } from "./TabSetNode";
 
 /** @internal */
 export function adjustSelectedIndexAfterDock(node: TabNode) {
 	const parent = node.getParent();
-	if (
-		parent !== null &&
-		(parent instanceof TabSetNode || parent instanceof BorderNode)
-	) {
+	if (parent !== null && (parent instanceof TabSetNode || parent instanceof BorderNode)) {
 		const children = parent.getChildren();
 		for (let i = 0; i < children.length; i++) {
 			const child = children[i] as TabNode;
@@ -27,10 +24,7 @@ export function adjustSelectedIndex(
 	removedIndex: number,
 ) {
 	// for the tabset/border being removed from set the selected index
-	if (
-		parent !== undefined &&
-		(parent instanceof TabSetNode || parent instanceof BorderNode)
-	) {
+	if (parent !== undefined && (parent instanceof TabSetNode || parent instanceof BorderNode)) {
 		const selectedIndex = (parent as TabSetNode | BorderNode).getSelected();
 		if (selectedIndex !== -1) {
 			if (removedIndex === selectedIndex && parent.getChildren().length > 0) {
@@ -54,9 +48,6 @@ export function adjustSelectedIndex(
 export function randomUUID(): string {
 	// @ts-expect-error
 	return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-		(
-			c ^
-			(crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-		).toString(16),
+		(c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
 	);
 }

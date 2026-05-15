@@ -1,26 +1,26 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import { Suspense } from "react";
 import { Line, useGLTF } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { q } from "@thorium/context/AppContext";
+import { useStation } from "@thorium/routes/station/useStation";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { setCursor } from "@thorium/utils/setCursor";
+import type { Meter } from "@thorium/utils/unitTypes";
+import { type RefObject, Suspense, useMemo, useRef } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import {
-	CanvasTexture,
 	Color,
 	FrontSide,
 	type Group,
 	type Mesh,
 	type MeshStandardMaterial,
 	Object3D,
-	type Sprite,
 	type Vector3,
 } from "three";
-import { useFrame } from "@react-three/fiber";
-import { useGetStarmapStore } from "./starmapStore";
 import type { Line2 } from "three-stdlib";
-import { clientId, q } from "@thorium/context/AppContext";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { setCursor } from "@thorium/utils/setCursor";
-import type { Meter } from "@thorium/utils/unitTypes";
-import { ConeVisualization } from "@thorium/cards/Targeting/Phasers";
-import { useStation } from "@thorium/routes/station/useStation";
+
+import { PhasersVisualization } from "./PhasersVisualization";
+import { ShipSprite } from "./ShipSprite";
+import { useGetStarmapStore } from "./starmapStore";
 
 export function StarmapShip({
 	id,
@@ -48,9 +48,7 @@ export function StarmapShip({
 	const model = useShipModel(modelUrl);
 
 	const useStarmapStore = useGetStarmapStore();
-	const isSelected = useStarmapStore(
-		(store) => store.selectedObjectIds,
-	).includes(id);
+	const isSelected = useStarmapStore((store) => store.selectedObjectIds).includes(id);
 	const systemId = useStarmapStore((store) => store.currentSystem);
 
 	const [autopilotData] = q.starmapCore.autopilot.useNetRequest(
@@ -61,15 +59,12 @@ export function StarmapShip({
 	const shipAutopilot = autopilotData[id];
 	const { shipId, ship } = useStation();
 
-	const isNotViewscreen = useStarmapStore(
-		(store) => store.viewingMode !== "viewscreen",
-	);
+	const isNotViewscreen = useStarmapStore((store) => store.viewingMode !== "viewscreen");
 	const isCore = useStarmapStore((store) => store.viewingMode === "core");
 	const sensorsHidden = useStarmapStore((store) => store.sensorsHidden);
 	const group = useRef<Group>(null);
 	const dragging = useRef<Group>(null);
 	const shipMesh = useRef<Group>(null);
-	const phasersRef = useRef<Group>(null);
 	const shipSprite = useRef<Group>(null);
 	const { interpolate } = useLiveQuery();
 	const lineRef = useRef<Line2>(null);
@@ -83,26 +78,13 @@ export function StarmapShip({
 		group.current.visible = true;
 		group.current.position.set(state.x, state.y, state.z);
 		if (dragging.current && dragMovement?.current) {
-			dragging.current.position
-				.set(state.x, state.y, state.z)
-				.add(dragMovement.current);
+			dragging.current.position.set(state.x, state.y, state.z).add(dragMovement.current);
 			dragging.current.visible = true;
 		}
 		if (dragging.current && !dragMovement?.current) {
 			dragging.current.visible = false;
 		}
-		shipMesh.current?.quaternion.set(
-			state.r.x,
-			state.r.y,
-			state.r.z,
-			state.r.w,
-		);
-		phasersRef.current?.quaternion.set(
-			state.r.x,
-			state.r.y,
-			state.r.z,
-			state.r.w,
-		);
+		shipMesh.current?.quaternion.set(state.r.x, state.r.y, state.r.z, state.r.w);
 		if (shipMesh.current) {
 			if (!isNotViewscreen && shipId === id) {
 				shipMesh.current.visible = false;
@@ -125,8 +107,7 @@ export function StarmapShip({
 						: [
 								ship.currentSystem
 									? shipAutopilot.destinationPosition
-									: shipAutopilot.destinationSystemPosition ||
-										shipAutopilot.destinationPosition,
+									: shipAutopilot.destinationSystemPosition || shipAutopilot.destinationPosition,
 							];
 
 				lineRef.current.geometry.setPositions([
@@ -176,37 +157,11 @@ export function StarmapShip({
 				)}
 			</group>
 			<group ref={group}>
-				{/* Ship sensor range */}
-				{!isCore || sensorsHidden ? null : isSelected ? (
-					<group rotation={[0, Math.PI, 0]}>
-						{/* Pilot Range */}
-						<mesh>
-							<icosahedronGeometry args={[10_000, 1]} />
-							<meshBasicMaterial
-								color="#0088ff"
-								transparent
-								opacity={0.2}
-								wireframe
-							/>
-						</mesh>
-						{/* Weapons Range */}
-						<mesh>
-							<icosahedronGeometry args={[25_000, 1]} />
-							<meshBasicMaterial
-								color="#ff0000"
-								transparent
-								opacity={0.2}
-								wireframe
-							/>
-						</mesh>
-						<group ref={phasersRef}>
-							<Suspense>
-								<PhasersVisualization shipId={id} />
-							</Suspense>
-						</group>
-						{/* TODO: Add Sensors range */}
-					</group>
-				) : null}
+				{!isCore || sensorsHidden || !isSelected ? null : (
+					<Suspense>
+						<SensorRanges id={id} />
+					</Suspense>
+				)}
 				<group
 					onPointerOver={() => {
 						// set the cursor to pointer
@@ -252,9 +207,79 @@ export function StarmapShip({
 	);
 }
 
+function SensorRanges({ id }: { id: number }) {
+	const phasersRef = useRef<Group>(null);
+	const { interpolate } = useLiveQuery();
+
+	useFrame(() => {
+		const state = interpolate(id);
+		if (!state) return;
+		phasersRef.current?.quaternion.set(state.r.x, state.r.y, state.r.z, state.r.w);
+	});
+
+	return (
+		<group rotation={[0, Math.PI, 0]}>
+			{/* Pilot Range */}
+			<mesh>
+				<icosahedronGeometry args={[10_000, 1]} />
+				<meshBasicMaterial color="#0088ff" transparent opacity={0.2} wireframe />
+			</mesh>
+			{/* Weapons Range */}
+			<mesh>
+				<icosahedronGeometry args={[25_000, 1]} />
+				<meshBasicMaterial color="#ff0000" transparent opacity={0.2} wireframe />
+			</mesh>
+			<ErrorBoundary fallback={null}>
+				<Suspense>
+					<SensorsRange shipId={id} />
+				</Suspense>
+			</ErrorBoundary>
+			<ErrorBoundary fallback={null}>
+				<Suspense>
+					<CommunicationsRange shipId={id} />
+				</Suspense>
+			</ErrorBoundary>
+			<group ref={phasersRef}>
+				<Suspense>
+					<PhasersVisualization shipId={id} />
+				</Suspense>
+			</group>
+		</group>
+	);
+}
+
+function SensorsRange({ shipId }: { shipId: number }) {
+	const [sensors] = q.sensors.get.useNetRequest({ shipId });
+
+	return (
+		<>
+			<mesh>
+				<icosahedronGeometry args={[sensors.passiveRange, 1]} />
+				<meshBasicMaterial color="#0bd0bb" transparent opacity={0.2} wireframe />
+			</mesh>
+			<mesh>
+				<icosahedronGeometry args={[sensors.activeRange, 1]} />
+				<meshBasicMaterial color="#0bd0bb" transparent opacity={0.2} wireframe />
+			</mesh>
+		</>
+	);
+}
+
+function CommunicationsRange({ shipId }: { shipId: number }) {
+	const [shortRangeComm] = q.shortRangeComm.get.useNetRequest({ shipId });
+	if (!shortRangeComm) return null;
+	const { maxRadius, minRadius, gain } = shortRangeComm;
+	const gainRadius = minRadius + gain * (maxRadius - minRadius);
+	return (
+		<mesh>
+			<icosahedronGeometry args={[gainRadius, 1]} />
+			<meshBasicMaterial color="#ff8800" transparent opacity={0.2} wireframe />
+		</mesh>
+	);
+}
+
 export function useShipModel(modelAsset: string | undefined) {
 	const model = useGLTF(modelAsset || "/assets/Empty.glb", false);
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We want to update when modelAsset changes
 	const scene = useMemo(() => {
 		if (!model) return new Object3D();
 
@@ -280,89 +305,4 @@ export function useShipModel(modelAsset: string | undefined) {
 	if (!modelAsset) return null;
 
 	return scene;
-}
-
-const ShipSprite = ({
-	color = "red",
-	spriteAsset,
-	userData,
-	opacity = 1,
-}: {
-	color?: string | number;
-	spriteAsset: string;
-	userData?: any;
-	opacity?: number;
-}) => {
-	const spriteMap = useShipSprite(spriteAsset);
-	const scale = 1 / 50;
-	const ref = useRef<Sprite>(null);
-	useFrame(() => {
-		const isSelected = false;
-		// TODO May 24 2022 - this is used for showing that a ship is selected.
-		// const isSelected = useSelectedShips.getState().selectedIds.includes(id);
-		if (isSelected) {
-			ref.current?.material.color.set("#0088ff");
-		} else {
-			ref.current?.material.color.set(color);
-		}
-	});
-
-	return (
-		<sprite ref={ref} scale={[scale, scale, scale]} userData={userData}>
-			<spriteMaterial
-				attach="material"
-				alphaMap={spriteMap}
-				color={color}
-				opacity={opacity}
-				transparent
-				sizeAttenuation={false}
-				needsUpdate={true}
-				depthTest={true}
-				depthWrite={false}
-			/>
-		</sprite>
-	);
-};
-
-export function useShipSprite(spriteAsset: string) {
-	const canvasDimensions = 2048;
-	const [canvas] = useState(() =>
-		Object.assign(document.createElement("canvas"), {
-			width: canvasDimensions,
-			height: canvasDimensions,
-		}),
-	);
-	const [spriteMap] = useState(() => new CanvasTexture(canvas));
-	useEffect(() => {
-		const ctx = canvas.getContext("2d");
-		const img = new Image();
-		img.src = spriteAsset;
-		img.onload = () => {
-			if (!ctx) return;
-			// Draw the canvas
-			ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-			const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-			const data = imageData.data;
-			// Convert to black and white
-			for (let i = 0; i < data.length; i += 4) {
-				data[i] = data[i + 1] = data[i + 2] = data[i + 3];
-				// data[i + 3] = 255;
-			}
-			ctx.putImageData(imageData, 0, 0);
-			spriteMap.needsUpdate = true;
-		};
-	}, [spriteAsset, canvas, spriteMap]);
-
-	return spriteMap;
-}
-
-function PhasersVisualization({ shipId }: { shipId: number }) {
-	const [phasers] = q.targeting.phasers.list.useNetRequest({ shipId });
-	return (
-		<>
-			{phasers.map((phaser) => (
-				<ConeVisualization key={phaser.id} {...phaser} />
-			))}
-		</>
-	);
 }

@@ -2,10 +2,10 @@ import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import Input from "@thorium/ui/Input";
-import { useImperativeHandle, useRef, type RefObject } from "react";
-import scanVid from "./scansvid.mp4?url";
-import { TypingText } from "@thorium/components/TypingText";
 import { cn } from "@thorium/utils/cn";
+import { useImperativeHandle, useRef, type RefObject } from "react";
+
+import scanVid from "./scansvid.mp4?url";
 
 export function SensorScans({
 	scanType = "Standard",
@@ -75,7 +75,7 @@ export function SensorScans({
 					Begin Scan
 				</Button>
 			)}
-			<div className="flex flex-col flex-1">
+			<div className="flex flex-1 flex-col">
 				<p>Scan Results</p>
 				<div className="relative">
 					<video
@@ -88,7 +88,7 @@ export function SensorScans({
 							{ "opacity-100 pointer-events-auto": inProgress },
 						)}
 					/>
-					<div className="panel panel-alert flex-1 aspect-video p-4 whitespace-pre-wrap">
+					<div className="panel panel-alert aspect-video flex-1 p-4 whitespace-pre-wrap">
 						{selectedScan?.response || ""}
 					</div>
 				</div>

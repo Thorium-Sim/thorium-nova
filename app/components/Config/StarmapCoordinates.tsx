@@ -1,31 +1,22 @@
-import Input from "@thorium/ui/Input";
-import { useState, useEffect, Suspense } from "react";
-import { Icon } from "@thorium/ui/Icon";
-import Button from "@thorium/ui/Button";
-import {
-	flip,
-	offset,
-	shift,
-	useClick,
-	useFloating,
-	useInteractions,
-} from "@floating-ui/react";
-import {
-	StarmapStoreProvider,
-	useGetStarmapStore,
-} from "../Starmap/starmapStore";
-import StarmapCanvas from "../Starmap/StarmapCanvas";
-import { ClientOnly } from "remix-utils/client-only";
-import Nebula from "../Starmap/Nebula";
-import { useParams } from "react-router";
-import FuzzTexture from "../../cards/Viewscreen/fuzz.png";
-import { Plane, Vector3 } from "three";
+import { flip, offset, shift, useClick, useFloating, useInteractions } from "@floating-ui/react";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
 import { q } from "@thorium/context/AppContext";
-import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
-import SolarSystemWrapper from "@thorium/routes/config/starmap/system";
 import InterstellarWrapper from "@thorium/routes/config/starmap";
 import { StatusBar } from "@thorium/routes/config/starmap/layout";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
+import SolarSystemWrapper from "@thorium/routes/config/starmap/system";
+import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
+import Input from "@thorium/ui/Input";
+import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { Suspense, useEffect, useState } from "react";
+import { useParams } from "react-router";
+import { ClientOnly } from "remix-utils/client-only";
+import { Plane, Vector3 } from "three";
+
+import FuzzTexture from "../../cards/Viewscreen/fuzz.png";
+import Nebula from "../Starmap/Nebula";
+import StarmapCanvas from "../Starmap/StarmapCanvas";
+import { StarmapStoreProvider, useGetStarmapStore } from "../Starmap/starmapStore";
 
 export function StarmapCoordinates({
 	value,
@@ -44,7 +35,7 @@ export function StarmapCoordinates({
 			<div className="flex">
 				<StarmapPicker value={value} setValue={setValue} />
 				<Input
-					className="input-sm w-32"
+					className="input-xs w-32"
 					label="X"
 					value={value?.x || ""}
 					onChange={(event) =>
@@ -53,7 +44,7 @@ export function StarmapCoordinates({
 					}
 				/>
 				<Input
-					className="input-sm w-32"
+					className="input-xs w-32"
 					label="Y"
 					value={value?.y || ""}
 					onChange={(event) =>
@@ -62,7 +53,7 @@ export function StarmapCoordinates({
 					}
 				/>
 				<Input
-					className="input-sm w-32"
+					className="input-xs w-32"
 					label="Z"
 					value={value?.z || ""}
 					onChange={(event) =>
@@ -72,9 +63,7 @@ export function StarmapCoordinates({
 				/>
 			</div>
 			{value && value.x !== 0 && value.y !== 0 && value.z !== 0 ? (
-				<div>
-					System: {value.parentId ? value.parentId.name : "Interstellar"}
-				</div>
+				<div>System: {value.parentId ? value.parentId.name : "Interstellar"}</div>
 			) : null}
 		</div>
 	);
@@ -100,9 +89,7 @@ function StarmapPicker({
 		onOpenChange: setOpen,
 	});
 
-	const { getReferenceProps, getFloatingProps } = useInteractions([
-		useClick(context),
-	]);
+	const { getReferenceProps, getFloatingProps } = useInteractions([useClick(context)]);
 
 	return (
 		<>
@@ -121,18 +108,15 @@ function StarmapPicker({
 						top: y ?? 0,
 						left: x ?? 0,
 					}}
-					className="z-50 drop-shadow-xl bg-black/90 border-white/50 border-2 rounded w-full aspect-square"
+					className="z-50 aspect-square w-full rounded border-2 border-white/50 bg-black/90 drop-shadow-xl"
 					{...getFloatingProps()}
 				>
 					<Suspense fallback={null}>
 						<StarmapStoreProvider>
-							<div className="border-b border-b-white/20 pb-0.5 px-2 flex gap-2 items-baseline">
+							<div className="flex items-baseline gap-2 border-b border-b-white/20 px-2 pb-0.5">
 								{/* <StarmapCoreMenubar /> */}
 							</div>
-							<StarmapCoordinatePicker
-								setValue={setValue}
-								system={value?.parentId?.name || null}
-							>
+							<StarmapCoordinatePicker setValue={setValue} system={value?.parentId?.name || null}>
 								{value && value.x !== 0 && value.y !== 0 && value.z !== 0 ? (
 									<PositionPoint position={value} />
 								) : null}
@@ -141,7 +125,7 @@ function StarmapPicker({
 					</Suspense>
 					{value?.parentId ? (
 						<Button
-							className="absolute bottom-0 left-0 btn-xs btn-primary btn-outline"
+							className="btn-xs btn-primary btn-outline absolute bottom-0 left-0"
 							onClick={() =>
 								setValue({
 									x: 0,
@@ -212,8 +196,7 @@ function StarmapCoordinatePicker({
 					if (event.button !== 0) return;
 					// Construct a plane perpendicular to the camera that goes through
 					// the origin
-					const camera =
-						useStarmapStore.getState().cameraControls?.current?.camera;
+					const camera = useStarmapStore.getState().cameraControls?.current?.camera;
 					if (!camera) return;
 					// Calculate the camera's forward vector
 					camera.getWorldDirection(forward);
@@ -255,16 +238,11 @@ function StarmapCoordinatePicker({
 		</>
 	);
 }
-function PositionPoint({
-	position,
-}: { position: { x: number; y: number; z: number } }) {
+function PositionPoint({ position }: { position: { x: number; y: number; z: number } }) {
 	const spriteMap = useShipSprite(FuzzTexture);
 
 	return (
-		<sprite
-			position={[position.x || 0, position.y || 0, position.z || 0]}
-			scale={0.05}
-		>
+		<sprite position={[position.x || 0, position.y || 0, position.z || 0]} scale={0.05}>
 			<spriteMaterial color={65280} map={spriteMap} sizeAttenuation={false} />
 		</sprite>
 	);

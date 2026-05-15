@@ -1,12 +1,9 @@
-import type { FileOrFolder } from "@thorium/.server/data/thorium";
 import { readdir, lstat } from "node:fs/promises";
 import path from "node:path";
 
-export async function traverseFiles(
-	basePath: string,
-	rootPath: string,
-	extensions: string[] = [],
-) {
+import type { FileOrFolder } from "@thorium/.server/data/thorium";
+
+export async function traverseFiles(basePath: string, rootPath: string, extensions: string[] = []) {
 	const files: FileOrFolder[] = [];
 	try {
 		const folderFiles = await readdir(basePath);

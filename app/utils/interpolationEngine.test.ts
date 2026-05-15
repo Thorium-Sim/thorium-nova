@@ -3,14 +3,12 @@ import { createRNG } from "@thorium/utils/rng";
 import { expect, test } from "vitest";
 
 test("it should interpolate a plain string", () => {
-	expect(interpolateText("this is a plain string")).toEqual(
-		"this is a plain string",
-	);
+	expect(interpolateText("this is a plain string")).toEqual("this is a plain string");
 });
 test("it should interpolate a variable into a string", () => {
-	expect(
-		interpolateText("this is a {type} string", { type: "boring" }),
-	).toEqual("this is a boring string");
+	expect(interpolateText("this is a {type} string", { type: "boring" })).toEqual(
+		"this is a boring string",
+	);
 });
 test("it should interpolate a variable regardless of the whitespace", () => {
 	expect(
@@ -70,11 +68,7 @@ test("it should set variables inside a variable switch", () => {
 test("it should randomly choose between listed strings", () => {
 	const rng = createRNG("test");
 	expect(
-		interpolateText(
-			`The code is {~Alpha,Beta,Gamma,Delta,Zeta,Lambda,Omicron}`,
-			{},
-			rng,
-		),
+		interpolateText(`The code is {~Alpha,Beta,Gamma,Delta,Zeta,Lambda,Omicron}`, {}, rng),
 	).toEqual("The code is Lambda");
 	expect(
 		interpolateText(
@@ -87,12 +81,8 @@ test("it should randomly choose between listed strings", () => {
 test("it should work with a RANDOM function", () => {
 	const rng = createRNG("test");
 
-	expect(interpolateText(`The code is RANDOM(100,999)`, {}, rng)).toEqual(
-		"The code is 851",
-	);
-	expect(interpolateText(`The code is RANDOM(100,999)`, {}, rng)).toEqual(
-		"The code is 327",
-	);
+	expect(interpolateText(`The code is RANDOM(100,999)`, {}, rng)).toEqual("The code is 851");
+	expect(interpolateText(`The code is RANDOM(100,999)`, {}, rng)).toEqual("The code is 327");
 });
 test("it should work with a CAPITALIZE function", () => {
 	expect(

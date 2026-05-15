@@ -45,10 +45,7 @@ import { Suspense, useRef, useState, type ReactNode } from "react";
 export function DamageReports() {
 	const { shipId } = useStation();
 	q.damageReports.stream.useDataStream({ shipId });
-	const [systems] = q.damageReports.systems.useNetRequest(
-		{ shipId },
-		{ refetchInterval: 1000 },
-	);
+	const [systems] = q.damageReports.systems.useNetRequest({ shipId }, { refetchInterval: 1000 });
 
 	const [selectedFilter, setSelectedFilter] = useState("All");
 	const [selectedSort, setSelectedSort] = useState("Damage");
@@ -62,10 +59,10 @@ export function DamageReports() {
 	const selectedSystem = systems.find((d) => d.id === selectedEntity);
 
 	return (
-		<div className="w-full h-full grid grid-cols-4 gap-4">
-			<div className="flex flex-col gap-2 col-span-1 overflow-hidden">
+		<div className="grid h-full w-full grid-cols-4 gap-4">
+			<div className="col-span-1 flex flex-col gap-2 overflow-hidden">
 				<h3>Reports</h3>
-				<ul className="list-group panel w-full overflow-y-auto flex-[2]">
+				<ul className="list-group panel w-full flex-[2] overflow-y-auto">
 					{damageReports.map((d) => (
 						<li
 							key={d.id}
@@ -79,13 +76,9 @@ export function DamageReports() {
 					))}
 				</ul>
 				<h3>Systems</h3>
-				<ul className="list-group panel w-full min-h-0 overflow-y-auto flex-[5]">
+				<ul className="list-group panel min-h-0 w-full flex-[5] overflow-y-auto">
 					{systems
-						.filter(
-							(s) =>
-								selectedFilter === "All" ||
-								systemCategories[s.type] === selectedFilter,
-						)
+						.filter((s) => selectedFilter === "All" || systemCategories[s.type] === selectedFilter)
 						.sort((a, b) => {
 							switch (selectedSort) {
 								case "Name":
@@ -93,10 +86,8 @@ export function DamageReports() {
 									if (a.name < b.name) return -1;
 									return 0;
 								case "Type":
-									if (systemCategories[a.type] > systemCategories[b.type])
-										return 1;
-									if (systemCategories[a.type] < systemCategories[b.type])
-										return -1;
+									if (systemCategories[a.type] > systemCategories[b.type]) return 1;
+									if (systemCategories[a.type] < systemCategories[b.type]) return -1;
 									return 0;
 								case "Offline":
 									if (a.offline && b.offline) return 0;
@@ -118,7 +109,7 @@ export function DamageReports() {
 							/>
 						))}
 				</ul>
-				<div className="flex gap-2 justify-between">
+				<div className="flex justify-between gap-2">
 					<Select
 						className="select-alert flex-1"
 						label="Filter"
@@ -133,7 +124,7 @@ export function DamageReports() {
 						className="select-alert flex-1"
 						label="Sort"
 						selected={selectedSort}
-						items={[...systemSortValues.map((f) => ({ id: f, label: f }))]}
+						items={systemSortValues.map((f) => ({ id: f, label: f }))}
 						setSelected={(f) => setSelectedSort(f || "Name")}
 					/>
 				</div>
@@ -166,22 +157,13 @@ function SystemItem({
 	onClick: () => void;
 }) {
 	return (
-		<li
-			className={cn("list-group-item", { selected: isSelected })}
-			onClick={onClick}
-		>
+		<li className={cn("list-group-item", { selected: isSelected })} onClick={onClick}>
 			<span className={offline ? "text-red-500" : ""}>{name}</span>
 			<span className="flex items-center gap-2">
-				<span className="w-[4ch] tabular-nums text-right">
-					<Tooltip content="Aggregate Damage">
-						{Math.round(damage * 100)}%
-					</Tooltip>
+				<span className="w-[4ch] text-right tabular-nums">
+					<Tooltip content="Aggregate Damage">{Math.round(damage * 100)}%</Tooltip>
 				</span>
-				<progress
-					className={"progress progress-success"}
-					max={1}
-					value={damage}
-				/>
+				<progress className={"progress progress-success"} max={1} value={damage} />
 				<Suspense
 					fallback={
 						<RadialDial color="#0f0" label="" count={0}>
@@ -218,13 +200,7 @@ function SystemDiagnosticIndicator({ id }: { id: number }) {
 			</RadialDial>
 		);
 	return (
-		<RadialDial
-			count={diagnostic.progress}
-			max={1}
-			color="#0f0"
-			label=""
-			ref={ref}
-		>
+		<RadialDial count={diagnostic.progress} max={1} color="#0f0" label="" ref={ref}>
 			{diagnostic.level}
 		</RadialDial>
 	);
@@ -232,7 +208,6 @@ function SystemDiagnosticIndicator({ id }: { id: number }) {
 
 function SystemDetails({
 	systemId,
-	name,
 	setSelectedReportId,
 }: {
 	systemId: number;
@@ -252,12 +227,9 @@ function SystemDetails({
 	const systemDamageReport = damageReports.find((s) => s.systemId === systemId);
 	if (systemDamageReport) {
 		return (
-			<div className="flex flex-col gap-4 col-span-3 items-center justify-center">
+			<div className="col-span-3 flex flex-col items-center justify-center gap-4">
 				<h2 className="text-4xl">Damage Report In Progress...</h2>
-				<Button
-					className="btn-alert"
-					onClick={() => setSelectedReportId(systemDamageReport.id)}
-				>
+				<Button className="btn-alert" onClick={() => setSelectedReportId(systemDamageReport.id)}>
 					Go To Report
 				</Button>
 			</div>
@@ -265,7 +237,7 @@ function SystemDetails({
 	}
 	if (!diagnostic) {
 		return (
-			<div className="flex flex-col gap-4 col-span-3 items-center justify-center">
+			<div className="col-span-3 flex flex-col items-center justify-center gap-4">
 				<Button
 					className="btn-lg btn-info"
 					onClick={() => {
@@ -315,12 +287,7 @@ function SystemDetails({
 	}
 
 	if (diagnostic.reportCandidates) {
-		return (
-			<ReportCandidates
-				systemId={systemId}
-				setSelectedReportId={setSelectedReportId}
-			/>
-		);
+		return <ReportCandidates systemId={systemId} setSelectedReportId={setSelectedReportId} />;
 	}
 
 	if (diagnostic.results) {
@@ -329,14 +296,11 @@ function SystemDetails({
 
 	if (diagnostic.progress < 1) {
 		return (
-			<div className="flex flex-col gap-4 items-center justify-center w-1/2 mx-auto col-span-3">
+			<div className="col-span-3 mx-auto flex w-1/2 flex-col items-center justify-center gap-4">
 				Level {diagnostic.level} Diagnostic In Progress...
-				<DiagnosticProgress
-					diagnosticId={diagnostic.id}
-					progress={diagnostic.progress}
-				/>
+				<DiagnosticProgress diagnosticId={diagnostic.id} progress={diagnostic.progress} />
 				<Button
-					className="mx-auto btn-warning"
+					className="btn-warning mx-auto"
 					onClick={() =>
 						q.damageReports.diagnosticAbort.netSend({
 							diagnosticId: diagnostic.id,
@@ -353,7 +317,10 @@ function SystemDetails({
 function DiagnosticProgress({
 	diagnosticId,
 	progress,
-}: { diagnosticId: number; progress: number }) {
+}: {
+	diagnosticId: number;
+	progress: number;
+}) {
 	const ref = useRef<HTMLProgressElement>(null);
 	const { interpolate } = useLiveQuery();
 	const { cardLoaded } = useCardContext();
@@ -365,14 +332,7 @@ function DiagnosticProgress({
 		ref.current.value = value.x;
 	}, cardLoaded);
 
-	return (
-		<progress
-			ref={ref}
-			className="progress progress-alert"
-			max={1}
-			value={progress}
-		/>
-	);
+	return <progress ref={ref} className="progress progress-alert" max={1} value={progress} />;
 }
 
 function SystemCard({ systemId }: { systemId: number }) {
@@ -386,7 +346,7 @@ function SystemCard({ systemId }: { systemId: number }) {
 	const reportCount = Number(diagnostic.level) - 1;
 
 	return (
-		<div className="col-span-3 w-5/6 mx-auto h-full overflow-hidden">
+		<div className="col-span-3 mx-auto h-full w-5/6 overflow-hidden">
 			<div className="flex flex-col gap-2">
 				<MetricPanel
 					id="efficiency"
@@ -474,7 +434,7 @@ function SystemCard({ systemId }: { systemId: number }) {
 					<Icon name="user-plus" className="size-5" />
 				</MetricPanel>
 				<Button
-					className="mx-auto btn-warning"
+					className="btn-warning mx-auto"
 					onClick={() =>
 						q.damageReports.diagnosticAbort.netSend({
 							diagnosticId: diagnostic.id,
@@ -524,9 +484,7 @@ function MetricPanel({
 	}
 
 	return (
-		<div
-			className={cn("group p-2 tabular-nums !flex items-center gap-2 panel")}
-		>
+		<div className={cn("group p-2 tabular-nums !flex items-center gap-2 panel")}>
 			<div
 				className={cn(
 					"bg-white/20 rounded-full w-8 h-8 flex items-center justify-center",
@@ -540,7 +498,7 @@ function MetricPanel({
 				{children}
 			</div>
 			<div className="flex-1">
-				<p className="font-medium text-xl">{name}</p>
+				<p className="text-xl font-medium">{name}</p>
 				<p className="text-gray-300">{description}</p>
 			</div>
 			<div
@@ -575,7 +533,7 @@ function MetricPanel({
 						});
 					}}
 				>
-					<Icon name="wrench" className="size-5 mr-2" />
+					<Icon name="wrench" className="mr-2 size-5" />
 					Generate Report{reportCount > 1 ? "s" : ""}
 				</Button>
 			</Tooltip>
@@ -586,7 +544,10 @@ function MetricPanel({
 function ReportCandidates({
 	systemId,
 	setSelectedReportId,
-}: { systemId: number; setSelectedReportId: (id: number) => void }) {
+}: {
+	systemId: number;
+	setSelectedReportId: (id: number) => void;
+}) {
 	const [diagnostic] = q.damageReports.systemDiagnostic.useNetRequest({
 		systemId: systemId,
 	});
@@ -595,29 +556,22 @@ function ReportCandidates({
 	if (!reports) return null;
 
 	return (
-		<div className="flex flex-col justify-around col-span-3 w-5/6 mx-auto h-full overflow-hidden">
-			<div className="flex gap-4 justify-center items-center">
+		<div className="col-span-3 mx-auto flex h-full w-5/6 flex-col justify-around overflow-hidden">
+			<div className="grid grid-cols-3 grid-rows-[auto_auto_auto] gap-4">
 				{reports.map((report) => (
-					<div key={report.id} className="panel p-4">
-						<h2 className="text-xl text-center font-bold">
-							{report.type} Maintenance
-						</h2>
+					<div key={report.id} className="panel row-span-3 grid grid-rows-subgrid p-4">
+						<h2 className="text-center text-xl font-bold">{report.type} Maintenance</h2>
 						<ul>
 							{report.affectedSystems.map((sys) => (
-								<li
-									key={`${sys.id}${Object.keys(sys.effects).join("")}`}
-									className="mb-4"
-								>
+								<li key={`${sys.id}${Object.keys(sys.effects).join("")}`} className="mb-4">
 									<span className="text-lg">{sys.name}</span>
 									<ul className="ml-4 list-disc">
 										{Object.entries(sys.effects).map(([name, value]) => (
 											<li
 												key={`${name}${value}`}
 												className={cn({
-													"text-red-500":
-														name === "efficiency" ? value < 0 : value > 0,
-													"text-green-500":
-														name === "efficiency" ? value > 0 : value < 0,
+													"text-red-500": name === "efficiency" ? value < 0 : value > 0,
+													"text-green-500": name === "efficiency" ? value > 0 : value < 0,
 												})}
 											>
 												{capitalCase(name)}: {value > 0 ? "+" : ""}
@@ -631,11 +585,10 @@ function ReportCandidates({
 						<Button
 							className="btn-success w-full"
 							onClick={async () => {
-								const { reportId } =
-									await q.damageReports.beginDamageReport.netSend({
-										diagnosticId: diagnostic.id,
-										reportCandidateId: report.id,
-									});
+								const { reportId } = await q.damageReports.beginDamageReport.netSend({
+									diagnosticId: diagnostic.id,
+									reportCandidateId: report.id,
+								});
 
 								setSelectedReportId(reportId);
 							}}
@@ -646,7 +599,7 @@ function ReportCandidates({
 				))}
 			</div>
 			<Button
-				className="mx-auto btn-warning"
+				className="btn-warning mx-auto"
 				onClick={() =>
 					q.damageReports.diagnosticAbort.netSend({
 						diagnosticId: diagnostic.id,
@@ -659,16 +612,15 @@ function ReportCandidates({
 	);
 }
 
-const damageMetricFormats: Record<DamageEffects, (value: number) => ReactNode> =
-	{
-		efficiency: (val) => `${Math.floor(val * 100)}%`,
-		heatMultiplier: (val) => <>&times;{Math.round(val * 100) / 100}</>,
-		instability: (val) => `${Math.round(val * 100)}%`,
-		signature: (val) => Math.round(val * 100),
-		failureRisk: (val) => `${Math.round(val * 10000) / 100}%`,
-		cascadeRisk: (val) => `${Math.round(val * 1000) / 10}%`,
-		crewSafetyRating: (val) => `${Math.round(val * 100)}%`,
-	};
+const damageMetricFormats: Record<DamageEffects, (value: number) => ReactNode> = {
+	efficiency: (val) => `${Math.floor(val * 100)}%`,
+	heatMultiplier: (val) => <>&times;{Math.round(val * 100) / 100}</>,
+	instability: (val) => `${Math.round(val * 100)}%`,
+	signature: (val) => Math.round(val * 100),
+	failureRisk: (val) => `${Math.round(val * 10000) / 100}%`,
+	cascadeRisk: (val) => `${Math.round(val * 1000) / 10}%`,
+	crewSafetyRating: (val) => `${Math.round(val * 100)}%`,
+};
 
 function DamageReport({
 	id,
@@ -684,20 +636,18 @@ function DamageReport({
 	currentStepText: string;
 }) {
 	return (
-		<div className="flex flex-col col-span-3 text-xl gap-2">
+		<div className="col-span-3 flex flex-col gap-2 text-xl">
 			<div>{name}</div>
-			<div className="panel flex-1 p-4 text-2xl whitespace-pre-wrap overflow-y-auto">
+			<div className="panel flex-1 overflow-y-auto p-4 text-2xl whitespace-pre-wrap">
 				{currentStepText}
 			</div>
-			<div className="flex justify-between items-center gap-2">
+			<div className="flex items-center justify-between gap-2">
 				<div className="text-xl">
 					Step {currentStepIndex + 1} / {stepCount}
 				</div>
 				<Button
 					className="btn-error"
-					onClick={() =>
-						q.damageReports.abortDamageReport.netSend({ reportId: id })
-					}
+					onClick={() => q.damageReports.abortDamageReport.netSend({ reportId: id })}
 				>
 					Abort Report
 				</Button>

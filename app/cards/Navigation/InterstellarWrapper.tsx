@@ -1,12 +1,12 @@
-import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { InterstellarMap } from "@thorium/components/Starmap/InterstellarMap";
-import SystemMarker from "@thorium/components/Starmap/SystemMarker";
-import { Suspense, useEffect } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 import { StarmapShip } from "@thorium/components/Starmap/StarmapShip";
+import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
+import SystemMarker from "@thorium/components/Starmap/SystemMarker";
 import { WaypointEntity } from "@thorium/components/Starmap/WaypointEntity";
 import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
+import { Suspense, useEffect } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 export function InterstellarWrapper() {
 	const { shipId } = useStation();
@@ -20,6 +20,7 @@ export function InterstellarWrapper() {
 		active: false,
 		shipId,
 	});
+	const [autopilot] = q.pilot.autopilot.get.useNetRequest({ shipId });
 	useEffect(() => {
 		useStarmapStore.getState().currentSystemSet?.(null);
 	}, [useStarmapStore]);
@@ -31,41 +32,35 @@ export function InterstellarWrapper() {
 					<SystemMarker
 						key={sys.id}
 						systemId={sys.id}
-						position={
-							[sys.position.x, sys.position.y, sys.position.z] as [
-								number,
-								number,
-								number,
-							]
-						}
+						position={[sys.position.x, sys.position.y, sys.position.z]}
 						name={sys.identity.name}
-						onClick={() =>
-							useStarmapStore.setState({ selectedObjectIds: [sys.id] })
-						}
+						onClick={() => {
+							useStarmapStore.setState({ selectedObjectIds: [sys.id] });
+						}}
 						onDoubleClick={() => {
 							useStarmapStore.getState().setCurrentSystem(sys.id);
 							useStarmapStore.setState({ selectedObjectIds: [] });
 						}}
+						commSatelliteRadius={null}
 					/>
 				) : null,
 			)}
 			{ship.position?.parentId === null && (
 				<Suspense key={ship.id} fallback={null}>
-					<ErrorBoundary
-						FallbackComponent={() => <></>}
-						onError={(err) => console.error(err)}
-					>
+					<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
 						<StarmapShip id={ship.id} size={ship.size} logoUrl={ship.icon} />
 					</ErrorBoundary>
 				</Suspense>
 			)}
 			{waypoints.map((waypoint) => (
 				<Suspense key={waypoint.id}>
-					<ErrorBoundary
-						FallbackComponent={() => <></>}
-						onError={(err) => console.error(err)}
-					>
-						<WaypointEntity position={waypoint.position} />
+					<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
+						<WaypointEntity
+							position={waypoint.position}
+							isActive={waypoint.isActive}
+							isFacing={waypoint.id === autopilot.facingWaypointIds[0]}
+							isLocked={waypoint.id === autopilot.destinationWaypointId}
+						/>
 					</ErrorBoundary>
 				</Suspense>
 			))}

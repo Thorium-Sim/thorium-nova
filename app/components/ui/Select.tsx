@@ -1,10 +1,8 @@
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
-import { Icon } from "./Icon";
 import { cn } from "@thorium/utils/cn";
 import {
 	Button,
 	Header,
-	type Key,
 	Label,
 	type LabelProps,
 	ListBox,
@@ -14,6 +12,8 @@ import {
 	Select as RASelect,
 	SelectValue,
 } from "react-aria-components";
+
+import { Icon } from "./Icon";
 
 export default function Select<I extends string | number>({
 	label,
@@ -28,22 +28,23 @@ export default function Select<I extends string | number>({
 	multiple,
 	id,
 	labelProps,
+	hideIcon,
+	buttonClassName,
 }: {
 	label: string;
 	labelHidden?: boolean;
 	disabled?: boolean;
-	items: (
-		| { id: I; label: string }
-		| { header: string; items: { id: I; label: string }[] }
-	)[];
+	items: ({ id: I; label: string } | { header: string; items: { id: I; label: string }[] })[];
 	selected: I | null;
 	setSelected: (value: I | null) => void;
 	size?: "xxs" | "xs" | "sm" | "md";
 	className?: string;
+	buttonClassName?: string;
 	labelProps?: LabelProps;
 	placeholder?: string;
 	multiple?: boolean;
 	id?: string;
+	hideIcon?: boolean;
 }) {
 	return (
 		<RASelect
@@ -52,7 +53,7 @@ export default function Select<I extends string | number>({
 			placeholder={placeholder}
 			selectedKey={selected}
 			onSelectionChange={(selected) => setSelected(selected as I)}
-			className={className}
+			className={`select ${className}`}
 		>
 			<Label
 				className={cn(
@@ -66,26 +67,24 @@ export default function Select<I extends string | number>({
 			</Label>
 			<Button
 				className={cn(
-					"py-2 px-2 flex justify-between items-center select-button bg-gray-900 text-gray-100 relative w-full border border-gray-700 rounded-md shadow-sm text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+					"py-2 px-2 flex justify-between items-center select-button bg-gray-900 text-gray-100 relative w-full border border-gray-700 rounded-md shadow-xs text-left cursor-default focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
 					{
 						"select-xxs h-5 min-h-5 py-0": size === "xxs",
 						"select-xs py-0": size === "xs",
 						"select-sm py-1": size === "sm",
 					},
-					className || "",
+					buttonClassName || "",
 				)}
 			>
 				<SelectValue />
-				<Icon
-					name="chevrons-up-down"
-					className="h-5 w-5 text-gray-400"
-					aria-hidden="true"
-				/>
+				{hideIcon ? null : (
+					<Icon name="chevrons-up-down" className="h-5 w-5 text-gray-400" aria-hidden="true" />
+				)}
 			</Button>
 			<Popover className={popoverTransitionClasses}>
 				<ListBox
 					selectionMode={multiple ? "multiple" : "single"}
-					className="select-options isolate w-fit min-w-32 bg-gray-900 shadow-lg rounded-md py-1 px-0.5 text-sm ring-2 ring-gray-400 ring-opacity-5 text-white max-h-96 overflow-y-auto outline-none data-[focused]:ring-opacity-50"
+					className="select-options ring-opacity-5 data-[focused]:ring-opacity-50 isolate max-h-96 w-fit min-w-32 overflow-y-auto rounded-md bg-gray-900 px-2 py-1 text-sm text-white shadow-lg ring-2 ring-gray-400 outline-none"
 				>
 					{items.map((item) =>
 						"header" in item ? (
@@ -110,14 +109,13 @@ function SelectItem<I extends string | number>(item: { id: I; label: string }) {
 		<ListBoxItem
 			key={item.id}
 			id={item.id}
-			className="flex justify-between cursor-default py-0.5 px-2 min-w-fit data-[focused]:text-white data-[focused]:bg-blue-600 text-gray-100 outline-none rounded"
+			className="flex min-w-fit cursor-default justify-between rounded px-2 py-0.5 text-gray-100 outline-none data-[focused]:bg-blue-600 data-[focused]:text-white"
+			textValue={item.label}
 		>
 			{({ isSelected }) => (
 				<>
 					{item.label}
-					{isSelected ? (
-						<Icon name="check" className="h-5 w-5" aria-hidden="true" />
-					) : null}
+					{isSelected ? <Icon name="check" className="h-5 w-5" aria-hidden="true" /> : null}
 				</>
 			)}
 		</ListBoxItem>

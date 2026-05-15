@@ -1,6 +1,7 @@
-import { HydratedRouter } from "react-router/dom";
+import { initializeClient } from "@thorium/context/AppContext";
 import { startTransition } from "react";
 import { hydrateRoot } from "react-dom/client";
+import { HydratedRouter } from "react-router/dom";
 
 export interface ThoriumGlobal {
 	// Kiosk helpers
@@ -34,6 +35,8 @@ window.addEventListener(
 	},
 	false,
 );
+
+await initializeClient();
 
 startTransition(() => {
 	hydrateRoot(document, <HydratedRouter />);

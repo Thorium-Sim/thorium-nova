@@ -1,11 +1,12 @@
-import { useParams } from "react-router";
-import Input from "@thorium/ui/Input";
-import { toast } from "@thorium/context/ToastContext";
-import { useContext, useReducer } from "react";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
-import { OverrideResetButton } from "../OverrideResetButton";
-import { q } from "@thorium/context/AppContext";
 import { Navigate } from "@thorium/components/Navigate";
+import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import { toast } from "@thorium/context/ToastContext";
+import Input from "@thorium/ui/Input";
+import { useContext, useReducer } from "react";
+import { useParams } from "react-router";
+
+import { OverrideResetButton } from "../OverrideResetButton";
 
 export default function PhasersConfig() {
 	const { pluginId, systemId, shipId } = useParams() as {
@@ -30,7 +31,7 @@ export default function PhasersConfig() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -40,8 +41,7 @@ export default function PhasersConfig() {
 							helperText={"How far phasers can shoot at 0˚ arc in kilometers"}
 							defaultValue={system.maxRange}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.phasers.update.netSend({
 										pluginId,
@@ -61,14 +61,10 @@ export default function PhasersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="maxRange"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="maxRange" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -80,8 +76,7 @@ export default function PhasersConfig() {
 							}
 							defaultValue={system.maxArc}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.phasers.update.netSend({
 										pluginId,
@@ -101,14 +96,10 @@ export default function PhasersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="maxArc"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="maxArc" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -120,8 +111,7 @@ export default function PhasersConfig() {
 							}
 							defaultValue={system.fullChargeYield}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.phasers.update.netSend({
 										pluginId,
@@ -141,14 +131,10 @@ export default function PhasersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="fullChargeYield"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="fullChargeYield" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -160,8 +146,7 @@ export default function PhasersConfig() {
 							}
 							defaultValue={system.yieldMultiplier}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.phasers.update.netSend({
 										pluginId,
@@ -181,14 +166,10 @@ export default function PhasersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="yieldMultiplier"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="yieldMultiplier" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -200,8 +181,7 @@ export default function PhasersConfig() {
 							}
 							defaultValue={system.headingDegree}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.phasers.update.netSend({
 										pluginId,
@@ -221,14 +201,10 @@ export default function PhasersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="headingDegree"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="headingDegree" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -240,8 +216,7 @@ export default function PhasersConfig() {
 							}
 							defaultValue={system.pitchDegree}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.phasers.update.netSend({
 										pluginId,
@@ -261,26 +236,19 @@ export default function PhasersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="pitchDegree"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="pitchDegree" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
 							pattern="[0-9]*"
 							label="Phaser Banks (legacy)"
 							placeholder={"0"}
-							helperText={
-								"How many phaser banks are attached to this phaser system"
-							}
+							helperText={"How many phaser banks are attached to this phaser system"}
 							defaultValue={system.legacyPhaserBanks}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.phasers.update.netSend({
 										pluginId,

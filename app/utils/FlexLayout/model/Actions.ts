@@ -115,10 +115,7 @@ export class Actions {
 	 * @param tabsetNodeId the id of the tabset node to set as active
 	 * @returns {Action} the action
 	 */
-	static setActiveTabset(
-		tabsetNodeId: string | undefined,
-		windowId?: string | undefined,
-	): Action {
+	static setActiveTabset(tabsetNodeId: string | undefined, windowId?: string): Action {
 		return new Action(Actions.SET_ACTIVE_TABSET, {
 			tabsetNode: tabsetNodeId,
 			windowId: windowId,
@@ -144,10 +141,7 @@ export class Actions {
 	 * @param tabsetNodeId the id of the tabset to maximize
 	 * @returns {Action} the action
 	 */
-	static maximizeToggle(
-		tabsetNodeId: string,
-		windowId?: string | undefined,
-	): Action {
+	static maximizeToggle(tabsetNodeId: string, windowId?: string): Action {
 		return new Action(Actions.MAXIMIZE_TOGGLE, {
 			node: tabsetNodeId,
 			windowId: windowId,

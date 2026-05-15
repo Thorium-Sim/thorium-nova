@@ -1,4 +1,3 @@
-import { diagnosticRecord } from "@thorium/utils/flags/damageTypes";
 import z from "zod";
 
 export const isMainComputer = z

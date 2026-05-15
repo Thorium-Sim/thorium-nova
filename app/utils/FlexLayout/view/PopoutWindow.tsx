@@ -1,8 +1,9 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
+
+import type { LayoutWindow } from "../model/LayoutWindow";
 import { CLASSES } from "../Types";
 import type { LayoutInternal } from "./Layout";
-import type { LayoutWindow } from "../model/LayoutWindow";
 
 /** @internal */
 export interface IPopoutWindowProps {
@@ -15,26 +16,13 @@ export interface IPopoutWindowProps {
 }
 
 /** @internal */
-export const PopoutWindow = (
-	props: React.PropsWithChildren<IPopoutWindowProps>,
-) => {
-	const {
-		title,
-		layout,
-		layoutWindow,
-		url,
-		onCloseWindow,
-		onSetWindow,
-		children,
-	} = props;
+export const PopoutWindow = (props: React.PropsWithChildren<IPopoutWindowProps>) => {
+	const { title, layout, layoutWindow, url, onCloseWindow, onSetWindow, children } = props;
 	const popoutWindow = React.useRef<Window | null>(null);
-	const [content, setContent] = React.useState<HTMLElement | undefined>(
-		undefined,
-	);
+	const [content, setContent] = React.useState<HTMLElement | undefined>(undefined);
 	// map from main docs style -> this docs equivalent style
 	const styleMap = new Map<HTMLElement, HTMLElement>();
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useLayoutEffect(() => {
 		if (!popoutWindow.current) {
 			// only create window once, even in strict mode
@@ -71,8 +59,7 @@ export const PopoutWindow = (
 						const popoutDocument = popoutWindow.current.document;
 						popoutDocument.title = title;
 						const popoutContent = popoutDocument.createElement("div");
-						popoutContent.className =
-							CLASSES.FLEXLAYOUT__FLOATING_WINDOW_CONTENT;
+						popoutContent.className = CLASSES.FLEXLAYOUT__FLOATING_WINDOW_CONTENT;
 						popoutDocument.body.appendChild(popoutContent);
 						copyStyles(popoutDocument, styleMap).then(() => {
 							setContent(popoutContent); // re-render once link styles loaded
@@ -122,18 +109,12 @@ function handleStyleMutations(
 	for (const mutation of mutationsList) {
 		if (mutation.type === "childList") {
 			for (const addition of mutation.addedNodes) {
-				if (
-					addition instanceof HTMLLinkElement ||
-					addition instanceof HTMLStyleElement
-				) {
+				if (addition instanceof HTMLLinkElement || addition instanceof HTMLStyleElement) {
 					copyStyle(popoutDocument, addition, styleMap);
 				}
 			}
 			for (const removal of mutation.removedNodes) {
-				if (
-					removal instanceof HTMLLinkElement ||
-					removal instanceof HTMLStyleElement
-				) {
+				if (removal instanceof HTMLLinkElement || removal instanceof HTMLStyleElement) {
 					const popoutStyle = styleMap.get(removal);
 					if (popoutStyle) {
 						popoutDocument.head.removeChild(popoutStyle);

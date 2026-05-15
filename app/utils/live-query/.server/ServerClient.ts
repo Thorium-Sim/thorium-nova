@@ -1,9 +1,6 @@
 import { encode } from "@msgpack/msgpack";
 import type { PubSub } from "@thorium/utils/live-query/.server/pubsub";
-import {
-	type AnyRouter,
-	callProcedure,
-} from "@thorium/utils/live-query/.server/router";
+import { type AnyRouter, callProcedure } from "@thorium/utils/live-query/.server/router";
 import type { inferRouterContext } from "@thorium/utils/live-query/.server/types";
 import { SnapshotInterpolation } from "@thorium/utils/snapshot-interpolation/src";
 import type { Snapshot } from "@thorium/utils/snapshot-interpolation/src/types";
@@ -90,7 +87,7 @@ export class ServerClient<TRouter extends AnyRouter> {
 
 						const handleNetRequestError = (err: unknown) => {
 							if (err === null) return;
-							let message = err;
+							let message: string = JSON.stringify(err);
 							if (err instanceof Error) {
 								message = err.message;
 							}
@@ -141,9 +138,10 @@ export class ServerClient<TRouter extends AnyRouter> {
 								function index(obj: any, i: keyof typeof obj) {
 									return obj[i];
 								}
-								const unSub = path
-									.split(".")
-									.reduce(index, this.pubsub.subscribe)(handleRequest, this.id);
+								const unSub = path.split(".").reduce(index, this.pubsub.subscribe)(
+									handleRequest,
+									this.id,
+								);
 								if (unSub) {
 									this.subscriptions.set(id, unSub);
 								}

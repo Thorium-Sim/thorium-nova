@@ -57,17 +57,27 @@ export function generateShipInventory(
 		[0, []],
 	);
 
+	const shipSystems = new Set<string>();
+
+	for (const room of inputRooms) {
+		for (const system of room.systems) {
+			shipSystems.add(system);
+		}
+	}
+
 	// We only want to add the kinds of cargo that are absolutely necessary, especially at first.
 	const neededInventory: string[] = [];
 	if (shipConfig.powerNeed > 0) {
 		neededInventory.push("fuel");
 	}
-	// TODO Jan 21, 2023 - these should be conditional based on reactors and systems that need heat.
-	neededInventory.push("coolant");
-	// TODO Jan 21, 2023 - these should be conditional based on whether there are torpedos or not
-	neededInventory.push("torpedoCasing");
-	neededInventory.push("torpedoWarhead");
-	neededInventory.push("torpedoGuidance");
+	if (shipSystems.has("reactor") || shipSystems.has("coolantTank")) {
+		neededInventory.push("coolant");
+	}
+	if (shipSystems.has("torpedoLauncher")) {
+		neededInventory.push("torpedoCasing");
+		neededInventory.push("torpedoWarhead");
+		neededInventory.push("torpedoGuidance");
+	}
 	// TODO Jan 21, 2023 - these should be conditional based on whether there are probes or not
 	neededInventory.push("probeCasing");
 	neededInventory.push("probeEquipment");
@@ -86,23 +96,32 @@ export function generateShipInventory(
 
 	// And we need to figure out our abundance level of each piece of cargo
 	// for doing weighted random selection.
-	const inventoryList = Object.values(flightInventory).filter((i) => {
-		for (const key in i.flags) {
-			if (neededInventory.includes(key)) return true;
+
+	// Use a set to prevent duplicate inventory items from being added
+	const inventorySet = new Set<{
+		name: string;
+		volume: number;
+		abundance: number;
+		flags: InventoryFlags;
+	}>();
+	for (const key in flightInventory) {
+		const item = flightInventory[key];
+		for (const flag in item.flags) {
+			if (neededInventory.includes(flag)) inventorySet.add(item);
 		}
-		return false;
-	});
+		if (shipSystems.has("exocomps") && item.flags.repair?.type.includes("Exocomp")) {
+			inventorySet.add(item);
+		}
+	}
+	const inventoryList = [...inventorySet];
+
 	const cargoAbundance: number[] = [];
-	const totalInventoryVolume = inventoryList.reduce(
-		(acc, inventoryTemplate) => {
-			return acc + inventoryTemplate.volume * inventoryTemplate.abundance;
-		},
-		0,
-	);
+	const totalInventoryVolume = inventoryList.reduce((acc, inventoryTemplate) => {
+		return acc + inventoryTemplate.volume * inventoryTemplate.abundance;
+	}, 0);
 	// Limit the amount of cargo so we don't fill up every nook and cranny
 	const volumeMultiplier = 0.75;
-	const shipAbundanceRatio =
-		(totalVolume * volumeMultiplier) / totalInventoryVolume;
+	const shipAbundanceRatio = (totalVolume * volumeMultiplier) / totalInventoryVolume;
 
 	inventoryList.forEach((inventoryTemplate, index) => {
 		const abundance = inventoryTemplate.abundance * shipAbundanceRatio;
@@ -127,9 +146,10 @@ export function generateShipInventory(
 		if (!inventoryTemplate) return;
 		const roomEntity = roomsMap.get(room.id);
 		if (!roomEntity) return;
-		roomEntity.contents[inventoryTemplate.name] = roomEntity.contents[
-			inventoryTemplate.name
-		] ?? { count: 0, temperature: 295.37 };
+		roomEntity.contents[inventoryTemplate.name] = roomEntity.contents[inventoryTemplate.name] ?? {
+			count: 0,
+			temperature: 295.37,
+		};
 		roomEntity.contents[inventoryTemplate.name].count += 1;
 		totalVolume -= inventoryTemplate.volume;
 		room.availableVolume -= inventoryTemplate.volume;
@@ -150,38 +170,33 @@ export function generateShipInventory(
 	 * If there isn't enough space in the room of that type, the item will be added
 	 * to the cargo hold
 	 */
-	const roomMap = rooms.reduce(
-		(acc: { [key: string]: (typeof rooms)[0][] }, room) => {
-			room.flags.forEach((flag) => {
-				if (!acc[flag]) acc[flag] = [];
-				if (flag !== "cargo") {
+	const roomMap = rooms.reduce((acc: { [key: string]: (typeof rooms)[0][] }, room) => {
+		room.flags.forEach((flag) => {
+			if (!acc[flag]) acc[flag] = [];
+			if (flag !== "cargo") {
+				acc[flag].push(room);
+				return;
+			}
+			if (flag === "cargo") {
+				// Only add to the cargo list if it doesn't have other flags
+				if (room.flags.length === 1) {
 					acc[flag].push(room);
-					return;
 				}
-				if (flag === "cargo") {
-					// Only add to the cargo list if it doesn't have other flags
-					if (room.flags.length === 1) {
-						acc[flag].push(room);
-					}
-				}
-			});
-			room.systems.forEach((sys) => {
-				if (!acc[sys]) acc[sys] = [];
-				acc[sys].push(room);
-			});
-			return acc;
-		},
-		{},
-	);
+			}
+		});
+		room.systems.forEach((sys) => {
+			if (!acc[sys]) acc[sys] = [];
+			acc[sys].push(room);
+		});
+		return acc;
+	}, {});
 	function getRandomInventoryRoom(type: string, inventoryVolume: number) {
 		const room = randomFromList(
 			(roomMap[type] ?? []).filter((r) => r.availableVolume >= inventoryVolume),
 		);
 		if (!room) {
 			const cargoRoom = randomFromList(
-				(roomMap.cargo ?? []).filter(
-					(r) => r.availableVolume >= inventoryVolume,
-				),
+				(roomMap.cargo ?? []).filter((r) => r.availableVolume >= inventoryVolume),
 			);
 			if (!cargoRoom) {
 				return null;
@@ -213,8 +228,7 @@ export function generateShipInventory(
 			powerNeeded -= inventoryTemplate.flags.fuel?.fuelDensity || 1;
 
 			let room = getRandomInventoryRoom("reactor", inventoryTemplate.volume);
-			if (!room)
-				room = getRandomInventoryRoom("fuelStorage", inventoryTemplate.volume);
+			if (!room) room = getRandomInventoryRoom("fuelStorage", inventoryTemplate.volume);
 			if (!room) continue;
 			addInventory(inventoryTemplate, room);
 		}
@@ -249,10 +263,7 @@ export function generateShipInventory(
 	for (let i = 0; i < torpedoCasingCount; i++) {
 		const inventoryTemplate = getWeightedRandomInventory(casingsList);
 		if (!inventoryTemplate) continue;
-		const room = getRandomInventoryRoom(
-			"torpedoStorage",
-			inventoryTemplate.volume,
-		);
+		const room = getRandomInventoryRoom("torpedoStorage", inventoryTemplate.volume);
 		if (!room) continue;
 		addInventory(inventoryTemplate, room);
 		const inventoryIndex = inventoryList.indexOf(inventoryTemplate);
@@ -264,10 +275,7 @@ export function generateShipInventory(
 	for (let i = 0; i < warheadCount; i++) {
 		const inventoryTemplate = getWeightedRandomInventory(warheadsList);
 		if (!inventoryTemplate) continue;
-		const room = getRandomInventoryRoom(
-			"torpedoStorage",
-			inventoryTemplate.volume,
-		);
+		const room = getRandomInventoryRoom("torpedoStorage", inventoryTemplate.volume);
 		if (!room) continue;
 		addInventory(inventoryTemplate, room);
 		const inventoryIndex = inventoryList.indexOf(inventoryTemplate);
@@ -279,10 +287,7 @@ export function generateShipInventory(
 	for (let i = 0; i < guidanceCount; i++) {
 		const inventoryTemplate = getWeightedRandomInventory(guidanceList);
 		if (!inventoryTemplate) continue;
-		const room = getRandomInventoryRoom(
-			"torpedoStorage",
-			inventoryTemplate.volume,
-		);
+		const room = getRandomInventoryRoom("torpedoStorage", inventoryTemplate.volume);
 		if (!room) continue;
 		addInventory(inventoryTemplate, room);
 		const inventoryIndex = inventoryList.indexOf(inventoryTemplate);
@@ -318,32 +323,20 @@ export function generateShipInventory(
 			return acc;
 		}, 0);
 		// Probe rooms need space for the probe equipment too, so lets only fill the room to 30% of its total volume.
-		const minimumCasings = Math.max(
-			1,
-			(totalProbeRoomVolume * 0.3) / probeCasingTotalVolume,
-		);
+		const minimumCasings = Math.max(1, (totalProbeRoomVolume * 0.3) / probeCasingTotalVolume);
 		for (let i = 0; i < minimumCasings; i++) {
 			probeCasingIndexes.forEach((index) => {
-				const room = getRandomInventoryRoom(
-					"probeStorage",
-					inventoryList[index].volume,
-				);
+				const room = getRandomInventoryRoom("probeStorage", inventoryList[index].volume);
 				if (!room) return;
 				addInventory(inventoryList[index], room);
 			});
 		}
 		// More probes can be added randomly if there is space in the cargo hold.
 		// Now we can add probe equipment to the probe storage rooms
-		const minimumEquipment = Math.max(
-			2,
-			(totalProbeRoomVolume * 0.3) / probeEquipmentTotalVolume,
-		);
+		const minimumEquipment = Math.max(2, (totalProbeRoomVolume * 0.3) / probeEquipmentTotalVolume);
 		for (let i = 0; i < minimumEquipment; i++) {
 			probeEquipmentIndexes.forEach((index) => {
-				const room = getRandomInventoryRoom(
-					"probeStorage",
-					inventoryList[index].volume,
-				);
+				const room = getRandomInventoryRoom("probeStorage", inventoryList[index].volume);
 				if (!room) return;
 				addInventory(inventoryList[index], room);
 			});
@@ -372,30 +365,21 @@ export function generateShipInventory(
 	});
 	for (let i = 0; i < securityCrew; i++) {
 		securityItemIndexes.forEach((index) => {
-			const room = getRandomInventoryRoom(
-				"security",
-				inventoryList[index].volume,
-			);
+			const room = getRandomInventoryRoom("security", inventoryList[index].volume);
 			if (!room) return;
 			addInventory(inventoryList[index], room);
 		});
 	}
 	for (let i = 0; i < repairCrew; i++) {
 		repairItemIndexes.forEach((index) => {
-			const room = getRandomInventoryRoom(
-				"maintenance",
-				inventoryList[index].volume,
-			);
+			const room = getRandomInventoryRoom("maintenance", inventoryList[index].volume);
 			if (!room) return;
 			addInventory(inventoryList[index], room);
 		});
 	}
 	for (let i = 0; i < medicalCrew; i++) {
 		medicalItemIndexes.forEach((index) => {
-			const room = getRandomInventoryRoom(
-				"medical",
-				inventoryList[index].volume,
-			);
+			const room = getRandomInventoryRoom("medical", inventoryList[index].volume);
 			if (!room) return;
 			addInventory(inventoryList[index], room);
 		});
@@ -410,10 +394,7 @@ export function generateShipInventory(
 	// We'll optimize for keeping the same inventory in the same room, not spreading it out
 	// TODO July 30, 2022: Rooms that are associated with ship systems should not have general
 	// cargo inside them.
-	const cargoRooms: Map<
-		number,
-		ReturnType<typeof getRandomInventoryRoom>
-	> = new Map();
+	const cargoRooms: Map<number, ReturnType<typeof getRandomInventoryRoom>> = new Map();
 	while (cargoAbundance.length > 0) {
 		const index = randomFromList(cargoAbundance);
 		let room = cargoRooms.get(index);

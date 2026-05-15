@@ -3,7 +3,7 @@ import { q } from "@thorium/context/AppContext";
 export function LoginCore() {
 	const [clients] = q.loginCore.clients.useNetRequest();
 	return (
-		<div className="prose prose-invert w-full mx-auto">
+		<div className="prose prose-invert mx-auto w-full">
 			<table>
 				<thead>
 					<tr>

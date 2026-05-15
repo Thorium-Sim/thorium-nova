@@ -1,12 +1,13 @@
-import { useParams, useNavigate } from "react-router";
-import { useContext, useReducer, useState } from "react";
+import { Navigate } from "@thorium/components/Navigate";
+import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import { toast } from "@thorium/context/ToastContext";
 import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
-import { toast } from "@thorium/context/ToastContext";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import { useContext, useReducer, useState } from "react";
+import { useParams, useNavigate } from "react-router";
+
 import { OverrideResetButton } from "./OverrideResetButton";
-import { q } from "@thorium/context/AppContext";
-import { Navigate } from "@thorium/components/Navigate";
 
 export default function Basic() {
 	const [rekey, setRekey] = useReducer(() => Math.random(), Math.random());
@@ -31,7 +32,7 @@ export default function Basic() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-4 flex items-end">
+					<div className="flex items-end pb-4">
 						<Input
 							labelHidden={false}
 							isInvalid={error}
@@ -51,9 +52,7 @@ export default function Basic() {
 										name: e.target.value,
 									});
 									if (!shipId) {
-										navigate(
-											`/config/${pluginId}/systems/${result.shipSystemId}`,
-										);
+										navigate(`/config/${pluginId}/systems/${result.shipSystemId}`);
 									}
 								} catch (err) {
 									if (err instanceof Error) {
@@ -68,7 +67,7 @@ export default function Basic() {
 						/>
 						<OverrideResetButton property="name" setRekey={setRekey} />
 					</div>
-					<div className="pb-4 flex">
+					<div className="flex pb-4">
 						<Input
 							as="textarea"
 							className="!h-32"
@@ -85,13 +84,9 @@ export default function Basic() {
 								})
 							}
 						/>
-						<OverrideResetButton
-							property="description"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="description" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-4 flex items-end">
+					<div className="flex items-end pb-4">
 						<div className="flex-1">
 							<TagInput
 								label="Tags"

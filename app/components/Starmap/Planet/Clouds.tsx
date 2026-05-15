@@ -2,12 +2,11 @@ import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import React from "react";
 import { FrontSide, type Mesh } from "three";
-import { whiteImage } from "../whiteImage";
 
 interface CloudsProps {
 	texture: string;
 }
-export const Clouds: React.FC<CloudsProps> = ({ texture = whiteImage }) => {
+export const Clouds: React.FC<CloudsProps> = ({ texture }) => {
 	const clouds = useTexture(texture);
 	const ref = React.useRef<Mesh>(null);
 

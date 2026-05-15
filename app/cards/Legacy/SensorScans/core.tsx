@@ -19,12 +19,10 @@ export function LegacySensorScansCore() {
 	const [scans] = q.legacy.sensorScans.scans.useNetRequest({ shipId });
 
 	const [selectedScanId, setSelectedScanId] = useState<number | null>(null);
-	const selectedScan = sensors.scanHistory
-		? scans.find((s) => s.id === selectedScanId)
-		: scans[0];
+	const selectedScan = sensors.scanHistory ? scans.find((s) => s.id === selectedScanId) : scans[0];
 
 	return (
-		<div className="flex flex-col h-full text-xs min-h-0">
+		<div className="flex h-full min-h-0 flex-col text-xs">
 			<div className="flex justify-between">
 				<div>
 					<Button className="btn-xs btn-active">External</Button>
@@ -50,9 +48,9 @@ export function LegacySensorScansCore() {
 					Processed Data History
 				</Button>
 			</div>
-			<div className="flex-1 grid grid-cols-4 min-h-0">
+			<div className="grid min-h-0 flex-1 grid-cols-4">
 				{sensors.scanHistory ? (
-					<ul className="bg-gray-900 list-group overflow-y-auto overflow-x-hidden">
+					<ul className="list-group overflow-x-hidden overflow-y-auto bg-gray-900">
 						{scans.map((s) => (
 							<li
 								key={s.id}
@@ -68,9 +66,7 @@ export function LegacySensorScansCore() {
 									inputRef.current?.focus();
 								}}
 							>
-								<div className="overflow-hidden whitespace-pre-wrap break-words">
-									{s.request}
-								</div>
+								<div className="overflow-hidden break-words whitespace-pre-wrap">{s.request}</div>
 								<Icon
 									name="loader"
 									className={cn("animate-spin shrink-0", {
@@ -88,17 +84,15 @@ export function LegacySensorScansCore() {
 					})}
 				>
 					<OutputField
-						className="flex-grow-[2] h-4 break-words whitespace-pre-wrap"
+						className="h-4 grow-[2] break-words whitespace-pre-wrap"
 						alert={selectedScan?.inProgress}
 					>
-						{selectedScan
-							? `${selectedScan?.scanType} - ${selectedScan?.request}`
-							: ""}
+						{selectedScan ? `${selectedScan?.scanType} - ${selectedScan?.request}` : ""}
 					</OutputField>
-					<TypingField className="flex-grow-[4] h-4" ref={inputRef} />
+					<TypingField className="h-4 grow-[4]" ref={inputRef} />
 				</div>
 				{processedDataHistory ? (
-					<div className="bg-gray-900 p-2 overflow-y-auto">
+					<div className="overflow-y-auto bg-gray-900 p-2">
 						<ProcessedData />
 					</div>
 				) : null}
@@ -173,9 +167,7 @@ export function LegacySensorScansCore() {
 			</div>
 			<div className="flex items-center">
 				<Button className="btn-xs flex-1">Probe Data</Button>
-				<Button className="btn-xs btn-warning flex-1">
-					Flash & Send Probe Data
-				</Button>
+				<Button className="btn-xs btn-warning flex-1">Flash & Send Probe Data</Button>
 			</div>
 		</div>
 	);

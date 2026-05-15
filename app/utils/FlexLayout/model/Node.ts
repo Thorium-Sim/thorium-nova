@@ -4,12 +4,7 @@ import type { DropInfo } from "../DropInfo";
 import { Orientation } from "../Orientation";
 import { Rect } from "../Rect";
 import type { IDraggable } from "./IDraggable";
-import type {
-	IJsonBorderNode,
-	IJsonRowNode,
-	IJsonTabNode,
-	IJsonTabSetNode,
-} from "./IJsonModel";
+import type { IJsonBorderNode, IJsonRowNode, IJsonTabNode, IJsonTabSetNode } from "./IJsonModel";
 import type { Model } from "./Model";
 
 export abstract class Node {
@@ -76,9 +71,7 @@ export abstract class Node {
 
 	getOrientation(): Orientation {
 		if (this.parent === undefined) {
-			return this.model.isRootOrientationVertical()
-				? Orientation.VERT
-				: Orientation.HORZ;
+			return this.model.isRootOrientationVertical() ? Orientation.VERT : Orientation.HORZ;
 		}
 		return Orientation.flip(this.parent.getOrientation());
 	}
@@ -92,12 +85,7 @@ export abstract class Node {
 		this.listeners.delete(event);
 	}
 
-	abstract toJson():
-		| IJsonRowNode
-		| IJsonBorderNode
-		| IJsonTabSetNode
-		| IJsonTabNode
-		| undefined;
+	abstract toJson(): IJsonRowNode | IJsonBorderNode | IJsonTabSetNode | IJsonTabNode | undefined;
 
 	/** @internal */
 	setId(id: string) {
@@ -214,24 +202,14 @@ export abstract class Node {
 	}
 
 	/** @internal */
-	canDrop(
-		dragNode: Node & IDraggable,
-		x: number,
-		y: number,
-	): DropInfo | undefined {
+	canDrop(dragNode: Node & IDraggable, x: number, y: number): DropInfo | undefined {
 		return undefined;
 	}
 
 	/** @internal */
-	canDockInto(
-		dragNode: Node & IDraggable,
-		dropInfo: DropInfo | undefined,
-	): boolean {
+	canDockInto(dragNode: Node & IDraggable, dropInfo: DropInfo | undefined): boolean {
 		if (dropInfo != null) {
-			if (
-				dropInfo.location === DockLocation.CENTER &&
-				dropInfo.node.isEnableDrop() === false
-			) {
+			if (dropInfo.location === DockLocation.CENTER && dropInfo.node.isEnableDrop() === false) {
 				return false;
 			}
 
@@ -244,21 +222,16 @@ export abstract class Node {
 				return false;
 			}
 
-			if (
-				dropInfo.location !== DockLocation.CENTER &&
-				dropInfo.node.isEnableDivide() === false
-			) {
+			if (dropInfo.location !== DockLocation.CENTER && dropInfo.node.isEnableDivide() === false) {
 				return false;
 			}
 
 			// finally check model callback to check if drop allowed
 			if (this.model.getOnAllowDrop()) {
-				return (
-					this.model.getOnAllowDrop() as (
-						dragNode: Node,
-						dropInfo: DropInfo,
-					) => boolean
-				)(dragNode, dropInfo);
+				return (this.model.getOnAllowDrop() as (dragNode: Node, dropInfo: DropInfo) => boolean)(
+					dragNode,
+					dropInfo,
+				);
 			}
 		}
 		return true;

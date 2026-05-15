@@ -1,4 +1,5 @@
 import type { Entity } from "@thorium/utils/ecs";
+
 import type { HeadersResolver } from "../client/client";
 import type { MiddlewareFunction } from "./middleware";
 import type { Parser } from "./parser";
@@ -11,12 +12,9 @@ export interface ResolveOptions<TParams extends ProcedureParams> {
 	ctx: TParams["_ctx_out"];
 	input: TParams["_input_out"];
 	publish?: TParams["_publish"];
-	entity?: TParams["_entity"];
 }
 
-export type ProcedureBuilderResolver = (
-	opts: ResolveOptions<any>,
-) => Promise<unknown>;
+export type ProcedureBuilderResolver = (opts: ResolveOptions<any>) => Promise<unknown>;
 
 export type ProcedureBuilderFilter = (
 	publish: unknown,
@@ -96,13 +94,9 @@ export interface ProcedureCallOptions {
 	rawInput: unknown;
 	input?: unknown;
 	publish?: unknown;
-	entity?: unknown;
 	path: string;
 	type: ProcedureType;
-	onCall?: (
-		opts: ProcedureCallOptions,
-		result: unknown,
-	) => void | Promise<void>;
+	onCall?: (opts: ProcedureCallOptions, result: unknown) => void | Promise<void>;
 }
 
 /**
@@ -130,21 +124,16 @@ export interface ProcedureOptions {
  */
 export type ProcedureArgs<TParams extends ProcedureParams> =
 	TParams["_input_in"] extends UnsetMarker
-		? // biome-ignore lint/suspicious/noConfusingVoidType: Necessary for this to work correctly
-			[input?: undefined | void, opts?: ProcedureOptions]
+		? [input?: undefined | void, opts?: ProcedureOptions]
 		: undefined extends TParams["_input_in"]
-			? // biome-ignore lint/suspicious/noConfusingVoidType: Necessary for this to work correctly
-				[input?: TParams["_input_in"] | void, opts?: ProcedureOptions]
+			? [input?: TParams["_input_in"] | void, opts?: ProcedureOptions]
 			: [input: TParams["_input_in"], opts?: ProcedureOptions];
 
 /**
  *
  * @internal
  */
-export interface Procedure<
-	TType extends ProcedureType,
-	TParams extends ProcedureParams,
-> {
+export interface Procedure<TType extends ProcedureType, TParams extends ProcedureParams> {
 	_type: TType;
 	_def: TParams & ProcedureBuilderDef<TParams>;
 	/**

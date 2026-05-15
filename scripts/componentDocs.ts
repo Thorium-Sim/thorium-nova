@@ -27,17 +27,11 @@ export function componentDocs() {
 		},
 		transform(src: string, id: string) {
 			if (componentDocsRegex.test(id)) {
-				const sourceFile = ts.createSourceFile(
-					id,
-					src,
-					ts.ScriptTarget.Latest,
-					true,
-				);
+				const sourceFile = ts.createSourceFile(id, src, ts.ScriptTarget.Latest, true);
 				let currentExportKeyword = "";
 				function visit(node: ts.Node) {
 					if (ts.SyntaxKind[node.kind] === "ExportKeyword") {
-						const keyword =
-							node.parent.declarationList.declarations[0].name.getText();
+						const keyword = node.parent.declarationList.declarations[0].name.getText();
 						if (keyword) {
 							currentExportKeyword = keyword;
 							docs[currentExportKeyword] = {

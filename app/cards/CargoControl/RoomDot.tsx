@@ -1,77 +1,87 @@
-import {
-	flip,
-	offset,
-	shift,
-	useFloating,
-	useInteractions,
-	useRole,
-	useHover,
-} from "@floating-ui/react";
-import { useState } from "react";
+import { cn } from "@thorium/utils/cn";
+import { useEffect, useRef, type SVGProps } from "react";
+
 import { useShipMapStore } from "./useShipMapStore";
 
 export function RoomDot({
 	id,
 	position,
-	name,
+	...props
 }: {
 	id: number;
-	name: string;
 	position: { x: number; y: number };
-}) {
+} & Omit<SVGProps<SVGCircleElement>, "id">) {
 	const selectedRoomId = useShipMapStore((state) => state.selectedRoomId);
 	const isSelected = selectedRoomId === id;
 
-	const [open, setOpen] = useState(false);
-
-	const { x, y, refs, strategy, context } = useFloating({
-		placement: "left",
-		middleware: [offset(10), flip(), shift()],
-		open,
-		onOpenChange: setOpen,
-	});
-
-	const { getReferenceProps, getFloatingProps } = useInteractions([
-		useHover(context),
-		useRole(context, { role: "tooltip" }),
-	]);
-
 	return (
 		<>
-			<div
-				className="absolute w-4 h-4 cursor-pointer flex"
-				style={{
-					transform: `translate(calc(${position.x}px - 0.5rem), calc(${position.y}px - 0.5rem))`,
-				}}
-			>
-				<div
-					className={`w-4 h-4 ${
-						isSelected
-							? "bg-sky-400 ring-2 ring-sky-300 shadow-md"
-							: "bg-green-300"
-					} rounded-full pointer-events-auto`}
-					ref={refs.setReference}
+			<circle
+				cx={position.x}
+				cy={position.y}
+				r={5}
+				className={cn("fill-green-300 cursor-pointer pointer-events-auto", {
+					"fill-sky-400": isSelected,
+				})}
+				style={{ anchorName: `--room-${id}` }}
+				onClick={() => useShipMapStore.setState({ selectedRoomId: id })}
+				{...props}
+			/>
+			{isSelected && (
+				<circle
+					cx={position.x}
+					cy={position.y}
+					r={5}
+					className={cn("fill-green-300 cursor-pointer", {
+						"fill-sky-400 animate-ping": isSelected,
+					})}
+					style={{ transformOrigin: `${position.x}px ${position.y}px` }}
 					onClick={() => useShipMapStore.setState({ selectedRoomId: id })}
-					{...getReferenceProps()}
 				/>
-				{isSelected && (
-					<span className="animate-ping absolute inline-flex h-4 w-4 rounded-full bg-sky-400" />
-				)}
-			</div>
-			{open && (
-				<div
-					ref={refs.setFloating}
-					style={{
-						position: strategy,
-						top: y ?? 0,
-						left: x ?? 0,
-					}}
-					className="z-50 text-white text-2xl drop-shadow-xl bg-black/90 border-white/50 border-2 rounded px-2 py-1"
-					{...getFloatingProps()}
-				>
-					{name}
-				</div>
 			)}
+		</>
+	);
+}
+
+export function RoomDotLabel({
+	name,
+	position,
+	tooltipShown,
+}: {
+	name: string;
+	position: { x: number; y: number };
+	tooltipShown: boolean;
+}) {
+	const textBg = useRef<SVGRectElement>(null);
+	const text = useRef<SVGTextElement>(null);
+
+	useEffect(() => {
+		if (text.current && textBg.current) {
+			let bbox = text.current.getBBox();
+			if (bbox.width + bbox.x > text.current.ownerSVGElement!.getBBox().width) {
+				text.current.setAttribute("x", `${position.x - bbox.width - 10}`);
+			}
+			bbox = text.current.getBBox();
+			textBg.current.setAttribute("width", `${bbox.width + 4}`);
+			textBg.current.setAttribute("height", `${bbox.height + 2}`);
+			textBg.current.setAttribute("x", `${bbox.x - 2}`);
+			textBg.current.setAttribute("y", `${bbox.y - 1}`);
+		}
+	}, []);
+	return (
+		<>
+			<style>
+				{`
+				text {
+	font: 1px;
+}`}
+			</style>
+			<g className={tooltipShown ? "" : "hidden"}>
+				<rect ref={textBg} className="stroke fill-black/80 stroke-white/50" rx={2} />
+				<text ref={text} x={position.x + 10} y={position.y + 3} className="fill-white text-[10px]">
+					{name}
+				</text>
+			</g>
 		</>
 	);
 }

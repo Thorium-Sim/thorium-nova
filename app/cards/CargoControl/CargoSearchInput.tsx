@@ -1,9 +1,8 @@
 import { q } from "@thorium/context/AppContext";
-import SearchableInput, {
-	DefaultResultLabel,
-} from "@thorium/ui/SearchableInput";
-import { useShipMapStore } from "./useShipMapStore";
 import { useStation } from "@thorium/routes/station/useStation";
+import SearchableInput, { DefaultResultLabel } from "@thorium/ui/SearchableInput";
+
+import { useShipMapStore } from "./useShipMapStore";
 
 export function CargoSearchInput() {
 	const { shipId } = useStation();
@@ -36,9 +35,7 @@ export function CargoSearchInput() {
 					</p>
 					{result.type !== "deck" && (
 						<p>
-							<small>
-								{[result.room, result.deck].filter(Boolean).join(", ")}
-							</small>
+							<small>{[result.room, result.deck].filter(Boolean).join(", ")}</small>
 						</p>
 					)}
 				</DefaultResultLabel>

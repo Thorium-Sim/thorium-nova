@@ -1,0 +1,35 @@
+@utility faded-scroll-x {
+	@apply flex w-full overflow-x-auto overflow-y-hidden;
+	& > * {
+		flex-shrink: 0;
+	}
+	mask-image: linear-gradient(
+		to right,
+		transparent 0px,
+		#fff var(--fade-distance, 10px),
+		#fff calc(100% - var(--fade-distance, 10px)),
+		transparent 100%
+	);
+}
+@utility faded-scroll-y {
+	@apply flex h-full flex-col overflow-x-hidden overflow-y-auto;
+	& > * {
+		flex-shrink: 0;
+	}
+	mask-image: linear-gradient(
+		to bottom,
+		transparent 0px,
+		#fff var(--fade-distance, 10px),
+		#fff calc(100% - var(--fade-distance, 10px)),
+		transparent 100%
+	);
+}
+
+@utility faded-scroll-top {
+	mask-image: linear-gradient(
+		to bottom,
+		transparent 0px,
+		#fff var(--fade-distance, 10px),
+		#fff 100%
+	);
+}

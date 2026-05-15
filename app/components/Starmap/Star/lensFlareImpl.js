@@ -19,11 +19,7 @@ import {
 } from "three";
 
 var Lensflare = function () {
-	Mesh.call(
-		this,
-		Lensflare.Geometry,
-		new MeshBasicMaterial({ opacity: 0, transparent: true }),
-	);
+	Mesh.call(this, Lensflare.Geometry, new MeshBasicMaterial({ opacity: 0, transparent: true }));
 
 	this.type = "Lensflare";
 	this.frustumCulled = false;
@@ -42,12 +38,7 @@ var Lensflare = function () {
 	tempMap.wrapS = ClampToEdgeWrapping;
 	tempMap.wrapT = ClampToEdgeWrapping;
 
-	var occlusionMap = new DataTexture(
-		new Uint8Array(16 * 16 * 3),
-		16,
-		16,
-		RGBFormat,
-	);
+	var occlusionMap = new DataTexture(new Uint8Array(16 * 16 * 3), 16, 16, RGBFormat);
 	occlusionMap.minFilter = NearestFilter;
 	occlusionMap.magFilter = NearestFilter;
 	occlusionMap.wrapS = ClampToEdgeWrapping;
@@ -182,10 +173,7 @@ var Lensflare = function () {
 		scale.set(size * invAspect, size);
 
 		validArea.min.set(viewport.x, viewport.y);
-		validArea.max.set(
-			viewport.x + (viewport.z - 16),
-			viewport.y + (viewport.w - 16),
-		);
+		validArea.max.set(viewport.x + (viewport.z - 16), viewport.y + (viewport.w - 16));
 
 		// calculate position in screen space
 
@@ -201,10 +189,7 @@ var Lensflare = function () {
 		screenPositionPixels.x =
 			viewport.x + positionScreen.x * halfViewportWidth + halfViewportWidth - 8;
 		screenPositionPixels.y =
-			viewport.y +
-			positionScreen.y * halfViewportHeight +
-			halfViewportHeight -
-			8;
+			viewport.y + positionScreen.y * halfViewportHeight + halfViewportHeight - 8;
 
 		// screen cull
 
@@ -219,14 +204,7 @@ var Lensflare = function () {
 			uniforms["scale"].value = scale;
 			uniforms["screenPosition"].value = positionScreen;
 
-			renderer.renderBufferDirect(
-				camera,
-				null,
-				geometry,
-				material1a,
-				mesh1,
-				null,
-			);
+			renderer.renderBufferDirect(camera, null, geometry, material1a, mesh1, null);
 
 			// copy result to occlusionMap
 
@@ -238,14 +216,7 @@ var Lensflare = function () {
 			uniforms["scale"].value = scale;
 			uniforms["screenPosition"].value = positionScreen;
 
-			renderer.renderBufferDirect(
-				camera,
-				null,
-				geometry,
-				material1b,
-				mesh1,
-				null,
-			);
+			renderer.renderBufferDirect(camera, null, geometry, material1b, mesh1, null);
 
 			// render elements
 
@@ -259,10 +230,8 @@ var Lensflare = function () {
 
 				uniforms["color"].value.copy(element.color);
 				uniforms["map"].value = element.texture;
-				uniforms["screenPosition"].value.x =
-					positionScreen.x + vecX * element.distance;
-				uniforms["screenPosition"].value.y =
-					positionScreen.y + vecY * element.distance;
+				uniforms["screenPosition"].value.x = positionScreen.x + vecX * element.distance;
+				uniforms["screenPosition"].value.y = positionScreen.y + vecY * element.distance;
 
 				const size = element.size / viewport.w;
 				const invAspect = viewport.w / viewport.z;
@@ -271,14 +240,7 @@ var Lensflare = function () {
 
 				material2.uniformsNeedUpdate = true;
 
-				renderer.renderBufferDirect(
-					camera,
-					null,
-					geometry,
-					material2,
-					mesh2,
-					null,
-				);
+				renderer.renderBufferDirect(camera, null, geometry, material2, mesh2, null);
 			}
 		}
 	};
@@ -388,14 +350,8 @@ Lensflare.Geometry = (() => {
 	var interleavedBuffer = new InterleavedBuffer(float32Array, 5);
 
 	geometry.setIndex([0, 1, 2, 0, 2, 3]);
-	geometry.setAttribute(
-		"position",
-		new InterleavedBufferAttribute(interleavedBuffer, 3, 0, false),
-	);
-	geometry.setAttribute(
-		"uv",
-		new InterleavedBufferAttribute(interleavedBuffer, 2, 3, false),
-	);
+	geometry.setAttribute("position", new InterleavedBufferAttribute(interleavedBuffer, 3, 0, false));
+	geometry.setAttribute("uv", new InterleavedBufferAttribute(interleavedBuffer, 2, 3, false));
 
 	return geometry;
 })();

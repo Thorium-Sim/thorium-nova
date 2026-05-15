@@ -1,5 +1,10 @@
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { autoPlacement, useFloating } from "@floating-ui/react-dom";
+import Button from "@thorium/ui/Button";
+import Checkbox from "@thorium/ui/Checkbox";
+import { Icon } from "@thorium/ui/Icon";
+import Input from "@thorium/ui/Input";
+import Select from "@thorium/ui/Select";
+import { capitalCase } from "change-case";
 import { produce } from "immer";
 import {
 	type Dispatch,
@@ -10,14 +15,10 @@ import {
 	useRef,
 	useState,
 } from "react";
-import Select from "@thorium/ui/Select";
-import { capitalCase } from "change-case";
-import Button from "@thorium/ui/Button";
-import { autoPlacement, useFloating } from "@floating-ui/react-dom";
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+
 import useOnClickOutside from "./useClickOutside";
-import Checkbox from "@thorium/ui/Checkbox";
-import Input from "@thorium/ui/Input";
-import { Icon } from "@thorium/ui/Icon";
 const gamepadKeys = [
 	"yaw",
 	"pitch",
@@ -45,10 +46,8 @@ const keyLabels: Partial<Record<GamepadKey, string>> = {
 	"pilot-sensor-tilt": "Press a button to toggle the sensor tilt.",
 	"impulse-speed": "Set the current speed to the value of an axis.",
 	"impulse-adjust": "Hold down a button to adjust speed. Use with two buttons.",
-	"warp-focus-set":
-		"Use an axis to shift focus between the warp speed buttons.",
-	"warp-focus-adjust":
-		"Use two buttons to shift focus between the warp speed buttons.",
+	"warp-focus-set": "Use an axis to shift focus between the warp speed buttons.",
+	"warp-focus-adjust": "Use two buttons to shift focus between the warp speed buttons.",
 	"warp-engage": "Activate the currently focused warp speed.",
 };
 
@@ -78,11 +77,9 @@ interface JoystickConfig {
 	actions: { [K in GamepadKey]?: GamepadActionConfig[] };
 }
 
-export const useGamepadStore = create<{ gamepads: (Gamepad | null)[] }>(
-	(set, get) => ({
-		gamepads: [],
-	}),
-);
+export const useGamepadStore = create<{ gamepads: (Gamepad | null)[] }>(() => ({
+	gamepads: [],
+}));
 
 export const useGamepadConfigStore = create(
 	persist<{
@@ -154,10 +151,7 @@ export const useGamepadConfigStore = create(
 							draft.configs[get().activeConfig].actions[key]?.findIndex(
 								(item) => item.gamepad === gamepad,
 							) || -1;
-						draft.configs[get().activeConfig].actions[key]?.splice(
-							actionIndex,
-							1,
-						);
+						draft.configs[get().activeConfig].actions[key]?.splice(actionIndex, 1);
 					}),
 				);
 			},
@@ -174,9 +168,7 @@ export const useGamepadConfigStore = create(
 							draft.configs[get().activeConfig].actions[key] || [];
 						const actionIndex =
 							get().configs[get().activeConfig].actions[key]?.findIndex(
-								(item) =>
-									item.gamepad === action.gamepad &&
-									item.index === action.index,
+								(item) => item.gamepad === action.gamepad && item.index === action.index,
 							) ?? -1;
 						if (actionIndex === -1) return;
 						try {
@@ -231,11 +223,7 @@ export function calculateHatDirection(num: number) {
 	let x = 0;
 	let y = 0;
 	const input = num.toFixed(5);
-	if (
-		input.startsWith("-1") ||
-		input.startsWith("-0.71429") ||
-		input.startsWith("1")
-	) {
+	if (input.startsWith("-1") || input.startsWith("-0.71429") || input.startsWith("1")) {
 		y = 1;
 	}
 	if (
@@ -245,18 +233,10 @@ export function calculateHatDirection(num: number) {
 	) {
 		x = 1;
 	}
-	if (
-		input.startsWith("-0.14286") ||
-		input.startsWith("0.14286") ||
-		input.startsWith("0.42857")
-	) {
+	if (input.startsWith("-0.14286") || input.startsWith("0.14286") || input.startsWith("0.42857")) {
 		y = -1;
 	}
-	if (
-		input.startsWith("0.42857") ||
-		input.startsWith("0.71429") ||
-		input.startsWith("1")
-	) {
+	if (input.startsWith("0.42857") || input.startsWith("0.71429") || input.startsWith("1")) {
 		x = -1;
 	}
 	if (x && y) {
@@ -314,9 +294,7 @@ export function useGamepadValue(
 ): void {
 	// First check all the gamepads in the current config
 	// to see if any of them have a value for this key.
-	const config = useGamepadConfigStore(
-		(store) => store.configs[store.activeConfig],
-	);
+	const config = useGamepadConfigStore((store) => store.configs[store.activeConfig]);
 	const callbackRef = useRef(callback);
 	useEffect(() => {
 		callbackRef.current = callback;
@@ -324,26 +302,21 @@ export function useGamepadValue(
 
 	const oldValue = useRef(0);
 	const actions = config?.actions[key || ("" as GamepadKey)];
-	// biome-ignore lint/correctness/useExhaustiveDependencies: Update when key changes
+
 	useEffect(() => {
 		if (!actions) return;
 		const unsubscribe = useGamepadStore.subscribe((store) => {
 			let value = 0;
 			for (const action of actions) {
 				let actionValue = 0;
-				const gamepad = store.gamepads.find(
-					(gamepad) => gamepad && action.gamepad === gamepad.id,
-				);
+				const gamepad = store.gamepads.find((gamepad) => gamepad && action.gamepad === gamepad.id);
 				switch (action.control) {
 					case "axis": {
 						let { index, deadZone = 0.05, invert } = action;
 						actionValue = gamepad?.axes[index] || 0;
 						if (deadZone < 0 || deadZone >= 1) deadZone = 0;
 						if (deadZone !== 0) {
-							actionValue =
-								actionValue < deadZone && actionValue > deadZone * -1
-									? 0
-									: actionValue;
+							actionValue = actionValue < deadZone && actionValue > deadZone * -1 ? 0 : actionValue;
 						}
 						if (invert) {
 							actionValue *= -1;
@@ -411,14 +384,9 @@ export function GamepadConfig() {
 				return;
 			}
 			const diff = objectDiff(newVal, old);
-			for (const { path, old, newVal } of diff) {
-				const [diffGamepad, type, index] = path.split(".") as [
-					string,
-					"axes" | "buttons",
-					string,
-				];
-				const gamepadObj =
-					useGamepadStore.getState().gamepads[Number(diffGamepad)];
+			for (const { path, newVal } of diff) {
+				const [diffGamepad, type, index] = path.split(".") as [string, "axes" | "buttons", string];
+				const gamepadObj = useGamepadStore.getState().gamepads[Number(diffGamepad)];
 				if (!gamepadObj) continue;
 				if (!assigningKey) continue;
 				if (gamepad !== gamepadObj.id) continue;
@@ -487,7 +455,7 @@ function GamepadAction({
 		) || [];
 
 	return (
-		<div className="flex gap-2 items-center justify-between py-1">
+		<div className="flex items-center justify-between gap-2 py-1">
 			<div style={{ width: `${width}ch` }}>
 				{capitalCase(key)}
 				<small className="block text-gray-400">{keyLabels[key]}</small>
@@ -495,17 +463,12 @@ function GamepadAction({
 
 			<ul className="flex-1">
 				{keyConfigs.map((keyConfig) => (
-					<li
-						key={`${keyConfig.gamepad}-${keyConfig.control}-${keyConfig.index}`}
-					>
+					<li key={`${keyConfig.gamepad}-${keyConfig.control}-${keyConfig.index}`}>
 						{capitalCase(keyConfig.control)}: {keyConfig.index}{" "}
 						<button
 							className="px-1 py-2"
 							type="button"
-							onClick={() =>
-								gamepad &&
-								useGamepadConfigStore.getState().removeAction(key, gamepad)
-							}
+							onClick={() => gamepad && useGamepadConfigStore.getState().removeAction(key, gamepad)}
 						>
 							<Icon name="ban" className="text-red-500" />
 						</button>
@@ -584,7 +547,7 @@ function GamepadAction({
 			<Button
 				disabled={!gamepad}
 				type="button"
-				className={`btn-xs place-self-end self-center max-w-fit ${
+				className={`btn-xs max-w-fit place-self-end self-center ${
 					assigningKey !== key ? "btn-warning" : ""
 				}`}
 				onClick={() => setAssigningKey(assigningKey ? null : key)}
@@ -606,9 +569,7 @@ function ActionConfig({ children }: { children: ReactNode }) {
 			update();
 		}
 	}, [update, visible]);
-	useOnClickOutside(refs.floating as React.MutableRefObject<HTMLElement>, () =>
-		setVisible(false),
-	);
+	useOnClickOutside(refs.floating as React.MutableRefObject<HTMLElement>, () => setVisible(false));
 
 	return (
 		<>
@@ -631,7 +592,7 @@ function ActionConfig({ children }: { children: ReactNode }) {
 					top: y ?? "",
 					left: x ?? "",
 				}}
-				className={`max-w-xs w-max z-10 border-transparent shadow-lg bg-opacity-90 bg-black rounded-lg p-2 ${
+				className={`z-10 w-max max-w-xs rounded-lg border-transparent bg-black/90 p-2 shadow-lg ${
 					visible ? "block" : "hidden"
 				}`}
 			>

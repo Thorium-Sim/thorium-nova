@@ -36,10 +36,7 @@ function copyToChannel(
  * - Outcome: Downmix to mono, and copy to channels
  **/
 
-export function downMixBuffer(
-	sourceBuffer: AudioBuffer,
-	destinationChannels: number[],
-) {
+export function downMixBuffer(sourceBuffer: AudioBuffer, destinationChannels: number[]) {
 	if (!audioContext) return sourceBuffer;
 	let destinationBuffer = audioContext.createBuffer(
 		audioContext.destination.channelCount,

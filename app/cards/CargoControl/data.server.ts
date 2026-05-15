@@ -1,26 +1,20 @@
-import { t } from "@thorium/.server/init/t";
-import { pubsub } from "@thorium/.server/init/pubsub";
-import { matchSorter } from "match-sorter";
-import type { ECS, Entity } from "@thorium/utils/ecs";
-import { z } from "zod";
-import type { shipMap } from "@thorium/ecs-components/shipMap";
-import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
-import {
-	calculateShipMapPath,
-	createShipMapGraph,
-} from "@thorium/utils/.server/ship/shipMapPathfinder";
+import type { DataContext } from "@thorium/.server/DataContext";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
+import { findClosestNode } from "@thorium/.server/systems/PassengerMovementSystem";
+import type { shipMap } from "@thorium/ecs-components/shipMap";
 import {
 	getInventoryTemplates,
 	getPluginInventoryTemplates,
 } from "@thorium/utils/.server/getInventoryTemplates";
-import { findClosestNode } from "@thorium/.server/systems/PassengerMovementSystem";
-import type { DataContext } from "@thorium/.server/DataContext";
-import {
-	nodeFlags,
-	nodeFlagsSchema,
-	type NodeFlag,
-} from "@thorium/utils/flags/DeckNode";
+import { getGraph } from "@thorium/utils/.server/ship/shipMapGraph";
+import { calculateShipMapPath } from "@thorium/utils/.server/ship/shipMapPathfinder";
+import type { ECS, Entity } from "@thorium/utils/ecs";
+import { nodeFlags, nodeFlagsSchema, type NodeFlag } from "@thorium/utils/flags/DeckNode";
+import { randomFromList } from "@thorium/utils/operations/randomFromList";
+import { matchSorter } from "match-sorter";
+import z from "zod";
 
 type ShipMapDeckNode = z.infer<typeof shipMap>["deckNodes"][number];
 
@@ -32,25 +26,6 @@ const transferId = z.object({
 
 const cargoRoomsCache = new Map<Entity, ShipMapDeckNode[]>();
 
-const shipMapGraphCache = new Map<
-	number,
-	ReturnType<typeof createShipMapGraph>
->();
-
-function getGraph(entity: Entity) {
-	if (!shipMapGraphCache.has(entity.id)) {
-		if (!entity.components.shipMap) throw new Error("Invalid ship map.");
-		shipMapGraphCache.set(
-			entity.id,
-			createShipMapGraph(
-				entity.components.shipMap?.deckEdges || [],
-				entity.components.shipMap.deckNodes,
-			),
-		);
-	}
-	return shipMapGraphCache.get(entity.id)!;
-}
-
 export const cargoControl = t.router({
 	inventoryTypes: t.procedure
 		.autoPublish([], () => null)
@@ -58,7 +33,7 @@ export const cargoControl = t.router({
 			for (const system of ctx.ecs.systems) {
 				if (system.constructor.name === "FilterInventorySystem") {
 					return Object.fromEntries(
-						Array.from(system?.entities.entries()).map(([id, entity]) => [
+						Array.from(system?.entities.entries()).map(([_, entity]) => [
 							entity.components.identity?.name,
 							{
 								...entity.components.identity,
@@ -77,10 +52,7 @@ export const cargoControl = t.router({
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
-		.autoPublish(
-			["shipMap"],
-			(entity) => entity.components.shipMap && { shipId: entity.id },
-		)
+		.autoPublish(["shipMap"], (entity) => entity.components.shipMap && { shipId: entity.id })
 		.request(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("No ship selected");
@@ -98,16 +70,14 @@ export const cargoControl = t.router({
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
-		.autoPublish(["cargoContainer", "passengerMovement"], (entity) =>
+		.autoPublish(["isCargoContainer", "passengerMovement"], (entity) =>
 			entity.components.cargoContainer && entity.components.position?.parentId
 				? { shipId: entity.components.position.parentId }
 				: null,
 		)
 		.request(({ ctx, input }) => {
 			const inventoryTemplates = getInventoryTemplates(ctx.ecs);
-			const matchEntities = [
-				...(ctx.ecs.componentCache.get("cargoContainer") || []),
-			];
+			const matchEntities = [...(ctx.ecs.componentCache.get("isCargoContainer") || [])];
 			return (
 				matchEntities
 					.filter(
@@ -119,13 +89,10 @@ export const cargoControl = t.router({
 					)
 					.map((entity) => {
 						const entityState: "idle" | "enRoute" =
-							entity.components.passengerMovement?.nodePath.length === 0
-								? "idle"
-								: "enRoute";
+							entity.components.passengerMovement?.nodePath.length === 0 ? "idle" : "enRoute";
 						return {
 							id: entity.id,
-							name:
-								entity.components.identity?.name || `Container ${entity.id}`,
+							name: entity.components.identity?.name || `Container ${entity.id}`,
 							position: entity.components.position,
 							contents: entity.components.cargoContainer?.contents || {},
 							used: calculateCargoUsed(
@@ -133,8 +100,7 @@ export const cargoControl = t.router({
 								inventoryTemplates,
 							),
 							volume: entity.components.cargoContainer?.volume || 0,
-							destinationNode:
-								entity.components.passengerMovement?.destinationNode || null,
+							destinationNode: entity.components.passengerMovement?.destinationNode || null,
 							entityState,
 						};
 					}) || []
@@ -200,16 +166,18 @@ export const cargoControl = t.router({
 
 			return matchSorter(output, input.query, { keys: ["name"] }).slice(0, 10);
 		}),
-	stream: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.dataStream(({ entity, input, ctx }) => {
-			if (!entity) return false;
-			return Boolean(
-				entity.components.cargoContainer &&
-					entity.components.position?.parentId === input.shipId &&
-					entity.components.passengerMovement,
-			);
-		}),
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
+		const set = new Set<Entity>();
+		for (let entity of ctx.ecs.componentCache.get("isCargoContainer") || []) {
+			if (
+				entity.components.position?.parentId === input.shipId &&
+				entity.components.passengerMovement
+			) {
+				set.add(entity);
+			}
+		}
+		return set;
+	}),
 	containerSummon: t.procedure
 		.input(
 			z.object({
@@ -223,18 +191,14 @@ export const cargoControl = t.router({
 			if (!ship) throw new Error("No ship selected");
 			if (!ship.components.shipMap) throw new Error("Invalid ship map.");
 			const graph = getGraph(ship);
-			const room = ship.components.shipMap?.deckNodes.find(
-				(d) => d.id === input.roomId,
-			);
+			const room = ship.components.shipMap?.deckNodes.find((d) => d.id === input.roomId);
 			if (!room) throw new Error("No room found");
 
 			let container: Entity | null | undefined;
 			if (typeof input.containerId === "number") {
 				container = ctx.flight?.ecs.getEntityById(input.containerId);
 			} else {
-				const matchEntities = [
-					...(ctx.ecs.componentCache.get("cargoContainer") || []),
-				];
+				const matchEntities = [...(ctx.ecs.componentCache.get("isCargoContainer") || [])];
 				// Find the closest container.
 				container = matchEntities.reduce((acc: Entity | null, entity) => {
 					if (
@@ -250,10 +214,8 @@ export const cargoControl = t.router({
 
 					// Prioritize entities that are close to the target deck, but not busy.
 					if (
-						Math.abs(
-							room.deckIndex -
-								(acc.components.position?.z ?? Number.POSITIVE_INFINITY),
-						) < Math.abs(room.deckIndex - entity.components.position.z)
+						Math.abs(room.deckIndex - (acc.components.position?.z ?? Number.POSITIVE_INFINITY)) <
+						Math.abs(room.deckIndex - entity.components.position.z)
 					) {
 						// If the acc entity is not busy, use it.
 						return acc;
@@ -275,8 +237,7 @@ export const cargoControl = t.router({
 				}, null);
 			}
 
-			if (!container?.components.position)
-				throw new Error("No container available.");
+			if (!container?.components.position) throw new Error("No container available.");
 
 			const closestNode = findClosestNode(
 				ship.components.shipMap.deckNodes,
@@ -284,11 +245,7 @@ export const cargoControl = t.router({
 			);
 			if (!closestNode) throw new Error("No container available.");
 
-			const nodePath = calculateShipMapPath(
-				graph,
-				closestNode.id,
-				input.roomId,
-			);
+			const nodePath = calculateShipMapPath(graph, closestNode.id, input.roomId);
 
 			if (nodePath) {
 				container.updateComponent("passengerMovement", {
@@ -319,70 +276,6 @@ export const cargoControl = t.router({
 			if (!fromContainer) throw new Error("No source container found.");
 			const toContainer = getCargoContents(ctx.ecs, input.toId);
 			if (!toContainer) throw new Error("No destination container found.");
-
-			const inventoryTemplates = getInventoryTemplates(ctx.ecs);
-
-			const itemCounts: { [key: string]: number } = {};
-			let destinationVolume = toContainer.volume || 0;
-			// First loop to see if there are any errors
-			input.transfers.forEach(({ item, count }) => {
-				if (
-					!fromContainer.contents[item] ||
-					fromContainer.contents[item].count < count
-				) {
-					itemCounts[item] = fromContainer.contents[item].count;
-				}
-				const destinationUsedSpace = calculateCargoUsed(
-					toContainer.contents || {},
-					inventoryTemplates,
-				);
-				const movedVolume = calculateCargoUsed(
-					{ [item]: { count: itemCounts[item] || count } },
-					inventoryTemplates,
-				);
-
-				if (destinationUsedSpace + movedVolume > destinationVolume) {
-					const volumeLeft = destinationVolume - destinationUsedSpace;
-					const singleVolume = calculateCargoUsed(
-						{ [item]: { count: 1 } },
-						inventoryTemplates,
-					);
-					const cargoItemsThatFitInVolumeLeft = Math.floor(
-						volumeLeft / singleVolume,
-					);
-
-					itemCounts[item] = Math.min(
-						itemCounts[item] || count,
-						cargoItemsThatFitInVolumeLeft,
-					);
-					if (itemCounts[item] <= 0)
-						throw new Error("Not enough space in destination.");
-				}
-				const actualMovedVolume = calculateCargoUsed(
-					{ [item]: { count: itemCounts[item] || count } },
-					inventoryTemplates,
-				);
-				destinationVolume -= actualMovedVolume;
-			});
-
-			// Then loop to do the actual transfer
-			input.transfers.forEach(({ item, count }) => {
-				fromContainer.contents[item].count -= itemCounts[item] || count;
-				if (!toContainer.contents[item])
-					toContainer.contents[item] = { count: 0, temperature: 295.37 };
-
-				// Average the temperatures of the items being transferred.
-				// The formula we'll use for combining heat is
-				// (T1 * C1 + T2 * C2) / (C1 + C2)
-				const T1 = fromContainer.contents[item].temperature;
-				const T2 = toContainer.contents[item].temperature;
-				const C1 = toContainer.contents[item].count;
-				const C2 = itemCounts[item] || count;
-
-				toContainer.contents[item].count += C2;
-				toContainer.contents[item].temperature =
-					(T1 * C1 + T2 * C2) / (C1 + C2);
-			});
 
 			pubsub.publish.cargoControl.containers({
 				shipId: input.fromId.shipId,
@@ -441,11 +334,9 @@ export const cargoControl = t.router({
 			const room = getRoomFromFlagsAndSystems(ship, input.flags, input.systems);
 
 			const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
-			const inventoryItem =
-				input.item || randomFromList(Object.keys(inventoryTemplates));
+			const inventoryItem = input.item || randomFromList(Object.keys(inventoryTemplates));
 
-			if (!inventoryTemplates[inventoryItem])
-				throw new Error("Inventory item not found.");
+			if (!inventoryTemplates[inventoryItem]) throw new Error("Inventory item not found.");
 
 			if (!room.contents[inventoryItem])
 				room.contents[inventoryItem] = { count: 0, temperature: 295.37 };
@@ -499,11 +390,9 @@ export const cargoControl = t.router({
 			const room = getRoomFromFlagsAndSystems(ship, input.flags, input.systems);
 
 			const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
-			const inventoryItem =
-				input.item || randomFromList(Object.keys(inventoryTemplates));
+			const inventoryItem = input.item || randomFromList(Object.keys(inventoryTemplates));
 
-			if (!inventoryTemplates[inventoryItem])
-				throw new Error("Inventory item not found.");
+			if (!inventoryTemplates[inventoryItem]) throw new Error("Inventory item not found.");
 
 			if (!room.contents[inventoryItem])
 				room.contents[inventoryItem] = { count: 0, temperature: 295.37 };
@@ -555,8 +444,7 @@ export const cargoControl = t.router({
 
 			const room = getRoomFromFlagsAndSystems(ship, input.flags, input.systems);
 
-			if (!room.contents[input.item])
-				throw new Error("Item not found in room.");
+			if (!room.contents[input.item]) throw new Error("Item not found in room.");
 
 			room.contents[input.item].count -= input.count;
 			if (room.contents[input.item].count <= 0) {
@@ -636,16 +524,14 @@ export function getCargoContents(
 		return { volume: container.volume, contents: container.contents };
 	}
 	if (type === "room") {
-		const room = ecs
-			.getEntityById(shipId)
-			?.components.shipMap?.deckNodes.find((d) => d.id === id);
+		const room = ecs.getEntityById(shipId)?.components.shipMap?.deckNodes.find((d) => d.id === id);
 		if (!room) return null;
 		return { volume: room.volume, contents: room.contents };
 	}
 	return null;
 }
 
-function getCargoRooms(ship: Entity | null) {
+export function getCargoRooms(ship: Entity | null) {
 	if (!ship) return [];
 
 	const inventoryTemplates = getInventoryTemplates(ship.ecs);
@@ -663,6 +549,7 @@ function getCargoRooms(ship: Entity | null) {
 			return {
 				id: node.id,
 				name: node.name,
+				deckIndex: node.deckIndex,
 				deck: ship?.components.shipMap?.decks[node.deckIndex].name,
 				position: { x: node.x, y: node.y },
 				volume: node.volume,
@@ -674,6 +561,15 @@ function getCargoRooms(ship: Entity | null) {
 		}) || [];
 
 	return rooms;
+}
+
+export function getRoomsForInventory(ship: Entity | null, inventoryName: string) {
+	if (!ship) return [];
+
+	const cargoRooms = getCargoRooms(ship);
+	return cargoRooms.filter(
+		(r) => inventoryName in r.contents && r.contents[inventoryName].count > 0,
+	);
 }
 
 export function getRoomByFlag(ship: Entity, flag: NodeFlag) {
@@ -688,7 +584,7 @@ export function getRoomByFlag(ship: Entity, flag: NodeFlag) {
 
 export function getRoomBySystem(ship: Entity | null, system: string) {
 	if (!ship?.components.shipMap && ship?.components.cargoContainer) {
-		return [ship.components.cargoContainer];
+		return [{ id: ship.id, ...ship.components.cargoContainer }];
 	}
 
 	const rooms = getCargoRooms(ship);
@@ -696,11 +592,7 @@ export function getRoomBySystem(ship: Entity | null, system: string) {
 	return rooms.filter((room) => room.systems?.includes(system));
 }
 
-function getRoomFromFlagsAndSystems(
-	ship: Entity,
-	flags?: NodeFlag[],
-	systems?: string[],
-) {
+function getRoomFromFlagsAndSystems(ship: Entity, flags?: NodeFlag[], systems?: string[]) {
 	if (!ship.components.shipMap && ship.components.cargoContainer) {
 		return ship.components.cargoContainer;
 	}
@@ -723,4 +615,101 @@ function getRoomFromFlagsAndSystems(
 	if (!room) throw new Error("Room not found.");
 
 	return room;
+}
+
+type Container = {
+	volume: number;
+	contents: Record<
+		string,
+		{
+			count: number;
+			temperature: number;
+		}
+	>;
+};
+
+export function transferInventory(
+	ecs: ECS,
+	fromContainer: Container,
+	toContainer: Container,
+	transfers: {
+		item: string;
+		count: number;
+	}[],
+) {
+	const inventoryTemplates = getInventoryTemplates(ecs);
+
+	const itemCounts: { [key: string]: number } = {};
+	let destinationVolume = toContainer.volume || 0;
+	// First loop to see if there are any errors
+	transfers.forEach(({ item, count }) => {
+		if (!fromContainer.contents[item] || fromContainer.contents[item].count < count) {
+			itemCounts[item] = fromContainer.contents[item]?.count || 0;
+		}
+		const destinationUsedSpace = calculateCargoUsed(toContainer.contents || {}, inventoryTemplates);
+		const movedVolume = calculateCargoUsed(
+			{ [item]: { count: itemCounts[item] || count } },
+			inventoryTemplates,
+		);
+
+		if (destinationUsedSpace + movedVolume > destinationVolume) {
+			const volumeLeft = destinationVolume - destinationUsedSpace;
+			const singleVolume = calculateCargoUsed({ [item]: { count: 1 } }, inventoryTemplates);
+			const cargoItemsThatFitInVolumeLeft = Math.floor(volumeLeft / singleVolume);
+
+			itemCounts[item] = Math.min(itemCounts[item] || count, cargoItemsThatFitInVolumeLeft);
+			if (itemCounts[item] <= 0) throw new Error("Not enough space in destination.");
+		}
+		const actualMovedVolume = calculateCargoUsed(
+			{ [item]: { count: itemCounts[item] || count } },
+			inventoryTemplates,
+		);
+		destinationVolume -= actualMovedVolume;
+	});
+
+	const transferredCounts: Record<string, number> = {};
+	// Then loop to do the actual transfer
+	transfers.forEach(({ item, count }) => {
+		const C2 = itemCounts[item] ?? count;
+		if (C2 === 0) return;
+		fromContainer.contents[item].count -= C2;
+		if (!toContainer.contents[item]) toContainer.contents[item] = { count: 0, temperature: 295.37 };
+
+		// Average the temperatures of the items being transferred.
+		// The formula we'll use for combining heat is
+		// (T1 * C1 + T2 * C2) / (C1 + C2)
+		const T1 = fromContainer.contents[item].temperature;
+		const T2 = toContainer.contents[item].temperature;
+		const C1 = toContainer.contents[item].count;
+
+		toContainer.contents[item].count += C2;
+		toContainer.contents[item].temperature = (T1 * C1 + T2 * C2) / (C1 + C2);
+		transferredCounts[item] = C2;
+	});
+
+	return transferredCounts;
+}
+
+const listFormatter = new Intl.ListFormat("en-US", { style: "long", type: "conjunction" });
+const pluralRules = new Intl.PluralRules("en-US");
+export function inventoryToString(ecs: ECS, inventory: Record<string, number>): string {
+	const inventoryTemplates = getInventoryTemplates(ecs);
+	return listFormatter.format(
+		Object.entries(inventory).map(([key, count]) => {
+			const item = inventoryTemplates[key];
+			return `${pluralize(count, item.name, item.plural)}`;
+		}),
+	);
+}
+
+function pluralize(count: number, singular: string, plural: string = singular) {
+	const grammaticalNumber = pluralRules.select(count);
+	switch (grammaticalNumber) {
+		case "one":
+			return count + " " + singular;
+		case "other":
+			return count + " " + plural;
+		default:
+			throw new Error("Unknown: " + grammaticalNumber);
+	}
 }

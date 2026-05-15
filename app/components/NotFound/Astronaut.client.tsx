@@ -20,10 +20,5 @@ export function Astronaut() {
 		loadAnimation();
 	}, []);
 
-	return (
-		<div
-			ref={container}
-			className="w-[500px] h-[500px] overflow-hidden mx-auto"
-		/>
-	);
+	return <div ref={container} className="mx-auto h-[500px] w-[500px] overflow-hidden" />;
 }

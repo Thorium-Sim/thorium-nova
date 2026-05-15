@@ -61,12 +61,11 @@ SimplexNoise.prototype = {
 		0, -1, 1, 0, 1, -1, 0, -1, -1,
 	]),
 	grad4: new Float32Array([
-		0, 1, 1, 1, 0, 1, 1, -1, 0, 1, -1, 1, 0, 1, -1, -1, 0, -1, 1, 1, 0, -1, 1,
-		-1, 0, -1, -1, 1, 0, -1, -1, -1, 1, 0, 1, 1, 1, 0, 1, -1, 1, 0, -1, 1, 1, 0,
-		-1, -1, -1, 0, 1, 1, -1, 0, 1, -1, -1, 0, -1, 1, -1, 0, -1, -1, 1, 1, 0, 1,
-		1, 1, 0, -1, 1, -1, 0, 1, 1, -1, 0, -1, -1, 1, 0, 1, -1, 1, 0, -1, -1, -1,
-		0, 1, -1, -1, 0, -1, 1, 1, 1, 0, 1, 1, -1, 0, 1, -1, 1, 0, 1, -1, -1, 0, -1,
-		1, 1, 0, -1, 1, -1, 0, -1, -1, 1, 0, -1, -1, -1, 0,
+		0, 1, 1, 1, 0, 1, 1, -1, 0, 1, -1, 1, 0, 1, -1, -1, 0, -1, 1, 1, 0, -1, 1, -1, 0, -1, -1, 1, 0,
+		-1, -1, -1, 1, 0, 1, 1, 1, 0, 1, -1, 1, 0, -1, 1, 1, 0, -1, -1, -1, 0, 1, 1, -1, 0, 1, -1, -1,
+		0, -1, 1, -1, 0, -1, -1, 1, 1, 0, 1, 1, 1, 0, -1, 1, -1, 0, 1, 1, -1, 0, -1, -1, 1, 0, 1, -1, 1,
+		0, -1, -1, -1, 0, 1, -1, -1, 0, -1, 1, 1, 1, 0, 1, 1, -1, 0, 1, -1, 1, 0, 1, -1, -1, 0, -1, 1,
+		1, 0, -1, 1, -1, 0, -1, -1, 1, 0, -1, -1, -1, 0,
 	]),
 	noise2D: function (xin, yin) {
 		var permMod12 = this.permMod12,
@@ -225,32 +224,28 @@ SimplexNoise.prototype = {
 		else {
 			var gi0 = permMod12[ii + perm[jj + perm[kk]]] * 3;
 			t0 *= t0;
-			n0 =
-				t0 * t0 * (grad3[gi0] * x0 + grad3[gi0 + 1] * y0 + grad3[gi0 + 2] * z0);
+			n0 = t0 * t0 * (grad3[gi0] * x0 + grad3[gi0 + 1] * y0 + grad3[gi0 + 2] * z0);
 		}
 		var t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
 		if (t1 < 0) n1 = 0.0;
 		else {
 			var gi1 = permMod12[ii + i1 + perm[jj + j1 + perm[kk + k1]]] * 3;
 			t1 *= t1;
-			n1 =
-				t1 * t1 * (grad3[gi1] * x1 + grad3[gi1 + 1] * y1 + grad3[gi1 + 2] * z1);
+			n1 = t1 * t1 * (grad3[gi1] * x1 + grad3[gi1 + 1] * y1 + grad3[gi1 + 2] * z1);
 		}
 		var t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
 		if (t2 < 0) n2 = 0.0;
 		else {
 			var gi2 = permMod12[ii + i2 + perm[jj + j2 + perm[kk + k2]]] * 3;
 			t2 *= t2;
-			n2 =
-				t2 * t2 * (grad3[gi2] * x2 + grad3[gi2 + 1] * y2 + grad3[gi2 + 2] * z2);
+			n2 = t2 * t2 * (grad3[gi2] * x2 + grad3[gi2 + 1] * y2 + grad3[gi2 + 2] * z2);
 		}
 		var t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
 		if (t3 < 0) n3 = 0.0;
 		else {
 			var gi3 = permMod12[ii + 1 + perm[jj + 1 + perm[kk + 1]]] * 3;
 			t3 *= t3;
-			n3 =
-				t3 * t3 * (grad3[gi3] * x3 + grad3[gi3 + 1] * y3 + grad3[gi3 + 2] * z3);
+			n3 = t3 * t3 * (grad3[gi3] * x3 + grad3[gi3 + 1] * y3 + grad3[gi3 + 2] * z3);
 		}
 		// Add contributions from each corner to get the final noise value.
 		// The result is scaled to stay just inside [-1,1]
@@ -351,69 +346,47 @@ SimplexNoise.prototype = {
 			n0 =
 				t0 *
 				t0 *
-				(grad4[gi0] * x0 +
-					grad4[gi0 + 1] * y0 +
-					grad4[gi0 + 2] * z0 +
-					grad4[gi0 + 3] * w0);
+				(grad4[gi0] * x0 + grad4[gi0 + 1] * y0 + grad4[gi0 + 2] * z0 + grad4[gi0 + 3] * w0);
 		}
 		var t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1 - w1 * w1;
 		if (t1 < 0) n1 = 0.0;
 		else {
-			var gi1 =
-				(perm[ii + i1 + perm[jj + j1 + perm[kk + k1 + perm[ll + l1]]]] % 32) *
-				4;
+			var gi1 = (perm[ii + i1 + perm[jj + j1 + perm[kk + k1 + perm[ll + l1]]]] % 32) * 4;
 			t1 *= t1;
 			n1 =
 				t1 *
 				t1 *
-				(grad4[gi1] * x1 +
-					grad4[gi1 + 1] * y1 +
-					grad4[gi1 + 2] * z1 +
-					grad4[gi1 + 3] * w1);
+				(grad4[gi1] * x1 + grad4[gi1 + 1] * y1 + grad4[gi1 + 2] * z1 + grad4[gi1 + 3] * w1);
 		}
 		var t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2 - w2 * w2;
 		if (t2 < 0) n2 = 0.0;
 		else {
-			var gi2 =
-				(perm[ii + i2 + perm[jj + j2 + perm[kk + k2 + perm[ll + l2]]]] % 32) *
-				4;
+			var gi2 = (perm[ii + i2 + perm[jj + j2 + perm[kk + k2 + perm[ll + l2]]]] % 32) * 4;
 			t2 *= t2;
 			n2 =
 				t2 *
 				t2 *
-				(grad4[gi2] * x2 +
-					grad4[gi2 + 1] * y2 +
-					grad4[gi2 + 2] * z2 +
-					grad4[gi2 + 3] * w2);
+				(grad4[gi2] * x2 + grad4[gi2 + 1] * y2 + grad4[gi2 + 2] * z2 + grad4[gi2 + 3] * w2);
 		}
 		var t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3 - w3 * w3;
 		if (t3 < 0) n3 = 0.0;
 		else {
-			var gi3 =
-				(perm[ii + i3 + perm[jj + j3 + perm[kk + k3 + perm[ll + l3]]]] % 32) *
-				4;
+			var gi3 = (perm[ii + i3 + perm[jj + j3 + perm[kk + k3 + perm[ll + l3]]]] % 32) * 4;
 			t3 *= t3;
 			n3 =
 				t3 *
 				t3 *
-				(grad4[gi3] * x3 +
-					grad4[gi3 + 1] * y3 +
-					grad4[gi3 + 2] * z3 +
-					grad4[gi3 + 3] * w3);
+				(grad4[gi3] * x3 + grad4[gi3 + 1] * y3 + grad4[gi3 + 2] * z3 + grad4[gi3 + 3] * w3);
 		}
 		var t4 = 0.6 - x4 * x4 - y4 * y4 - z4 * z4 - w4 * w4;
 		if (t4 < 0) n4 = 0.0;
 		else {
-			var gi4 =
-				(perm[ii + 1 + perm[jj + 1 + perm[kk + 1 + perm[ll + 1]]]] % 32) * 4;
+			var gi4 = (perm[ii + 1 + perm[jj + 1 + perm[kk + 1 + perm[ll + 1]]]] % 32) * 4;
 			t4 *= t4;
 			n4 =
 				t4 *
 				t4 *
-				(grad4[gi4] * x4 +
-					grad4[gi4 + 1] * y4 +
-					grad4[gi4 + 2] * z4 +
-					grad4[gi4 + 3] * w4);
+				(grad4[gi4] * x4 + grad4[gi4 + 1] * y4 + grad4[gi4 + 2] * z4 + grad4[gi4 + 3] * w4);
 		}
 		// Sum up and scale the result to cover the range [-1,1]
 		return 27.0 * (n0 + n1 + n2 + n3 + n4);

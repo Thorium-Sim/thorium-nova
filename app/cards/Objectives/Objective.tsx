@@ -45,7 +45,7 @@ export function Objective({
 				}
 			>
 				{state === "complete" ? (
-					<div className="w-6 @2xl:w-8 aspect-square rounded-full bg-green-500" />
+					<div className="aspect-square w-6 rounded-full bg-green-500 @2xl:w-8" />
 				) : null}
 			</button>
 			<div className="flex-1">
@@ -56,9 +56,7 @@ export function Objective({
 				>
 					{title}
 				</h3>
-				{size === "sm" ? null : (
-					<p className="text-sm @2xl:text-base">{description}</p>
-				)}
+				{size === "sm" ? null : <p className="text-sm @2xl:text-base">{description}</p>}
 			</div>
 		</div>
 	);

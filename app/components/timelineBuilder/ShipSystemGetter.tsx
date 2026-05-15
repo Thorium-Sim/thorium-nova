@@ -1,4 +1,3 @@
-import { q } from "@thorium/context/AppContext";
 import {
 	MadLibSelect,
 	MadLibsCombobox,
@@ -6,6 +5,7 @@ import {
 	ValueInput,
 	type BlockProps,
 } from "@thorium/components/timelineBuilder/BlockInputs";
+import { q } from "@thorium/context/AppContext";
 
 export function ShipSystemGetter({
 	count,
@@ -30,10 +30,8 @@ export function ShipSystemGetter({
 				onChange={(value) => update("systemType", value)}
 				items={availableShipSystems.map((sys) => ({ id: sys.type }))}
 			/>{" "}
-			systems from ship{" "}
-			<EntityInput value={entity} onChange={(e) => update("entity", e)} /> as
-			local variable{" "}
-			<ValueInput value={variable} onChange={(v) => update("variable", v)} />
+			systems from ship <EntityInput value={entity} onChange={(e) => update("entity", e)} /> as
+			local variable <ValueInput value={variable} onChange={(v) => update("variable", v)} />
 		</div>
 	);
 }

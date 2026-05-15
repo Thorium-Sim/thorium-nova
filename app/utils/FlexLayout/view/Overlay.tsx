@@ -1,6 +1,7 @@
 import * as React from "react";
-import type { LayoutInternal } from "./Layout";
+
 import { CLASSES } from "../Types";
+import type { LayoutInternal } from "./Layout";
 
 /** @internal */
 export interface IOverlayProps {

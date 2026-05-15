@@ -1,9 +1,10 @@
+import { useFrame } from "@react-three/fiber";
+import { keepPreviousData } from "@tanstack/react-query";
 import { q } from "@thorium/context/AppContext";
-import { useFrame, useThree } from "@react-three/fiber";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { useEffect } from "react";
+
 import { useGetStarmapStore } from "./starmapStore";
-import { keepPreviousData } from "@tanstack/react-query";
 
 export function useFollowEntity() {
 	const useStarmapStore = useGetStarmapStore();

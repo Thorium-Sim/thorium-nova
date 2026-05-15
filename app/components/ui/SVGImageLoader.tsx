@@ -1,14 +1,16 @@
 import {
 	type ComponentPropsWithoutRef,
-	forwardRef,
 	type Ref,
 	useEffect,
 	useLayoutEffect,
 	useRef,
+	memo,
 } from "react";
 import { suspend } from "suspend-react";
 
-export function SVGImageLoader({
+import "./SVGImageLoader.css";
+
+export const SVGImageLoader = memo(function SVGImageLoader({
 	url,
 	alt,
 	ref,
@@ -16,7 +18,7 @@ export function SVGImageLoader({
 }: {
 	url: string;
 	onLoad?: () => void;
-	ref?: Ref<HTMLDivElement>;
+	ref?: Ref<HTMLDivElement | null>;
 } & ComponentPropsWithoutRef<"img">) {
 	const data = suspend(async () => {
 		if (!url) return null;
@@ -38,16 +40,9 @@ export function SVGImageLoader({
 			onLoadCallback.current?.();
 		}
 	}, [data]);
+
 	if (data) {
-		return (
-			<div
-				role="img"
-				{...props}
-				// biome-ignore lint/security/noDangerouslySetInnerHtml: Necessary for rendering the loaded SVG
-				dangerouslySetInnerHTML={{ __html: data }}
-				ref={ref}
-			/>
-		);
+		return <div role="img" {...props} dangerouslySetInnerHTML={{ __html: data }} ref={ref} />;
 	}
 	return (
 		<img
@@ -60,4 +55,5 @@ export function SVGImageLoader({
 			ref={ref}
 		/>
 	);
-}
+});
+SVGImageLoader.displayName = "SVGImageLoader";

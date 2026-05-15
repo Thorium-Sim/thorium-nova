@@ -1,33 +1,62 @@
-import { createContext, type ReactNode, StrictMode, use } from "react";
+import type { AppRouter } from "@thorium/.server/init/router";
 import { AlertDialog } from "@thorium/ui/AlertDialog";
-import useEasterEgg from "../hooks/useEasterEgg";
-import ToastContainer from "./ToastContext";
-import { IssueTrackerProvider } from "../components/IssueTracker";
 import {
 	createLiveQueryReact,
 	LiveQueryProvider,
 	useLiveQuery,
 } from "@thorium/utils/live-query/client";
-import type { AppRouter } from "@thorium/.server/init/router";
-import { ThoriumAccountContextProvider } from "./ThoriumAccountContext";
-import { Disconnected, Reconnecting } from "./ConnectionStatus";
-import { TabIdCoordinator } from "browser-tab-id";
-import { createRNG } from "@thorium/utils/rng";
+import uniqid from "@thorium/utils/uniqid";
+import { type ReactNode } from "react";
 
-export let clientId = "";
-if (typeof window !== "undefined") {
-	if (sessionStorage.getItem("test-clientId")) {
-		clientId = sessionStorage.getItem("test-clientId") || "";
-	} else {
-		let browserId = localStorage.getItem("browserId");
-		const tabCoordinator = new TabIdCoordinator();
-		if (!browserId) {
-			browserId = tabCoordinator.generateUUID();
-			localStorage.setItem("browserId", browserId);
+import { IssueTrackerProvider } from "../components/IssueTracker";
+import useEasterEgg from "../hooks/useEasterEgg";
+import { Disconnected, Reconnecting } from "./ConnectionStatus";
+import { ThoriumAccountContextProvider } from "./ThoriumAccountContext";
+import ToastContainer from "./ToastContext";
+
+const PERSISTENT_ID_KEY = "thorium_clientPersistentId";
+const PING_TIMEOUT = 500;
+export let clientId =
+	typeof window !== "undefined"
+		? sessionStorage.getItem("test-clientId") || sessionStorage.getItem(PERSISTENT_ID_KEY) || ""
+		: "";
+
+/**
+ * This client ID implementation works as follows:
+ * - If the clientId is already present in session storage, use it.
+ * - Request all open tabs to let us know what their clientId is.
+ * - After a timeout, pick one of the available clientIds, or create a new one and add it to the overall list
+ */
+const broadcastChannel = new BroadcastChannel("thorium_clientCount");
+const claimedByOthers = new Set();
+export async function initializeClient() {
+	broadcastChannel.addEventListener("message", (event) => {
+		if (event.data === "clientPing") {
+			if (clientId) {
+				broadcastChannel.postMessage(clientId);
+			}
+		} else {
+			claimedByOthers.add(event.data);
 		}
-		const rng = createRNG(`${browserId}${tabCoordinator.tabId}`);
-		clientId = rng.nextString();
+	});
+	if (clientId) return clientId;
+
+	broadcastChannel.postMessage("clientPing");
+	await new Promise<void>((res) => setTimeout(() => res(), PING_TIMEOUT));
+	const clientList = (localStorage.getItem(PERSISTENT_ID_KEY) || "").split(",").filter(Boolean);
+	for (const client of clientList) {
+		if (claimedByOthers.has(client)) continue;
+		return setClient(client);
 	}
+	const id = uniqid("tab-");
+	localStorage.setItem(PERSISTENT_ID_KEY, [...clientList, id].join(","));
+	return setClient(id);
+}
+
+function setClient(id: string) {
+	sessionStorage.setItem(PERSISTENT_ID_KEY, id);
+	clientId = id;
+	return id;
 }
 
 function getRequestContext() {
@@ -60,7 +89,7 @@ export default function AppContext({ children }: { children: ReactNode }) {
 	);
 }
 
-export const q = createLiveQueryReact<AppRouter>({
+export const [q, liveQueryClient] = createLiveQueryReact<AppRouter>({
 	headers: async () => ({
 		"client-id": clientId,
 	}),

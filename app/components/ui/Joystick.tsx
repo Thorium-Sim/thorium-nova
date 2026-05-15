@@ -1,8 +1,8 @@
-import type { GamepadKey } from "@thorium/hooks/useGamepadStore";
 import { animated as a } from "@react-spring/web";
+import type { GamepadKey } from "@thorium/hooks/useGamepadStore";
 import { useJoystick } from "@thorium/hooks/useJoystick";
-import type { ReactNode } from "react";
 import { cn } from "@thorium/utils/cn";
+import type { ReactNode } from "react";
 
 export const Joystick = ({
 	children,
@@ -37,17 +37,14 @@ export const Joystick = ({
 		<div className={cn(`relative aspect-square`, className)}>
 			<div
 				ref={containerRef}
-				className="top-0 absolute bg-black/50 border-2 border-white/50 rounded-full w-full h-full flex justify-center items-center touch-none"
+				className="absolute top-0 flex h-full w-full touch-none items-center justify-center rounded-full border-2 border-white/50 bg-black/50"
 				draggable={false}
 				{...eventHandlers}
 				onPointerDown={(e) => {
 					// Find the offset from the center
 					const rect = containerRef.current?.getBoundingClientRect();
 					if (!rect) return;
-					const center = [
-						rect.left + rect.width / 2,
-						rect.top + rect.height / 2,
-					] as const;
+					const center = [rect.left + rect.width / 2, rect.top + rect.height / 2] as const;
 					set([e.clientX - center[0], e.clientY - center[1]]);
 					eventHandlers.onPointerDown?.(e);
 				}}
@@ -58,8 +55,7 @@ export const Joystick = ({
 					style={{
 						transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`),
 					}}
-					// @ts-expect-error
-					className="z-10 w-1/12 aspect-square rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer touch-none"
+					className="z-10 aspect-square w-1/12 cursor-pointer touch-none rounded-full border-2 border-black/50 bg-gray-500 shadow-md"
 				/>
 				{children}
 			</div>
@@ -106,14 +102,8 @@ export const LinearJoystick = ({
 				// Find the offset from the center
 				const rect = containerRef.current?.getBoundingClientRect();
 				if (!rect) return;
-				const center = [
-					rect.left + rect.width / 2,
-					rect.top + rect.height / 2,
-				] as const;
-				set([
-					vertical ? 0 : e.clientX - center[0],
-					vertical ? e.clientY - center[1] : 0,
-				]);
+				const center = [rect.left + rect.width / 2, rect.top + rect.height / 2] as const;
+				set([vertical ? 0 : e.clientX - center[0], vertical ? e.clientY - center[1] : 0]);
 				eventHandlers.onPointerDown?.(e);
 			}}
 		>
@@ -121,8 +111,7 @@ export const LinearJoystick = ({
 				data-testid={id}
 				{...eventHandlers}
 				style={{ transform: xy?.to((x, y) => `translate3d(${x}px,${y}px,0)`) }}
-				// @ts-expect-error
-				className="z-10 w-10 h-10 rounded-full border-black/50 border-2 bg-gray-500 shadow-md cursor-pointer touch-none"
+				className="z-10 h-10 w-10 cursor-pointer touch-none rounded-full border-2 border-black/50 bg-gray-500 shadow-md"
 			/>
 			{children}
 		</div>

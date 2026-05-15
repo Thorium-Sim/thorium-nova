@@ -4,8 +4,7 @@ import Select from "@thorium/ui/Select";
 
 export function LegacyEngineControlCore() {
 	const { shipId } = useStation();
-	const [{ warpEngines, impulseEngines }] =
-		q.legacy.engineControl.get.useNetRequest({ shipId });
+	const [{ warpEngines, impulseEngines }] = q.legacy.engineControl.get.useNetRequest({ shipId });
 
 	return (
 		<div>

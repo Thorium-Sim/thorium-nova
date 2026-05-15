@@ -8,11 +8,9 @@ export function useSessionStorageReducer<R extends Reducer<I, any>, I>(
 	const init = useCallback(() => {
 		let preloadedState: any;
 		try {
-			preloadedState = JSON.parse(
-				window.sessionStorage.getItem(storageKey) || "",
-			);
+			preloadedState = JSON.parse(window.sessionStorage.getItem(storageKey) || "");
 			// validate preloadedState if necessary
-		} catch (e) {
+		} catch {
 			// ignore
 		}
 		return preloadedState || defaultState;
@@ -29,9 +27,5 @@ export function useSessionStorageReducer<R extends Reducer<I, any>, I>(
 }
 
 export function useSessionStorage<T>(storageKey: string, defaultValue: T) {
-	return useSessionStorageReducer(
-		(state: T, action: T) => action,
-		defaultValue,
-		storageKey,
-	);
+	return useSessionStorageReducer((state: T, action: T) => action, defaultValue, storageKey);
 }

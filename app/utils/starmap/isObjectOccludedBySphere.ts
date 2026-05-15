@@ -9,16 +9,8 @@ export function isObjectOccludedBySphere(
 	objectPositionXYZ: { x: number; y: number; z: number },
 	obstacle: Sphere,
 ): boolean {
-	observerPosition.set(
-		observerPositionXYZ.x,
-		observerPositionXYZ.y,
-		observerPositionXYZ.z,
-	);
-	objectPosition.set(
-		objectPositionXYZ.x,
-		objectPositionXYZ.y,
-		objectPositionXYZ.z,
-	);
+	observerPosition.set(observerPositionXYZ.x, observerPositionXYZ.y, observerPositionXYZ.z);
+	objectPosition.set(objectPositionXYZ.x, objectPositionXYZ.y, objectPositionXYZ.z);
 
 	// Create a ray from observer to object
 	direction.subVectors(objectPosition, observerPosition).normalize();
@@ -36,10 +28,7 @@ export function isObjectOccludedBySphere(
 	const a = direction.dot(direction);
 	const b = 2 * direction.dot(ray.origin.clone().sub(sphereCenter));
 	const c =
-		ray.origin
-			.clone()
-			.sub(sphereCenter)
-			.dot(ray.origin.clone().sub(sphereCenter)) -
+		ray.origin.clone().sub(sphereCenter).dot(ray.origin.clone().sub(sphereCenter)) -
 		sphereRadius * sphereRadius;
 
 	// Calculate discriminant
@@ -55,15 +44,11 @@ export function isObjectOccludedBySphere(
 	const t2 = (-b + Math.sqrt(discriminant)) / (2 * a);
 
 	if (t1 > 0) {
-		intersectionPoints.push(
-			ray.origin.clone().add(direction.clone().multiplyScalar(t1)),
-		);
+		intersectionPoints.push(ray.origin.clone().add(direction.clone().multiplyScalar(t1)));
 	}
 
 	if (t2 > 0) {
-		intersectionPoints.push(
-			ray.origin.clone().add(direction.clone().multiplyScalar(t2)),
-		);
+		intersectionPoints.push(ray.origin.clone().add(direction.clone().multiplyScalar(t2)));
 	}
 
 	// Check if any intersection point is between observer and object

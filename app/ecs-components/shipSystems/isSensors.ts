@@ -15,10 +15,7 @@ export const isSensors = z
 		shieldPenaltyMultiplier: z.number().default(2),
 		/** Scan results database */
 		resultsDatabase: z
-			.union([
-				z.array(z.tuple([z.number(), scanRecord])),
-				z.map(z.number(), scanRecord),
-			])
+			.union([z.array(z.tuple([z.number(), scanRecord])), z.map(z.number(), scanRecord)])
 			.default([])
 			.transform((val) => (val instanceof Map ? val : new Map(val))),
 		selectedContact: z.number().nullable().default(null),

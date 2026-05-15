@@ -1,13 +1,9 @@
 import type { ActionOverrides } from "@thorium/.server/data";
 import { components } from "@thorium/ecs-components";
 import type z from "zod";
-type ZodObjectOrWrapped =
-	| z.ZodObject<any, any>
-	| z.ZodEffects<z.ZodObject<any, any>>;
+type ZodObjectOrWrapped = z.ZodObject<any, any> | z.ZodEffects<z.ZodObject<any, any>>;
 
-export function getObjectFormSchema(
-	schema: ZodObjectOrWrapped,
-): z.ZodObject<any, any> {
+export function getObjectFormSchema(schema: ZodObjectOrWrapped): z.ZodObject<any, any> {
 	if (schema._def.typeName === "ZodEffects") {
 		const typedSchema = schema as z.ZodEffects<z.ZodObject<any, any>>;
 		return getObjectFormSchema(typedSchema._def.schema);
@@ -18,9 +14,7 @@ export function getObjectFormSchema(
 /**
  * Get all default values from a Zod schema.
  */
-export function getDefaultValues<Schema extends z.ZodObject<any, any>>(
-	schema: Schema,
-) {
+export function getDefaultValues<Schema extends z.ZodObject<any, any>>(schema: Schema) {
 	const { shape } = schema;
 	type DefaultValuesType = any; // DefaultValues<Partial<z.infer<Schema>>>;
 	const defaultValues = {} as DefaultValuesType;
@@ -29,9 +23,7 @@ export function getDefaultValues<Schema extends z.ZodObject<any, any>>(
 		const item = shape[key] as z.ZodAny;
 
 		if (getBaseType(item) === "ZodObject") {
-			const defaultItems = getDefaultValues(
-				item as unknown as z.ZodObject<any, any>,
-			);
+			const defaultItems = getDefaultValues(item as unknown as z.ZodObject<any, any>);
 			for (const defaultItemKey of Object.keys(defaultItems)) {
 				const pathKey = `${key}.${defaultItemKey}` as keyof DefaultValuesType;
 				defaultValues[pathKey] = defaultItems[defaultItemKey];
@@ -73,23 +65,17 @@ function getBaseSchema(schema: z.ZodAny): z.ZodAny {
  * Search for a "ZodDefult" in the Zod stack and return its value.
  */
 function getDefaultValueInZodStack(schema: z.ZodAny): any {
-	const typedSchema = schema as unknown as z.ZodDefault<
-		z.ZodNumber | z.ZodString
-	>;
+	const typedSchema = schema as unknown as z.ZodDefault<z.ZodNumber | z.ZodString>;
 
 	if (typedSchema._def.typeName === "ZodDefault") {
 		return typedSchema._def.defaultValue();
 	}
 
 	if ("innerType" in typedSchema._def) {
-		return getDefaultValueInZodStack(
-			typedSchema._def.innerType as unknown as z.ZodAny,
-		);
+		return getDefaultValueInZodStack(typedSchema._def.innerType as unknown as z.ZodAny);
 	}
 	if ("schema" in typedSchema._def) {
-		return getDefaultValueInZodStack(
-			(typedSchema._def as any).schema as z.ZodAny,
-		);
+		return getDefaultValueInZodStack((typedSchema._def as any).schema as z.ZodAny);
 	}
 	return undefined;
 }
@@ -108,13 +94,7 @@ export function beautifyObjectName(string: string) {
  * Convert a Zod schema to HTML input props to give direct feedback to the user.
  * Once submitted, the schema will be validated completely.
  */
-export function zodToHtmlInputProps(
-	schema:
-		| z.ZodNumber
-		| z.ZodString
-		| z.ZodOptional<z.ZodNumber | z.ZodString>
-		| any,
-): React.InputHTMLAttributes<HTMLInputElement> {
+export function zodToHtmlInputProps(schema: any): React.InputHTMLAttributes<HTMLInputElement> {
 	if (["ZodOptional", "ZodNullable"].includes(schema._def.typeName)) {
 		const typedSchema = schema as z.ZodOptional<z.ZodNumber | z.ZodString>;
 		return {
@@ -248,35 +228,42 @@ export function parseSchema(
 ): ParsedSchema {
 	if (!schema) return [];
 	const { shape } = schema;
-	if (!shape) return [];
+	if (!shape) {
+		if (schema._def.typeName === "ZodIntersection") {
+			const left = parseSchema(schema._def.left, overrides, nestedName);
+			const right = parseSchema(schema._def.right, overrides, nestedName);
+
+			return [...left, ...right];
+		}
+
+		if (schema._def.typeName === "ZodUnion") {
+			return schema._def.options.flatMap((option: any) =>
+				parseSchema(option, overrides, nestedName),
+			);
+		}
+		return [];
+	}
 	return Object.keys(shape).flatMap((name) => {
 		let output: ParsedSchema = [];
 		const item = getItemFromShape(shape, name);
 		const type = overrides[name]?.type || getBaseType(item);
 		if (type === "ZodObject") {
-			const objectSchema = getObjectFormSchema(
-				item as unknown as ZodObjectOrWrapped,
-			);
+			const objectSchema = getObjectFormSchema(item as unknown as ZodObjectOrWrapped);
 			output = output.concat(parseSchema(objectSchema, overrides, name));
 		}
-		const itemName =
-			overrides[name]?.name ??
-			item._def.description ??
-			beautifyObjectName(name);
+		const itemName = overrides[name]?.name ?? item._def.description ?? beautifyObjectName(name);
 
 		const key = `${nestedName ? `${nestedName}.` : ""}${name}`;
 
 		const values =
-			overrides[name]?.values ||
-			(getBaseSchema(item) as unknown as z.ZodEnum<any>)._def.values;
+			overrides[name]?.values || (getBaseSchema(item) as unknown as z.ZodEnum<any>)._def.values;
 
 		const fieldConfigItem = fieldConfig?.[name] ?? {};
 		const inputProps = {
 			...zodToHtmlInputProps(item),
 			...overrides[name]?.inputProps,
 		};
-		const isRequired =
-			inputProps.required ?? fieldConfigItem.inputProps?.required ?? false;
+		const isRequired = inputProps.required ?? fieldConfigItem.inputProps?.required ?? false;
 
 		output.unshift({
 			type: type,

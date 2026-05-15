@@ -12,17 +12,17 @@ export function LobbyHeader() {
 	return (
 		<div className="flex justify-between">
 			<div>
-				<h2 className="text-white font-bold text-xl mb-2">
+				<h2 className="mb-2 text-xl font-bold text-white">
 					Flight Name: <em>{flight?.name}</em>
 				</h2>
-				<h3 className="text-white font-bold text-lg mb-2">
+				<h3 className="mb-2 text-lg font-bold text-white">
 					Flight Mode: <em>{capitalCase(flight?.mode || "")}</em>
 				</h3>
 
 				<ClientButton />
 				<IPAddress />
-				<h4 className="text-white font-semibold text-lg mb-1">Snapshots</h4>
-				<ul className="panel h-32 overflow-y-auto mb-1">
+				<h4 className="mb-1 text-lg font-semibold text-white">Snapshots</h4>
+				<ul className="panel mb-1 h-32 overflow-y-auto">
 					{flight?.snapshots.map((s) => (
 						<li
 							key={s}

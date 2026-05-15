@@ -8,28 +8,18 @@ export const CoreFlexLayoutContext = createContext<{
 	setInitialModel: (newModel: IJsonModel) => void;
 }>(null!);
 
-export const CoreFlexLayoutProvider = ({
-	children,
-}: {
-	children: ReactNode;
-}) => {
+export const CoreFlexLayoutProvider = ({ children }: { children: ReactNode }) => {
 	const [initialModel, setInitialModel] = useLocalStorage<IJsonModel>(
 		"core-flexLayout",
 		defaultJson,
 	);
-	const [layoutModel, setLayoutModel] = useState(() =>
-		Model.fromJson(initialModel),
-	);
+	const [layoutModel, setLayoutModel] = useState(() => Model.fromJson(initialModel));
 	const value = useMemo(
 		() => ({ layoutModel, setLayoutModel, setInitialModel }),
 		[layoutModel, setInitialModel],
 	);
 
-	return (
-		<CoreFlexLayoutContext.Provider value={value}>
-			{children}
-		</CoreFlexLayoutContext.Provider>
-	);
+	return <CoreFlexLayoutContext.Provider value={value}>{children}</CoreFlexLayoutContext.Provider>;
 };
 
 export const defaultJson: IJsonModel = {

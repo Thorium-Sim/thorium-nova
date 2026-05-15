@@ -1,7 +1,9 @@
-import type Entity from "../entity";
-import System from "../system";
 import { beforeEach, vi } from "vitest";
 import { describe, expect, it } from "vitest";
+
+// oxlint-disable typescript/unbound-method
+import type Entity from "../entity";
+import System from "../system";
 
 function getFakeEntity() {
 	return {
@@ -35,7 +37,7 @@ describe("System", () => {
 		it("should add the system to entity systems", () => {
 			system.addEntity(entity);
 
-			expect(entity.addSystem).toBeCalledWith(system);
+			expect(entity.addSystem).toHaveBeenCalledWith(system);
 		});
 
 		it("should call enter() on added entity", () => {
@@ -43,7 +45,7 @@ describe("System", () => {
 
 			system.addEntity(entity);
 
-			expect(system.enter).toBeCalledWith(entity);
+			expect(system.enter).toHaveBeenCalledWith(entity);
 		});
 	});
 
@@ -66,7 +68,7 @@ describe("System", () => {
 		it("should remove the system from entity systems", () => {
 			system.removeEntity(entity);
 
-			expect(entity.removeSystem).toBeCalledWith(system);
+			expect(entity.removeSystem).toHaveBeenCalledWith(system);
 		});
 
 		it("should call exit() on removed entity", () => {
@@ -74,7 +76,7 @@ describe("System", () => {
 
 			system.removeEntity(entity);
 
-			expect(system.exit).toBeCalledWith(entity);
+			expect(system.exit).toHaveBeenCalledWith(entity);
 		});
 	});
 
@@ -89,7 +91,7 @@ describe("System", () => {
 			system.addEntity(entity2);
 			system.updateAll(0, 0);
 
-			expect(system.update).toBeCalledTimes(2);
+			expect(system.update).toHaveBeenCalledTimes(2);
 		});
 
 		it("should call preUpdate()", () => {
@@ -98,7 +100,7 @@ describe("System", () => {
 
 			system.updateAll(0, 0);
 
-			expect(system.preUpdate).toBeCalled();
+			expect(system.preUpdate).toHaveBeenCalled();
 		});
 
 		it("should call postUpdate()", () => {
@@ -107,7 +109,7 @@ describe("System", () => {
 
 			system.updateAll(0, 0);
 
-			expect(system.postUpdate).toBeCalled();
+			expect(system.postUpdate).toHaveBeenCalled();
 		});
 	});
 });

@@ -1,7 +1,8 @@
 import * as React from "react";
+
 import type { TabNode } from "../model/TabNode";
-import type { LayoutInternal } from "./Layout";
 import { CLASSES } from "../Types";
+import type { LayoutInternal } from "./Layout";
 import { TabButtonStamp } from "./TabButtonStamp";
 
 /** @internal */
@@ -15,7 +16,6 @@ export const DragContainer = (props: IDragContainerProps) => {
 	const { layout, node } = props;
 	const selfRef = React.useRef<HTMLDivElement | null>(null);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useEffect(() => {
 		node.setTabStamp(selfRef.current);
 	}, [node, selfRef.current]);

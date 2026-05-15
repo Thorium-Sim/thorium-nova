@@ -1,109 +1,77 @@
-import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
-import { useEffect, useState } from "react";
-import { Suspense } from "react";
-import { useResizeObserver } from "@thorium/hooks/useResizeObserver";
-import { useShipMapStore } from "./useShipMapStore";
-import { CargoContainerDot } from "./CargoContainerDot";
-import { RoomDot } from "./RoomDot";
 import { q } from "@thorium/context/AppContext";
-import { pixelRatio } from "@thorium/utils/pixelRatio.client";
 import { useStation } from "@thorium/routes/station/useStation";
+import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
+import { useCallback, useRef, type ReactNode, type RefObject } from "react";
+import { Suspense } from "react";
+
+import { useShipMapStore } from "./useShipMapStore";
+
+type DeckChildren = (
+	deck: { name: string },
+	deckIndex: number,
+	ref: RefObject<HTMLDivElement | null>,
+) => ReactNode;
 
 export function ShipView({
 	deckIndex,
-	cardLoaded,
+	deckChildren,
 }: {
 	deckIndex: number;
 	cardLoaded: boolean;
+	deckChildren?: DeckChildren;
 }) {
 	const { shipId } = useStation();
 	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
 
-	const { decks, rooms, shipLength } = cargoRooms;
-	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
+	const { decks } = cargoRooms;
 
-	const [ref, dims, measure] = useResizeObserver();
-	const [imgRef, imgDims, imgMeasure] = useResizeObserver();
-
-	const transform = {
-		x: dims.width / 2 - imgDims.width / 2,
-		y: dims.height / 2 - imgDims.height / 2,
-		widthScale: imgDims.width / pixelRatio / shipLength,
-	};
-
-	const [transformationLoaded, setTransformationLoaded] = useState(true);
-
-	useEffect(() => {
-		if (cardLoaded) {
-			imgMeasure();
-		}
-	}, [cardLoaded, imgMeasure]);
 	return (
-		<div
-			id="deck-container"
-			className="h-full w-full justify-self-center overflow-hidden relative select-none"
-			ref={ref}
-		>
+		<div id="deck-container" className="relative h-full w-full justify-self-center select-none">
 			<Suspense fallback={null}>
 				{decks.map((d, i) => (
-					<div
-						id={d.name}
-						className="absolute w-full origin-top pointer-events-none"
-						key={d.name}
-						style={{
-							transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-							transition: "opacity 0.2s ease",
-							opacity: transformationLoaded ? 1 : 0,
-						}}
-						ref={i === 0 ? imgRef : null}
-					>
-						<div
-							className={`relative transition-all duration-500  ${
-								deckIndex === i
-									? "deck-on"
-									: deckIndex < i
-										? "deck-before"
-										: "deck-after"
-							}`}
-						>
-							{rooms.map((room) =>
-								room.deck === d.name ? (
-									<RoomDot
-										key={room.id}
-										id={room.id}
-										name={room.name || ""}
-										position={{
-											x: room.position.x * pixelRatio * transform.widthScale,
-											y: room.position.y * pixelRatio * transform.widthScale,
-										}}
-									/>
-								) : null,
-							)}
-							{cargoContainers.map(
-								(container) =>
-									container.position && (
-										<CargoContainerDot
-											key={container.id}
-											id={container.id}
-											position={container.position}
-											widthScale={transform.widthScale}
-											deckIndex={i}
-										/>
-									),
-							)}
-
-							<SVGImageLoader
-								url={d.backgroundUrl || ""}
-								onClick={() =>
-									useShipMapStore.setState({ selectedRoomId: null })
-								}
-								className="pointer-events-auto"
-								onLoad={() => imgMeasure()}
-							/>
-						</div>
-					</div>
+					<Deck key={d.name} d={d} i={i} deckIndex={deckIndex} deckChildren={deckChildren} />
 				))}
 			</Suspense>
+		</div>
+	);
+}
+
+function Deck({
+	d,
+	i,
+	deckIndex,
+	deckChildren,
+}: {
+	d: { name: string; backgroundUrl?: string };
+	i: number;
+	deckIndex: number;
+	deckChildren?: DeckChildren;
+}) {
+	const ref = useRef<HTMLDivElement>(null);
+
+	const onClick = useCallback(() => useShipMapStore.setState({ selectedRoomId: null }), []);
+	return (
+		<div
+			id={d.name}
+			className="pointer-events-none absolute w-full origin-top"
+			style={{
+				transition: "opacity 0.2s ease",
+			}}
+		>
+			<div
+				className={`relative transition-all duration-500 ${
+					deckIndex === i ? "deck-on" : deckIndex < i ? "deck-before" : "deck-after"
+				}`}
+			>
+				{deckChildren?.(d, i, ref)}
+
+				<SVGImageLoader
+					url={d.backgroundUrl || ""}
+					onClick={onClick}
+					className="pointer-events-none outline-none"
+					ref={ref}
+				/>
+			</div>
 		</div>
 	);
 }

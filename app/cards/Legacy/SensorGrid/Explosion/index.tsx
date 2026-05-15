@@ -1,9 +1,5 @@
 import useInterval from "@thorium/hooks/useInterval";
-import {
-	useState,
-	type DetailedHTMLProps,
-	type ImgHTMLAttributes,
-} from "react";
+import { useState, type DetailedHTMLProps, type ImgHTMLAttributes } from "react";
 
 const frameImports = import.meta.glob("./*.avif", {
 	eager: true,
@@ -19,10 +15,7 @@ const frames = Object.values(frameImports)
 export function Explosion({
 	loop,
 	...props
-}: { loop?: boolean } & DetailedHTMLProps<
-	ImgHTMLAttributes<HTMLImageElement>,
-	HTMLImageElement
->) {
+}: { loop?: boolean } & DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>) {
 	const [frame, setFrame] = useState(0);
 
 	useInterval(

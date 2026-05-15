@@ -1,7 +1,8 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { getPhaserCharge } from "@thorium/.server/systems/PhasersSystem";
 import { getClassification } from "@thorium/cards/Navigation/getObjectClassification.server";
-import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
+import { shortRangeStateMap } from "@thorium/cards/ShortRangeComm/shared";
+import { getShipSystem, getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { type ECS, type Entity, System } from "@thorium/utils/ecs";
 import type { scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
@@ -23,12 +24,8 @@ export class SensorScanSystem extends System {
 			const parentId = scan.components.scan?.parentId;
 			if (!scan.components.scan || !parentId) continue;
 			if (scan.components.scan.progress >= 1) continue;
-			if (!this.sensorsScanCount.has(parentId))
-				this.sensorsScanCount.set(parentId, 0);
-			this.sensorsScanCount.set(
-				parentId,
-				(this.sensorsScanCount.get(parentId) || 0) + 1,
-			);
+			if (!this.sensorsScanCount.has(parentId)) this.sensorsScanCount.set(parentId, 0);
+			this.sensorsScanCount.set(parentId, (this.sensorsScanCount.get(parentId) || 0) + 1);
 		}
 	}
 	update(entity: Entity, elapsedMs: number): void {
@@ -73,12 +70,7 @@ export class SensorScanSystem extends System {
 
 		const parent = this.ecs.getEntityById(scan.parentId);
 		const object = this.ecs.getEntityById(scan.target);
-		if (
-			!parent ||
-			parent.components.isDestroyed ||
-			!object ||
-			object.components.isDestroyed
-		)
+		if (!parent || parent.components.isDestroyed || !object || object.components.isDestroyed)
 			return;
 
 		if (!sensors || !sensorSystem || !shipId) return;
@@ -109,8 +101,7 @@ export class SensorScanSystem extends System {
 
 		let totalRequiredEnergy: KiloWattHour = Number.POSITIVE_INFINITY;
 		totalRequiredEnergy =
-			(maxScanEnergyCost - minScanEnergyCost) * (distance / activeRange) +
-			minScanEnergyCost;
+			(maxScanEnergyCost - minScanEnergyCost) * (distance / activeRange) + minScanEnergyCost;
 		if (distance > activeRange) {
 			const addedDistance = distance - activeRange;
 			const distanceRatio = (passiveRange + addedDistance) / distance;
@@ -143,8 +134,7 @@ export class SensorScanSystem extends System {
 				: sensors.components.power?.defaultPower) || 0;
 		const powerProvided = currentPower / scanCount;
 		// The energy provided in kilowatt hours, by converting from megawatts
-		const energyProvided: KiloWattHour =
-			powerProvided * elapsedTimeHours * 1000;
+		const energyProvided: KiloWattHour = powerProvided * elapsedTimeHours * 1000;
 
 		const progress = Math.min(
 			1,
@@ -158,8 +148,7 @@ export class SensorScanSystem extends System {
 			entity.updateComponent("scan", { timestamp: Date.now() });
 
 			const currentResults = {
-				...(sensorSystem.resultsDatabase.get(object.id) ||
-					({} as z.infer<typeof scanRecord>)),
+				...(sensorSystem.resultsDatabase.get(object.id) || ({} as z.infer<typeof scanRecord>)),
 				...generateScanResults(object, this.ecs, scan.type),
 			};
 
@@ -174,18 +163,14 @@ export class SensorScanSystem extends System {
 	}
 }
 
-export function generateScanResults(
-	object: Entity,
-	ecs: ECS,
-	scanType: z.infer<typeof scanTypes>,
-) {
+export function generateScanResults(object: Entity, ecs: ECS, scanType: z.infer<typeof scanTypes>) {
 	const currentResults: Partial<z.infer<typeof scanRecord>> = {};
 	switch (scanType) {
 		case "cargo": {
 			const output: Record<string, number> = {};
 			object.components.shipMap?.deckNodes.forEach((node) => {
 				if (node.isRoom && node.flags?.includes("cargo")) {
-					Object.entries(node.contents).forEach(([name, { count }], i) => {
+					Object.entries(node.contents).forEach(([name, { count }]) => {
 						if (count === 0) return;
 						if (!output[name]) output[name] = 0;
 						output[name] += count;
@@ -203,16 +188,13 @@ export function generateScanResults(
 		case "damage": {
 			// We'll just include the top three damaged systems
 			const systems: { name: string | undefined; efficiency: number }[] = [];
-			for (const [systemId] of object.components.shipSystems?.shipSystems ||
-				[]) {
+			for (const [systemId] of object.components.shipSystems?.shipSystems || []) {
 				const system = ecs.getEntityById(systemId);
 				if (!system) continue;
 				const efficiency = system.components.damage?.efficiency || 1;
 				if (efficiency > 0.9) continue;
 				systems.push({
-					name:
-						system?.components.identity?.name ||
-						system.components.isShipSystem?.type,
+					name: system?.components.identity?.name || system.components.isShipSystem?.type,
 					efficiency,
 				});
 			}
@@ -226,9 +208,7 @@ export function generateScanResults(
 			break;
 		}
 		case "identification": {
-			const faction = ecs.getEntityById(
-				object.components.faction?.factionId || -1,
-			);
+			const faction = ecs.getEntityById(object.components.faction?.factionId || -1);
 
 			currentResults.identification = {
 				scanTime: Date.now(),
@@ -281,9 +261,7 @@ export function generateScanResults(
 				shipId: object.id,
 				systemType: "Targeting",
 			});
-			const target = ecs.getEntityById(
-				targeting[0].components.isTargeting?.target || -1,
-			);
+			const target = ecs.getEntityById(targeting[0].components.isTargeting?.target || -1);
 			currentResults.targeting = {
 				scanTime: Date.now(),
 				targetId: target?.id || -1,
@@ -310,16 +288,12 @@ export function generateScanResults(
 						return { type: "phasers" as const, charge: getPhaserCharge(p) };
 					}),
 					...torpedoes.map((t) => {
-						const torpedo = ecs.getEntityById(
-							t.components.isTorpedoLauncher?.torpedoEntity || -1,
-						);
+						const torpedo = ecs.getEntityById(t.components.isTorpedoLauncher?.torpedoEntity || -1);
 						return {
 							type: "torpedoes" as const,
 							loaded:
 								t.components.isTorpedoLauncher?.status === "loaded"
-									? `${capitalCase(
-											torpedo?.components.identity?.name || "Unknown",
-										)} Loaded`
+									? `${capitalCase(torpedo?.components.identity?.name || "Unknown")} Loaded`
 									: "Unloaded",
 						};
 					}),
@@ -337,9 +311,18 @@ export function generateScanResults(
 			break;
 		}
 		case "communications": {
-			// TODO March 31: Implement
+			const shortRangeSystem = getShipSystem(ecs, {
+				shipId: object.id,
+				systemType: "shortRangeComm",
+			});
 			currentResults.communications = {
 				scanTime: Date.now(),
+				status: shortRangeSystem.components.isShortRangeComm
+					? shortRangeStateMap[shortRangeSystem.components.isShortRangeComm.state]
+					: "Unknown",
+				frequency: shortRangeSystem.components.isShortRangeComm
+					? `${shortRangeSystem.components.isShortRangeComm.antennaFrequency} MHz`
+					: "N/A",
 			};
 			break;
 		}
@@ -363,9 +346,7 @@ export function generateScanResults(
 			{
 				currentResults.atmosphere = {
 					scanTime: Date.now(),
-					atmosphere: [
-						...(object.components.isPlanet?.atmosphericComposition || []),
-					],
+					atmosphere: [...(object.components.isPlanet?.atmosphericComposition || [])],
 				};
 			}
 			break;

@@ -1,7 +1,6 @@
 import { type ECS, Entity } from "@thorium/utils/ecs";
 
-export const defaultIcon =
-	"/plugins/Thorium Default/assets/Sensor Contacts/Icons/dot.svg";
+export const defaultIcon = "/plugins/Thorium Default/assets/Sensor Contacts/Icons/dot.svg";
 export const defaultPicture =
 	"/plugins/Thorium Default/assets/Sensor Contacts/Pictures/Astra Battleship.avif";
 
@@ -15,11 +14,7 @@ export function getArmyContacts(ecs: ECS, shipId: number) {
 
 	return contacts;
 }
-export function createContact(
-	shipId: number,
-	sensorsId: number,
-	lastContact?: Entity,
-) {
+export function createContact(shipId: number, sensorsId: number, lastContact?: Entity) {
 	const contact = new Entity();
 
 	contact.addComponent("isSensorContact", {

@@ -1,11 +1,20 @@
 import { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
+import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
 import { ECS, Entity } from "@thorium/utils/ecs";
+import { aroundEach, beforeEach, describe, expect, it } from "vitest";
+
 import { FilterInventorySystem } from "../FilterInventorySystem";
 import { FilterShipsWithReactors } from "../FilterShipsWithReactors";
 import { ReactorFuelSystem } from "../ReactorFuelSystem";
-import { beforeEach, describe, expect, it } from "vitest";
-import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
+
+aroundEach(async (runTest) => {
+	await DataStore.operations.run(testDataStoreProps, async () => {
+		await runTest();
+	});
+});
 
 describe("ReactorFuelSystem", () => {
 	let ecs: ECS;
@@ -80,9 +89,7 @@ describe("ReactorFuelSystem", () => {
 		system.addComponent("isShipSystem", {
 			type: "generic",
 		});
-		const powerDraw = Math.ceil(
-			reactorComponent.maxOutput * reactorComponent.optimalOutputPercent,
-		);
+		const powerDraw = Math.ceil(reactorComponent.maxOutput * reactorComponent.optimalOutputPercent);
 		system.addComponent("power", {
 			powerDraw,
 			powerSources: Array.from({ length: powerDraw }).map(() => reactor.id),
@@ -104,9 +111,7 @@ describe("ReactorFuelSystem", () => {
 		ecs.addEntity(ship2);
 
 		expect(filterShipsWithReactorSystem.entities.size).toEqual(1);
-		expect(filterShipsWithReactorSystem.entities.values().next().value).toEqual(
-			ship,
-		);
+		expect(filterShipsWithReactorSystem.entities.values().next().value).toEqual(ship);
 	});
 	it("should detect the correct amount of items related to a system", () => {
 		const fuelList = getReactorInventory(reactor);
@@ -127,22 +132,16 @@ describe("ReactorFuelSystem", () => {
 			ecs.update(16);
 		}
 		expect(reactorComponent.currentOutput).toMatchInlineSnapshot("6");
-		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(
-			"0.328285714285714",
-		);
+		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot("0.328285714285714");
 
 		for (let i = 0; i < 60 * 9 + 50; i++) {
 			ecs.update(16);
 		}
 		expect(reactorComponent.currentOutput).toMatchInlineSnapshot("6");
-		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(
-			"0.31142857142856833",
-		);
+		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot("0.31142857142856833");
 		ecs.update(16);
 		expect(reactorComponent.currentOutput).toMatchInlineSnapshot("6");
-		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(
-			"0.3113999999999969",
-		);
+		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot("0.3113999999999969");
 	});
 	it("should consume extra fuel when the desired power is above the optimal level", () => {
 		if (!reactor.components.isReactor) throw new Error("not reactor");
@@ -176,16 +175,10 @@ describe("ReactorFuelSystem", () => {
 
 		system.updateComponent("power", {
 			powerDraw: Math.ceil(
-				reactorComponent.maxOutput *
-					reactorComponent.optimalOutputPercent *
-					0.5,
+				reactorComponent.maxOutput * reactorComponent.optimalOutputPercent * 0.5,
 			),
 			powerSources: Array.from({
-				length: Math.ceil(
-					reactorComponent.maxOutput *
-						reactorComponent.optimalOutputPercent *
-						0.5,
-				),
+				length: Math.ceil(reactorComponent.maxOutput * reactorComponent.optimalOutputPercent * 0.5),
 			}).map(() => reactor.id),
 		});
 
@@ -206,19 +199,17 @@ describe("ReactorFuelSystem", () => {
 
 		expect(reactorComponent.currentOutput).toMatchInlineSnapshot("6");
 		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(`0.01`);
-		expect(
-			ship.components.shipMap?.deckNodes[0].contents.Deuterium.count,
-		).toMatchInlineSnapshot(`100`);
+		expect(ship.components.shipMap?.deckNodes[0].contents.Deuterium.count).toMatchInlineSnapshot(
+			`100`,
+		);
 
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
 		expect(reactorComponent.currentOutput).toMatchInlineSnapshot("6");
-		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot(
-			"0.008285714285714311",
+		expect(reactorComponent.unusedFuel.amount).toMatchInlineSnapshot("0.008285714285714311");
+		expect(ship.components.shipMap?.deckNodes[0].contents.Deuterium.count).toMatchInlineSnapshot(
+			"100",
 		);
-		expect(
-			ship.components.shipMap?.deckNodes[0].contents.Deuterium.count,
-		).toMatchInlineSnapshot("100");
 	});
 });

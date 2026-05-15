@@ -1,5 +1,9 @@
+import { keepPreviousData } from "@tanstack/react-query";
+import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
 import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
 import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
 import SearchableList from "@thorium/ui/SearchableList";
@@ -7,10 +11,6 @@ import TagInput from "@thorium/ui/TagInput";
 import UploadWell from "@thorium/ui/UploadWell";
 import { Suspense, useState } from "react";
 import { Link, NavLink, useNavigate, useParams } from "react-router";
-import { toast } from "@thorium/context/ToastContext";
-import { q } from "@thorium/context/AppContext";
-import { Icon } from "@thorium/ui/Icon";
-import { keepPreviousData } from "@tanstack/react-query";
 
 export default function PluginEdit() {
 	const { pluginId } = useParams() as { pluginId: string };
@@ -18,19 +18,19 @@ export default function PluginEdit() {
 	const navigate = useNavigate();
 	const prompt = usePrompt();
 	return (
-		<div className="p-8 h-[calc(100%-2rem)]">
-			<h1 className="font-bold text-white text-3xl mb-4">Plugin Config</h1>
+		<div className="h-[calc(100%-2rem)] p-8">
+			<h1 className="mb-4 text-3xl font-bold text-white">Plugin Config</h1>
 
-			<div className="flex gap-8 h-[calc(100%-3rem)]">
-				<div className="flex flex-col w-80 h-full">
+			<div className="flex h-[calc(100%-3rem)] gap-8">
+				<div className="flex h-full w-80 flex-col">
 					<Button
-						className="w-full btn-sm btn-success"
+						className="btn-sm btn-success w-full"
 						onClick={async () => {
 							const name = await prompt({ header: "Enter plugin name" });
 							if (typeof name !== "string") return;
 							try {
 								const result = await q.plugin.create.netSend({ name });
-								navigate(`/config/${result.pluginId}`);
+								void navigate(`/config/${result.pluginId}`);
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({
@@ -58,22 +58,15 @@ export default function PluginEdit() {
 						selectedItem={pluginId || null}
 						setSelectedItem={({ id }) => navigate(`/config/${id}`)}
 						renderItem={(c) => (
-							<div className="flex justify-between items-center" key={c.id}>
+							<div className="flex items-center justify-between" key={c.id}>
 								<div>
 									{c.name}
-									{c.active ? (
-										""
-									) : (
-										<span className="text-red-600"> (inactive)</span>
-									)}
+									{c.active ? "" : <span className="text-red-600"> (inactive)</span>}
 									<div>
 										<small>{c.author}</small>
 									</div>
 								</div>
-								<NavLink
-									{...{ to: `/config/${c.id}/list` }}
-									onClick={(e) => e.stopPropagation()}
-								>
+								<NavLink {...{ to: `/config/${c.id}/list` }} onClick={(e) => e.stopPropagation()}>
 									<Icon name="pencil" />
 								</NavLink>
 							</div>
@@ -119,7 +112,7 @@ function PluginDetails() {
 									name: target.value,
 									pluginId: plugin.id,
 								});
-								navigate(`/config/${result.pluginId}`);
+								void navigate(`/config/${result.pluginId}`);
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({
@@ -143,11 +136,13 @@ function PluginDetails() {
 					disabled={!plugin}
 					onBlur={(e: React.FocusEvent<Element>) => {
 						const target = e.target as HTMLInputElement;
-						plugin &&
+						void (
+							plugin &&
 							q.plugin.update.netSend({
 								description: target.value,
 								pluginId: plugin.id,
-							});
+							})
+						);
 					}}
 				/>
 				<TagInput
@@ -156,45 +151,45 @@ function PluginDetails() {
 					disabled={!plugin}
 					onAdd={(tag) => {
 						if (plugin?.tags.includes(tag) || !plugin) return;
-						q.plugin.update.netSend({
+						void q.plugin.update.netSend({
 							tags: [...plugin.tags, tag],
 							pluginId: plugin.id,
 						});
 					}}
 					onRemove={(tag) => {
 						if (!plugin) return;
-						q.plugin.update.netSend({
+						void q.plugin.update.netSend({
 							tags: plugin.tags.filter((t) => t !== tag),
 							pluginId: plugin.id,
 						});
 					}}
 				/>
-				<div className="grid grid-cols-2 w-full gap-2">
+				<div className="grid w-full grid-cols-2 gap-2">
 					{plugin?.active ? (
 						<Button
-							className="w-full btn-outline btn-warning"
+							className="btn-outline btn-warning w-full"
 							disabled={!pluginId}
 							onClick={async () => {
 								if (!pluginId) return;
-								q.plugin.update.netSend({ pluginId, active: false });
+								void q.plugin.update.netSend({ pluginId, active: false });
 							}}
 						>
 							Deactivate Plugin
 						</Button>
 					) : (
 						<Button
-							className="w-full btn-outline btn-success"
+							className="btn-outline btn-success w-full"
 							disabled={!pluginId}
 							onClick={async () => {
 								if (!pluginId) return;
-								q.plugin.update.netSend({ pluginId, active: true });
+								void q.plugin.update.netSend({ pluginId, active: true });
 							}}
 						>
 							Activate Plugin
 						</Button>
 					)}
 					<Button
-						className="w-full btn-outline btn-error"
+						className="btn-outline btn-error w-full"
 						disabled={!pluginId}
 						onClick={async () => {
 							if (
@@ -205,14 +200,14 @@ function PluginDetails() {
 								}))
 							)
 								return;
-							q.plugin.update.netSend({ pluginId });
-							navigate("/config");
+							void q.plugin.update.netSend({ pluginId });
+							void navigate("/config");
 						}}
 					>
 						Delete Plugin
 					</Button>
 					<Button
-						className="w-full btn-outline btn-notice"
+						className="btn-outline btn-notice w-full"
 						disabled={!pluginId}
 						onClick={async () => {
 							if (!pluginId) return;
@@ -225,7 +220,7 @@ function PluginDetails() {
 									pluginId: pluginId,
 									name,
 								});
-								navigate(`/config/${result.pluginId}`);
+								void navigate(`/config/${result.pluginId}`);
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({
@@ -241,23 +236,20 @@ function PluginDetails() {
 						Duplicate Plugin
 					</Button>
 					<Link
-						className={`btn w-full btn-outline btn-warning ${
-							!pluginId ? "btn-disabled" : ""
-						}`}
+						className={`btn btn-outline btn-warning w-full ${!pluginId ? "btn-disabled" : ""}`}
 						to={`/config/${pluginId}/list`}
 					>
 						Edit Plugin
 					</Link>
 					{plugin?.default ? (
 						<Button
-							className="w-full btn-outline btn-info"
+							className="btn-outline btn-info w-full"
 							disabled={!pluginId}
 							onClick={async () => {
 								if (!pluginId) return;
 								if (
 									await confirm({
-										header:
-											"Are you sure you want to restore the default plugin?",
+										header: "Are you sure you want to restore the default plugin?",
 										body: "Any changes that you've made to the default plugin will be overwritten.",
 									})
 								) {
@@ -275,18 +267,18 @@ function PluginDetails() {
 					<span className="flex">
 						Cover Image{" "}
 						<InfoTip>
-							Used on the Thorium Plugin Registry. Images should be square and
-							at least 1024x1024 in size.
+							Used on the Thorium Plugin Registry. Images should be square and at least 1024x1024 in
+							size.
 						</InfoTip>
 					</span>
 					<UploadWell
 						id="cover-image"
-						className="max-w-sm aspect-square h-auto"
+						className="aspect-square h-auto max-w-sm"
 						accept="image/*"
 						disabled={!plugin}
 						onChange={(files: FileList) => {
 							if (!plugin) return;
-							q.plugin.update.netSend({
+							void q.plugin.update.netSend({
 								pluginId: plugin.id,
 								coverImage: files[0],
 							});
@@ -295,7 +287,7 @@ function PluginDetails() {
 						{plugin?.coverImage && (
 							<img
 								src={`${plugin.coverImage}?${Date.now()}`}
-								className="w-[90%] h-[90%] object-cover"
+								className="h-[90%] w-[90%] object-cover"
 								alt="Cover"
 							/>
 						)}

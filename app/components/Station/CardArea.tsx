@@ -1,30 +1,22 @@
+import * as Cards from "@thorium/cards";
 import Login from "@thorium/cards/Login";
 import Offline from "@thorium/cards/Offline";
-import * as Cards from "@thorium/cards";
-import {
-	type ComponentType,
-	Fragment,
-	Suspense,
-	useCallback,
-	useMemo,
-	useState,
-} from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import type { CardProps } from "../../cards/CardProps";
-import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
+import { clientId, q } from "@thorium/context/AppContext";
 import CardProvider from "@thorium/context/CardContext";
-import { q, clientId } from "@thorium/context/AppContext";
+import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import { Transition } from "@thorium/ui/Transition";
-import Button from "@thorium/ui/Button";
+import { type ComponentType, Suspense, useCallback, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+
+import type { CardProps } from "../../cards/CardProps";
 
 const CardError = () => {
 	return (
 		<div className={"card-error"}>
 			<p className="offline-title">Station Error</p>
 			<p className="offline-message">
-				Your station has experienced an error. A diagnostic must be performed to
-				restore this station to functionality. Please contact a computer
-				specialist.
+				Your station has experienced an error. A diagnostic must be performed to restore this
+				station to functionality. Please contact a computer specialist.
 			</p>
 		</div>
 	);
@@ -44,13 +36,13 @@ export const CardArea: React.FC<{
 		<div className="fade-in">
 			<Transition
 				isOpen={!client.loginName && station.name !== "Viewscreen"}
-				className="w-full h-full absolute card-transition"
+				className="card-transition absolute h-full w-full"
 			>
 				<Login />
 			</Transition>
 			<Transition
 				isOpen={Boolean(client.offlineState)}
-				className="w-full h-full absolute card-transition"
+				className="card-transition absolute h-full w-full"
 			>
 				<Offline />
 			</Transition>
@@ -78,8 +70,7 @@ const CardRenderer = ({
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [station] = q.station.get.useNetRequest({ clientId });
 	const allowCard =
-		(station.name === "Viewscreen" || Boolean(client.loginName)) &&
-		!client.offlineState;
+		(station.name === "Viewscreen" || Boolean(client.loginName)) && !client.offlineState;
 	const show = allowCard && currentCardId === id;
 	const [cardLoaded, setCardLoaded] = useState(show);
 	return (
@@ -94,7 +85,7 @@ const CardRenderer = ({
 				beforeEnter={useCallback(() => {
 					setCardLoaded(true);
 				}, [])}
-				className="w-full h-full absolute @container card-transition"
+				className="card-transition @container absolute h-full w-full"
 			>
 				<Suspense fallback={<LoadingSpinner />}>
 					<ErrorBoundary fallback={<CardError />}>

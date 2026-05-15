@@ -1,10 +1,10 @@
+import { toast } from "@thorium/context/ToastContext";
+
 import { NETREQUEST_PATH, NETSEND_PATH } from "../constants";
 
 type HTTPHeaders = Record<string, string>;
 
-export type HeadersResolver =
-	| HTTPHeaders
-	| (() => HTTPHeaders | Promise<HTTPHeaders>);
+export type HeadersResolver = HTTPHeaders | (() => HTTPHeaders | Promise<HTTPHeaders>);
 export type LiveQueryClientOptions = {
 	baseUrl?: string;
 	netSendPath?: string;
@@ -25,14 +25,30 @@ export class LiveQueryError extends Error {
 		this.error = remoteError;
 	}
 }
+/**
+ * Thrown when a system fails the stability check.
+ * The client-side checks for this error and displays
+ * the proper toast message to the user.
+ */
+export class SystemStabilityError extends Error {
+	public error: string;
+	public readonly errorType = "SystemStabilityError";
+
+	constructor(
+		message: string,
+		public title: string,
+	) {
+		super(message);
+		this.error = message;
+	}
+}
+
 export class LiveQueryClient {
 	requestUrl: URL;
 	sendUrl: URL;
 	headers: HTTPHeaders | (() => HTTPHeaders | Promise<HTTPHeaders>);
 	constructor({
-		baseUrl = typeof window === "undefined"
-			? "http://localhost:4444"
-			: window.location.origin,
+		baseUrl = typeof window === "undefined" ? "http://localhost:4444" : window.location.origin,
 		netRequestPath = NETREQUEST_PATH,
 		netSendPath = NETSEND_PATH,
 		headers = {},
@@ -54,9 +70,7 @@ export class LiveQueryClient {
 			headers.append(key, val);
 		});
 		Object.entries(
-			typeof inputHeaders === "function"
-				? await inputHeaders()
-				: inputHeaders || {},
+			typeof inputHeaders === "function" ? await inputHeaders() : inputHeaders || {},
 		).forEach(([key, val]) => {
 			headers.append(key, val);
 		});
@@ -74,16 +88,22 @@ export class LiveQueryClient {
 
 			if (!res.ok) {
 				try {
-					throw new LiveQueryError(
-						`Error in request ${JSON.parse(response).error}`,
-						JSON.parse(response).error,
-					);
+					const parsed = JSON.parse(response);
+					if (parsed.errorType === "SystemStabilityError") {
+						throw new SystemStabilityError(parsed.error, parsed.title);
+					}
+					throw new LiveQueryError(`Error in request ${parsed.error}`, parsed.error);
 				} catch (error) {
+					if (error instanceof SystemStabilityError) {
+						toast({
+							title: error.title,
+							body: error.message,
+							color: "error",
+						});
+					}
 					if (error instanceof LiveQueryError) throw error;
 					throw new Error(
-						`${res.status} Error in request: ${
-							res.statusText
-						}, Url: ${url}, Body: ${JSON.stringify(
+						`${res.status} Error in request: ${res.statusText}, Url: ${url}, Body: ${JSON.stringify(
 							body,
 						)}, Response: ${response}`,
 					);
@@ -125,12 +145,7 @@ export class LiveQueryClient {
 				opts.input[key] = {} as any;
 			}
 			// Duck type the value into a FileList
-			else if (
-				value &&
-				typeof value === "object" &&
-				value.length &&
-				"item" in value
-			) {
+			else if (value && typeof value === "object" && value.length && "item" in value) {
 				for (let i = 0; i < value.length; i++) {
 					body.append(`${key}[]`, value[i]);
 				}
@@ -141,11 +156,6 @@ export class LiveQueryClient {
 			body.append("params", JSON.stringify(opts.input));
 		}
 
-		return await this.makeRequest(
-			this.sendUrl,
-			body,
-			opts.signal,
-			opts.headers,
-		);
+		return await this.makeRequest(this.sendUrl, body, opts.signal, opts.headers);
 	}
 }

@@ -1,8 +1,8 @@
-import * as React from "react";
-import Button from "@thorium/ui/Button";
-import { toast } from "@thorium/context/ToastContext";
-import { fromDate } from "dot-beat-time";
 import { clientId, q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
+import Button from "@thorium/ui/Button";
+import { fromDate } from "dot-beat-time";
+import * as React from "react";
 
 export default function OfficersLog() {
 	const [client] = q.client.get.useNetRequest({ clientId });
@@ -14,20 +14,16 @@ export default function OfficersLog() {
 	const textRef = React.useRef<HTMLTextAreaElement>(null);
 	const entry = officersLog.find((e) => e.timestamp === selectedEntry);
 	return (
-		<div className="mx-auto h-screen max-w-5xl w-full grid grid-cols-3 grid-rows-[2.5rem_1fr_auto] @2xl:max-h-full max-h-[calc(22rem)] @2xl:py-4 @2xl:gap-8 gap-4">
-			<h2 className="@2xl:text-4xl text-2xl font-bold h-10 col-start-1">
-				Officers Log
-			</h2>
-			<ul className="panel panel-alert overflow-y-auto col-start-1">
+		<div className="mx-auto grid h-screen max-h-[calc(22rem)] w-full max-w-5xl grid-cols-3 grid-rows-[2.5rem_1fr_auto] gap-4 @2xl:max-h-full @2xl:gap-8 @2xl:py-4">
+			<h2 className="col-start-1 h-10 text-2xl font-bold @2xl:text-4xl">Officers Log</h2>
+			<ul className="panel panel-alert col-start-1 overflow-y-auto">
 				{officersLog
 					.concat()
 					.reverse()
 					.map((log, i) => (
 						<li
 							key={`${log.timestamp}-${i}`}
-							className={`list-group-item ${
-								selectedEntry === log.timestamp ? "selected" : ""
-							}`}
+							className={`list-group-item ${selectedEntry === log.timestamp ? "selected" : ""}`}
 							onClick={() => setSelectedEntry(log.timestamp)}
 						>
 							{fromDate(new Date(log.timestamp), true)}
@@ -44,26 +40,22 @@ export default function OfficersLog() {
 			>
 				New Log Entry
 			</Button>
-			<h3 className="@2xl:text-2xl text-lg font-bold h-10 flex justify-between items-end col-span-2 row-start-1 col-start-2">
+			<h3 className="col-span-2 col-start-2 row-start-1 flex h-10 items-end justify-between text-lg font-bold @2xl:text-2xl">
 				<span>Log of Officer: {client.loginName}</span>
 				<span>
-					Stardate:{" "}
-					{fromDate(
-						entry?.timestamp ? new Date(entry?.timestamp) : stardate,
-						true,
-					)}
+					Stardate: {fromDate(entry?.timestamp ? new Date(entry?.timestamp) : stardate, true)}
 				</span>
 			</h3>
 			<textarea
 				ref={textRef}
-				className="textarea textarea-alert text-xl @2xl:p-4 p-2 col-span-2 row-start-2 col-start-2"
+				className="textarea textarea-alert col-span-2 col-start-2 row-start-2 p-2 text-xl @2xl:p-4"
 				onChange={(e) => setLogEntry(e.target.value)}
 				readOnly={!!entry}
 				value={entry?.message || logEntry}
 			/>
-			<div className="flex @2xl:gap-8 gap-4 col-span-2 col-start-2 row-start-3">
+			<div className="col-span-2 col-start-2 row-start-3 flex gap-4 @2xl:gap-8">
 				<Button
-					className="btn-error flex-1 @2xl:btn-md btn-sm"
+					className="btn-error @2xl:btn-md btn-sm flex-1"
 					onClick={() => {
 						setSelectedEntry(null);
 						setLogEntry("");
@@ -73,7 +65,7 @@ export default function OfficersLog() {
 					Clear
 				</Button>
 				<Button
-					className="btn-success flex-1 @2xl:btn-md btn-sm"
+					className="btn-success @2xl:btn-md btn-sm flex-1"
 					disabled={!!entry}
 					onClick={async () => {
 						if (logEntry.trim().length === 0) {

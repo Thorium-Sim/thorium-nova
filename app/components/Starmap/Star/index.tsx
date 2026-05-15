@@ -1,12 +1,13 @@
-import type React from "react";
+import { setCursor } from "@thorium/utils/setCursor";
+import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { solarRadiusToKilometers } from "@thorium/utils/unitTypes";
+import type React from "react";
 import { Color } from "three";
+
 import OrbitContainer from "../OrbitContainer";
-import Star from "./StarMesh";
 import Selected from "../Selected";
 import { useGetStarmapStore } from "../starmapStore";
-import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
-import { setCursor } from "@thorium/utils/setCursor";
+import Star from "./StarMesh";
 
 const StarEntity: React.FC<{
 	star: {
@@ -28,19 +29,12 @@ const StarEntity: React.FC<{
 	// const selectedId = useConfigStore(store => store.selectedObject?.id);
 	const selected = false; //selectedId === entity.id;
 	if (!star.satellite) return null;
-	const { semiMajorAxis, eccentricity, orbitalArc, inclination, showOrbit } =
-		star.satellite;
-	const color1 = new Color(
-		`hsl(${star.hue}, 100%, ${star.isWhite ? 100 : 50}%)`,
-	);
-	const color2 = new Color(
-		`hsl(${star.hue + 20}, 100%, ${star.isWhite ? 100 : 50}%)`,
-	);
+	const { semiMajorAxis, eccentricity, orbitalArc, inclination, showOrbit } = star.satellite;
+	const color1 = new Color(`hsl(${star.hue}, 100%, ${star.isWhite ? 100 : 50}%)`);
+	const color2 = new Color(`hsl(${star.hue + 20}, 100%, ${star.isWhite ? 100 : 50}%)`);
 
 	const size =
-		viewingMode === "editor"
-			? 10 + 5 * star.radius
-			: solarRadiusToKilometers(star.radius);
+		viewingMode === "editor" ? 10 + 5 * star.radius : solarRadiusToKilometers(star.radius);
 	return (
 		<OrbitContainer
 			semiMajorAxis={semiMajorAxis}
@@ -53,12 +47,12 @@ const StarEntity: React.FC<{
 				onPointerOver={() => {
 					if (viewingMode === "viewscreen") return;
 					setCursor("pointer");
-					const position = getOrbitPosition({
-						eccentricity,
-						orbitalArc,
-						inclination: inclination,
-						semiMajorAxis: semiMajorAxis,
-					});
+					// const position = getOrbitPosition({
+					// 	eccentricity,
+					// 	orbitalArc,
+					// 	inclination: inclination,
+					// 	semiMajorAxis: semiMajorAxis,
+					// });
 					// useConfigStore.setState({
 					//   hoveredPosition: position,
 					//   scaledHoveredPosition: position,

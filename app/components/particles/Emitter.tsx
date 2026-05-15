@@ -1,13 +1,8 @@
-import {
-	type ReactNode,
-	useRef,
-	createContext,
-	useContext,
-	forwardRef,
-} from "react";
-import { Vector3, type Group } from "three";
-import type { Angle } from "./types";
 import type { ThreeElements } from "@react-three/fiber";
+import { type ReactNode, useRef, createContext, useContext, forwardRef } from "react";
+import { Vector3, type Group } from "three";
+
+import type { Angle } from "./types";
 
 const EmitterContext = createContext<{
 	emissionAngleRange: Angle;
@@ -38,34 +33,27 @@ export const Emitter = forwardRef<
 		emissionAngleRange?: Angle;
 		onParticlesExpired?: () => void;
 	} & ThreeElements["group"]
->(
-	(
-		{ children, emissionAngleRange = { longitude: 0, latitude: 0 }, ...props },
-		forwardedRef,
-	) => {
-		const innerRef = useRef<Group>(null);
-		const ref = mergeRefs([forwardedRef, innerRef]);
-		return (
-			<group {...props} ref={ref}>
-				<EmitterContext.Provider
-					value={{
-						emissionAngleRange,
-						getEmitterPosition: () => innerRef.current?.position!,
-						onParticlesExpired: props.onParticlesExpired,
-					}}
-				>
-					{children}
-				</EmitterContext.Provider>
-			</group>
-		);
-	},
-);
+>(({ children, emissionAngleRange = { longitude: 0, latitude: 0 }, ...props }, forwardedRef) => {
+	const innerRef = useRef<Group>(null);
+	const ref = mergeRefs([forwardedRef, innerRef]);
+	return (
+		<group {...props} ref={ref}>
+			<EmitterContext.Provider
+				value={{
+					emissionAngleRange,
+					getEmitterPosition: () => innerRef.current!.position,
+					onParticlesExpired: props.onParticlesExpired,
+				}}
+			>
+				{children}
+			</EmitterContext.Provider>
+		</group>
+	);
+});
 Emitter.displayName = "Emitter";
 
 function mergeRefs<T = any>(
-	refs: Array<
-		React.MutableRefObject<T> | React.LegacyRef<T> | undefined | null
-	>,
+	refs: Array<React.MutableRefObject<T> | React.LegacyRef<T> | undefined | null>,
 ): React.RefCallback<T> {
 	return (value) => {
 		refs.forEach((ref) => {

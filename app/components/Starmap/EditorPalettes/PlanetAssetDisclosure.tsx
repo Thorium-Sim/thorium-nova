@@ -1,10 +1,11 @@
-import Button from "../../ui/Button";
-import UploadWell from "@thorium/ui/UploadWell";
-import InfoTip from "@thorium/ui/InfoTip";
 import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
-import { PaletteDisclosure } from "../SolarSystemMap";
-import { useSystemIds } from "../useSystemIds";
 import { q } from "@thorium/context/AppContext";
+import InfoTip from "@thorium/ui/InfoTip";
+import UploadWell from "@thorium/ui/UploadWell";
+
+import Button from "../../ui/Button";
+import { useSystemIds } from "../useSystemIds";
+import { PaletteDisclosure } from "./PaletteDisclosure";
 
 export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 	const [pluginId, solarSystemId] = useSystemIds();
@@ -15,8 +16,8 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 				<label htmlFor="texture" className="inline-flex items-center">
 					Texture{" "}
 					<InfoTip>
-						Image aspect ratio should be 2x1, with the dimensions as powers of
-						two, eg. 512x256 or 2048x1024
+						Image aspect ratio should be 2x1, with the dimensions as powers of two, eg. 512x256 or
+						2048x1024
 					</InfoTip>
 				</label>
 				<UploadWell
@@ -33,7 +34,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 				>
 					<img
 						src={`${object.isPlanet.textureMapAsset}?${Date.now()}`}
-						className="w-[90%] h-[90%] object-contain"
+						className="h-[90%] w-[90%] object-contain"
 						alt="Planet Texture"
 					/>
 				</UploadWell>
@@ -42,8 +43,8 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 				<label htmlFor="clouds" className="inline-flex items-center">
 					Clouds{" "}
 					<InfoTip>
-						Image should be a transparent PNG. The aspect ratio should be 2x1,
-						with the dimensions as powers of two, eg. 512x256 or 2048x1024
+						Image should be a transparent PNG. The aspect ratio should be 2x1, with the dimensions
+						as powers of two, eg. 512x256 or 2048x1024
 					</InfoTip>
 				</label>
 				<UploadWell
@@ -61,7 +62,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 					{object.isPlanet.cloudMapAsset && (
 						<img
 							src={`${object.isPlanet.cloudMapAsset}?${Date.now()}`}
-							className="w-[90%] h-[90%] object-contain"
+							className="h-[90%] w-[90%] object-contain"
 							alt="Clouds Texture"
 						/>
 					)}
@@ -84,8 +85,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 				<label htmlFor="rings" className="inline-flex items-center">
 					Rings{" "}
 					<InfoTip>
-						Image should be a transparent PNG. Vertical lines in the image
-						represent rings.
+						Image should be a transparent PNG. Vertical lines in the image represent rings.
 					</InfoTip>
 				</label>
 				<UploadWell
@@ -103,7 +103,7 @@ export function PlanetAssetDisclosure({ object }: { object: PlanetPlugin }) {
 					{object.isPlanet.ringMapAsset && (
 						<img
 							src={`${object.isPlanet.ringMapAsset}?${Date.now()}`}
-							className="w-[90%] h-[90%] object-contain"
+							className="h-[90%] w-[90%] object-contain"
 							alt="Clouds Texture"
 						/>
 					)}

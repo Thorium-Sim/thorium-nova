@@ -1,14 +1,14 @@
-import { q } from "@thorium/context/AppContext";
-import { useNavigate, useParams } from "react-router";
 import { Navigate } from "@thorium/components/Navigate";
-import Input from "@thorium/ui/Input";
-import { useState } from "react";
-import { toast } from "@thorium/context/ToastContext";
-import InfoTip from "@thorium/ui/InfoTip";
 import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
-import { Button } from "react-aria-components";
+import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
 import Checkbox from "@thorium/ui/Checkbox";
+import InfoTip from "@thorium/ui/InfoTip";
+import Input from "@thorium/ui/Input";
+import { useState } from "react";
+import { Button } from "react-aria-components";
+import { useNavigate, useParams } from "react-router";
 
 export default function TriggerLayout() {
 	const { macroId, pluginId } = useParams() as {
@@ -24,12 +24,11 @@ export default function TriggerLayout() {
 	});
 	const [error, setError] = useState(false);
 
-	if (!macroId || !trigger)
-		return <Navigate to={`/config/${pluginId}/trigger`} />;
+	if (!macroId || !trigger) return <Navigate to={`/config/${pluginId}/trigger`} />;
 
 	return (
-		<div className="flex-1 flex flex-col">
-			<div className="flex justify-between w-full gap-2">
+		<div className="flex flex-1 flex-col">
+			<div className="flex w-full justify-between gap-2">
 				<div className="flex-1">
 					<div>
 						<Input
@@ -48,7 +47,7 @@ export default function TriggerLayout() {
 										macroId,
 										name: e.target.value,
 									});
-									navigate(`/config/${pluginId}/trigger/${result.macroId}`);
+									void navigate(`/config/${pluginId}/trigger/${result.macroId}`);
 								} catch (err) {
 									if (err instanceof Error) {
 										toast({
@@ -61,7 +60,7 @@ export default function TriggerLayout() {
 							}}
 						/>
 					</div>
-					<div className="pb-4 flex gap-2">
+					<div className="flex gap-2 pb-4">
 						<div className="flex-1">
 							<Input
 								labelHidden={false}
@@ -97,7 +96,7 @@ export default function TriggerLayout() {
 				<div className="flex-1">
 					<Input
 						as="textarea"
-						className="!h-32"
+						className="h-32!"
 						labelHidden={false}
 						label="Description"
 						defaultValue={trigger.description}
@@ -114,11 +113,11 @@ export default function TriggerLayout() {
 			<h3 className="text-xl font-semibold">
 				Blocks{" "}
 				<InfoTip>
-					Compose blocks together to create the logic for your trigger. Get
-					entity references, store properties in variables, and execute actions.
+					Compose blocks together to create the logic for your trigger. Get entity references, store
+					properties in variables, and execute actions.
 				</InfoTip>
 			</h3>
-			<div className="flex-1 overflow-y-auto overflow-x-hidden">
+			<div className="flex-1 overflow-x-hidden overflow-y-auto">
 				{!trigger?.blocks || trigger?.blocks?.length === 0 ? (
 					<div>
 						<p>No blocks added to trigger.</p>
@@ -133,9 +132,7 @@ export default function TriggerLayout() {
 								});
 							}}
 						>
-							<Button className="btn btn-sm btn-outline btn-success">
-								Add Block
-							</Button>
+							<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
 						</AddBlockButton>
 					</div>
 				) : (
@@ -151,8 +148,8 @@ export default function TriggerLayout() {
 							})
 						}
 						onUpdate={(block, property, value) => {
-							const { id, type, ...properties } = block;
-							q.plugin.macro.block.update.netSend({
+							const { id: _, type: __, ...properties } = block;
+							void q.plugin.macro.block.update.netSend({
 								pluginId,
 								macroId,
 								blockId: block.id,
@@ -160,7 +157,7 @@ export default function TriggerLayout() {
 							});
 						}}
 						onReplace={(id, blocks) => {
-							q.plugin.macro.block.replace.netSend({
+							void q.plugin.macro.block.replace.netSend({
 								pluginId,
 								macroId,
 								blockId: id,
@@ -188,9 +185,7 @@ export default function TriggerLayout() {
 					});
 				}}
 			>
-				<Button className="btn btn-sm btn-outline btn-success">
-					Add Block
-				</Button>
+				<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
 			</AddBlockButton>
 		</div>
 	);

@@ -7,7 +7,7 @@ interface CommonProps {
 	invalidMessage?: string;
 	fixed?: boolean;
 	labelProps?: React.LabelHTMLAttributes<HTMLLabelElement>;
-	helperText?: string;
+	helperText?: React.ReactNode;
 	inputButton?: React.ReactNode;
 }
 const Input = forwardRef<
@@ -35,7 +35,6 @@ const Input = forwardRef<
 		...inputProps
 	} = props;
 
-	// biome-ignore lint/correctness/useHookAtTopLevel: Unlikely to cause problems since ID won't change
 	const id = inputProps.id || useId();
 
 	return (
@@ -43,13 +42,11 @@ const Input = forwardRef<
 			<label
 				htmlFor={id}
 				{...labelProps}
-				className={`${labelProps?.className || ""} ${
-					labelHidden ? "hidden" : ""
-				}`}
+				className={`${labelProps?.className || ""} ${labelHidden ? "hidden" : ""}`}
 			>
 				{label}
 			</label>
-			<div className="flex justify-between w-full gap-2">
+			<div className="flex w-full justify-between gap-2">
 				{React.createElement(as, {
 					autoComplete: "off",
 					...(inputProps as React.InputHTMLAttributes<HTMLInputElement>),
@@ -62,9 +59,7 @@ const Input = forwardRef<
 				{inputButton}
 			</div>
 			{isInvalid && <p className="text-red-500">{invalidMessage}</p>}
-			{helperText && (
-				<p className="text-gray-400 text-sm leading-tight mb-2">{helperText}</p>
-			)}
+			{helperText && <p className="mb-2 text-sm leading-tight text-gray-400">{helperText}</p>}
 		</div>
 	);
 });

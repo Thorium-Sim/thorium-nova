@@ -1,28 +1,25 @@
+import { useAlert, useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
+import Checkbox from "@thorium/ui/Checkbox";
+import { InputField, OutputField, TypingField } from "@thorium/ui/Core";
 import Dropdown, { DropdownItem } from "@thorium/ui/Dropdown";
+import { Icon } from "@thorium/ui/Icon";
+import InfoTip from "@thorium/ui/InfoTip";
 import LinearDotIndicator from "@thorium/ui/LinearDotIndicator";
+import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
+import { Menu, MenuItem, MenuTrigger } from "@thorium/ui/Menu";
+import Modal from "@thorium/ui/Modal";
 import RadialDial from "@thorium/ui/RadialDial";
+import SearchableInput, { DefaultResultLabel } from "@thorium/ui/SearchableInput";
+import SearchableList from "@thorium/ui/SearchableList";
 import Select from "@thorium/ui/Select";
 import SineWave from "@thorium/ui/SineWave";
-import Modal from "@thorium/ui/Modal";
-import { type ReactNode, useRef, useState } from "react";
-import SearchableList from "@thorium/ui/SearchableList";
-import InfoTip from "@thorium/ui/InfoTip";
 import TagInput from "@thorium/ui/TagInput";
-import Button from "@thorium/ui/Button";
-import SearchableInput, {
-	DefaultResultLabel,
-} from "@thorium/ui/SearchableInput";
-import type { QueryFunctionContext } from "@tanstack/react-query";
-import { Icon } from "@thorium/ui/Icon";
-import { Button as RAButton } from "react-aria-components";
-import { PropertyCombobox } from "@thorium/components/Config/EntityQueryBuilder";
 import { useTransition } from "@thorium/ui/Transition";
 import { cn } from "@thorium/utils/cn";
-import { useAlert, useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
-const ModalDemo = ({
-	title,
-	children,
-}: { title: string; children: ReactNode }) => {
+import { type ReactNode, useRef, useState } from "react";
+import { Button as RAButton, type Selection } from "react-aria-components";
+const ModalDemo = ({ title, children }: { title: string; children: ReactNode }) => {
 	const [isOpen, setIsOpen] = useState(false);
 	return (
 		<div>
@@ -89,11 +86,9 @@ const TagInputDemo = () => {
 	);
 };
 
-async function searchableInputQuery({
-	queryKey,
-}: { queryKey: [string, string] }) {
+async function searchableInputQuery({ queryKey }: { queryKey: [string, string] }) {
 	await new Promise((res) => setTimeout(res, 1000 + Math.random() * 500));
-	const [key, query] = queryKey;
+	const [_, query] = queryKey;
 	const people = [
 		{ id: 1, name: "Wade Cooper" },
 		{ id: 2, name: "Arlene Mccoy" },
@@ -117,9 +112,7 @@ async function searchableInputQuery({
 }
 
 export function ComponentDemo() {
-	const [selected, setSelected] = useState<null | { id: number; name: string }>(
-		null,
-	);
+	const [selected, setSelected] = useState<null | { id: number; name: string }>(null);
 
 	const ref = useRef<HTMLDivElement>(null);
 	const [isOpen, setIsOpen] = useState(false);
@@ -129,12 +122,50 @@ export function ComponentDemo() {
 	const prompt = usePrompt();
 	const confirm = useConfirm();
 
+	const lineRef = useRef(0);
+
+	const [menuSelected, setMenuSelected] = useState<Selection>(new Set(["rulers"]));
+
 	return (
-		<div className="flex flex-col gap-8 text-white h-full overflow-y-auto p-4">
+		<div className="flex h-full flex-col gap-8 overflow-y-auto p-4 text-white">
+			<MenuTrigger>
+				<RAButton className="btn w-min whitespace-nowrap">Open Menu</RAButton>
+				<Menu
+					selectionMode="multiple"
+					selectedKeys={menuSelected}
+					onSelectionChange={setMenuSelected}
+				>
+					<MenuItem id="grid">Pixel grid</MenuItem>
+					<MenuItem id="rulers">Rulers</MenuItem>
+					<MenuItem id="comments" isDisabled>
+						Comments
+					</MenuItem>
+					<MenuItem id="layout">Layout guides</MenuItem>
+					<MenuItem id="toolbar">Toolbar</MenuItem>
+				</Menu>
+			</MenuTrigger>
 			<div className="flex gap-4">
-				<Button onClick={() => alert({ header: "This is an alert" })}>
-					Alert
-				</Button>
+				<div className="bg-accent text-accent-content cursor-default rounded px-4 py-2">
+					cursor-default
+				</div>
+				<div className="bg-accent text-accent-content cursor-pointer rounded px-4 py-2">
+					cursor-pointer
+				</div>
+				<div className="bg-accent text-accent-content cursor-text rounded px-4 py-2">
+					cursor-text
+				</div>
+				<div className="bg-accent text-accent-content cursor-progress rounded px-4 py-2">
+					cursor-progress{" "}
+				</div>
+				<div className="bg-accent text-accent-content cursor-not-allowed rounded px-4 py-2">
+					cursor-not-allowed
+				</div>
+				<div className="bg-accent text-accent-content cursor-wait rounded px-4 py-2">
+					cursor-wait
+				</div>
+			</div>
+			<div className="flex gap-4">
+				<Button onClick={() => alert({ header: "This is an alert" })}>Alert</Button>
 				<Button
 					onClick={() =>
 						prompt({
@@ -145,11 +176,7 @@ export function ComponentDemo() {
 				>
 					Prompt
 				</Button>
-				<Button
-					onClick={() =>
-						confirm({ header: "Yes or no?", body: "Choose carefully." })
-					}
-				>
+				<Button onClick={() => confirm({ header: "Yes or no?", body: "Choose carefully." })}>
 					Confirm
 				</Button>
 			</div>
@@ -183,7 +210,10 @@ export function ComponentDemo() {
 					<div className="flex-1">This is an error alert</div>
 				</div>
 				<div className="alert alert-notice">
-					<div className="flex-1">This is an alert alert</div>
+					<div className="flex-1">This is a notice alert</div>
+				</div>
+				<div className="alert alert-alert">
+					<div className="flex-1">This is a alert alert</div>
 				</div>
 			</div>
 			<div>
@@ -219,7 +249,7 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Buttons</h2>
-				<div className="flex gap-4 w-full flex-wrap">
+				<div className="flex w-full flex-wrap gap-4">
 					<Button>Button</Button>
 					<Button className="btn-primary">Primary</Button>
 					<Button className="btn-secondary">Secondary</Button>
@@ -230,14 +260,58 @@ export function ComponentDemo() {
 					<Button className="btn-error">Error</Button>
 					<Button className="btn-notice">Notice</Button>
 					<Button className="btn-alert">Alert</Button>
-					<Button className="btn-ghost">Ghost</Button>
 					<Button className="btn-link">Link</Button>
-					<Button className="glass">Glass</Button>
+				</div>
+				<div className="flex w-full flex-wrap gap-4">
+					<Button className="btn-active">Button</Button>
+					<Button className="btn-active btn-primary">Primary</Button>
+					<Button className="btn-active btn-secondary">Secondary</Button>
+					<Button className="btn-active btn-accent">Accent</Button>
+					<Button className="btn-active btn-info">Info</Button>
+					<Button className="btn-active btn-success">Success</Button>
+					<Button className="btn-active btn-warning">Warning</Button>
+					<Button className="btn-active btn-error">Error</Button>
+					<Button className="btn-active btn-notice">Notice</Button>
+					<Button className="btn-active btn-alert">Alert</Button>
+					<Button className="btn-active btn-link">Link</Button>
+				</div>
+				<div className="flex w-full flex-wrap gap-4">
+					<Button disabled>Button</Button>
+					<Button disabled className="btn-primary">
+						Primary
+					</Button>
+					<Button disabled className="btn-secondary">
+						Secondary
+					</Button>
+					<Button disabled className="btn-accent">
+						Accent
+					</Button>
+					<Button disabled className="btn-info">
+						Info
+					</Button>
+					<Button disabled className="btn-success">
+						Success
+					</Button>
+					<Button disabled className="btn-warning">
+						Warning
+					</Button>
+					<Button disabled className="btn-error">
+						Error
+					</Button>
+					<Button disabled className="btn-notice">
+						Notice
+					</Button>
+					<Button disabled className="btn-alert">
+						Alert
+					</Button>
+					<Button disabled className="btn-link">
+						Link
+					</Button>
 				</div>
 			</div>
 			<div>
 				<h2 className="text-3xl">Outline Buttons</h2>
-				<div className="flex gap-4 w-full flex-wrap">
+				<div className="flex w-full flex-wrap gap-4">
 					<Button className="btn-outline">Button</Button>
 					<Button className="btn-outline btn-primary">Primary</Button>
 					<Button className="btn-outline btn-secondary">Secondary</Button>
@@ -248,9 +322,23 @@ export function ComponentDemo() {
 					<Button className="btn-outline btn-error">Error</Button>
 					<Button className="btn-outline btn-notice">Notice</Button>
 					<Button className="btn-outline btn-alert">Alert</Button>
-					<Button className="btn-outline btn-ghost">Ghost</Button>
 					<Button className="btn-outline btn-link">Link</Button>
-					<Button className="btn-outline glass">Glass</Button>
+				</div>
+			</div>
+			<div>
+				<h2 className="text-3xl">Dash Buttons</h2>
+				<div className="flex w-full flex-wrap gap-4">
+					<Button className="btn-dash">Button</Button>
+					<Button className="btn-dash btn-primary">Primary</Button>
+					<Button className="btn-dash btn-secondary">Secondary</Button>
+					<Button className="btn-dash btn-accent">Accent</Button>
+					<Button className="btn-dash btn-info">Info</Button>
+					<Button className="btn-dash btn-success">Success</Button>
+					<Button className="btn-dash btn-warning">Warning</Button>
+					<Button className="btn-dash btn-error">Error</Button>
+					<Button className="btn-dash btn-notice">Notice</Button>
+					<Button className="btn-dash btn-alert">Alert</Button>
+					<Button className="btn-dash btn-link">Link</Button>
 				</div>
 			</div>
 			<div>
@@ -264,7 +352,7 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Button Groups</h2>
-				<div className="btn-group">
+				<div className="join">
 					<Button className="btn-active">Item 1</Button>
 					<Button>Item 2</Button>
 					<Button>Item 3</Button>
@@ -274,21 +362,9 @@ export function ComponentDemo() {
 				<h2 className="text-3xl">Gamepad Focus Border</h2>
 				<Button className="btn-active gamepad-focus">I am focused</Button>
 			</div>
-			<div>
-				<h2 className="text-3xl">Divider</h2>
-				<div className="flex flex-col w-full">
-					<div className="grid h-20 card bg-neutral rounded-xl place-items-center">
-						content
-					</div>
-					<div className="divider">OR</div>
-					<div className="grid h-20 card bg-neutral rounded-xl place-items-center">
-						content
-					</div>
-				</div>
-			</div>
 			<div className="w-full">
 				<h2 className="text-3xl">Form Input</h2>
-				<div className="flex gap-4 flex-wrap">
+				<div className="flex flex-wrap gap-4">
 					<div className="form-control">
 						<label className="label" htmlFor="Input">
 							Input
@@ -305,11 +381,7 @@ export function ComponentDemo() {
 						<label className="label" htmlFor="Secondary">
 							Secondary
 						</label>
-						<input
-							type="text"
-							className="input input-secondary"
-							id="Secondary"
-						/>
+						<input type="text" className="input input-secondary" id="Secondary" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="Accent">
@@ -351,7 +423,7 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Form Textarea</h2>
-				<div className="flex gap-4 flex-wrap">
+				<div className="flex flex-wrap gap-4">
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Textarea">
 							Textarea
@@ -362,28 +434,19 @@ export function ComponentDemo() {
 						<label className="label" htmlFor="textarea-Primary">
 							Primary
 						</label>
-						<textarea
-							className="textarea textarea-primary"
-							id="textarea-Primary"
-						/>
+						<textarea className="textarea textarea-primary" id="textarea-Primary" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Secondary">
 							Secondary
 						</label>
-						<textarea
-							className="textarea textarea-secondary"
-							id="textarea-Secondary"
-						/>
+						<textarea className="textarea textarea-secondary" id="textarea-Secondary" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Accent">
 							Accent
 						</label>
-						<textarea
-							className="textarea textarea-accent"
-							id="textarea-Accent"
-						/>
+						<textarea className="textarea textarea-accent" id="textarea-Accent" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Info">
@@ -395,19 +458,13 @@ export function ComponentDemo() {
 						<label className="label" htmlFor="textarea-Success">
 							Success
 						</label>
-						<textarea
-							className="textarea textarea-success"
-							id="textarea-Success"
-						/>
+						<textarea className="textarea textarea-success" id="textarea-Success" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Warning">
 							Warning
 						</label>
-						<textarea
-							className="textarea textarea-warning"
-							id="textarea-Warning"
-						/>
+						<textarea className="textarea textarea-warning" id="textarea-Warning" />
 					</div>
 					<div className="form-control">
 						<label className="label" htmlFor="textarea-Error">
@@ -419,18 +476,17 @@ export function ComponentDemo() {
 						<label className="label" htmlFor="textarea-Notice">
 							Notice
 						</label>
-						<textarea
-							className="textarea textarea-notice"
-							id="textarea-Notice"
-						/>
+						<textarea className="textarea textarea-notice" id="textarea-Notice" />
 					</div>
 				</div>
 			</div>
 			<div>
-				<h2 className="text-3xl">Readonly Field</h2>
+				<h2 className="text-3xl">Checkbox</h2>
+				<Checkbox label="Checkbox" />
 			</div>
+
 			<div>
-				<h2 className="text-3xl">Panel</h2>
+				<h2 className="text-3xl">Panels</h2>
 				<div className="flex gap-4">
 					<div className="panel h-32 w-64 p-4">Panel</div>
 					<div className="panel panel-ghost h-32 w-64 p-4">Panel</div>
@@ -446,17 +502,10 @@ export function ComponentDemo() {
 				</div>
 			</div>
 			<div>
-				<h2 className="text-3xl">Keypad</h2>
-			</div>
-			<div>
 				<h2 className="text-3xl">Colored Bar</h2>
 				<progress className="progress progress-accent" value={50} max={100} />
 				<progress className="progress progress-primary" value={50} max={100} />
-				<progress
-					className="progress progress-secondary"
-					value={50}
-					max={100}
-				/>
+				<progress className="progress progress-secondary" value={50} max={100} />
 				<progress className="progress progress-accent" value={50} max={100} />
 				<progress className="progress progress-info" value={50} max={100} />
 				<progress className="progress progress-success" value={50} max={100} />
@@ -466,25 +515,11 @@ export function ComponentDemo() {
 				<progress className="progress progress-alert" value={50} max={100} />
 			</div>
 			<div>
-				<h2 className="text-3xl">Scrollable List</h2>
-			</div>
-			<div>
-				<h2 className="text-3xl">Table</h2>
-			</div>
-			<div>
-				<h2 className="text-3xl">Joystick</h2>
-			</div>
-			<div>
 				<h2 className="text-3xl">Radial Dial</h2>
 				<div className="flex gap-4">
 					<RadialDial label="Dial 1" count={50} />
 					<RadialDial label="Dial 2" color="var(--primary)" count={75} />
-					<RadialDial
-						label="Dial 3"
-						color="var(--accent)"
-						count={75}
-						max={200}
-					/>
+					<RadialDial label="Dial 3" color="var(--accent)" count={75} max={200} />
 				</div>
 			</div>
 			<div>
@@ -496,15 +531,15 @@ export function ComponentDemo() {
 			</div>
 			<div>
 				<h2 className="text-3xl">Range Slider</h2>
-				<input type="range" className="slider max-w-sm" />
-				<input type="range" className="slider slider-primary max-w-sm" />
-				<input type="range" className="slider slider-secondary max-w-sm" />
-				<input type="range" className="slider slider-accent max-w-sm" />
-				<input type="range" className="slider slider-info max-w-sm" />
-				<input type="range" className="slider slider-success max-w-sm" />
-				<input type="range" className="slider slider-warning max-w-sm" />
-				<input type="range" className="slider slider-error max-w-sm" />
-				<input type="range" className="slider slider-notice max-w-sm" />
+				<input type="range" className="range max-w-sm" />
+				<input type="range" className="range range-primary max-w-sm" />
+				<input type="range" className="range range-secondary max-w-sm" />
+				<input type="range" className="range range-accent max-w-sm" />
+				<input type="range" className="range range-info max-w-sm" />
+				<input type="range" className="range range-success max-w-sm" />
+				<input type="range" className="range range-warning max-w-sm" />
+				<input type="range" className="range range-error max-w-sm" />
+				<input type="range" className="range range-notice max-w-sm" />
 			</div>
 			<div>
 				<h2 className="text-3xl">Modal</h2>
@@ -522,11 +557,52 @@ export function ComponentDemo() {
 			<div>
 				<h2 className="text-3xl">Sine Wave</h2>
 				<div className="flex flex-wrap">
-					<div className="w-[250px] h-48 bg-gray-800">
-						<SineWave />
+					<div className="h-48 w-[250px] bg-gray-800">
+						<SineWave
+							waves={[
+								{
+									amplitude: 0.25,
+									frequency: 50,
+									phase: Math.PI / 2,
+								},
+							]}
+							callFrame={(ctx, width, height) => {
+								if (lineRef.current > width) {
+									lineRef.current = 0;
+								}
+								ctx.fillStyle = "rgba(255,255,0,0.5)";
+								ctx.fillRect(lineRef.current - 1, 0, 4, height);
+								lineRef.current += 1;
+							}}
+						/>
 					</div>
-					<div className="w-48 h-[250px] bg-gray-800">
-						<SineWave color="blue" frequency={2} orientation="vertical" />
+					<div className="h-[250px] w-48 bg-gray-800">
+						<SineWave
+							color="blue"
+							waves={[
+								{
+									amplitude: 0.25,
+									frequency: 24,
+									phase: Math.PI / 2,
+								},
+								{
+									amplitude: 0.25,
+									frequency: 12,
+									phase: Math.PI / 2,
+								},
+								{
+									amplitude: 0.125,
+									frequency: 6,
+									phase: Math.PI / 2,
+								},
+								{
+									amplitude: 0.25,
+									frequency: 3,
+									phase: Math.PI / 2,
+								},
+							]}
+							orientation="vertical"
+						/>
 					</div>
 				</div>
 			</div>
@@ -586,7 +662,7 @@ export function ComponentDemo() {
 						.map((_, i) => (
 							<div
 								key={`item-${i}`}
-								className="h-32 w-32 rounded mx-4 bg-neutral flex justify-center items-center"
+								className="bg-neutral mx-4 flex h-32 w-32 items-center justify-center rounded"
 							>
 								Item {i}
 							</div>
@@ -596,28 +672,33 @@ export function ComponentDemo() {
 			<div>
 				<h2 className="text-3xl">Info Tooltip</h2>
 				<InfoTip>
-					This is some helpful info that you can see if you hover your cursor
-					over me or focus on me.
+					This is some helpful info that you can see if you hover your cursor over me or focus on
+					me.
 				</InfoTip>
 			</div>
 			<div>
 				<h2 className="text-3xl">Dotted Linear Indicators</h2>
-				<div className="flex flex-col gap-4 max-w-md mt-4">
+				<div className="mt-4 flex max-w-md flex-col gap-4">
 					<LinearDotIndicator />
 					<LinearDotIndicator reverse={true} />
 					<LinearDotIndicator color="blue" level={0.5} />
 					<LinearDotIndicator color="red" level={0.25} dotCount={30} />
 				</div>
 			</div>
-		</div>
-	);
-}
-
-export function ViewscreenDemo() {
-	// TODO August 23, 2022 - This is a good place to add viewscreen overlays and HUD when those end up getting developed
-	return (
-		<div className="w-full h-full flex items-center justify-center text-white bg-purple-500/20 text-6xl">
-			Viewscreen
+			<div>
+				<h2 className="text-3xl">Core Inputs</h2>
+				<div className="w-sm text-xs">
+					<InputField onClick={() => {}} prompt="Testing">
+						Testing
+					</InputField>
+					<OutputField>Testing</OutputField>
+					<TypingField value={"Testing"} />
+				</div>
+			</div>
+			<div>
+				<h2 className="text-3xl">Loading Spinner</h2>
+				<LoadingSpinner compact />
+			</div>
 		</div>
 	);
 }

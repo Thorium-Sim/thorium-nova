@@ -1,8 +1,14 @@
 import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
-import { t } from "@thorium/.server/init/t";
+import { exocomps } from "@thorium/.server/data/plugins/systems/exocomps";
+import { longRangeComm } from "@thorium/.server/data/plugins/systems/longRangeComm";
+import { navigation } from "@thorium/.server/data/plugins/systems/navigation";
+import { shortRangeComm } from "@thorium/.server/data/plugins/systems/shortRangeComm";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
+import { sound } from "@thorium/ecs-components/sound";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { type Primitive, z, type ZodLiteral } from "zod";
+import z, { type Primitive, type ZodLiteral } from "zod";
+
 import {
 	getPlugin,
 	getShipSystem,
@@ -10,21 +16,17 @@ import {
 	pluginFilter,
 	systemInput,
 } from "../utils";
-import { impulse } from "./impulse";
-import { warp } from "./warp";
-import { inertialDampeners } from "./inertialDampeners";
-import { thrusters } from "./thrusters";
-import { reactor } from "./reactor";
 import { battery } from "./battery";
-import { torpedoLauncher } from "./torpedoLauncher";
-import { shields } from "./shields";
-import { phasers } from "./phasers";
-import { sound } from "@thorium/ecs-components/sound";
-import path from "node:path";
-import { sensors } from "./sensors";
+import { impulse } from "./impulse";
+import { inertialDampeners } from "./inertialDampeners";
 import { mainComputer } from "./mainComputer";
-import { navigation } from "@thorium/.server/data/plugins/systems/navigation";
-import { longRangeComm } from "@thorium/.server/data/plugins/systems/longRangeComm";
+import { phasers } from "./phasers";
+import { reactor } from "./reactor";
+import { sensors } from "./sensors";
+import { shields } from "./shields";
+import { thrusters } from "./thrusters";
+import { torpedoLauncher } from "./torpedoLauncher";
+import { warp } from "./warp";
 
 const systemTypes = createUnionSchema(
 	Object.keys(ShipSystemTypes) as (keyof typeof ShipSystemTypes)[],
@@ -44,6 +46,8 @@ export const systems = t.router({
 	mainComputer,
 	navigation,
 	longRangeComm,
+	shortRangeComm,
+	exocomps,
 	all: t.procedure
 		.input(z.object({ pluginId: z.string() }).optional())
 		.filter((publish: { pluginId: string } | null, { input }) => {
@@ -87,14 +91,11 @@ export const systems = t.router({
 		});
 	}),
 	create: t.procedure
-		.input(
-			z.object({ pluginId: z.string(), name: z.string(), type: systemTypes }),
-		)
+		.input(z.object({ pluginId: z.string(), name: z.string(), type: systemTypes }))
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const ShipSystemClass =
-				ShipSystemTypes[input.type as keyof typeof ShipSystemTypes];
+			const ShipSystemClass = ShipSystemTypes[input.type as keyof typeof ShipSystemTypes];
 			const shipSystem = new ShipSystemClass({ name: input.name }, plugin);
 			plugin.aspects.shipSystems.push(shipSystem);
 
@@ -106,16 +107,11 @@ export const systems = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const shipSystem = plugin.aspects.shipSystems.find(
-				(s) => s.name === input.shipSystemId,
-			);
+			const shipSystem = plugin.aspects.shipSystems.find((s) => s.name === input.shipSystemId);
 			if (!shipSystem) {
 				throw new Error("Ship system not found");
 			}
-			plugin.aspects.shipSystems.splice(
-				plugin.aspects.shipSystems.indexOf(shipSystem),
-				1,
-			);
+			plugin.aspects.shipSystems.splice(plugin.aspects.shipSystems.indexOf(shipSystem), 1);
 
 			pubsub.publish.plugin.systems.all({ pluginId: input.pluginId });
 			return { shipSystemId: shipSystem.name };
@@ -202,16 +198,10 @@ export const systems = t.router({
 				shipSystem.maxHeat = input.maxHeat;
 			}
 			if (typeof input.offlineEfficiency === "number") {
-				shipSystem.offlineEfficiency = Math.min(
-					1,
-					Math.max(0, input.offlineEfficiency),
-				);
+				shipSystem.offlineEfficiency = Math.min(1, Math.max(0, input.offlineEfficiency));
 			}
 			if (typeof input.onlineEfficiency === "number") {
-				shipSystem.onlineEfficiency = Math.min(
-					1,
-					Math.max(0, input.onlineEfficiency),
-				);
+				shipSystem.onlineEfficiency = Math.min(1, Math.max(0, input.onlineEfficiency));
 			}
 			if (typeof input.overloadDamageMultiplier === "number") {
 				shipSystem.overloadDamageMultiplier = input.overloadDamageMultiplier;
@@ -231,10 +221,7 @@ export const systems = t.router({
 			if (typeof input.entropyMultiplier === "number") {
 				shipSystem.entropyMultiplier = input.entropyMultiplier;
 			}
-			if (
-				typeof input.soundEffects === "object" &&
-				"soundEffects" in shipSystem
-			) {
+			if (typeof input.soundEffects === "object" && "soundEffects" in shipSystem) {
 				shipSystem.soundEffects = input.soundEffects;
 			}
 
@@ -270,28 +257,21 @@ export const systems = t.router({
 			if (!shipSystem || "soundEffects" in shipSystem === false) {
 				return;
 			}
-			if (typeof input.file === "string") {
-				const filePath = path.basename(input.file);
-				const url = await ctx.uploadFile.call(
-					system,
-					input.file,
-					input.fileName || filePath,
-				);
-				if (!Array.isArray(shipSystem.soundEffects[input.soundEffect])) {
-					shipSystem.soundEffects[input.soundEffect] = [];
-				}
-				shipSystem.soundEffects[input.soundEffect].push({
-					url,
-					channel: null,
-					volume: [1, 1],
-					loop: false,
-					delay: 0,
-					gap: 0,
-					playbackRate: [1, 1],
-					loopEnd: null,
-					loopStart: null,
-				});
+			const url = await ctx.uploadFile.call(system, input.file, input.fileName || input.file.name);
+			if (!Array.isArray(shipSystem.soundEffects[input.soundEffect])) {
+				shipSystem.soundEffects[input.soundEffect] = [];
 			}
+			shipSystem.soundEffects[input.soundEffect].push({
+				url,
+				channel: null,
+				volume: [1, 1],
+				loop: false,
+				delay: 0,
+				gap: 0,
+				playbackRate: [1, 1],
+				loopEnd: null,
+				loopStart: null,
+			});
 
 			pubsub.publish.plugin.systems.all({ pluginId: input.pluginId });
 			pubsub.publish.plugin.systems.get({
@@ -338,11 +318,7 @@ function createUnionSchema<T extends readonly Primitive[]>(values: T) {
 		return z.literal(values[0]);
 	}
 
-	const createUnion = <
-		T extends Readonly<[Primitive, Primitive, ...Primitive[]]>,
-	>(
-		values: T,
-	) => {
+	const createUnion = <T extends Readonly<[Primitive, Primitive, ...Primitive[]]>>(values: T) => {
 		const zodLiterals = values.map((value) => z.literal(value)) as unknown as [
 			ZodLiteral<Primitive>,
 			ZodLiteral<Primitive>,
@@ -351,7 +327,5 @@ function createUnionSchema<T extends readonly Primitive[]>(values: T) {
 		return z.union(zodLiterals);
 	};
 
-	return createUnion(
-		values as unknown as Readonly<[Primitive, Primitive, ...Primitive[]]>,
-	);
+	return createUnion(values as unknown as Readonly<[Primitive, Primitive, ...Primitive[]]>);
 }

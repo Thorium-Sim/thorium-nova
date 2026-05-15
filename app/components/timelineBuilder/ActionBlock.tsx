@@ -1,27 +1,21 @@
-import { Icon } from "@thorium/ui/Icon";
-import { cn } from "@thorium/utils/cn";
-import { Fragment, useId } from "react";
-import { getInputType, parseSchema } from "@thorium/utils/zodAutoForm";
-import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
 import {
 	ActionCombobox,
 	type ActionAction,
 	type ActionState,
 } from "@thorium/components/Config/ActionBuilder";
-import { q } from "@thorium/context/AppContext";
-import {
-	Button as RAButton,
-	Disclosure,
-	Heading,
-	DisclosurePanel,
-} from "react-aria-components";
 import { PropertyInput } from "@thorium/components/Config/EntityQueryBuilder";
 import type { BlockProps } from "@thorium/components/timelineBuilder/BlockInputs";
+import { q } from "@thorium/context/AppContext";
+import { Icon } from "@thorium/ui/Icon";
+import { cn } from "@thorium/utils/cn";
+import { getInputType, parseSchema } from "@thorium/utils/zodAutoForm";
+import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
+import { Fragment, useId } from "react";
+import { Button as RAButton, Disclosure, Heading, DisclosurePanel } from "react-aria-components";
 
 export function ActionBlock({ action, values, update }: BlockProps<"Action">) {
 	const [availableActions] = q.thorium.actions.useNetRequest();
-	const chosenAction =
-		availableActions.find((a) => a.action === action) || null;
+	const chosenAction = availableActions.find((a) => a.action === action) || null;
 	return (
 		<Disclosure>
 			<Heading className="flex items-center gap-1">
@@ -41,7 +35,7 @@ export function ActionBlock({ action, values, update }: BlockProps<"Action">) {
 					</RAButton>
 				)}
 			</Heading>
-			<DisclosurePanel className="flex flex-col gap-2 w-full">
+			<DisclosurePanel className="flex w-full flex-col gap-2">
 				{chosenAction ? (
 					<ActionInput
 						action={{ ...chosenAction, values }}
@@ -114,12 +108,7 @@ function ActionValueInput({
 	}
 
 	return (
-		<div
-			className={cn(
-				"flex items-end",
-				item.isNested ? "value-input-is-nested" : "",
-			)}
-		>
+		<div className={cn("flex items-end", item.isNested ? "value-input-is-nested" : "")}>
 			<div className="flex-1">
 				<label htmlFor={id}>{item.name}</label>
 				<PropertyInput
@@ -156,17 +145,13 @@ function ActionInput({
 	const actionDef = availableActions.find((a) => a.action === action.action);
 	input = input || actionDef?.input;
 	const overrides = actionDef?.actionOverrides || {};
-	const actionSchema = action
-		? // biome-ignore lint/security/noGlobalEval: Eval is necessary
-			parseSchema(eval(parseJsonSchema(input)), overrides)
-		: [];
+	// oxlint-disable-next-line no-eval
+	const actionSchema = action ? parseSchema(eval(parseJsonSchema(input)), overrides) : [];
 
 	const inputs = [];
 	const queryInputs: string[] = [];
 	for (const item of actionSchema) {
-		const value = item.key
-			.split(".")
-			.reduce((acc: any, key) => acc?.[key], action.values);
+		const value = item.key.split(".").reduce((acc: any, key) => acc?.[key], action.values);
 
 		if (value && typeof value === "object" && "query" in value) {
 			queryInputs.push(item.key);

@@ -5,9 +5,7 @@ export class NPCKnowledgeSystem extends System {
 	static flightMode = ["nova"];
 	frequency = 10;
 	test(entity: Entity) {
-		return !!(
-			entity.components.isShip && !entity.components.isPlayerShip?.value
-		);
+		return !!(entity.components.isShip && !entity.components.isPlayerShip?.value);
 	}
 	update(entity: Entity, _elapsedMs: number): void {
 		// Make sure the NPC ship has a nearby objects system so it is included in the nearby objects calculation.
@@ -26,7 +24,7 @@ export class NPCKnowledgeSystem extends System {
 		const weaponsRange = 25_000; // targeting.components.isTargeting?.weaponsRange
 
 		const threats = threatKnowledge(entity);
-		const goals = goalsKnowledge(entity);
+		// const goals = goalsKnowledge(entity);
 
 		entity.updateComponent("npcKnowledge", {
 			activeRange,
@@ -45,4 +43,6 @@ export class NPCKnowledgeSystem extends System {
 // steal an item from a ship
 // move into combat position
 // flee when overly damaged
-function goalsKnowledge(entity: Entity) {}
+// function goalsKnowledge(_: Entity) {
+// 	return {};
+// }

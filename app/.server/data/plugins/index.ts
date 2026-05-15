@@ -1,17 +1,19 @@
-import { t } from "@thorium/.server/init/t";
-import { systems } from "./systems";
-import { starmap } from "./starmap";
-import { z } from "zod";
-import inputAuth from "@thorium/utils/.server/inputAuth";
-import BasePlugin from "@thorium/.server/classes/Plugins";
-import { pubsub } from "@thorium/.server/init/pubsub";
 import path from "node:path";
-import { ship } from "./ship";
-import { timeline } from "./timeline";
-import { theme } from "./themes";
-import { inventory } from "./inventory";
-import { getPlugin } from "./utils";
+
+import BasePlugin from "@thorium/.server/classes/Plugins";
 import { macro } from "@thorium/.server/data/plugins/macro";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
+import inputAuth from "@thorium/utils/.server/inputAuth";
+import z from "zod";
+
+import { inventory } from "./inventory";
+import { ship } from "./ship";
+import { starmap } from "./starmap";
+import { systems } from "./systems";
+import { theme } from "./themes";
+import { timeline } from "./timeline";
+import { getPlugin } from "./utils";
 
 export function publish(pluginId: string) {
 	pubsub.publish.plugin.all();
@@ -36,32 +38,26 @@ export const plugin = t.router({
 			return true;
 		})
 		.request(({ ctx, input }) => {
-			const plugin = ctx.server.plugins.find(
-				(plugin) => plugin.id === input.pluginId,
-			);
+			const plugin = ctx.server.plugins.find((plugin) => plugin.id === input.pluginId);
 			return plugin ? { ...plugin, coverImage: plugin.coverImage } : null;
 		}),
-	create: t.procedure
-		.input(z.object({ name: z.string() }))
-		.send(async ({ ctx, input }) => {
-			inputAuth(ctx);
-			const plugin = new BasePlugin(input, ctx.server, {
-				meta: { filePath: `/plugins/${input.name}/manifest.yml` },
-			});
-			await plugin.loadAspects();
-			ctx.server.plugins.push(plugin);
-			publish(plugin.id);
-			return { pluginId: plugin.id };
-		}),
-	delete: t.procedure
-		.input(z.object({ pluginId: z.string() }))
-		.send(async ({ ctx, input }) => {
-			inputAuth(ctx);
-			const plugin = getPlugin(ctx, input.pluginId);
-			await plugin.remove();
-			ctx.server.plugins.splice(ctx.server.plugins.indexOf(plugin), 1);
-			publish(plugin.id);
-		}),
+	create: t.procedure.input(z.object({ name: z.string() })).send(async ({ ctx, input }) => {
+		inputAuth(ctx);
+		const plugin = new BasePlugin(input, ctx.server, {
+			meta: { filePath: `/plugins/${input.name}/manifest.yml` },
+		});
+		await plugin.loadAspects();
+		ctx.server.plugins.push(plugin);
+		publish(plugin.id);
+		return { pluginId: plugin.id };
+	}),
+	delete: t.procedure.input(z.object({ pluginId: z.string() })).send(async ({ ctx, input }) => {
+		inputAuth(ctx);
+		const plugin = getPlugin(ctx, input.pluginId);
+		await plugin.remove();
+		ctx.server.plugins.splice(ctx.server.plugins.indexOf(plugin), 1);
+		publish(plugin.id);
+	}),
 	duplicate: t.procedure
 		.input(z.object({ pluginId: z.string(), name: z.string() }))
 		.send(async ({ ctx, input }) => {
@@ -96,11 +92,7 @@ export const plugin = t.router({
 			}
 			if (input.coverImage) {
 				const ext = path.extname(input.coverImage.name);
-				plugin.coverImage = await ctx.uploadFile.call(
-					plugin,
-					input.coverImage,
-					`coverImage${ext}`,
-				);
+				plugin.coverImage = await ctx.uploadFile.call(plugin, input.coverImage, `coverImage${ext}`);
 			}
 			if (input.active !== undefined) {
 				plugin.active = input.active;

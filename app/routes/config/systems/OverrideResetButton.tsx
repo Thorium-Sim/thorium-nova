@@ -1,9 +1,9 @@
-import { useParams } from "react-router";
-import { useContext } from "react";
+import { q } from "@thorium/context/AppContext";
 import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import Button from "@thorium/ui/Button";
-import { q } from "@thorium/context/AppContext";
 import { Icon } from "@thorium/ui/Icon";
+import { useContext } from "react";
+import { useParams } from "react-router";
 
 export function OverrideResetButton({
 	property,

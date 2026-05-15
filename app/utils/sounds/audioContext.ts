@@ -1,5 +1,4 @@
-export const audioContext =
-	typeof window === "undefined" ? null! : new AudioContext();
+export const audioContext = typeof window === "undefined" ? null! : new AudioContext();
 let resumed = false;
 if (typeof document !== "undefined") {
 	document.body.onmousemove = () => {

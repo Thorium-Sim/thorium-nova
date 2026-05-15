@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { createShipMapGraph, calculateShipMapPath } from "./shipMapPathfinder";
 
 describe("ship map pathfinder", () => {

@@ -1,14 +1,10 @@
 import type ShieldsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Shields";
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
-import {
-	getShipSystem,
-	getShipSystemForInput,
-	pluginFilter,
-	systemInput,
-} from "../utils";
+import z from "zod";
+
+import { getShipSystem, getShipSystemForInput, pluginFilter, systemInput } from "../utils";
 
 export const shields = t.router({
 	get: t.procedure
@@ -29,9 +25,7 @@ export const shields = t.router({
 				shipPluginId: z.string().optional(),
 				shipId: z.string().optional(),
 				maxStrength: z.number().optional(),
-				shieldCount: z
-					.union([z.literal(1), z.literal(4), z.literal(6)])
-					.optional(),
+				shieldCount: z.union([z.literal(1), z.literal(4), z.literal(6)]).optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {

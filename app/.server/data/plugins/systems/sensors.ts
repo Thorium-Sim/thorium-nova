@@ -8,7 +8,7 @@ import {
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
+import z from "zod";
 
 export const sensors = t.router({
 	get: t.procedure
@@ -36,10 +36,7 @@ export const sensors = t.router({
 				pingActive: z.boolean().optional(),
 				autoTargeting: z.boolean().optional(),
 				scanHistory: z.boolean().optional(),
-				scanAnswers: z
-					.object({ label: z.string(), value: z.string() })
-					.array()
-					.optional(),
+				scanAnswers: z.object({ label: z.string(), value: z.string() }).array().optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -60,10 +57,7 @@ export const sensors = t.router({
 				shipSystem.maxScanEnergyCost = Math.max(0, input.maxScanEnergyCost);
 			}
 			if (typeof input.shieldPenaltyMultiplier === "number") {
-				shipSystem.shieldPenaltyMultiplier = Math.max(
-					0,
-					input.shieldPenaltyMultiplier,
-				);
+				shipSystem.shieldPenaltyMultiplier = Math.max(0, input.shieldPenaltyMultiplier);
 			}
 			if (typeof input.pingActive === "boolean") {
 				shipSystem.pingActive = input.pingActive;

@@ -1,11 +1,12 @@
 import { autoPlacement, useFloating } from "@floating-ui/react";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
+import { q } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
+import { pickStarmapShip } from "@thorium/cores/StarmapCore/pickShip";
 import useEventListener from "@thorium/hooks/useEventListener";
 import { useRightClick } from "@thorium/hooks/useRightClick";
-import { type RefObject, useState } from "react";
-import { q } from "@thorium/context/AppContext";
 import { Portal } from "@thorium/ui/Portal";
+import { type RefObject, useState } from "react";
 
 function makeVirtualEl({ x: X, y: Y }: { x: number; y: number }) {
 	const virtualEl = {
@@ -26,7 +27,7 @@ function makeVirtualEl({ x: X, y: Y }: { x: number; y: number }) {
 }
 
 const menuItemClass =
-	"px-2 py-1 text-left cursor-pointer hover:bg-purple-700 hover:bg-opacity-50 focus:outline-none focus:ring transition-all";
+	"px-1 py-0.5 text-left cursor-pointer hover:bg-purple-700/50 focus:outline-none focus:ring transition-all";
 
 export const StarmapCoreContextMenu = ({
 	parentRef,
@@ -62,9 +63,7 @@ export const StarmapCoreContextMenu = ({
 		const object = useStarmapStore
 			.getState()
 			.getObjectsUnderCursor?.()
-			.filter(
-				(o) => o.userData.type && o.userData.id !== undefined,
-			)[0]?.userData;
+			.filter((o) => o.userData.type && o.userData.id !== undefined)[0]?.userData;
 
 		setOpen({ x: e.clientX, y: e.clientY, object });
 		const virtualEl = makeVirtualEl({ x: e.clientX, y: e.clientY });
@@ -94,7 +93,7 @@ export const StarmapCoreContextMenu = ({
 					top: y ?? "",
 					left: x ?? "",
 				}}
-				className="text-white bg-opacity-50 bg-black border border-opacity-25 border-white rounded-sm  divide-y divide-purple-500 divide-opacity-25 flex flex-col"
+				className="flex flex-col divide-y divide-purple-500/25 rounded-sm border border-white/25 bg-black/50 text-xs text-white"
 			>
 				{/* TODO March 11, 2024: Add commands for when right clicking on another object, such as following or attacking the target */}
 				{selectedShips.length > 0 ? (
@@ -104,9 +103,7 @@ export const StarmapCoreContextMenu = ({
 								className={menuItemClass}
 								onClick={() => {
 									if (selectedShips.length > 0) {
-										const position = useStarmapStore
-											.getState()
-											.translate2DTo3D?.(x, y);
+										const position = useStarmapStore.getState().translate2DTo3D?.(x, y);
 										if (!position) return;
 
 										q.starmapCore.setDestinations.netSend({
@@ -130,9 +127,7 @@ export const StarmapCoreContextMenu = ({
 								className={menuItemClass}
 								onClick={() => {
 									if (selectedShips.length > 0) {
-										const position = useStarmapStore
-											.getState()
-											.translate2DTo3D?.(x, y);
+										const position = useStarmapStore.getState().translate2DTo3D?.(x, y);
 										if (!position) return;
 										q.starmapCore.fireTorpedo.netSend({
 											objectId: selectedShips[0] as number,
@@ -156,8 +151,7 @@ export const StarmapCoreContextMenu = ({
 							onClick={() => {
 								if (selectedShips.length > 0) {
 									q.starmapCore.setOrbit.netSend({
-										ships: useStarmapStore.getState()
-											.selectedObjectIds as number[],
+										ships: useStarmapStore.getState().selectedObjectIds as number[],
 										objectId: object.id,
 									});
 									setOpen(false);
@@ -172,8 +166,7 @@ export const StarmapCoreContextMenu = ({
 							onClick={() => {
 								if (selectedShips.length > 0) {
 									q.starmapCore.setOrbit.netSend({
-										ships: useStarmapStore.getState()
-											.selectedObjectIds as number[],
+										ships: useStarmapStore.getState().selectedObjectIds as number[],
 										objectId: object.id,
 									});
 									setOpen(false);
@@ -188,8 +181,7 @@ export const StarmapCoreContextMenu = ({
 							onClick={() => {
 								if (selectedShips.length > 0) {
 									q.starmapCore.setFollowShip.netSend({
-										ships: useStarmapStore.getState()
-											.selectedObjectIds as number[],
+										ships: useStarmapStore.getState().selectedObjectIds as number[],
 										objectId: object.id,
 										// TODO: March 15, 2024 - This should change based on the current objective of the ship
 										objective: "defend",
@@ -201,6 +193,52 @@ export const StarmapCoreContextMenu = ({
 							Follow Ship
 						</button>
 					) : null
+				) : null}
+				{object ? (
+					<>
+						<button
+							className={menuItemClass}
+							onClick={async () => {
+								if (!object) return;
+								const objectId = object.id;
+								const objectDetails = await q.starmapCore.object.netRequest({
+									objectId,
+								});
+								pickStarmapShip(
+									`Choose a ship to hail ${objectDetails?.components.identity?.name || "this object."}`,
+									(picked) => {
+										q.shortRangeComm.hail.netSend({
+											shipId: picked,
+											targetId: objectId,
+										});
+									},
+								);
+							}}
+						>
+							Hail to...
+						</button>
+						<button
+							className={menuItemClass}
+							onClick={async () => {
+								if (!object) return;
+								const objectId = object.id;
+								const objectDetails = await q.starmapCore.object.netRequest({
+									objectId,
+								});
+								pickStarmapShip(
+									`Choose a ship for ${objectDetails?.components.identity?.name || "this object"} to hail.`,
+									(picked) => {
+										q.shortRangeComm.hail.netSend({
+											targetId: picked,
+											shipId: objectId,
+										});
+									},
+								);
+							}}
+						>
+							Hail from...
+						</button>
+					</>
 				) : null}
 				<button
 					className={menuItemClass}
@@ -221,7 +259,7 @@ export const StarmapCoreContextMenu = ({
 						if (!position) return;
 
 						await q.ship.spawn.netSend({
-							template: { name: template.id, pluginId: template.pluginName },
+							template: { name: template.name, pluginId: template.pluginName },
 							position: {
 								x: position.x,
 								y: useStarmapStore.getState().yDimensionIndex,

@@ -9,10 +9,7 @@ export const shipSystems = z
 		 * and the rooms they are assigned to
 		 */
 		shipSystems: z
-			.union([
-				z.array(z.tuple([z.number(), systemRooms])),
-				z.map(z.number(), systemRooms),
-			])
+			.union([z.array(z.tuple([z.number(), systemRooms])), z.map(z.number(), systemRooms)])
 			.default([])
 			.transform((val) => (val instanceof Map ? val : new Map(val))),
 	})

@@ -1,23 +1,17 @@
-import React, { type ReactNode, Suspense } from "react";
-import {
-	render as rtlRender,
-	type RenderOptions,
-} from "@testing-library/react";
-import { MemoryRouter as Router } from "react-router";
-import {
-	LiveQueryContext,
-	LiveQueryProvider,
-} from "@thorium/utils/live-query/client/liveQueryContext";
-import { MockNetRequestContext } from "@thorium/utils/live-query/client/mockContext";
+import { render as rtlRender, type RenderOptions } from "@testing-library/react";
 import type { AppRouter } from "@thorium/.server/init/router";
-import { vi } from "vitest";
 import type { inferRouterOutputs } from "@thorium/utils/live-query/.server/types";
+import { LiveQueryProvider } from "@thorium/utils/live-query/client/liveQueryContext";
+import { MockNetRequestContext } from "@thorium/utils/live-query/client/mockContext";
+import React, { type ReactNode, Suspense } from "react";
+import { MemoryRouter as Router } from "react-router";
+import { vi } from "vitest";
 
 // @ts-expect-error
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
 let netSendResponse: { response: any } = { response: "" };
-const netSendSpy = vi.fn((input, params) => netSendResponse);
+const netSendSpy = vi.fn((_, __) => netSendResponse);
 function setNetSendResponse(response: any) {
 	netSendResponse = { response };
 }

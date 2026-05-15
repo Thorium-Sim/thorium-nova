@@ -1,8 +1,9 @@
-import * as React from "react";
-import { NavLink, useLocation, Outlet } from "react-router";
-import Menubar from "@thorium/ui/Menubar";
-import "./docs.css";
 import { Navigate } from "@thorium/components/Navigate";
+import Menubar from "@thorium/ui/Menubar";
+import * as React from "react";
+
+import "./docs.css";
+import { NavLink, useLocation } from "react-router";
 
 const ROUTES = import.meta.glob("./**/*.{md,mdx}", {
 	eager: true,
@@ -23,19 +24,11 @@ function isRoute(route: any): route is RouteType {
 	return route.path;
 }
 
-function isRouteModule(
-	route: unknown,
-): route is { html: string; attributes: any; toc: any } {
+function isRouteModule(route: unknown): route is { html: string; attributes: any; toc: any } {
 	if (typeof route !== "object") return false;
 	if (!route) return false;
 	if (!("default" in route)) return false;
 	return true;
-}
-
-function stripHtml(html: string) {
-	const tmp = document.createElement("DIV");
-	tmp.innerHTML = html;
-	return tmp.textContent || tmp.innerText || "";
 }
 
 export const routes = Object.keys(ROUTES)
@@ -79,9 +72,7 @@ function generateTOC(element: HTMLElement) {
 		return output;
 	}
 
-	const toc: { level: HeadingLevel; content: string }[] = searchChildren(
-		element,
-	).map((index) => ({
+	const toc: { level: HeadingLevel; content: string }[] = searchChildren(element).map((index) => ({
 		level: index.tagName.replace("h", "") as HeadingLevel,
 		content: index.innerText,
 	}));
@@ -104,7 +95,7 @@ const TOCItem = ({
 		<li>
 			<a
 				href={`#${id}`}
-				className={`mb-2 text-purple-200 hover:text-purple-400 block ${
+				className={`mb-2 block text-purple-200 hover:text-purple-400 ${
 					level === "h2"
 						? "text-2xl"
 						: level === "h3"
@@ -125,7 +116,6 @@ const TOCItem = ({
 };
 
 function TOC({
-	pathname,
 	toc,
 	scrollToHeading,
 }: {
@@ -135,7 +125,7 @@ function TOC({
 }) {
 	return (
 		<div className="toc">
-			<h2 className="font-bold text-3xl mb-4">Table of Contents</h2>
+			<h2 className="mb-4 text-3xl font-bold">Table of Contents</h2>
 			<ul className="ml-2">
 				{toc.map((child) => (
 					<TOCItem
@@ -172,15 +162,10 @@ export default function DocLayout() {
 		});
 	}, []);
 	const location = useLocation();
-	const currentRoute = routes.find((r) =>
-		decodeURIComponent(location.pathname).endsWith(r.path),
-	);
+	const currentRoute = routes.find((r) => decodeURIComponent(location.pathname).endsWith(r.path));
 
-	const [toc, setToc] = React.useState<
-		{ level: HeadingLevel; content: string }[]
-	>([]);
+	const [toc, setToc] = React.useState<{ level: HeadingLevel; content: string }[]>([]);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: Run when the current route changes
 	React.useEffect(() => {
 		if (docRef.current) {
 			setToc(generateTOC(docRef.current));
@@ -192,8 +177,8 @@ export default function DocLayout() {
 				<Navigate to={"/docs/Quick%20Start/Getting%20Started"} replace />
 			) : null}
 			<Menubar>
-				<div className="flex justify-around gap-4 h-[calc(100%-2rem)]">
-					<aside className="px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
+				<div className="flex h-[calc(100%-2rem)] justify-around gap-4">
+					<aside className="w-full max-w-sm bg-black/60 px-4 py-8 text-white backdrop-blur backdrop-filter">
 						{orderedRoutes.map(([section, route]) => (
 							<React.Fragment key={section}>
 								<span>{section}</span>
@@ -211,10 +196,7 @@ export default function DocLayout() {
 										.map(
 											(route) =>
 												route.frontmatter && (
-													<li
-														key={route.path}
-														className="hover:text-gray-200 text-gray-400"
-													>
+													<li key={route.path} className="text-gray-400 hover:text-gray-200">
 														<NavLink
 															to={`/docs/${route.path}`}
 															className={({ isActive }) =>
@@ -230,9 +212,9 @@ export default function DocLayout() {
 							</React.Fragment>
 						))}
 					</aside>
-					<article className="overflow-y-auto flex-1" key={location.pathname}>
+					<article className="flex-1 overflow-y-auto" key={location.pathname}>
 						<div
-							className="mx-auto max-w-screen-lg my-16 bg-black/80 p-8 rounded-lg backdrop-filter backdrop-blur"
+							className="mx-auto my-16 max-w-screen-lg rounded-lg bg-black/80 p-8 backdrop-blur backdrop-filter"
 							ref={docRef}
 						>
 							<div className="prose prose-lg mx-auto">
@@ -240,12 +222,8 @@ export default function DocLayout() {
 							</div>
 						</div>
 					</article>
-					<aside className="flex-1 overflow-y-auto px-4 py-8 text-white w-full max-w-sm bg-black/60 backdrop-filter backdrop-blur">
-						<TOC
-							pathname={location.pathname}
-							toc={toc}
-							scrollToHeading={scrollToHeading}
-						/>
+					<aside className="w-full max-w-sm flex-1 overflow-y-auto bg-black/60 px-4 py-8 text-white backdrop-blur backdrop-filter">
+						<TOC pathname={location.pathname} toc={toc} scrollToHeading={scrollToHeading} />
 					</aside>
 				</div>
 			</Menubar>

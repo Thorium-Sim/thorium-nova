@@ -1,4 +1,5 @@
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+
 import { Aspect } from "./Aspect";
 import type BasePlugin from "./index";
 export default class ThemePlugin extends Aspect {
@@ -8,7 +9,6 @@ export default class ThemePlugin extends Aspect {
 	default?: boolean;
 	assets: {
 		rawCSS: string;
-		processedCSS: string;
 		files: string[];
 	};
 
@@ -22,7 +22,6 @@ export default class ThemePlugin extends Aspect {
 
 		this.assets = params.assets || {
 			rawCSS: "raw.css",
-			processedCSS: "processed.css",
 			files: [],
 		};
 		this.default = params.default || false;

@@ -1,8 +1,5 @@
-import {
-	lightYearToLightMinute,
-	type Centimeter,
-	type LightMinute,
-} from "@thorium/utils/unitTypes";
+import { lightYearToLightMinute, type LightMinute } from "@thorium/utils/unitTypes";
+
 import { randomFromList } from "./operations/randomFromList";
 
 /**

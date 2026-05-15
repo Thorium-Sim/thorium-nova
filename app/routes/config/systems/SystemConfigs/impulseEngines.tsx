@@ -1,15 +1,16 @@
-import { useParams } from "react-router";
-import Input from "@thorium/ui/Input";
-import { toast } from "@thorium/context/ToastContext";
-import { useContext, useReducer } from "react";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
-import { OverrideResetButton } from "../OverrideResetButton";
-import { q } from "@thorium/context/AppContext";
 import { Navigate } from "@thorium/components/Navigate";
-import { Icon } from "@thorium/ui/Icon";
-import Button from "@thorium/ui/Button";
+import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import { toast } from "@thorium/context/ToastContext";
 import type { EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
+import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
+import Input from "@thorium/ui/Input";
 import { produce } from "immer";
+import { useContext, useReducer } from "react";
+import { useParams } from "react-router";
+
+import { OverrideResetButton } from "../OverrideResetButton";
 
 export default function ImpulseEngineConfig() {
 	const { pluginId, systemId, shipId } = useParams() as {
@@ -52,7 +53,7 @@ export default function ImpulseEngineConfig() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -62,8 +63,7 @@ export default function ImpulseEngineConfig() {
 							helperText={"In km/s"}
 							defaultValue={system.cruisingSpeed}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.impulse.update.netSend({
 										pluginId,
@@ -83,13 +83,9 @@ export default function ImpulseEngineConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="cruisingSpeed"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="cruisingSpeed" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -99,8 +95,7 @@ export default function ImpulseEngineConfig() {
 							helperText={"In km/s"}
 							defaultValue={system.emergencySpeed}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.impulse.update.netSend({
 										pluginId,
@@ -120,13 +115,9 @@ export default function ImpulseEngineConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="emergencySpeed"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="emergencySpeed" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -138,8 +129,7 @@ export default function ImpulseEngineConfig() {
 							}
 							defaultValue={system.thrust}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.impulse.update.netSend({
 										pluginId,
@@ -165,7 +155,7 @@ export default function ImpulseEngineConfig() {
 							<label htmlFor="power-levels">Speeds</label>
 							<div className="flex gap-2">
 								{system.speeds.map(({ label, number }, i) => (
-									<div key={`${i}`} className="relative group flex flex-col">
+									<div key={`${i}`} className="group relative flex flex-col">
 										<Input
 											label="Label"
 											placeholder="Label"
@@ -173,8 +163,8 @@ export default function ImpulseEngineConfig() {
 											className="input w-[4ch] text-center tabular-nums"
 											max={40}
 											defaultValue={label}
-											onBlur={(event) => {
-												updateSpeeds(
+											onBlur={async (event) => {
+												await updateSpeeds(
 													produce(system.speeds, (draft) => {
 														draft[i].label = event.currentTarget.value;
 													}),
@@ -188,8 +178,8 @@ export default function ImpulseEngineConfig() {
 											className="input w-[4ch] text-center tabular-nums"
 											max={40}
 											defaultValue={number}
-											onBlur={(event) => {
-												updateSpeeds(
+											onBlur={async (event) => {
+												await updateSpeeds(
 													produce(system.speeds, (draft) => {
 														draft[i].number = event.currentTarget.value;
 													}),
@@ -197,7 +187,7 @@ export default function ImpulseEngineConfig() {
 											}}
 										/>
 										<button
-											className="hidden group-hover:flex absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-gray-300 items-center justify-center rounded-full w-5 h-5"
+											className="absolute top-0 right-0 hidden h-5 w-5 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-gray-300 group-hover:flex"
 											onClick={() =>
 												updateSpeeds(
 													produce(system.speeds, (draft) => {
@@ -212,24 +202,19 @@ export default function ImpulseEngineConfig() {
 								))}
 								<Button
 									className="btn-sm btn-info"
-									onClick={() => {
-										updateSpeeds([...system.speeds, { label: "", number: "" }]);
+									onClick={async () => {
+										await updateSpeeds([...system.speeds, { label: "", number: "" }]);
 									}}
 								>
 									+
 								</Button>
 							</div>
-							<p className="text-gray-400 text-sm leading-tight mb-2">
-								Names of the speed values. The second to last speed is cruising
-								speed, and speeds below that divide the cruising speed evenly.
-								The last speed uses emergency speed.
+							<p className="mb-2 text-sm leading-tight text-gray-400">
+								Names of the speed values. The second to last speed is cruising speed, and speeds
+								below that divide the cruising speed evenly. The last speed uses emergency speed.
 							</p>
 						</div>
-						<OverrideResetButton
-							property="speeds"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="speeds" setRekey={setRekey} className="mt-6" />
 					</div>
 				</div>
 			</div>

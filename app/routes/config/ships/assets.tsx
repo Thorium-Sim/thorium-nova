@@ -1,20 +1,14 @@
-import { useParams, Link } from "react-router";
-import { Suspense, useMemo, useReducer, useState } from "react";
+import { useGLTF } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
+import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
 import InfoTip from "@thorium/ui/InfoTip";
 import UploadWell from "@thorium/ui/UploadWell";
-import { readFile } from "@thorium/utils/readFile";
 import { renderGLTFPreview } from "@thorium/utils/generateGltfImage";
-import { toast } from "@thorium/context/ToastContext";
-import { q } from "@thorium/context/AppContext";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
-import {
-	Color,
-	FrontSide,
-	type Mesh,
-	type MeshStandardMaterial,
-	Object3D,
-} from "three";
+import { readFile } from "@thorium/utils/readFile";
+import { Suspense, useMemo, useReducer, useState } from "react";
+import { useParams, Link } from "react-router";
+import { Color, FrontSide, type Mesh, type MeshStandardMaterial, Object3D } from "three";
 
 export default function Assets() {
 	const { pluginId, shipId } = useParams() as {
@@ -27,18 +21,17 @@ export default function Assets() {
 	const [path, setPath] = useState<string | null>(null);
 	return (
 		<Suspense>
-			<div className="h-full grid grid-cols-2 grid-rows-2 gap-4 ">
+			<div className="grid h-full grid-cols-2 grid-rows-2 gap-4">
 				{path ? (
 					<Canvas>
 						<Preview path={path} />
 					</Canvas>
 				) : (
 					<div className="max-w-md">
-						<h3 className="text-lg font-bold flex items-center">
+						<h3 className="flex items-center text-lg font-bold">
 							Logo{" "}
 							<InfoTip>
-								Logos should be square and have a transparent background. SVGs
-								work best.
+								Logos should be square and have a transparent background. SVGs work best.
 							</InfoTip>
 						</h3>
 						<UploadWell
@@ -56,22 +49,19 @@ export default function Assets() {
 								<img
 									src={`${ship.assets.logo}?${Date.now()}`}
 									alt="Ship Logo"
-									className="w-5/6 h-5/6 object-contain aspect-square"
+									className="aspect-square h-5/6 w-5/6 object-contain"
 								/>
 							)}
 						</UploadWell>
 					</div>
 				)}
 				<div className="max-w-md">
-					<h3 className="text-lg font-bold flex items-center">
+					<h3 className="flex items-center text-lg font-bold">
 						Model{" "}
 						<InfoTip>
-							Models should be in .glb format. Top and side views are
-							automatically generated from the model.{" "}
-							<Link
-								to="/docs/plugins/ships#formatting-ship-models"
-								className="text-purple-300"
-							>
+							Models should be in .glb format. Top and side views are automatically generated from
+							the model.{" "}
+							<Link to="/docs/plugins/ships#formatting-ship-models" className="text-purple-300">
 								Read about how to create compatible models.
 							</Link>
 						</InfoTip>
@@ -135,31 +125,31 @@ export default function Assets() {
 							<img
 								src={`${ship.assets.vanity}?${Date.now()}`}
 								alt="Ship Vanity View"
-								className="w-5/6 h-5/6 object-contain aspect-square"
+								className="aspect-square h-5/6 w-5/6 object-contain"
 							/>
 						)}
 					</UploadWell>
 				</div>
 				<div className="max-w-md">
-					<h3 className="text-lg font-bold flex items-center">Side View</h3>
+					<h3 className="flex items-center text-lg font-bold">Side View</h3>
 					<UploadWell disabled>
 						{ship?.assets.sideView && (
 							<img
 								src={`${ship.assets.sideView}?${Date.now()}`}
 								alt="Ship Side View"
-								className="w-5/6 h-5/6 object-contain aspect-square"
+								className="aspect-square h-5/6 w-5/6 object-contain"
 							/>
 						)}
 					</UploadWell>
 				</div>
 				<div className="max-w-md">
-					<h3 className="text-lg font-bold flex items-center">Top View</h3>
+					<h3 className="flex items-center text-lg font-bold">Top View</h3>
 					<UploadWell disabled>
 						{ship?.assets.topView && (
 							<img
 								src={`${ship.assets.topView}?${Date.now()}`}
 								alt="Ship Top View"
-								className="w-5/6 h-5/6 object-contain aspect-square"
+								className="aspect-square h-5/6 w-5/6 object-contain"
 							/>
 						)}
 					</UploadWell>

@@ -12,26 +12,17 @@ export function MathIntoVariable({
 	variable,
 }: BlockProps<"MathIntoVariable">) {
 	return (
-		<div className="flex items-center gap-x-1 gap-y-5 flex-wrap">
+		<div className="flex flex-wrap items-center gap-x-1 gap-y-5">
 			Save the result of
-			<ValueInput
-				value={number1.toString()}
-				onChange={(value) => update("number1", value)}
-			/>{" "}
+			<ValueInput value={number1.toString()} onChange={(value) => update("number1", value)} />{" "}
 			<MadLibSelect
 				options={["+", "-", "×", "÷"]}
 				value={operation}
 				onChange={(value) => update("operation", value as any)}
 			/>{" "}
-			<ValueInput
-				value={number2.toString()}
-				onChange={(value) => update("number2", value)}
-			/>
+			<ValueInput value={number2.toString()} onChange={(value) => update("number2", value)} />
 			as local variable{" "}
-			<ValueInput
-				value={variable}
-				onChange={(value) => update("variable", value)}
-			/>
+			<ValueInput value={variable} onChange={(value) => update("variable", value)} />
 		</div>
 	);
 }

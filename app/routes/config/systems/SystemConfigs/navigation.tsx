@@ -1,12 +1,11 @@
+import { Navigate } from "@thorium/components/Navigate";
 import { q } from "@thorium/context/AppContext";
-import { toast } from "@thorium/context/ToastContext";
-import Input from "@thorium/ui/Input";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import Checkbox from "@thorium/ui/Checkbox";
 import { useContext, useReducer } from "react";
 import { useParams } from "react-router";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+
 import { OverrideResetButton } from "../OverrideResetButton";
-import { Navigate } from "@thorium/components/Navigate";
-import Checkbox from "@thorium/ui/Checkbox";
 
 export default function NavigationConfig() {
 	const { pluginId, systemId, shipId } = useParams() as {
@@ -45,11 +44,7 @@ export default function NavigationConfig() {
 							}
 							helperText="Whether the crew can calculate a course from the navigation screen. Otherwise they need to use sensors to scan for a course. Mutually exclusive with the Thrusters option."
 						/>
-						<OverrideResetButton
-							property="calculate"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="calculate" setRekey={setRekey} className="mt-6" />
 					</div>
 					<div className="pb-2">
 						<Checkbox
@@ -66,11 +61,7 @@ export default function NavigationConfig() {
 							}
 							helperText="Calculating a course provides thrusters adjustments instead of coordinates. Mutually exclusive with Calculate Course option"
 						/>
-						<OverrideResetButton
-							property="thrusters"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="thrusters" setRekey={setRekey} className="mt-6" />
 					</div>
 				</div>
 			</div>

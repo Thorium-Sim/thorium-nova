@@ -13,12 +13,12 @@ export function ObjectivesCore() {
 	const [objectives] = q.objectives.get.useNetRequest({ shipId });
 	const [adding, setAdding] = useState(false);
 	return (
-		<div className="flex flex-col gap-1 h-full">
+		<div className="flex h-full flex-col gap-1">
 			<div className="flex-1 overflow-y-auto">
 				{objectives.map((objective) => (
 					<div
 						key={objective.id}
-						className="flex items-center gap-1 last-of-type:border-transparent border-b border-b-white/50 py-1"
+						className="flex items-center gap-1 border-b border-b-white/50 py-1 last-of-type:border-transparent"
 					>
 						<div className="flex-1">
 							<div className="font-bold">{objective.title}</div>
@@ -97,27 +97,17 @@ export function ObjectivesCore() {
 						setAdding(false);
 					}}
 				>
-					<div className="flex flex-col w-full gap-1 flex-wrap items-start">
-						<div className="flex-1 w-full">
-							<Input
-								label="Title"
-								name="objective"
-								required
-								className="input-sm"
-							/>
+					<div className="flex w-full flex-col flex-wrap items-start gap-1">
+						<div className="w-full flex-1">
+							<Input label="Title" name="objective" required className="input-xs" />
 						</div>
-						<div className="flex-1 w-full">
-							<Input
-								as="textarea"
-								name="description"
-								label="Description"
-								className="textarea-sm"
-							/>
+						<div className="w-full flex-1">
+							<Input as="textarea" name="description" label="Description" className="textarea-sm" />
 						</div>
-						<div className="flex-1 w-full">
+						<div className="w-full flex-1">
 							<Input
 								label="Priority"
-								className="input-sm"
+								className="input-xs"
 								name="priority"
 								type="number"
 								defaultValue={1}
@@ -125,25 +115,22 @@ export function ObjectivesCore() {
 							<p className="text-sm">Higher number = higher priority</p>
 						</div>
 					</div>
-					<div className="flex gap-1 flex-wrap">
+					<div className="flex flex-wrap gap-1">
 						<Button
 							type="reset"
-							className="flex-1 btn-xs btn-error"
+							className="btn-xs btn-error flex-1"
 							onClick={() => setAdding(false)}
 						>
 							Cancel
 						</Button>
-						<Button type="submit" className="flex-1 btn-xs btn-success">
+						<Button type="submit" className="btn-xs btn-success flex-1">
 							Add Objective
 						</Button>
 					</div>
 				</form>
 			) : (
 				<div>
-					<Button
-						className="btn-xs btn-success"
-						onClick={() => setAdding(true)}
-					>
+					<Button className="btn-xs btn-success" onClick={() => setAdding(true)}>
 						Add Objective
 					</Button>
 				</div>

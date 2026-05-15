@@ -1,16 +1,17 @@
-import { z } from "zod";
-import { t } from "@thorium/.server/init/t";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import { type scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
-import { Entity } from "@thorium/utils/ecs";
 import { pubsub } from "@thorium/.server/init/pubsub";
-import { fromDate } from "dot-beat-time";
+import { t } from "@thorium/.server/init/t";
 import { generateScanResults } from "@thorium/.server/systems/SensorScanSystem";
+import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { Entity } from "@thorium/utils/ecs";
+import { type scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
+import { fromDate } from "dot-beat-time";
+import z from "zod";
 
 export const sensors = t.router({
 	get: t.procedure
 		.input(z.object({ shipId: z.number() }))
-		.filter((publish: { shipId: number; systemId: number }, { ctx, input }) => {
+		.filter((publish: { shipId: number; systemId: number }, { input }) => {
 			if (publish && publish.shipId !== input.shipId) return false;
 			return true;
 		})
@@ -39,10 +40,7 @@ export const sensors = t.router({
 	scanResult: t.procedure
 		.input(z.object({ shipId: z.number(), objectId: z.number() }))
 		.filter((publish: { objectId: number; shipId: number }, { input }) => {
-			if (
-				publish &&
-				(publish.objectId !== input.objectId || publish.shipId !== input.shipId)
-			)
+			if (publish && (publish.objectId !== input.objectId || publish.shipId !== input.shipId))
 				return false;
 			return true;
 		})
@@ -75,9 +73,7 @@ export const sensors = t.router({
 			return true;
 		})
 		.autoPublish(["scan"], (entity) => {
-			return (
-				entity.components.scan && { shipId: entity.components.scan?.parentId }
-			);
+			return entity.components.scan && { shipId: entity.components.scan?.parentId };
 		})
 		.request(({ ctx, input }) => {
 			const scans = [];
@@ -107,6 +103,12 @@ export const sensors = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
+			const sensorsSystem = getShipSystem(ctx.ecs, {
+				systemType: "sensors",
+				shipId: input.shipId,
+			});
+			checkSystemStability(sensorsSystem, "Failed to start scanning");
+
 			const scanEntity = new Entity();
 			scanEntity.addComponent("scan", {
 				type: input.type,
@@ -125,8 +127,14 @@ export const sensors = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			const shipId = ctx.ecs.getEntityById(input.scanId)?.components.scan
-				?.parentId;
+			const shipId = ctx.ecs.getEntityById(input.scanId)?.components.scan?.parentId;
+			if (shipId) {
+				const sensorsSystem = getShipSystem(ctx.ecs, {
+					systemType: "sensors",
+					shipId,
+				});
+				checkSystemStability(sensorsSystem, "Failed to cancel scanning");
+			}
 			ctx.flight?.ecs.removeEntityById(input.scanId);
 			if (shipId) {
 				pubsub.publish.sensors.scans({ shipId });
@@ -150,19 +158,24 @@ export const sensors = t.router({
 	// scanRepeat: t.procedure,
 	stream: t.procedure
 		.input(z.object({ systemId: z.number().nullable(), shipId: z.number() }))
-		.dataStream(({ ctx, input, entity }) => {
-			if (!entity) return false;
+		.dataStream(({ ctx, input }) => {
+			const set = new Set<Entity>();
 			const systemId =
-				input.systemId ||
-				ctx.ecs.getEntityById(input.shipId)?.components.position?.parentId;
+				input.systemId || ctx.ecs.getEntityById(input.shipId)?.components.position?.parentId;
 			if (typeof systemId === "undefined") {
-				return false;
+				return set;
 			}
-			return Boolean(
-				(entity.components.position &&
-					entity.components.position.parentId === systemId) ||
-					(entity.components.scan &&
-						entity.components.scan.parentId === input.shipId),
-			);
+			for (const entity of ctx.ecs.componentCache.get("position") || []) {
+				if (entity.components.position?.parentId === systemId) {
+					set.add(entity);
+				}
+			}
+			for (const entity of ctx.ecs.componentCache.get("scan") || []) {
+				// TODO April 28, 2028 — make it so completed scans aren't sent anymore
+				if (entity.components.scan?.parentId === input.shipId) {
+					set.add(entity);
+				}
+			}
+			return set;
 		}),
 });

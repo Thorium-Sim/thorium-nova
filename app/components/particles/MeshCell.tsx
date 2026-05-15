@@ -1,8 +1,9 @@
 import { useFrame } from "@react-three/fiber";
 import { type ReactNode, useRef } from "react";
 import { type InstancedMesh, Color, Matrix4, Object3D } from "three";
-import { useParticles } from "./useParticles";
+
 import type { CellProps } from "./types";
+import { useParticles } from "./useParticles";
 
 const instanceMatrix = new Matrix4();
 
@@ -24,11 +25,7 @@ export function MeshCell({
 
 		for (let i = 0; i < maxParticles; i++) {
 			mesh.getMatrixAt(i, instanceMatrix);
-			instanceMatrix.decompose(
-				transform.position,
-				transform.quaternion,
-				transform.scale,
-			);
+			instanceMatrix.decompose(transform.position, transform.quaternion, transform.scale);
 			updateParticle(i, transform, color, delta);
 			mesh.setColorAt(i, color);
 			mesh.setMatrixAt(i, transform.matrix);
@@ -39,11 +36,7 @@ export function MeshCell({
 		mesh.instanceMatrix.needsUpdate = true;
 	});
 	return (
-		<instancedMesh
-			ref={ref}
-			args={[undefined, undefined, maxParticles]}
-			frustumCulled={false}
-		>
+		<instancedMesh ref={ref} args={[undefined, undefined, maxParticles]} frustumCulled={false}>
 			{children}
 		</instancedMesh>
 	);

@@ -1,14 +1,15 @@
-import { describe, expect, it } from "vitest";
-import { spawnShip } from "./ship";
 import {
 	createMockDataContext,
 	createMockRouter,
 } from "@thorium/utils/.server/createMockDataContext";
-import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
+import { describe, expect, it } from "vitest";
+
+import { spawnShip } from "./ship";
 describe("Ship Spawner", () => {
 	it("should spawn a ship from a template", async () => {
-		DataStore.operations.run(testDataStoreProps, async () => {
+		await DataStore.operations.run(testDataStoreProps, async () => {
 			const dataContext = createMockDataContext();
 			const router = createMockRouter(dataContext);
 
@@ -22,7 +23,7 @@ describe("Ship Spawner", () => {
 				name: "Test Ship",
 			});
 
-			const shipDeck = await router.plugin.ship.deck.create({
+			await router.plugin.ship.deck.create({
 				pluginId: "Test Plugin",
 				shipId: "Test Ship",
 			});
@@ -66,9 +67,7 @@ describe("Ship Spawner", () => {
 			expect(ship.components.position?.y).toEqual(20);
 			expect(ship.components.position?.z).toEqual(30);
 			expect(extraEntities.length).toEqual(5);
-			expect(extraEntities[0].components.identity?.name).toEqual(
-				"Generic System",
-			);
+			expect(extraEntities[0].components.identity?.name).toEqual("Generic System");
 			expect(extraEntities[0].components.isShipSystem?.type).toEqual("generic");
 			expect(extraEntities[1].components.cargoContainer?.volume).toEqual(4000);
 			expect(extraEntities[2].components.cargoContainer?.volume).toEqual(4000);

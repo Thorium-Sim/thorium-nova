@@ -1,9 +1,18 @@
+import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { applyDamage } from "@thorium/utils/.server/ship/collisionDamage";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import { getAggregateDamage } from "@thorium/utils/flags/damageTypes";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { aroundEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { DamageCheckSystem } from "../DamageCheckSystem";
-import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
+
+aroundEach(async (runTest) => {
+	await DataStore.operations.run(testDataStoreProps, async () => {
+		await runTest();
+	});
+});
 
 vi.mock("@thorium/utils/.server/ship/collisionDamage", () => {
 	return {
@@ -18,25 +27,23 @@ vi.mock("@thorium/utils/flags/damageTypes", async (importOriginal) => {
 	};
 });
 
-function makeEntity(ecs: ECS, {
-	isPlayerShip = true,
-	vulnerability = "normal",
-	offline = false,
-	onlineDamage = 10,
-	offlineDamage = 20,
-	cascadeRisk = 0,
-}: {
-	isPlayerShip?: boolean;
-	vulnerability?: "normal" | "vulnerable" | "invulnerable";
-	offline?: boolean;
-	offlineDamage?: number;
-	onlineDamage?: number;
-	cascadeRisk?: number;
-} = {}) {
+function makeEntity(
+	ecs: ECS,
+	{
+		vulnerability = "normal",
+		offline = false,
+		onlineDamage = 10,
+		offlineDamage = 20,
+		cascadeRisk = 0,
+	}: {
+		vulnerability?: "normal" | "vulnerable" | "invulnerable";
+		offline?: boolean;
+		offlineDamage?: number;
+		onlineDamage?: number;
+		cascadeRisk?: number;
+	} = {},
+) {
 	const entity = new Entity();
-	if (isPlayerShip) {
-		entity.addComponent("isPlayerShip", { value: true });
-	}
 	entity.addComponent("damage", {
 		vulnerability,
 		offline,

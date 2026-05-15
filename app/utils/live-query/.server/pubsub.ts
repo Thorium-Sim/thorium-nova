@@ -1,13 +1,12 @@
 import { EventEmitter } from "eventemitter3";
+
 import { createRecursiveProxy } from "../proxy";
+import type { Procedure, ProcedureParams, UnsetMarker } from "./procedure";
 import type { BuildProcedure } from "./procedureBuilder";
 import type { AnyRouter } from "./router";
-import type { Procedure, ProcedureParams, UnsetMarker } from "./procedure";
 
 type RouterRequests<TRouter extends AnyRouter> = {
-	[P in keyof TRouter as TRouter[P] extends
-		| BuildProcedure<"request", any, any>
-		| AnyRouter
+	[P in keyof TRouter as TRouter[P] extends BuildProcedure<"request", any, any> | AnyRouter
 		? P
 		: never]: TRouter[P] extends Procedure<"request", ProcedureParams>
 		? TRouter[P]["_def"]["_publish"] extends UnsetMarker
@@ -19,9 +18,7 @@ type RouterRequests<TRouter extends AnyRouter> = {
 };
 
 type RouterSub<TRouter extends AnyRouter> = {
-	[P in keyof TRouter as TRouter[P] extends
-		| BuildProcedure<"request", any, any>
-		| AnyRouter
+	[P in keyof TRouter as TRouter[P] extends BuildProcedure<"request", any, any> | AnyRouter
 		? P
 		: never]: TRouter[P] extends Procedure<"request", ProcedureParams>
 		? (publish: any) => () => void
@@ -59,17 +56,15 @@ export class PubSub<TRouter extends AnyRouter> {
 		this.ee.emit(trigger, payload);
 	}
 
-	public subscribe = createRecursiveProxy(
-		({ path, args: [onMessage, id] }: any) => {
-			const trigger = path.join("/");
-			const listener = (payload: any) => onMessage(payload);
-			this.ee.addListener(trigger, listener);
-			this.subIdCounter = this.subIdCounter + 1;
-			const subId = this.subIdCounter;
-			this.subscriptions[subId] = [trigger, listener];
-			return () => this.unsubscribe(subId);
-		},
-	) as RouterSub<TRouter>;
+	public subscribe = createRecursiveProxy(({ path, args: [onMessage] }: any) => {
+		const trigger = path.join("/");
+		const listener = (payload: any) => onMessage(payload);
+		this.ee.addListener(trigger, listener);
+		this.subIdCounter = this.subIdCounter + 1;
+		const subId = this.subIdCounter;
+		this.subscriptions[subId] = [trigger, listener];
+		return () => this.unsubscribe(subId);
+	}) as RouterSub<TRouter>;
 
 	private unsubscribe(subId: number) {
 		if (this.subscriptions[subId]) {

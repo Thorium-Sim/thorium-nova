@@ -3,10 +3,7 @@ import type React from "react";
 import type { ReactNode } from "react";
 
 const Checkbox = (
-	props: React.DetailedHTMLProps<
-		React.InputHTMLAttributes<HTMLInputElement>,
-		HTMLInputElement
-	> & {
+	props: React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> & {
 		label: ReactNode;
 		labelHidden?: boolean;
 		labelProps?: React.DetailedHTMLProps<
@@ -21,25 +18,16 @@ const Checkbox = (
 		<>
 			<label
 				{...props.labelProps}
-				className={cn(
-					"flex items-center select-none",
-					props.labelProps?.className,
-				)}
+				className={cn("flex items-center select-none", props.labelProps?.className)}
 			>
 				<input
 					type="checkbox"
 					{...otherProps}
 					className={`${props.className} form-checkbox mr-2 text-blue-600`}
 				/>
-				<span
-					className={cn("flex items-center gap-1", { "sr-only": labelHidden })}
-				>
-					{label}
-				</span>
+				<span className={cn("flex items-center gap-1", { "sr-only": labelHidden })}>{label}</span>
 			</label>
-			{helperText && (
-				<p className="text-white text-sm leading-tight mb-2">{helperText}</p>
-			)}
+			{helperText && <p className="mb-2 text-sm leading-tight text-white">{helperText}</p>}
 		</>
 	);
 };

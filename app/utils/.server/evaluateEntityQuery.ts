@@ -4,20 +4,16 @@ import type {
 	EntityQuery,
 	ValueQuery,
 } from "@thorium/.server/classes/Plugins/TimelineStep";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
+import { interpolateText } from "@thorium/utils/interpolationEngine";
+import type z from "zod";
+
 import type { ECS, Entity } from "../ecs";
 import type { actionItem, conditionSchema } from "../flags/actionSchema";
 import { getNavigationDistance } from "../starmap/getNavigationDistance";
+import { getCompletePositionFromOrbit, getObjectSystem } from "../starmap/position";
 import { lightMinuteToKilometer, lightYearToLightMinute } from "../unitTypes";
-import { DataContext } from "../../.server/DataContext";
-import { database } from "@thorium/.server/init/buildDatabase";
-import {
-	getCompletePositionFromOrbit,
-	getObjectSystem,
-} from "../starmap/position";
-import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
-import type z from "zod";
-import { interpolateText } from "@thorium/utils/interpolationEngine";
-import { pubsub } from "@thorium/.server/init/pubsub";
 
 export function evaluateEntityQuery(ecs: ECS, query: EntityQuery): Entity[] {
 	const output: Entity[] = [];
@@ -33,7 +29,6 @@ export function evaluateEntityQuery(ecs: ECS, query: EntityQuery): Entity[] {
 		let match = true;
 		for (const componentQuery of query) {
 			const evaluation = evaluateComponentQuery(ecs, entity, componentQuery);
-			// biome-ignore lint/suspicious/noDoubleEquals: We definitely want to coerce this as we check.
 			if (evaluation == undefined) continue;
 			match = evaluation;
 			if (!match) break;
@@ -45,16 +40,8 @@ export function evaluateEntityQuery(ecs: ECS, query: EntityQuery): Entity[] {
 	return output;
 }
 
-function evaluateComponentQuery(
-	ecs: ECS,
-	entity: Entity,
-	componentQuery: ComponentQuery,
-) {
-	if (
-		!componentQuery ||
-		!componentQuery.component ||
-		!componentQuery.property
-	) {
+function evaluateComponentQuery(ecs: ECS, entity: Entity, componentQuery: ComponentQuery) {
+	if (!componentQuery || !componentQuery.component || !componentQuery.property) {
 		// Ignore it if it's undefined
 		return;
 	}
@@ -98,7 +85,6 @@ function evaluateComponentQuery(
 			}
 		}
 		if (componentQuery.comparison === "length") {
-			// biome-ignore lint/suspicious/noDoubleEquals: We want this to coerce
 			if (property.length == value) {
 				return true;
 			}
@@ -114,12 +100,10 @@ function evaluateComponentQuery(
 			}
 		}
 		if (componentQuery.comparison === "=") {
-			// biome-ignore lint/suspicious/noDoubleEquals: We want this to coerce
 			if (property == value) {
 				return true;
 			}
 		} else if (componentQuery.comparison === "!=") {
-			// biome-ignore lint/suspicious/noDoubleEquals: We want this to coerce
 			if (property != value) {
 				return true;
 			}
@@ -150,7 +134,6 @@ function evaluateComponentQuery(
 			}
 		}
 	} else {
-		// biome-ignore lint/suspicious/noDoubleEquals: We want this to coerce
 		if (property == value) {
 			return true;
 		}
@@ -168,9 +151,7 @@ export function selectValueQuery(ecs: ECS, entityQuery: ValueQuery): any[] {
 				entityQuery.select.component === "id"
 					? e.id
 					: // @ts-expect-error
-						e.components[entityQuery.select.component]?.[
-							entityQuery.select.property
-						],
+						e.components[entityQuery.select.component]?.[entityQuery.select.property],
 			)
 			.filter((t: any) => t !== undefined);
 
@@ -200,7 +181,9 @@ export function evaluateTriggerCondition(
 				if (condition.values) {
 					for (const key in condition.values) {
 						let conditionValue = condition.values[key];
+
 						if (
+							conditionValue &&
 							typeof conditionValue === "object" &&
 							"query" in conditionValue &&
 							typeof conditionValue.query === "object" &&
@@ -219,14 +202,15 @@ export function evaluateTriggerCondition(
 								match = false;
 								break;
 							}
-							// biome-ignore lint/suspicious/noDoubleEquals: We want this to coerce
 						} else if (event.values[key] != conditionValue) {
 							match = false;
 							break;
 						}
 					}
 				}
-				match = event.values;
+				if (match) {
+					match = event.values;
+				}
 			} else {
 				match = false;
 				break;
@@ -239,11 +223,7 @@ export function evaluateTriggerCondition(
 				match = false;
 				break;
 			}
-			const distance = getEntityDistance(
-				[entityA],
-				[entityB],
-				condition.condition,
-			);
+			const distance = getEntityDistance([entityA], [entityB], condition.condition);
 			if (condition.condition === "less than") {
 				if (distance > condition.distance) {
 					match = false;
@@ -292,33 +272,18 @@ function getEntityDistance(
 	for (const a of positionsA) {
 		for (const b of positionsB) {
 			if (!a || !b) continue;
-			if (
-				(a.type === "ship" && b.type !== "ship") ||
-				(a.type !== "ship" && b.type === "ship")
-			)
+			if ((a.type === "ship" && b.type !== "ship") || (a.type !== "ship" && b.type === "ship"))
 				continue;
-			if (
-				a.type === "ship" &&
-				b.type === "ship" &&
-				a.parentObject !== b.parentObject
-			)
-				continue;
+			if (a.type === "ship" && b.type === "ship" && a.parentObject !== b.parentObject) continue;
 			let distance = 0;
 			if (a.type === "ship" && b.type === "ship") {
 				distance = Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
 			} else {
-				const distanceOutput = getNavigationDistance(
-					a,
-					b,
-					a.parentObject,
-					b.parentObject,
-				);
+				const distanceOutput = getNavigationDistance(a, b, a.parentObject, b.parentObject);
 				if (!distanceOutput) continue;
 				distance =
 					distanceOutput.unit === "LY"
-						? lightMinuteToKilometer(
-								lightYearToLightMinute(distanceOutput.distance),
-							)
+						? lightMinuteToKilometer(lightYearToLightMinute(distanceOutput.distance))
 						: distanceOutput.distance;
 			}
 			distances.push(distance);
@@ -338,19 +303,13 @@ function getEntityPosition(e: Entity) {
 		if (e.components.position.type === "solar") {
 			parentObject = getObjectSystem(e);
 		}
-		if (
-			e.components.position.type === "ship" &&
-			e.components.position.parentId
-		) {
-			parentObject =
-				e.ecs?.getEntityById(e.components.position.parentId) || null;
+		if (e.components.position.type === "ship" && e.components.position.parentId) {
+			parentObject = e.ecs?.getEntityById(e.components.position.parentId) || null;
 		}
-		let parentPosition:
-			| { id: number; x: number; y: number; z: number }
-			| null
-			| undefined = parentObject?.components.position
-			? { id: parentObject.id, ...parentObject.components.position }
-			: null;
+		let parentPosition: { id: number; x: number; y: number; z: number } | null | undefined =
+			parentObject?.components.position
+				? { id: parentObject.id, ...parentObject.components.position }
+				: null;
 		if (parentObject && !parentPosition) {
 			parentPosition = parentObject
 				? { id: parentObject.id, ...getCompletePositionFromOrbit(parentObject) }
@@ -361,12 +320,10 @@ function getEntityPosition(e: Entity) {
 	if (e.components.satellite) {
 		const { x, y, z } = getCompletePositionFromOrbit(e);
 		const parentObject = getObjectSystem(e);
-		let parentPosition:
-			| { id: number; x: number; y: number; z: number }
-			| null
-			| undefined = parentObject?.components.position
-			? { id: parentObject.id, ...parentObject.components.position }
-			: null;
+		let parentPosition: { id: number; x: number; y: number; z: number } | null | undefined =
+			parentObject?.components.position
+				? { id: parentObject.id, ...parentObject.components.position }
+				: null;
 		if (parentObject && !parentPosition) {
 			parentPosition = parentObject
 				? { id: parentObject.id, ...getCompletePositionFromOrbit(parentObject) }
@@ -426,17 +383,12 @@ function generatePermutations(inputMap: Map<string, Set<any>>) {
 }
 
 export async function triggerStep(step: Entity) {
-	const timeline = step.ecs.getEntityById(
-		step.components.isTimelineStep?.timelineId || -1,
-	);
+	const timeline = step.ecs.getEntityById(step.components.isTimelineStep?.timelineId || -1);
 	const localVariables =
-		timeline?.components.variables?.variables.reduce(
-			(prev: Record<string, any>, next) => {
-				prev[next.name] = next.value;
-				return prev;
-			},
-			{},
-		) || {};
+		timeline?.components.variables?.variables.reduce((prev: Record<string, any>, next) => {
+			prev[next.name] = next.value;
+			return prev;
+		}, {}) || {};
 
 	const blocks = step?.components.isTimelineStep?.blocks;
 	if (!blocks) return;
@@ -473,42 +425,35 @@ export async function triggerStep(step: Entity) {
 	}
 }
 
-export async function processTriggers(
-	ecs: ECS,
-	event?: { event: string; values: any },
-) {
-	const triggers = ecs.componentCache.get("isTrigger");
+export async function processTriggers(ecs: ECS, event?: { event: string; values: any }) {
+	const triggers = [...(ecs.componentCache.get("isTrigger") || [])];
 	if (!triggers) return;
-	await Promise.all(
-		Array.from(triggers).map(async (trigger) => {
-			if (!trigger.components.isTrigger || !trigger.components.isTrigger.active)
-				return false;
-			const { conditions, blocks, stepId, localVariables, callReturnBlocks } =
-				trigger.components.isTrigger;
-			const match = evaluateTriggerCondition(ecs, conditions, event);
-
-			if (match) {
-				await executeBlocks(
-					ecs,
-					blocks.map((action) => {
-						if (action.action === "timeline.advance") {
-							return {
-								...action,
-								values: {
-									...action.values,
-									stepId: stepId,
-								},
-							};
-						}
-						return action;
-					}),
-					{ stepId, localVariables, theResult: match, callReturnBlocks },
-				);
-				trigger.updateComponent("isTrigger", {
-					triggeredAt: new Date(),
-					...(trigger.components.isTrigger.multiple ? {} : { active: false }),
-				});
-			}
-		}),
-	);
+	for (const trigger of triggers) {
+		if (!trigger.components.isTrigger || !trigger.components.isTrigger.active) continue;
+		const { conditions, blocks, stepId, localVariables, callReturnBlocks } =
+			trigger.components.isTrigger;
+		const match = evaluateTriggerCondition(ecs, conditions, event);
+		if (match) {
+			trigger.updateComponent("isTrigger", {
+				triggeredAt: new Date(),
+				...(trigger.components.isTrigger.multiple ? {} : { active: false }),
+			});
+			await executeBlocks(
+				ecs,
+				blocks.map((action) => {
+					if (action.action === "timeline.advance") {
+						return {
+							...action,
+							values: {
+								...action.values,
+								stepId: stepId,
+							},
+						};
+					}
+					return action;
+				}),
+				{ stepId, localVariables, theResult: match, callReturnBlocks },
+			);
+		}
+	}
 }

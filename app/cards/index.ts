@@ -16,3 +16,6 @@ export * from "./DamageReports";
 export * from "./CodeCyphers";
 export * from "./Messaging";
 export * from "./Documents";
+export * from "./LongRangeComm";
+export * from "./ShortRangeComm";
+export * from "./Exocomps";

@@ -44,45 +44,31 @@ export function getReportEffects(
 	const damage = system.components.damage;
 	if (!damage) return new Map();
 
-	const ship = system.ecs.getEntityById(
-		system.components.isShipSystem?.shipId || -1,
+	const ship = system.ecs.getEntityById(system.components.isShipSystem?.shipId || -1);
+	const damagableSystems = [...(ship?.components.shipSystems?.shipSystems.keys() || [])].flatMap(
+		(id) => {
+			const sys = system.ecs.getEntityById(id);
+			if (sys?.components.damage && sys.components.damage.vulnerability !== "invulnerable")
+				return sys;
+			return [];
+		},
 	);
-	const damagableSystems = [
-		...(ship?.components.shipSystems?.shipSystems.keys() || []),
-	].flatMap((id) => {
-		const sys = system.ecs.getEntityById(id);
-		if (
-			sys?.components.damage &&
-			sys.components.damage.vulnerability !== "invulnerable"
-		)
-			return sys;
-		return [];
-	});
 
 	// Decide which effects we can adjust - it will most often be all of them
 	const possibleEffects: DamageEffects[] = [];
 	if (damage.efficiency < 1) possibleEffects.push("efficiency");
 	// We'll hard-code this limit
-	if (
-		damage.heatMultiplier > MIN_HEAT_MULTIPLIER &&
-		damage.heatMultiplier < MAX_HEAT_MULTIPLIER
-	)
+	if (damage.heatMultiplier > MIN_HEAT_MULTIPLIER && damage.heatMultiplier < MAX_HEAT_MULTIPLIER)
 		possibleEffects.push("heatMultiplier");
 	if (damage.instability > 0 && damage.instability < MAX_INSTABILITY)
 		possibleEffects.push("instability");
-	if (
-		damage.signature > damage.minSignature &&
-		damage.signature < damage.maxSignature
-	)
+	if (damage.signature > damage.minSignature && damage.signature < damage.maxSignature)
 		possibleEffects.push("signature");
 	if (damage.failureRisk > 0 && damage.failureRisk < MAX_FAILURE_RISK)
 		possibleEffects.push("failureRisk");
 	if (damage.cascadeRisk > 0 && damage.cascadeRisk < MAX_CASCADE_RISK)
 		possibleEffects.push("cascadeRisk");
-	if (
-		damage.crewSafetyRating > 0 &&
-		damage.crewSafetyRating < MAX_CREW_SAFETY_RATING
-	)
+	if (damage.crewSafetyRating > 0 && damage.crewSafetyRating < MAX_CREW_SAFETY_RATING)
 		possibleEffects.push("crewSafetyRating");
 
 	// Bias the number of effects to 2, but allow 3 or 1 effect as well.
@@ -106,9 +92,7 @@ export function getReportEffects(
 					rng.nextFromList(damageEffects.filter((e) => !effects?.[e]));
 
 		let effectAmount =
-			rng.next() *
-			0.3 *
-			(ship?.components.tweaks?.damageReportEffectMultiplier || 1);
+			rng.next() * 0.3 * (ship?.components.tweaks?.damageReportEffectMultiplier || 1);
 
 		if (i === 0 || sideEffectType === "positive")
 			effectAmount =
@@ -145,9 +129,7 @@ const MAX_CREW_SAFETY_RATING = 0.5;
  * Represents how much of this damage should be applied,
  * based on the mins and maxes for that damage metric
  **/
-export function getDamageMetricMultipliers(
-	sys: Entity,
-): Record<DamageEffects, number> {
+export function getDamageMetricMultipliers(sys: Entity): Record<DamageEffects, number> {
 	const damage = sys.components.damage;
 	return {
 		efficiency: 1,
@@ -168,13 +150,9 @@ export function getAggregateDamage(sys: Entity) {
 	let output = 0;
 
 	output += 1 - damage.efficiency;
-	output +=
-		(damage.heatMultiplier - MIN_HEAT_MULTIPLIER) *
-		damageMultipliers.heatMultiplier;
+	output += (damage.heatMultiplier - MIN_HEAT_MULTIPLIER) * damageMultipliers.heatMultiplier;
 	output += damage.instability * (1 / damageMultipliers.instability);
-	output +=
-		(damage.signature - damage.minSignature) *
-		(1 / damageMultipliers.signature);
+	output += (damage.signature - damage.minSignature) * (1 / damageMultipliers.signature);
 	output += damage.failureRisk * (1 / damageMultipliers.failureRisk);
 	output += damage.cascadeRisk * (1 / damageMultipliers.cascadeRisk);
 	output += damage.crewSafetyRating * (1 / damageMultipliers.crewSafetyRating);

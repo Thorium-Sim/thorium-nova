@@ -1,11 +1,5 @@
-import {
-	createContext,
-	type ReactNode,
-	useContext,
-	useEffect,
-	useMemo,
-	useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
+
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
 type ThoriumAccountContextProps = {
@@ -27,15 +21,8 @@ interface ThoriumAccount {
 }
 const ThoriumAccountContext = createContext<ThoriumAccountContextProps>(null!);
 
-export function ThoriumAccountContextProvider({
-	children,
-}: {
-	children: ReactNode;
-}) {
-	const [account, setAccount] = useLocalStorage<ThoriumAccount | null>(
-		"thorium_account",
-		null,
-	);
+export function ThoriumAccountContextProvider({ children }: { children: ReactNode }) {
+	const [account, setAccount] = useLocalStorage<ThoriumAccount | null>("thorium_account", null);
 	const [verifying, setVerifying] = useState(false);
 	const [deviceCode, setDeviceCode] = useState<{
 		device_code: string;
@@ -67,19 +54,16 @@ export function ThoriumAccountContextProvider({
 		async function login() {
 			setVerifying(true);
 			// Kick off the login process
-			const data = (await fetch(
-				`${process.env.THORIUMSIM_URL}/oauth/device_request`,
-				{
-					method: "POST",
-					body: JSON.stringify({
-						client_id: process.env.THORIUMSIM_CLIENT_ID,
-						scope: "identity github:issues",
-					}),
-					headers: {
-						"Content-Type": "application/json",
-					},
+			const data = (await fetch(`${process.env.THORIUMSIM_URL}/oauth/device_request`, {
+				method: "POST",
+				body: JSON.stringify({
+					client_id: process.env.THORIUMSIM_CLIENT_ID,
+					scope: "identity github:issues",
+				}),
+				headers: {
+					"Content-Type": "application/json",
 				},
-			).then((res) => res.json())) as any;
+			}).then((res) => res.json())) as any;
 			if (data.error) {
 				setVerifying(false);
 				throw new Error(data.error_description);
@@ -101,20 +85,17 @@ export function ThoriumAccountContextProvider({
 	useEffect(() => {
 		if (deviceCode) {
 			const interval = setInterval(async () => {
-				const data = (await fetch(
-					`${process.env.THORIUMSIM_URL}/oauth/access_token`,
-					{
-						method: "POST",
-						body: JSON.stringify({
-							client_id: process.env.THORIUMSIM_CLIENT_ID,
-							device_code: deviceCode.device_code,
-							grant_type: "device_code",
-						}),
-						headers: {
-							"Content-Type": "application/json",
-						},
+				const data = (await fetch(`${process.env.THORIUMSIM_URL}/oauth/access_token`, {
+					method: "POST",
+					body: JSON.stringify({
+						client_id: process.env.THORIUMSIM_CLIENT_ID,
+						device_code: deviceCode.device_code,
+						grant_type: "device_code",
+					}),
+					headers: {
+						"Content-Type": "application/json",
 					},
-				).then((res) => res.json())) as any;
+				}).then((res) => res.json())) as any;
 
 				if (data.error) {
 					if (data.error === "authorization_pending") return;
@@ -143,11 +124,7 @@ export function ThoriumAccountContextProvider({
 		}
 	}, [deviceCode, value]);
 
-	return (
-		<ThoriumAccountContext.Provider value={value}>
-			{children}
-		</ThoriumAccountContext.Provider>
-	);
+	return <ThoriumAccountContext.Provider value={value}>{children}</ThoriumAccountContext.Provider>;
 }
 
 export function useThoriumAccount() {

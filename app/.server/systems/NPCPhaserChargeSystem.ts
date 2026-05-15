@@ -13,15 +13,8 @@ export class NPCPhaserChargeSystem extends System {
 			for (const [id] of entity.components.shipSystems?.shipSystems || []) {
 				const sys = this.ecs.getEntityById(id);
 				if (sys?.components.isPhaseCapacitor) {
-					const {
-						capacity = 0,
-						chargeRate = 0,
-						storage = 0,
-					} = sys.components.isBattery || {};
-					const newCharge = Math.min(
-						capacity,
-						storage + chargeRate * elapsedHours,
-					);
+					const { capacity = 0, chargeRate = 0, storage = 0 } = sys.components.isBattery || {};
+					const newCharge = Math.min(capacity, storage + chargeRate * elapsedHours);
 					sys.updateComponent("isBattery", { storage: newCharge });
 				}
 			}

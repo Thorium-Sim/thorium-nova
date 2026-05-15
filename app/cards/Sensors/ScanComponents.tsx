@@ -8,9 +8,9 @@ import {
 	starScanTypes,
 } from "@thorium/utils/flags/scanTypes";
 import { capitalCase } from "change-case";
-import type { z } from "zod";
 import type { ReactNode } from "react";
 import { Button } from "react-aria-components";
+import type { z } from "zod";
 
 export const ScanComponents = {
 	shields: ShieldsResults,
@@ -22,15 +22,12 @@ export const ScanComponents = {
 	weapons: WeaponsResults,
 	engines: null,
 	damage: DamageResults,
-	communications: null,
+	communications: CommunicationsResults,
 	life: LifeResults,
 	atmosphere: AtmosphereResults,
 	temperature: TemperatureResults,
 };
-export function ScanResults({
-	objectId,
-	type,
-}: { objectId: number; type: string }) {
+export function ScanResults({ objectId, type }: { objectId: number; type: string }) {
 	const scans =
 		type === "ship"
 			? shipScanTypes
@@ -41,9 +38,7 @@ export function ScanResults({
 					: scanTypes.options;
 	return (
 		<div className="flex flex-col gap-1">
-			{["planet", "star"].includes(type) ? (
-				<IdentificationResults objectId={objectId} />
-			) : null}
+			{["planet", "star"].includes(type) ? <IdentificationResults objectId={objectId} /> : null}
 			{scans.map((value) => {
 				const ScanComponent = ScanComponents[value];
 				if (!ScanComponent) return;
@@ -69,12 +64,11 @@ function ResultsWrapper({
 
 	const [scans] = q.sensors.scans.useNetRequest({ shipId });
 	const isScanning = scans.some(
-		(scan) =>
-			scan.target === objectId && scan.type === scanType && scan.progress < 1,
+		(scan) => scan.target === objectId && scan.type === scanType && scan.progress < 1,
 	);
 	return (
 		<div>
-			<strong className="font-bold flex justify-between items-center">
+			<strong className="flex items-center justify-between font-bold">
 				<span>{capitalCase(scanType)}</span>
 				{isScanning ? (
 					<Button className="btn btn-xs btn-info" isDisabled>
@@ -180,9 +174,7 @@ function WeaponsResults({ objectId }: { objectId: number }) {
 				<div key={index} className="flex justify-between">
 					<span>{capitalCase(weapon.type)}</span>
 					<span>
-						{weapon.type === "phasers"
-							? `${Math.round(weapon.charge * 100)}%`
-							: `${weapon.loaded}`}
+						{weapon.type === "phasers" ? `${Math.round(weapon.charge * 100)}%` : `${weapon.loaded}`}
 					</span>
 				</div>
 			))}
@@ -218,15 +210,26 @@ function ShieldsResults({ objectId }: { objectId: number }) {
 
 	return (
 		<div>
-			<div>
-				Status: {results.shields.status === "up" ? "Raised" : "Lowered"}
-			</div>
+			<div>Status: {results.shields.status === "up" ? "Raised" : "Lowered"}</div>
 			<div>
 				Strength:{" "}
 				{typeof results.shields.strength === "number"
 					? `${Math.round(results.shields.strength * 100)}%`
 					: "0%"}
 			</div>
+		</div>
+	);
+}
+function CommunicationsResults({ objectId }: { objectId: number }) {
+	const { shipId } = useStation();
+
+	const [results] = q.sensors.scanResult.useNetRequest({ shipId, objectId });
+
+	if (!results.communications) return null;
+
+	return (
+		<div className="tabular-nums">
+			{results.communications.status} — {results.communications.frequency}
 		</div>
 	);
 }
@@ -242,7 +245,7 @@ function LifeResults({ objectId }: { objectId: number }) {
 			<div>Habitable: {results.life.isHabitable ? "Yes" : "No"}</div>
 			<div>Population: {results.life.population}</div>
 			<div>Lifeforms:</div>
-			<ul className="list-disc ml-6">
+			<ul className="ml-6 list-disc">
 				{results.life.lifeforms.map((l) => (
 					<li key={l}>{l}</li>
 				))}
@@ -258,7 +261,7 @@ function AtmosphereResults({ objectId }: { objectId: number }) {
 	if (!results.atmosphere) return null;
 
 	return (
-		<ul className="list-disc ml-6">
+		<ul className="ml-6 list-disc">
 			{results.atmosphere.atmosphere.map((a) => (
 				<li key={a.component}>
 					{a.component}: {a.concentration}%
@@ -276,9 +279,7 @@ function TemperatureResults({ objectId }: { objectId: number }) {
 
 	return (
 		<div>
-			<div>
-				Temperature: {results.temperature.temperature.toLocaleString()} K
-			</div>
+			<div>Temperature: {results.temperature.temperature.toLocaleString()} K</div>
 		</div>
 	);
 }

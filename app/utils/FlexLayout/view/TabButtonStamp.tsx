@@ -1,7 +1,8 @@
 import * as React from "react";
+
 import type { TabNode } from "../model/TabNode";
-import type { LayoutInternal } from "./Layout";
 import { CLASSES } from "../Types";
+import type { LayoutInternal } from "./Layout";
 import { getRenderStateEx } from "./Utils";
 
 /** @internal */
@@ -21,17 +22,13 @@ export const TabButtonStamp = (props: ITabButtonStampProps) => {
 	const renderState = getRenderStateEx(layout, node);
 
 	const content = renderState.content ? (
-		<div className={cm(CLASSES.FLEXLAYOUT__TAB_BUTTON_CONTENT)}>
-			{renderState.content}
-		</div>
+		<div className={cm(CLASSES.FLEXLAYOUT__TAB_BUTTON_CONTENT)}>{renderState.content}</div>
 	) : (
 		node.getNameForOverflowMenu()
 	);
 
 	const leading = renderState.leading ? (
-		<div className={cm(CLASSES.FLEXLAYOUT__TAB_BUTTON_LEADING)}>
-			{renderState.leading}
-		</div>
+		<div className={cm(CLASSES.FLEXLAYOUT__TAB_BUTTON_LEADING)}>{renderState.leading}</div>
 	) : null;
 
 	return (

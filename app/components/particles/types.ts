@@ -1,4 +1,5 @@
 import type { Color } from "three";
+
 import type { LinearSpline } from "./LinearSpline";
 
 export interface Angle {

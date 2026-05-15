@@ -1,8 +1,8 @@
-import { type ReactNode, useEffect, useReducer, useState } from "react";
-import uniqid from "@thorium/utils/uniqid";
-import { createPortal } from "react-dom";
 import { Icon } from "@thorium/ui/Icon";
 import { Transition } from "@thorium/ui/Transition";
+import uniqid from "@thorium/utils/uniqid";
+import { type ReactNode, useEffect, useReducer, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 // TODO September 25, 2025 - Replace this with React Aria Components
 const Toast = ({
@@ -18,42 +18,42 @@ const Toast = ({
 	dismiss: () => void;
 }) => {
 	return (
-		<Transition isOpen={visible}>
-			<div
-				className={`toast alert ${
-					color === "success"
-						? "alert-success"
-						: color === "warning"
-							? "alert-warning"
-							: color === "error"
-								? "alert-error"
-								: color === "info"
-									? "alert-info"
-									: color === "notice"
-										? "alert-notice"
-										: ""
-				} !block m-4 min-h-16 max-w-md ${
-					action ? "cursor-pointer" : "pointer-events-none"
-				}`}
-				onClick={() => {
-					action?.();
-					dismiss();
-				}}
-				onMouseEnter={() => pause()}
-				onMouseLeave={() => resume()}
-			>
-				<div className="w-full flex items-center justify-between">
-					<h5 className="font-bold text-xl whitespace-pre-wrap">{title}</h5>
-					<button
-						className="close p-1 rounded-full hover:bg-white/30 transition-colors pointer-events-auto ml-2"
-						aria-label="close"
-						onClick={() => dismiss()}
-					>
-						<Icon name="x" />
-					</button>
-				</div>
-				<p className="whitespace-pre-wrap">{body}</p>
+		<Transition
+			isOpen={visible}
+			className={`toast alert ${
+				color === "success"
+					? "alert-success"
+					: color === "warning"
+						? "alert-warning"
+						: color === "error"
+							? "alert-error"
+							: color === "info"
+								? "alert-info"
+								: color === "notice"
+									? "alert-notice"
+									: ""
+			} m-4 block! min-h-16 max-w-md ${
+				action ? "cursor-pointer" : "pointer-events-none"
+			} entering:opacity-0 exiting:opacity-0 exiting:pointer-events-none transition-all duration-500 data-entered:opacity-100! data-exited:hidden`}
+			onClick={() => {
+				action?.();
+				dismiss();
+			}}
+			onMouseEnter={() => pause()}
+			onMouseLeave={() => resume()}
+			afterLeave={() => dismiss()}
+		>
+			<div className="flex w-full items-center justify-between">
+				<h5 className="text-xl font-bold whitespace-pre-wrap">{title}</h5>
+				<button
+					className="close pointer-events-auto ml-2 rounded-full p-1 transition-colors hover:bg-white/30"
+					aria-label="close"
+					onClick={() => dismiss()}
+				>
+					<Icon name="x" />
+				</button>
 			</div>
+			<p className="whitespace-pre-wrap">{body}</p>
 		</Transition>
 	);
 };
@@ -82,19 +82,24 @@ function toastReducer(state: Notification[], action: Notification | string) {
 			return notification;
 		});
 	}
-	return [action, ...state];
+	return [...state, action];
 }
-export let toast = (
+export let toast: (
 	notification: Omit<Notification, "id" | "visible" | "pause" | "resume">,
-) => {};
+) => void = () => {};
 
 export default function ToastContainer() {
 	const [toasts, dispatch] = useReducer(toastReducer, []);
+	const toastsRef = useRef(toasts);
+	toastsRef.current = toasts;
+
 	useEffect(() => {
 		const timeouts: Record<string, ReturnType<typeof setTimeout>> = {};
-		toast = (
-			notification: Omit<Notification, "id" | "visible" | "pause" | "resume">,
-		) => {
+		toast = (notification: Omit<Notification, "id" | "visible" | "pause" | "resume">) => {
+			if (toastsRef.current.some((t) => t.visible && t.title === notification.title)) {
+				return;
+			}
+
 			const id = uniqid("tst-");
 			const { duration = 5000 } = notification;
 			dispatch({
@@ -122,7 +127,7 @@ export default function ToastContainer() {
 	useEffect(() => {
 		if (!portalRef) {
 			const div = document.createElement("div");
-			div.className = "toast-container";
+			div.className = "toast-container theme-container";
 			document.body.appendChild(div);
 			setPortalRef(div);
 		}

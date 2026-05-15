@@ -1,8 +1,8 @@
-import { NavLink } from "react-router";
+import { q } from "@thorium/context/AppContext";
 import Button from "@thorium/ui/Button";
-import { q, clientId } from "@thorium/context/AppContext";
-import { ErrorBoundary, useErrorBoundary } from "react-error-boundary";
 import { Suspense } from "react";
+import { ErrorBoundary, useErrorBoundary } from "react-error-boundary";
+import { NavLink } from "react-router";
 
 function ErrorBoundaryFallback() {
 	const eb = useErrorBoundary();
@@ -14,9 +14,7 @@ function ErrorBoundaryFallback() {
 }
 export const WelcomeButtons = ({ className }: { className?: string }) => {
 	return (
-		<div
-			className={`${className} flex flex-col justify-end self-end space-y-4 max-w-md h-full`}
-		>
+		<div className={`${className} flex h-full max-w-md flex-col justify-end space-y-4 self-end`}>
 			<ErrorBoundary fallback={<ErrorBoundaryFallback />}>
 				<Suspense>
 					<FlightButtons />
@@ -42,10 +40,7 @@ function FlightButtons() {
 					Go To Card Development
 				</NavLink>
 			)}
-			<Button
-				className="btn btn-error btn-outline"
-				onClick={() => q.flight.stop.netSend()}
-			>
+			<Button className="btn btn-error btn-outline" onClick={() => q.flight.stop.netSend()}>
 				Stop Flight
 			</Button>
 		</>
@@ -55,8 +50,6 @@ function FlightButtons() {
 }
 
 function ClientButtons() {
-	const [client] = q.client.get.useNetRequest({ clientId });
-
 	return (
 		<>
 			<NavLink className="btn btn-primary btn-outline" to="/flight/quick/ship">

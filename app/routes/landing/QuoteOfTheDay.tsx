@@ -377,7 +377,7 @@ const quotes = [
 	// Benjamin Brewster, via Dan Abramov
 	"In theory, there is no difference between theory and practice, but in practice there is.",
 	// E.B. White
-	"I arise in the morning torn between a desire to improve save the world and a desire to savor the world. This makes it hard to plan the day.",
+	"I arise in the morning torn between a desire to save the world and a desire to savor the world. This makes it hard to plan the day.",
 	// Winnie the Pooh
 	"Rivers know this: there is no hurry. We shall get there someday.",
 	"People say nothing is impossible, but I do nothing every day.",
@@ -388,12 +388,30 @@ const quotes = [
 	"Everything we know is something we figured out.",
 	// Turkish Saying
 	"The uncaught fish is always a big fish",
+	// Kohor
+	"You should have savored the good things in life. Now, you must ponder thoughtfully the end of all pleasure that comes with DEATH.",
+	// Random post
+	"A revolution must be started by yourself. An egg, opened from the outside, is food; opened from the inside, it is a new life.",
+	// Niko Stratis https://bsky.app/profile/nikostratis.com/post/3mgpgk4ivzk25
+	"You can't critique anything if you don't know how to love something.",
+	// Gwendolyn Brooks
+	"Go ahead and live your life. You might be surprised. The world might continue.",
+	// Bill McKibben
+	"What's the best thing I can do as an individual? Stop being an individual.",
+	// Rebecca Solnit
+	"Optimism and pessimism all assume we know the future, and therefore nothing is required from us. I think the future is radically uncertain, and therefore much is required of us.",
+	// Random Tumblr
+	"It feels good to hate, but we know hate is not allowed. So when someone tells us that we're allowed to hate someone else, we get so excited we forget that we're supposed to love everyone.",
+	// Adam Miller
+	"Something changes when you are in love. It's not just that a new person is added to your life, one person among many. It's that this new person changes for you what it means to be alive.",
+	// Clement Mok
+	"Remember, the music is not in the piano.",
 ];
 
 const QuoteOfTheDay = () => {
 	const quote = useRef(quotes[Math.floor(Math.random() * quotes.length)]);
 	return (
-		<h5 className="text-lg px-2 fixed bottom-0 right-0 text-white text-opacity-60 max-w-prose">
+		<h5 className="fixed right-0 bottom-0 max-w-prose px-2 text-lg text-white/60">
 			{quote.current}
 		</h5>
 	);

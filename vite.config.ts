@@ -1,16 +1,18 @@
-import { reactRouter } from "@react-router/dev/vite";
-import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { setDefaultResultOrder } from "node:dns";
+
 import mdx from "@mdx-js/rollup";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkMdxFrontmatter from "remark-mdx-frontmatter";
-import remarkMdxImages from "./scripts/remark-mdx-images";
+import { reactRouter } from "@react-router/dev/vite";
+import rehypeShiki from "@shikijs/rehype";
+import tailwindcss from "@tailwindcss/vite";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
-import rehypeShiki from "@shikijs/rehype";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkMdxFrontmatter from "remark-mdx-frontmatter";
+import { defineConfig } from "vite";
 import { iconsSpritesheet } from "vite-plugin-icons-spritesheet";
+
 import { componentDocs } from "./scripts/componentDocs";
+import remarkMdxImages from "./scripts/remark-mdx-images";
 // import { analyzer } from "vite-bundle-analyzer";
 // import Inspect from "vite-plugin-inspect";
 
@@ -19,7 +21,11 @@ setDefaultResultOrder("ipv4first");
 const port = Number(process.env.PORT) || 3000;
 
 export default defineConfig({
+	resolve: {
+		tsconfigPaths: true,
+	},
 	plugins: [
+		tailwindcss(),
 		// Inspect(),
 		// analyzer(),
 		mdx({
@@ -29,11 +35,7 @@ export default defineConfig({
 				// @ts-ignore
 				remarkMdxImages,
 			],
-			rehypePlugins: [
-				rehypeSlug,
-				rehypeAutolinkHeadings,
-				[rehypeShiki, { theme: "one-dark-pro" }],
-			],
+			rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings, [rehypeShiki, { theme: "one-dark-pro" }]],
 		}),
 		iconsSpritesheet({
 			// Defaults to false, should it generate TS types for you
@@ -44,21 +46,18 @@ export default defineConfig({
 			outputDir: "app/components/ui/icons",
 			// Output path for the generated type file, defaults to types.ts in outputDir
 			typesOutputFile: "app/components/ui/icons/name.d.ts",
-			// What formatter to use to format the generated files, prettier or biome, defaults to no formatter
-			// formatter: "biome",
 			// The path to the formatter config file, defaults to no path
 			// pathToFormatterConfig: "./biome.json",
 			iconNameTransformer: (name) => name,
 		}),
 		reactRouter(),
-		tsconfigPaths(),
 		componentDocs(),
 	],
 	build: {
 		outDir: "../build",
 		emptyOutDir: true,
 		rollupOptions: {
-			onwarn: (warning, warn) => {},
+			onwarn: () => {},
 		},
 	},
 

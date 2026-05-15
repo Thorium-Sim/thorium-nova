@@ -1,13 +1,14 @@
 import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
+import { useStation } from "@thorium/routes/station/useStation";
+import Button from "@thorium/ui/Button";
 import { cn } from "@thorium/utils/cn";
+import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import { megaWattHourToGigaJoule } from "@thorium/utils/unitTypes";
 import { useRef, useState } from "react";
+
 import LauncherImage from "./assets/launcher.svg";
 import href from "./assets/torpedoSprite.svg?url";
-import Button from "@thorium/ui/Button";
-import { toast } from "@thorium/context/ToastContext";
-import { LiveQueryError } from "@thorium/utils/live-query/client/client";
-import { useStation } from "@thorium/routes/station/useStation";
 
 export function Torpedoes() {
 	const { shipId } = useStation();
@@ -19,32 +20,26 @@ export function Torpedoes() {
 
 	return (
 		<>
-			<ul className="relative panel panel-alert min-h-16 overflow-y-auto">
-				{Object.entries(torpedoList ?? {}).map(
-					([id, { count, yield: torpedoYield, speed }]) => (
-						<li
-							key={id}
-							className={cn(
-								"list-group-item",
-								selectedTorpedo === id ? "selected" : "",
-							)}
-							onClick={() => setSelectedTorpedo(id)}
-						>
-							<div className="flex justify-between items-center">
-								<div className="flex-1 flex flex-col">
-									<span>{id}</span>
-									<span className="text-sm text-gray-400">
-										Yield: {megaWattHourToGigaJoule(torpedoYield)} GJ · Speed:{" "}
-										{speed} km/s
-									</span>
-								</div>
-								<div>{count}</div>
+			<ul className="panel panel-alert relative min-h-16 overflow-y-auto">
+				{Object.entries(torpedoList ?? {}).map(([id, { count, yield: torpedoYield, speed }]) => (
+					<li
+						key={id}
+						className={cn("list-group-item", selectedTorpedo === id ? "selected" : "")}
+						onClick={() => setSelectedTorpedo(id)}
+					>
+						<div className="flex items-center justify-between">
+							<div className="flex flex-1 flex-col">
+								<span>{id}</span>
+								<span className="text-sm text-gray-400">
+									Yield: {megaWattHourToGigaJoule(torpedoYield)} GJ · Speed: {speed} km/s
+								</span>
 							</div>
-						</li>
-					),
-				)}
+							<div>{count}</div>
+						</div>
+					</li>
+				))}
 			</ul>
-			<div className="overflow-y-auto flex flex-col flex-1 gap-4">
+			<div className="flex flex-1 flex-col gap-4 overflow-y-auto">
 				{torpedoLaunchers?.map((launcher) => (
 					<Launcher
 						launcherId={launcher.id}
@@ -80,23 +75,21 @@ function Launcher({
 	} | null;
 }) {
 	const torpedoRef = useRef<SVGSVGElement>(null);
-	const animationTime =
-		state === "loading" || state === "unloading" ? loadTime : 100;
+	const animationTime = state === "loading" || state === "unloading" ? loadTime : 100;
 	return (
 		<div className="select-none">
 			<p className="text-right">{name}</p>
 			<div className="relative">
 				<img draggable={false} src={LauncherImage} alt="Torpedo Launcher" />
-				<div className="absolute w-[54%] h-[calc(65%)] top-[4%] left-[39%] overflow-hidden pointer-events-none">
+				<div className="pointer-events-none absolute top-[4%] left-[39%] h-[calc(65%)] w-[54%] overflow-hidden">
 					<svg
-						className="absolute w-full h-full"
+						className="absolute h-full w-full"
 						ref={torpedoRef}
 						style={{
 							maskImage: "linear-gradient(to top, black 0%, transparent 100%)",
 							maskSize: "100% 200%",
 							maskRepeat: "no-repeat",
-							maskPosition:
-								state === "ready" || state === "unloading" ? "0 -100%" : "200%",
+							maskPosition: state === "ready" || state === "unloading" ? "0 -100%" : "200%",
 							transition: `mask-position ${animationTime}ms ease, transform ${animationTime}ms ease, opacity 1ms linear 500ms`,
 							transform:
 								state === "ready" || state === "unloading"
@@ -135,7 +128,7 @@ function Launcher({
 					</svg>
 				</div>
 			</div>
-			<div className="flex justify-center gap-2 mt-1">
+			<div className="mt-1 flex justify-center gap-2">
 				<div className="w-32" />
 				<Button
 					className={cn(
@@ -156,10 +149,7 @@ function Launcher({
 					{state === "loaded" ? "Unload" : "Load"}
 				</Button>
 				<Button
-					className={cn(
-						"btn-xs min-w-16",
-						state === "loaded" ? "btn-error" : "btn-disabled",
-					)}
+					className={cn("btn-xs min-w-16", state === "loaded" ? "btn-error" : "btn-disabled")}
 					onClick={async () => {
 						try {
 							if (state === "loaded") {

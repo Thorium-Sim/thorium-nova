@@ -31,9 +31,9 @@ export const shipMap = z
 							temperature: z.number(),
 						}),
 					),
-					flags: nodeFlagsSchema.array().optional(),
-					volume: z.number().optional(),
-					systems: z.string().array().optional(),
+					flags: nodeFlagsSchema.array(),
+					volume: z.number(),
+					systems: z.string().array(),
 				}),
 			)
 			.default([]),

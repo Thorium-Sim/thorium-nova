@@ -1,5 +1,3 @@
-import { q, clientId } from "@thorium/context/AppContext";
-import { PlayerLobby } from "./PlayerLobby";
 import { HostLobby } from "./HostLobby";
 
 export default function FlightLobby() {

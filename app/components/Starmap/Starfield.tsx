@@ -54,10 +54,7 @@ function makeLineGeometry(pointList: Vector3[]) {
 
 function getModelViewMatrix(mesh: Mesh | undefined | null, camera: Camera) {
 	if (!mesh) return new Matrix4();
-	return new Matrix4().multiplyMatrices(
-		camera.matrixWorldInverse,
-		mesh.matrixWorld,
-	);
+	return new Matrix4().multiplyMatrices(camera.matrixWorldInverse, mesh.matrixWorld);
 }
 
 const Starfield: React.FC<{ count?: number; radius?: number }> = ({
@@ -71,11 +68,7 @@ const Starfield: React.FC<{ count?: number; radius?: number }> = ({
 	const geometry = React.useMemo(() => {
 		const pointList: Vector3[] = [];
 		for (let f = 0; count > f; f++) {
-			const point = new Vector3(
-				Math.random() - 0.5,
-				Math.random() - 0.5,
-				Math.random() - 0.5,
-			);
+			const point = new Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
 			point.normalize();
 			const m = Math.random();
 			point.multiplyScalar(radius * (1 - m * m * m));
@@ -87,9 +80,7 @@ const Starfield: React.FC<{ count?: number; radius?: number }> = ({
 
 	const { camera } = useThree();
 	const material = React.useMemo(() => {
-		function makeStarfieldMaterial(
-			input: { color1?: string; color2?: string } = {},
-		) {
+		function makeStarfieldMaterial(input: { color1?: string; color2?: string } = {}) {
 			const uniforms = {
 				color1: {
 					type: "c",
@@ -227,24 +218,17 @@ const Starfield: React.FC<{ count?: number; radius?: number }> = ({
 		const mat = mesh.current?.material as ShaderMaterial;
 		if (!mesh.current) return;
 		if (mat) {
-			mat.uniforms.previousModelViewMatrix.value.copy(
-				previousModelViewMatrix.current,
-			);
+			mat.uniforms.previousModelViewMatrix.value.copy(previousModelViewMatrix.current);
 			mat.uniforms.time.value = time.current;
 			time.current += delta;
 			mat.uniforms.deltaTime.value = delta;
 			mat.uniforms.intensity.value = presenceRatio.current;
-			previousModelViewMatrix.current = getModelViewMatrix(
-				mesh.current,
-				state.camera,
-			);
+			previousModelViewMatrix.current = getModelViewMatrix(mesh.current, state.camera);
 		}
 		skip.current--;
 		if (mesh.current) mesh.current.visible = true;
 	});
-	return (
-		<mesh ref={mesh} geometry={geometry} material={material} visible={false} />
-	);
+	return <mesh ref={mesh} geometry={geometry} material={material} visible={false} />;
 };
 
 export default Starfield;

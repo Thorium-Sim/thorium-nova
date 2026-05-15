@@ -1,3 +1,5 @@
+import { SensorGrid } from "@thorium/cards/Legacy/SensorGrid/SensorGrid";
+import { sensorsSpeeds, useSensorsStore } from "@thorium/cards/Legacy/SensorGrid/useSensorsStore";
 import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
@@ -9,14 +11,11 @@ import { Joystick } from "@thorium/ui/Joystick";
 import Select from "@thorium/ui/Select";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import { cn } from "@thorium/utils/cn";
-import {
-	Suspense,
-	useEffect,
-	useRef,
-	useState,
-	type PointerEvent,
-	type ReactNode,
-} from "react";
+import { capitalCase } from "change-case";
+import chroma from "chroma-js";
+
+import "./style.css";
+import { Suspense, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
 import {
 	Header,
 	Menu,
@@ -25,15 +24,6 @@ import {
 	Popover,
 	Button as RAButton,
 } from "react-aria-components";
-import chroma from "chroma-js";
-import { capitalCase } from "change-case";
-import "./style.css";
-import { SensorGrid } from "@thorium/cards/Legacy/SensorGrid/SensorGrid";
-import {
-	sensorsSpeeds,
-	useSensorsStore,
-} from "@thorium/cards/Legacy/SensorGrid/useSensorsStore";
-import { isArmyContact } from "@thorium/ecs-components/legacySensorContact";
 
 export function LegacySensorGridCore() {
 	const [page, setPage] = useState<"Icons" | "Extras" | "Move">("Icons");
@@ -48,9 +38,7 @@ export function LegacySensorGridCore() {
 	const gridRef = useRef<HTMLDivElement>(null);
 	const draggingRef = useRef<HTMLDivElement>(null);
 
-	const [dragging, setDragging] = useState<
-		number | "planet" | "border" | "ping" | null
-	>(null);
+	const [dragging, setDragging] = useState<number | "planet" | "border" | "ping" | null>(null);
 
 	async function setDraggingContact(
 		armyContactId: number | "planet" | "border" | "ping",
@@ -59,10 +47,8 @@ export function LegacySensorGridCore() {
 	) {
 		if (!down) {
 			// Check if the contact is within the sensor grid area
-			const gridParentDimensions =
-				gridRef.current?.parentElement?.getBoundingClientRect();
-			const draggingDimensions =
-				draggingRef.current?.children[0]?.getBoundingClientRect();
+			const gridParentDimensions = gridRef.current?.parentElement?.getBoundingClientRect();
+			const draggingDimensions = draggingRef.current?.children[0]?.getBoundingClientRect();
 			if (!gridParentDimensions || !draggingDimensions) {
 				setDragging(null);
 				return;
@@ -114,13 +100,11 @@ export function LegacySensorGridCore() {
 		}
 	}
 
-	const selectedContact = contacts.find(
-		(c) => c.id === sensorsStore.selectedContact,
-	);
+	const selectedContact = contacts.find((c) => c.id === sensorsStore.selectedContact);
 
 	return (
-		<div className="grid grid-cols-3 h-full overflow-hidden justify-items-end">
-			<div className="w-full flex flex-col max-h-full h-full min-h-0 bg-black z-20">
+		<div className="grid h-full grid-cols-3 justify-items-end overflow-hidden">
+			<div className="z-20 flex h-full max-h-full min-h-0 w-full flex-col bg-black">
 				<Select
 					size="xxs"
 					items={sensorsSpeeds}
@@ -138,15 +122,13 @@ export function LegacySensorGridCore() {
 				/>
 				<div className="flex w-full gap-1">
 					<Button
-						className="flex-1 btn-xs btn-error"
-						onClick={() =>
-							q.legacy.sensorGrid.clearContacts.netSend({ shipId })
-						}
+						className="btn-xs btn-error flex-1"
+						onClick={() => q.legacy.sensorGrid.clearContacts.netSend({ shipId })}
 					>
 						Clear
 					</Button>
 					<Button
-						className="flex-1 btn-xs btn-warning"
+						className="btn-xs btn-warning flex-1"
 						onClick={() => q.legacy.sensorGrid.stopContacts.netSend({ shipId })}
 					>
 						Stop
@@ -154,7 +136,7 @@ export function LegacySensorGridCore() {
 					{sensors.frozen ? (
 						<>
 							<Button
-								className="flex-1 btn-xs btn-info"
+								className="btn-xs btn-info flex-1"
 								onClick={() =>
 									q.legacy.sensorGrid.unfreezeSensors.netSend({
 										shipId,
@@ -165,7 +147,7 @@ export function LegacySensorGridCore() {
 								Cancel
 							</Button>
 							<Button
-								className="flex-1 btn-xs btn-success"
+								className="btn-xs btn-success flex-1"
 								onClick={() =>
 									q.legacy.sensorGrid.unfreezeSensors.netSend({
 										shipId,
@@ -178,16 +160,14 @@ export function LegacySensorGridCore() {
 						</>
 					) : (
 						<Button
-							className="flex-1 btn-xs btn-info"
-							onClick={() =>
-								q.legacy.sensorGrid.freezeSensors.netSend({ shipId })
-							}
+							className="btn-xs btn-info flex-1"
+							onClick={() => q.legacy.sensorGrid.freezeSensors.netSend({ shipId })}
 						>
 							Freeze
 						</Button>
 					)}
 				</div>
-				<div className="flex btn-group">
+				<div className="btn-group flex">
 					<Button
 						className={cn("flex-1 btn-xs btn-success", {
 							"btn-active": page === "Icons",
@@ -261,7 +241,7 @@ export function LegacySensorGridCore() {
 				gridRef={gridRef}
 				draggingRef={draggingRef}
 				dragging={dragging}
-				className="col-span-2 p-8 bg-[rgb(8,13,19)]"
+				className="col-span-2 bg-[rgb(8,13,19)] p-8"
 			/>
 		</div>
 	);
@@ -276,9 +256,9 @@ function IconsPage({
 		down: boolean,
 	) => void;
 }) {
-	const [editContact, setEditContact] = useState<
-		number | "planet" | "border" | "ping" | null
-	>(null);
+	const [editContact, setEditContact] = useState<number | "planet" | "border" | "ping" | null>(
+		null,
+	);
 
 	const { shipId } = useStation();
 	const [contacts] = q.legacy.sensorGrid.armyContacts.useNetRequest({ shipId });
@@ -314,13 +294,11 @@ function IconsPage({
 		);
 	}
 	if (typeof editContact === "string") {
-		return (
-			<SpecialEditor close={() => setEditContact(null)} type={editContact} />
-		);
+		return <SpecialEditor close={() => setEditContact(null)} type={editContact} />;
 	}
 	return (
-		<div className="h-full flex flex-col">
-			<div className="flex-1 text-xs flex flex-col gap-1 px-2">
+		<div className="flex h-full flex-col">
+			<div className="flex flex-1 flex-col gap-1 px-2 text-xs">
 				{contacts.map((c) => (
 					<ArmyContact
 						key={c.id}
@@ -342,28 +320,24 @@ function IconsPage({
 				<div>
 					Planet
 					<div
-						className="w-5 h-5 bg-white border-2 border-gray-400 rounded-full cursor-pointer"
+						className="h-5 w-5 cursor-pointer rounded-full border-2 border-gray-400 bg-white"
 						onPointerDown={handleArmyDrag(
 							(pos, down) => setDraggingContact("planet", pos, down),
 							() => setEditContact("planet"),
 						)}
 						style={{
 							backgroundColor: sensorsStore.planet.color,
-							borderColor: chroma(sensorsStore.planet.color)
-								.darken()
-								.css("rgb"),
+							borderColor: chroma(sensorsStore.planet.color).darken().css("rgb"),
 						}}
 					/>
 				</div>
 				<div>
 					Border
 					<div
-						className="w-8 h-3 mt-1 bg-white border-2 border-gray-400 cursor-pointer"
+						className="mt-1 h-3 w-8 cursor-pointer border-2 border-gray-400 bg-white"
 						style={{
 							backgroundColor: sensorsStore.border.color,
-							borderColor: chroma(sensorsStore.border.color)
-								.darken()
-								.css("rgb"),
+							borderColor: chroma(sensorsStore.border.color).darken().css("rgb"),
 						}}
 						onPointerDown={handleArmyDrag(
 							(pos, down) => setDraggingContact("border", pos, down),
@@ -374,12 +348,10 @@ function IconsPage({
 				<div>
 					Ping
 					<div
-						className="w-5 h-5 bg-white/20 border-2 border-gray-400 rounded-full cursor-pointer shadow-[inset_0_0_6px_rgba(255,255,255,1)]"
+						className="h-5 w-5 cursor-pointer rounded-full border-2 border-gray-400 bg-white/20 shadow-[inset_0_0_6px_rgba(255,255,255,1)]"
 						style={{
 							borderColor: chroma(sensorsStore.ping.color).darken().css("rgb"),
-							backgroundColor: chroma(sensorsStore.ping.color)
-								.alpha(0.2)
-								.css("rgb"),
+							backgroundColor: chroma(sensorsStore.ping.color).alpha(0.2).css("rgb"),
 							boxShadow: `inset 0 0 6px ${sensorsStore.ping.color}`,
 						}}
 						onPointerDown={handleArmyDrag(
@@ -405,10 +377,10 @@ function IconsPage({
 							</Button>
 						) : (
 							<MenuTrigger>
-								<RAButton className="btn flex btn-xs btn-success">Go</RAButton>
+								<RAButton className="btn btn-xs btn-success flex">Go</RAButton>
 								<Popover>
-									<Menu className="text-sm bg-black text-white border border-white/50 rounded py-2">
-										<Header className="font-bold px-2">Density</Header>
+									<Menu className="rounded border border-white/50 bg-black py-2 text-sm text-white">
+										<Header className="px-2 font-bold">Density</Header>
 										<MenuItem
 											className="px-2"
 											onAction={() =>
@@ -453,15 +425,12 @@ function IconsPage({
 	);
 }
 
-function SpecialEditor({
-	close,
-	type,
-}: { type: "planet" | "border" | "ping"; close: () => void }) {
+function SpecialEditor({ close, type }: { type: "planet" | "border" | "ping"; close: () => void }) {
 	const sensorStore = useSensorsStore();
 	const contact = sensorStore[type];
 
 	return (
-		<div className="text-xs flex flex-col overflow-y-auto h-full">
+		<div className="flex h-full flex-col overflow-y-auto text-xs">
 			<p>Edit {capitalCase(type)}</p>
 			{type !== "ping" ? (
 				<>
@@ -488,12 +457,9 @@ function SpecialEditor({
 								}))
 							}
 						>
-							<RAButton className="w-full max-w-32 aspect-square border-2 border-white/30 rounded bg-gray-900 p-2">
+							<RAButton className="aspect-square w-full max-w-32 rounded border-2 border-white/30 bg-gray-900 p-2">
 								<Suspense>
-									<SVGImageLoader
-										className="w-full h-full  object-contain"
-										url={contact.picture}
-									/>
+									<SVGImageLoader className="h-full w-full object-contain" url={contact.picture} />
 								</Suspense>
 							</RAButton>
 						</FilesMenu>
@@ -515,9 +481,7 @@ function SpecialEditor({
 			</label>
 			{type !== "border" ? (
 				<label>
-					<p className="tabular-nums">
-						Size ({Math.round(contact.size * 100)}% of grid diameter)
-					</p>
+					<p className="tabular-nums">Size ({Math.round(contact.size * 100)}% of grid diameter)</p>
 					<input
 						type="range"
 						defaultValue={contact.size}
@@ -594,7 +558,7 @@ function ContactEditor({
 		setOptimisticColor(color);
 	}, [color]);
 	return (
-		<div className="text-xs flex flex-col overflow-y-auto h-full">
+		<div className="flex h-full flex-col overflow-y-auto text-xs">
 			<Input
 				label="Contact Label"
 				className="input-xs"
@@ -616,9 +580,9 @@ function ContactEditor({
 								})
 							}
 						>
-							<RAButton className="w-full max-w-32 aspect-square border-2 border-white/30 rounded bg-gray-900 p-2">
+							<RAButton className="aspect-square w-full max-w-32 rounded border-2 border-white/30 bg-gray-900 p-2">
 								<SVGImageLoader
-									className="w-full h-full object-contain"
+									className="h-full w-full object-contain"
 									style={{ color: optimisticColor }}
 									url={icon}
 								/>
@@ -639,11 +603,8 @@ function ContactEditor({
 								})
 							}
 						>
-							<RAButton className="w-full max-w-32 aspect-square border-2 border-white/30 rounded bg-gray-900 p-2">
-								<SVGImageLoader
-									className="w-full h-full  object-contain"
-									url={picture || ""}
-								/>
+							<RAButton className="aspect-square w-full max-w-32 rounded border-2 border-white/30 bg-gray-900 p-2">
+								<SVGImageLoader className="h-full w-full object-contain" url={picture || ""} />
 							</RAButton>
 						</FilesMenu>
 					</Suspense>
@@ -763,9 +724,7 @@ function handleArmyDrag(
 		document.addEventListener(
 			"pointermove",
 			(event) => {
-				if (
-					Math.hypot(offset[0] - event.clientX, offset[1] - event.clientY) >= 5
-				) {
+				if (Math.hypot(offset[0] - event.clientX, offset[1] - event.clientY) >= 5) {
 					setDraggingContact([event.clientX, event.clientY], true);
 				}
 			},
@@ -776,9 +735,7 @@ function handleArmyDrag(
 			(event) => {
 				setDraggingContact([event.clientX, event.clientY], false);
 
-				if (
-					Math.hypot(offset[0] - event.clientX, offset[1] - event.clientY) < 5
-				) {
+				if (Math.hypot(offset[0] - event.clientX, offset[1] - event.clientY) < 5) {
 					onSelect();
 				}
 				abortController.abort();
@@ -800,23 +757,16 @@ function ArmyContact({
 	icon: string;
 	color: string;
 	onSelect: () => void;
-	setDraggingContact: (
-		armyContactId: number,
-		position: [number, number],
-		down: boolean,
-	) => void;
+	setDraggingContact: (armyContactId: number, position: [number, number], down: boolean) => void;
 }) {
 	return (
 		<div key={id} className="flex gap-2" onPointerDown={onSelect}>
 			<Suspense fallback={<div className="h-4 w-4" />}>
 				<SVGImageLoader
 					url={icon}
-					className="h-4 aspect-square cursor-pointer object-contain"
+					className="aspect-square h-4 cursor-pointer object-contain"
 					style={{ color }}
-					onPointerDown={handleArmyDrag(
-						(pos, down) => setDraggingContact(id, pos, down),
-						onSelect,
-					)}
+					onPointerDown={handleArmyDrag((pos, down) => setDraggingContact(id, pos, down), onSelect)}
 					onLoad={() => {}}
 				/>
 			</Suspense>
@@ -831,11 +781,7 @@ function ExtrasPage() {
 
 	const store = useSensorsStore();
 
-	function nudge({
-		x = 0,
-		y = 0,
-		yaw = 0,
-	}: { x?: number; y?: number; yaw?: number }) {
+	function nudge({ x = 0, y = 0, yaw = 0 }: { x?: number; y?: number; yaw?: number }) {
 		q.legacy.sensorGrid.nudge.netSend({
 			shipId,
 			nudge: {
@@ -846,20 +792,20 @@ function ExtrasPage() {
 		});
 	}
 	return (
-		<div className="overflow-y-auto flex-1">
+		<div className="flex-1 overflow-y-auto">
 			<div className="flex justify-between">
 				<div className="flex-1">
 					<Select
 						size="xxs"
-						items={[100, 90, 75, 60, 50, 45, 30, 20, 15, 10, 7, 5, 3, 2, 1].map(
-							(i) => ({ id: i, label: `${i}` }),
-						)}
+						items={[100, 90, 75, 60, 50, 45, 30, 20, 15, 10, 7, 5, 3, 2, 1].map((i) => ({
+							id: i,
+							label: `${i}`,
+						}))}
 						label="Nudge Distance"
 						labelProps={{ className: "text-xs" }}
 						selected={store.nudgeDistance}
 						setSelected={(value) => {
-							!Array.isArray(value) &&
-								value &&
+							if (!Array.isArray(value) && value)
 								useSensorsStore.setState({ nudgeDistance: value });
 						}}
 					/>
@@ -987,13 +933,10 @@ function MovePage() {
 					});
 				}}
 			>
-				<div className="bg-white/50 w-full h-px absolute" />
-				<div className="bg-white/50 w-px h-full absolute" />
+				<div className="absolute h-px w-full bg-white/50" />
+				<div className="absolute h-full w-px bg-white/50" />
 			</Joystick>
-			<Button
-				className="btn-xs btn-warning"
-				onClick={() => ref.current?.reset()}
-			>
+			<Button className="btn-xs btn-warning" onClick={() => ref.current?.reset()}>
 				Reset
 			</Button>
 		</div>

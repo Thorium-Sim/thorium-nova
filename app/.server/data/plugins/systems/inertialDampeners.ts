@@ -1,14 +1,10 @@
 import type InertialDampenersPlugin from "@thorium/.server/classes/Plugins/ShipSystems/InertialDampeners";
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
-import {
-	getShipSystem,
-	getShipSystemForInput,
-	pluginFilter,
-	systemInput,
-} from "../utils";
+import z from "zod";
+
+import { getShipSystem, getShipSystemForInput, pluginFilter, systemInput } from "../utils";
 
 export const inertialDampeners = t.router({
 	get: t.procedure
@@ -17,8 +13,7 @@ export const inertialDampeners = t.router({
 		.request(({ ctx, input }) => {
 			const system = getShipSystem({ input, ctx });
 
-			if (system.type !== "inertialDampeners")
-				throw new Error("System is not Inertial Dampeners");
+			if (system.type !== "inertialDampeners") throw new Error("System is not Inertial Dampeners");
 
 			return system as InertialDampenersPlugin;
 		}),
@@ -34,10 +29,7 @@ export const inertialDampeners = t.router({
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
-			const [system, override] = getShipSystemForInput<"inertialDampeners">(
-				ctx,
-				input,
-			);
+			const [system, override] = getShipSystemForInput<"inertialDampeners">(ctx, input);
 			const shipSystem = override || system;
 
 			if (typeof input.dampening === "number" && input.dampening > 0) {

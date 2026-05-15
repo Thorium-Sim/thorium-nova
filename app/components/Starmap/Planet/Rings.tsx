@@ -1,18 +1,13 @@
 import { useTexture } from "@react-three/drei";
 import React from "react";
-
 import { type BufferAttribute, DoubleSide, RingGeometry, Vector3 } from "three";
-import { whiteImage } from "../whiteImage";
 
 interface RingsProps {
 	texture: string;
 	wireframe?: boolean;
 }
 
-export const Rings: React.FC<RingsProps> = ({
-	texture = whiteImage,
-	wireframe,
-}) => {
+export const Rings: React.FC<RingsProps> = ({ texture, wireframe }) => {
 	const rings = useTexture(texture);
 	const geo = React.useMemo(() => {
 		const geometry = new RingGeometry(1.5, 3, 64);
@@ -27,12 +22,7 @@ export const Rings: React.FC<RingsProps> = ({
 		return geometry;
 	}, []);
 	return (
-		<mesh
-			rotation={[Math.PI / 2, 0, 0]}
-			scale={[0.7, 0.7, 0.7]}
-			geometry={geo}
-			receiveShadow
-		>
+		<mesh rotation={[Math.PI / 2, 0, 0]} scale={[0.7, 0.7, 0.7]} geometry={geo} receiveShadow>
 			<meshPhongMaterial
 				map={wireframe ? undefined : rings}
 				color={0xffffff}

@@ -1,13 +1,14 @@
 import StarPlugin from "@thorium/.server/classes/Plugins/Universe/Star";
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
-import { getSolarSystem } from "../utils";
 import { spectralTypes, starTypes } from "@thorium/utils/flags/starTypes";
-import { randomFromRange } from "@thorium/utils/operations/randomFromRange";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import { getAlphabet } from "@thorium/utils/getAlphabet";
+import { randomFromRange } from "@thorium/utils/operations/randomFromRange";
+import z from "zod";
+
+import { getSolarSystem } from "../utils";
 
 /**
  * The distance between stars in the same system.
@@ -25,16 +26,10 @@ export const star = t.router({
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
-			const solarSystem = getSolarSystem(
-				ctx,
-				input.pluginId,
-				input.solarSystemId,
-			);
+			const solarSystem = getSolarSystem(ctx, input.pluginId, input.solarSystemId);
 			const childrenStars = solarSystem.stars;
 
-			const starType = starTypes.find(
-				(s) => s.spectralType === input.spectralType,
-			);
+			const starType = starTypes.find((s) => s.spectralType === input.spectralType);
 			if (solarSystem.stars.length >= 3) {
 				throw new Error(`Only 3 stars are allowed`);
 			}
@@ -44,9 +39,7 @@ export const star = t.router({
 			}
 
 			// Let's assume that there are fewer than 3 stars in the system.
-			const name = `${solarSystem.name} ${getAlphabet(
-				solarSystem.stars.length,
-			)}`;
+			const name = `${solarSystem.name} ${getAlphabet(solarSystem.stars.length)}`;
 
 			const radius = randomFromRange(starType.radiusRange);
 
@@ -64,8 +57,7 @@ export const star = t.router({
 			if (childrenStars.length === 2) {
 				const star1 = childrenStars[0];
 				const star2 = childrenStars[1];
-				semiMajorAxis =
-					(radius + (star1.radius || 0) + (star2.radius || 0)) * STAR_DISTANCE;
+				semiMajorAxis = (radius + (star1.radius || 0) + (star2.radius || 0)) * STAR_DISTANCE;
 				orbitalArc = (star1.satellite?.orbitalArc || 0) + 120;
 				if (star1.satellite) {
 					star1.satellite.semiMajorAxis = semiMajorAxis;
@@ -118,11 +110,7 @@ export const star = t.router({
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
-			const solarSystem = getSolarSystem(
-				ctx,
-				input.pluginId,
-				input.solarSystemId,
-			);
+			const solarSystem = getSolarSystem(ctx, input.pluginId, input.solarSystemId);
 			const star = solarSystem.stars.find((s) => s.name === input.starId);
 			if (!star) {
 				throw new Error(`No star found with id ${input.starId}`);
@@ -151,11 +139,7 @@ export const star = t.router({
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
-			const solarSystem = getSolarSystem(
-				ctx,
-				input.pluginId,
-				input.solarSystemId,
-			);
+			const solarSystem = getSolarSystem(ctx, input.pluginId, input.solarSystemId);
 			const star = solarSystem.stars.find((s) => s.name === input.starId);
 			if (!star) {
 				throw new Error(`No star found with id ${input.starId}`);

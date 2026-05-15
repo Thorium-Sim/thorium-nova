@@ -13,11 +13,7 @@ export class LegacyCoolantTransferSystem extends System {
 		const coolant = entity.components.legacyCoolant;
 		if (!coolantTank || !coolant) return;
 
-		if (
-			coolantTank.transferSystem === null ||
-			coolantTank.transferSystem === -1
-		)
-			return;
+		if (coolantTank.transferSystem === null || coolantTank.transferSystem === -1) return;
 		if (coolantTank.transferDirection === "out" && coolant.coolant <= 0) return;
 		if (coolantTank.transferDirection === "in" && coolant.coolant >= 1) return;
 
@@ -41,11 +37,7 @@ export class LegacyCoolantTransferSystem extends System {
 				1,
 				Math.max(
 					0,
-					coolant.coolant +
-						transferRate *
-							coolant.coolantTransferRate *
-							tankRate *
-							elapsedRatio,
+					coolant.coolant + transferRate * coolant.coolantTransferRate * tankRate * elapsedRatio,
 				),
 			),
 		});
@@ -53,10 +45,7 @@ export class LegacyCoolantTransferSystem extends System {
 		transferSystem.updateComponent("legacyCoolant", {
 			coolant: Math.min(
 				1,
-				Math.max(
-					0,
-					systemCoolant.coolant + transferRate * systemRate * elapsedRatio,
-				),
+				Math.max(0, systemCoolant.coolant + transferRate * systemRate * elapsedRatio),
 			),
 		});
 

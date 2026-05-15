@@ -7,6 +7,7 @@ import {
 	type ComponentIds,
 	type ComponentProperties as Components,
 } from "@thorium/ecs-components";
+
 import type ECS from "./ecs";
 import type System from "./system";
 import { DefaultUIDGenerator, UIDGenerator } from "./uid";
@@ -89,11 +90,9 @@ class Entity {
 			const component = allComponents[componentId as ComponentIds];
 			const data = components[componentId as ComponentIds];
 			try {
-				this.components[componentId as ComponentIds] = component.parse(
-					data,
-				) as any;
+				this.components[componentId as ComponentIds] = component.parse(data) as any;
 			} catch (err) {
-				console.error("Error initializing component:", componentId, err);
+				console.error("Error initializing component:", componentId, data, err);
 			}
 		}
 	}
@@ -103,16 +102,27 @@ class Entity {
 			components: Object.fromEntries(
 				Object.entries(this.components).map(([key, comp]) => {
 					if (comp && "shipSystems" in comp && key === "shipSystems") {
-						return [
-							key,
-							{ ...comp, shipSystems: Array.from(comp.shipSystems.entries()) },
-						];
+						return [key, { ...comp, shipSystems: Array.from(comp.shipSystems.entries()) }];
 					}
 					if (key === "physicsHandles") {
 						return [key, { handles: new Map() }];
 					}
 					if (key === "nearbyObjects") {
 						return [key, { objects: new Map() }];
+					}
+					if (key === "isConversation" && comp && "inkStory" in comp) {
+						const { conversationState, inkFilePath, currentChoices, currentDialogue, inkStory } =
+							comp;
+						const state = inkStory?.state.ToJson() || conversationState;
+						return [
+							key,
+							{
+								conversationState: state,
+								inkFilePath,
+								currentChoices,
+								currentDialogue,
+							},
+						];
 					}
 					return [key, comp];
 				}),
@@ -189,10 +199,11 @@ class Entity {
 	 * @param {Object} data Component data.
 	 * @param autoPublish
 	 */
-	async addComponent<
-		Name extends keyof Components,
-		Data extends Components[Name],
-	>(name: Name, data: Partial<Data> = {}, autoPublish?: boolean) {
+	addComponent<Name extends keyof Components, Data extends Components[Name]>(
+		name: Name,
+		data: Partial<Data> = {},
+		autoPublish?: boolean,
+	) {
 		const component = allComponents[name as ComponentIds];
 		try {
 			const componentData = component.parse(data) as Data;

@@ -1,11 +1,12 @@
-import { useParams } from "react-router";
-import Input from "@thorium/ui/Input";
-import { toast } from "@thorium/context/ToastContext";
-import { useContext, useReducer } from "react";
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
-import { OverrideResetButton } from "../OverrideResetButton";
-import { q } from "@thorium/context/AppContext";
 import { Navigate } from "@thorium/components/Navigate";
+import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import { toast } from "@thorium/context/ToastContext";
+import Input from "@thorium/ui/Input";
+import { useContext, useReducer } from "react";
+import { useParams } from "react-router";
+
+import { OverrideResetButton } from "../OverrideResetButton";
 
 export default function TorpedoLauncherConfig() {
 	const { pluginId, systemId, shipId } = useParams() as {
@@ -30,7 +31,7 @@ export default function TorpedoLauncherConfig() {
 		<fieldset key={key} className="flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -40,8 +41,7 @@ export default function TorpedoLauncherConfig() {
 							helperText={"How long it takes to load a torpedo in milliseconds"}
 							defaultValue={system.loadTime}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.torpedoLauncher.update.netSend({
 										pluginId,
@@ -61,14 +61,10 @@ export default function TorpedoLauncherConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="loadTime"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="loadTime" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -78,8 +74,7 @@ export default function TorpedoLauncherConfig() {
 							helperText={"How long it takes to fire a torpedo in milliseconds"}
 							defaultValue={system.fireTime}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.torpedoLauncher.update.netSend({
 										pluginId,
@@ -99,14 +94,10 @@ export default function TorpedoLauncherConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="fireTime"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="fireTime" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -118,8 +109,7 @@ export default function TorpedoLauncherConfig() {
 							}
 							defaultValue={system.headingDegree}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.torpedoLauncher.update.netSend({
 										pluginId,
@@ -139,14 +129,10 @@ export default function TorpedoLauncherConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="headingDegree"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="headingDegree" setRekey={setRekey} className="mt-6" />
 					</div>
 
-					<div className="pb-2 flex">
+					<div className="flex pb-2">
 						<Input
 							labelHidden={false}
 							inputMode="numeric"
@@ -158,8 +144,7 @@ export default function TorpedoLauncherConfig() {
 							}
 							defaultValue={system.pitchDegree}
 							onBlur={async (e) => {
-								if (!e.target.value || Number.isNaN(Number(e.target.value)))
-									return;
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
 									await q.plugin.systems.torpedoLauncher.update.netSend({
 										pluginId,
@@ -179,11 +164,7 @@ export default function TorpedoLauncherConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton
-							property="pitchDegree"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
+						<OverrideResetButton property="pitchDegree" setRekey={setRekey} className="mt-6" />
 					</div>
 				</div>
 			</div>

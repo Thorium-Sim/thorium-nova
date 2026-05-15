@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useGetStarmapStore } from "./starmapStore";
 import { useParams } from "react-router";
+
+import { useGetStarmapStore } from "./starmapStore";
 
 export function useSystemIds() {
 	const { pluginId, systemId } = useParams();

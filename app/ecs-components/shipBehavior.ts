@@ -1,7 +1,4 @@
-import {
-	shipActions,
-	shipObjectives,
-} from "@thorium/utils/flags/shipObjectives";
+import { shipActions, shipObjectives } from "@thorium/utils/flags/shipObjectives";
 import z from "zod";
 
 const target = z

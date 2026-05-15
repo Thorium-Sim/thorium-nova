@@ -1,13 +1,11 @@
-import { useParams, useNavigate } from "react-router";
-import { Fragment, useState } from "react";
-import Input from "@thorium/ui/Input";
-import TagInput from "@thorium/ui/TagInput";
-import { toast } from "@thorium/context/ToastContext";
-import SearchableList from "@thorium/ui/SearchableList";
-import { q } from "@thorium/context/AppContext";
-import { Icon } from "@thorium/ui/Icon";
 import { Navigate } from "@thorium/components/Navigate";
+import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
+import Input from "@thorium/ui/Input";
 import Select from "@thorium/ui/Select";
+import TagInput from "@thorium/ui/TagInput";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router";
 
 export default function Basic() {
 	const { pluginId, shipId } = useParams() as {
@@ -21,7 +19,7 @@ export default function Basic() {
 	const navigate = useNavigate();
 	if (!ship) return <Navigate to={`/config/${pluginId}/ships`} />;
 	return (
-		<fieldset key={shipId} className="flex-1 overflow-y-auto max-w-3xl">
+		<fieldset key={shipId} className="max-w-3xl flex-1 overflow-y-auto">
 			<div className="flex flex-wrap">
 				<div className="flex-1 pr-4">
 					<div className="pb-4">
@@ -109,11 +107,7 @@ export default function Basic() {
 
 					<Select
 						label="Theme"
-						selected={
-							ship.theme
-								? [ship.theme.themeId, ship.theme.pluginId].join(":::")
-								: null
-						}
+						selected={ship.theme ? [ship.theme.themeId, ship.theme.pluginId].join(":::") : null}
 						setSelected={(id) => {
 							if (typeof id !== "string") return;
 							const [themeId, themePlugin] = id.split(":::");

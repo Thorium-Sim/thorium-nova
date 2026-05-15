@@ -34,12 +34,7 @@
 	animation-play-state: paused;
 	animation-duration: 6.5s;
 	animation-timing-function: cubic-bezier(1, 0, 0, 1);
-	mask-image: radial-gradient(
-		transparent 0%,
-		black 0.1%,
-		black 10%,
-		rgba(0, 0, 0, 0) 20%
-	);
+	mask-image: radial-gradient(transparent 0%, black 0.1%, black 10%, rgba(0, 0, 0, 0) 20%);
 	mask-size: 1% 1%;
 	mask-repeat: no-repeat;
 	mask-position: center;

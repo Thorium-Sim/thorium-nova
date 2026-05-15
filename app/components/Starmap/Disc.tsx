@@ -25,11 +25,7 @@ function makeDiscGeometry(t: any, n: any, i: any, r: any = 128) {
 		h < n.length;
 		h++
 	)
-		for (
-			var d = h * r, f = n[h], p = t.clone().multiplyScalar(i[h]), m = 0;
-			r > m;
-			m++
-		) {
+		for (var d = h * r, f = n[h], p = t.clone().multiplyScalar(i[h]), m = 0; r > m; m++) {
 			var v = 3 * (d + m);
 			const g = (2 * Math.PI * m) / r;
 			l[v] = f * Math.cos(g);
@@ -76,12 +72,7 @@ const Disc: React.FC<{
 	position?: any;
 	scale?: any;
 	color?: ColorRepresentation;
-}> = ({
-	habitableZoneInner,
-	habitableZoneOuter,
-	color = "rgb(0,55,33)",
-	...props
-}) => {
+}> = ({ habitableZoneInner, habitableZoneOuter, color = "rgb(0,55,33)", ...props }) => {
 	const geometry = React.useMemo(() => {
 		const offset1: vec4 = [
 			Math.max(0, lerp(habitableZoneInner, habitableZoneOuter, 0)),

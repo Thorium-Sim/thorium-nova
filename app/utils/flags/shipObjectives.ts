@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 
 /**
  * Long-term goals
@@ -8,14 +8,7 @@ import { z } from "zod";
  * - defend: move towards a target and defend it, regardless of own safety
  * - avoid: move away from a target
  */
-export const shipObjectives = z.enum([
-	"hold",
-	"patrol",
-	"follow",
-	"attack",
-	"defend",
-	"avoid",
-]);
+export const shipObjectives = z.enum(["hold", "patrol", "follow", "attack", "defend", "avoid"]);
 
 /**
  * Immediate behaviors

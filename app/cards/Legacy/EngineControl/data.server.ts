@@ -30,8 +30,7 @@ export const engineControl = t.router({
 					? {
 							id: warpEngines.id,
 							name: warpEngines.components.identity?.name || "Warp Engines",
-							currentWarpFactor:
-								warpEngines.components.isWarpEngines.currentWarpFactor,
+							currentWarpFactor: warpEngines.components.isWarpEngines.currentWarpFactor,
 							speeds: warpEngines.components.isWarpEngines.speeds,
 							nominalHeat: warpEngines.components.heat?.nominalHeat,
 							maxHeat: warpEngines.components.heat?.maxHeat,
@@ -40,13 +39,10 @@ export const engineControl = t.router({
 				impulseEngines: impulseEngines?.components.isImpulseEngines
 					? {
 							id: impulseEngines.id,
-							name:
-								impulseEngines.components.identity?.name || "Impulse Engines",
+							name: impulseEngines.components.identity?.name || "Impulse Engines",
 							speeds: impulseEngines.components.isImpulseEngines.speeds,
-							currentSpeed:
-								impulseEngines.components.isImpulseEngines.targetSpeed,
-							cruisingSpeed:
-								impulseEngines.components.isImpulseEngines.cruisingSpeed,
+							currentSpeed: impulseEngines.components.isImpulseEngines.targetSpeed,
+							cruisingSpeed: impulseEngines.components.isImpulseEngines.cruisingSpeed,
 							nominalHeat: impulseEngines.components.heat?.nominalHeat,
 							maxHeat: impulseEngines.components.heat?.maxHeat,
 						}
@@ -74,27 +70,19 @@ export const engineControl = t.router({
 				warpEngine?.updateComponent("isWarpEngines", {
 					currentWarpFactor: 0,
 				});
-				const speedCount =
-					impulseEngine.components.isImpulseEngines?.speeds.length || 2;
+				const speedCount = impulseEngine.components.isImpulseEngines?.speeds.length || 2;
 				const power = impulseEngine.components.power;
 				const currentPower = power?.currentPower || 0;
-				const maxIndex = getMaxSpeedIndex(
-					power?.powerLevels || [],
-					currentPower,
-				);
+				const maxIndex = getMaxSpeedIndex(power?.powerLevels || [], currentPower);
 				if (maxIndex < 0) {
 					impulseEngine?.updateComponent("isImpulseEngines", {
 						targetSpeed: 0,
 					});
 				} else {
 					const speedIncrement =
-						(impulseEngine.components.isImpulseEngines?.cruisingSpeed || 0) /
-						(speedCount - 1);
+						(impulseEngine.components.isImpulseEngines?.cruisingSpeed || 0) / (speedCount - 1);
 
-					const speedIndex = Math.min(
-						maxIndex * speedCount,
-						input.impulseSpeedIndex + 1,
-					);
+					const speedIndex = Math.min(maxIndex * speedCount, input.impulseSpeedIndex + 1);
 					const speed = speedIncrement * speedIndex;
 					impulseEngine?.updateComponent("isImpulseEngines", {
 						targetSpeed: speed,
@@ -103,12 +91,8 @@ export const engineControl = t.router({
 			} else if (typeof input.warpSpeedIndex === "number") {
 				const power = warpEngine.components.power;
 				const currentPower = power?.currentPower || 0;
-				const speedCount =
-					warpEngine.components.isWarpEngines?.speeds.length || 0;
-				const maxIndex = getMaxSpeedIndex(
-					power?.powerLevels || [],
-					currentPower,
-				);
+				const speedCount = warpEngine.components.isWarpEngines?.speeds.length || 0;
+				const maxIndex = getMaxSpeedIndex(power?.powerLevels || [], currentPower);
 				warpEngine?.updateComponent("isWarpEngines", {
 					currentWarpFactor: Math.trunc(
 						Math.min(Math.max(0, maxIndex * speedCount), input.warpSpeedIndex),

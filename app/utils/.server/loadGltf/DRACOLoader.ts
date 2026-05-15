@@ -1,6 +1,8 @@
 import { dirname, sep } from "node:path";
 import { Worker } from "node:worker_threads";
+
 import { BufferAttribute, BufferGeometry, Loader } from "three";
+
 import { FileLoader } from "./FileLoader";
 
 const _taskCache = new WeakMap();
@@ -85,10 +87,7 @@ export class DRACOLoader extends Loader {
 		this.decodeGeometry(buffer, taskConfig).then(callback);
 	}
 
-	decodeGeometry(
-		buffer: ArrayBuffer,
-		taskConfig: any,
-	): Promise<BufferGeometry> {
+	decodeGeometry(buffer: ArrayBuffer, taskConfig: any): Promise<BufferGeometry> {
 		const taskKey = JSON.stringify(taskConfig);
 
 		// Check for an existing task using this buffer. A transferred buffer cannot be transferred
@@ -124,10 +123,7 @@ export class DRACOLoader extends Loader {
 				return new Promise((resolve, reject) => {
 					worker._callbacks[taskID] = { resolve, reject };
 
-					worker.postMessage(
-						{ type: "decode", id: taskID, taskConfig, buffer },
-						[buffer],
-					);
+					worker.postMessage({ type: "decode", id: taskID, taskConfig, buffer }, [buffer]);
 
 					// this.debug();
 				});
@@ -193,8 +189,7 @@ export class DRACOLoader extends Loader {
 	_initDecoder() {
 		if (this.decoderPending) return this.decoderPending;
 
-		const useJS =
-			typeof WebAssembly !== "object" || this.decoderConfig.type === "js";
+		const useJS = typeof WebAssembly !== "object" || this.decoderConfig.type === "js";
 
 		if (useJS) {
 			this.workerSourceURL = `${this.decoderPath}draco_worker.js`;
@@ -203,12 +198,11 @@ export class DRACOLoader extends Loader {
 		} else {
 			this.workerSourceURL = `${this.decoderPath}draco_worker_wasm.js`;
 
-			this.decoderPending = this._loadLibrary(
-				"draco_decoder.wasm",
-				"arraybuffer",
-			).then((wasmBinary) => {
-				this.decoderConfig.wasmBinary = wasmBinary;
-			});
+			this.decoderPending = this._loadLibrary("draco_decoder.wasm", "arraybuffer").then(
+				(wasmBinary) => {
+					this.decoderConfig.wasmBinary = wasmBinary;
+				},
+			);
 		}
 
 		return this.decoderPending;
@@ -241,9 +235,7 @@ export class DRACOLoader extends Loader {
 							break;
 
 						default:
-							console.error(
-								`THREE.DRACOLoader: Unexpected message, "${message.type}"`,
-							);
+							console.error(`THREE.DRACOLoader: Unexpected message, "${message.type}"`);
 					}
 				});
 

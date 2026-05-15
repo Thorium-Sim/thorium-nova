@@ -1,9 +1,8 @@
+import { Icon } from "@thorium/ui/Icon";
+import { useMenubar } from "@thorium/ui/Menubar";
 import type React from "react";
 import type { ReactNode } from "react";
-
 import { NavLink, useParams } from "react-router";
-import { useMenubar } from "@thorium/ui/Menubar";
-import { Icon } from "@thorium/ui/Icon";
 
 const ConfigIcon: React.FC<{
 	to: string;
@@ -13,11 +12,11 @@ const ConfigIcon: React.FC<{
 	return (
 		<NavLink
 			aria-disabled={props.disabled}
-			className={`h-64 w-64 shadow-inner rounded-lg transition-colors duration-300 ${
+			className={`h-64 w-64 rounded-lg shadow-inner transition-colors duration-300 ${
 				props.disabled
-					? "text-gray-500 bg-black/30 cursor-not-allowed"
-					: "bg-white/30 cursor-pointer hover:bg-white/50"
-			}  flex justify-center items-center flex-col`}
+					? "cursor-not-allowed bg-black/30 text-gray-500"
+					: "cursor-pointer bg-white/30 hover:bg-white/50"
+			} flex flex-col items-center justify-center`}
 			onClick={(e) => {
 				if (props.disabled) {
 					e.preventDefault();
@@ -32,49 +31,49 @@ const ConfigList = () => {
 	const { pluginId } = useParams();
 	useMenubar({ backTo: `/config/${pluginId}` });
 	return (
-		<div className="p-8 h-[calc(100%-2rem)] overflow-y-auto">
-			<h1 className="font-bold text-white text-3xl mb-4">Plugin Aspects</h1>
+		<div className="h-[calc(100%-2rem)] overflow-y-auto p-8">
+			<h1 className="mb-4 text-3xl font-bold text-white">Plugin Aspects</h1>
 
 			<div className="grid grid-cols-4 gap-16 pb-16">
 				<ConfigIcon to={`/config/${pluginId}/starmap`}>
-					<Icon name="star" className="text-6xl mb-4" />
-					<p className="font-bold text-2xl">Universe</p>
+					<Icon name="star" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Universe</p>
 				</ConfigIcon>
 				<ConfigIcon to={`/config/${pluginId}/ships`}>
-					<Icon name="rocket" className="text-6xl mb-4" />
-					<p className="font-bold text-2xl">Ships</p>
+					<Icon name="rocket" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Ships</p>
 				</ConfigIcon>
 				<ConfigIcon to={`/config/${pluginId}/systems`}>
-					<Icon name="drafting-compass" className="text-6xl mb-4" />
-					<p className="font-bold text-2xl">Ship Systems</p>
+					<Icon name="drafting-compass" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Ship Systems</p>
 				</ConfigIcon>
 				<ConfigIcon to={`/config/${pluginId}/missions`}>
-					<Icon name="map" className="text-6xl mb-4" />
-					<p className="font-bold text-2xl">Missions</p>
+					<Icon name="map" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Missions</p>
 				</ConfigIcon>
 				<ConfigIcon to={`/config/${pluginId}/macros`}>
-					<Icon name="git-branch" className="text-6xl mb-4" />
-					<p className="font-bold text-2xl">Macros</p>
+					<Icon name="git-branch" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Macros</p>
 				</ConfigIcon>
 				<ConfigIcon to={`/config/${pluginId}/triggers`}>
-					<Icon name="circle-fading-arrow-up" className="text-6xl mb-4" />
-					<p className="font-bold text-2xl">Triggers</p>
+					<Icon name="circle-fading-arrow-up" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Triggers</p>
 				</ConfigIcon>
 				<ConfigIcon to={`/config/${pluginId}/reports`}>
-					<Icon name="clipboard-list" className="text-6xl mb-4" />
-					<p className="font-bold text-2xl">Reports</p>
+					<Icon name="clipboard-list" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Reports</p>
 				</ConfigIcon>
 				<ConfigIcon to={`/config/${pluginId}/trainings`}>
-					<Icon name="graduation-cap" className="text-6xl mb-4" />
-					<p className="font-bold text-2xl">Trainings</p>
+					<Icon name="graduation-cap" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Trainings</p>
 				</ConfigIcon>
 				<ConfigIcon to={`/config/${pluginId}/themes`}>
-					<Icon name="brush" className="text-6xl mb-4" />
-					<p className="font-bold text-2xl">Themes</p>
+					<Icon name="brush" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Themes</p>
 				</ConfigIcon>
 				<ConfigIcon to={`/config/${pluginId}/inventory`}>
-					<Icon name="package-open" className="text-6xl mb-4" />
-					<p className="font-bold text-2xl">Inventory</p>
+					<Icon name="package-open" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Inventory</p>
 				</ConfigIcon>
 			</div>
 		</div>

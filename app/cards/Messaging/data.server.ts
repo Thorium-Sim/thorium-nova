@@ -1,8 +1,8 @@
-import { z } from "zod";
+import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { Entity } from "@thorium/utils/ecs";
-import { pubsub } from "@thorium/.server/init/pubsub";
+import z from "zod";
 
 export const messaging = t.router({
 	messages: t.procedure
@@ -12,14 +12,9 @@ export const messaging = t.router({
 			if (publish && input.station) {
 				const station = ctx.ecs
 					.getEntityById(input.shipId)
-					?.components.stationComplement?.stations.find(
-						(s) => s.name === input.station,
-					);
+					?.components.stationComplement?.stations.find((s) => s.name === input.station);
 				if (!station) return false;
-				if (
-					publish.station !== input.station &&
-					!station.messageGroups.includes(publish.station)
-				)
+				if (publish.station !== input.station && !station.messageGroups.includes(publish.station))
 					return false;
 			}
 			return true;
@@ -46,8 +41,7 @@ export const messaging = t.router({
 				destination: string;
 				content: string;
 			}[] = [];
-			for (const message of ctx.ecs.componentCache.get("isInternalMessage") ||
-				[]) {
+			for (const message of ctx.ecs.componentCache.get("isInternalMessage") || []) {
 				if (!message.components.isInternalMessage) continue;
 				const { shipId, sender, destination, content, timestamp } =
 					message.components.isInternalMessage;
@@ -55,14 +49,8 @@ export const messaging = t.router({
 				if (input.station) {
 					const station = ctx.ecs
 						.getEntityById(input.shipId)
-						?.components.stationComplement?.stations.find(
-							(s) => s.name === input.station,
-						);
-					const stationMatches = [
-						destination,
-						sender,
-						...(station?.messageGroups || []),
-					];
+						?.components.stationComplement?.stations.find((s) => s.name === input.station);
+					const stationMatches = [destination, sender, ...(station?.messageGroups || [])];
 					if (!stationMatches.includes(input.station)) continue;
 				}
 				messages.push({
@@ -84,15 +72,12 @@ export const messaging = t.router({
 			return (
 				ctx.ecs
 					.getEntityById(input.shipId)
-					?.components.stationComplement?.stations.reduce(
-						(acc: string[], next) => {
-							for (const item of next.messageGroups) {
-								if (!acc.includes(item)) acc.push(item);
-							}
-							return acc;
-						},
-						[],
-					) || []
+					?.components.stationComplement?.stations.reduce((acc: string[], next) => {
+						for (const item of next.messageGroups) {
+							if (!acc.includes(item)) acc.push(item);
+						}
+						return acc;
+					}, []) || []
 			);
 		}),
 	sendInternalMessage: t.procedure

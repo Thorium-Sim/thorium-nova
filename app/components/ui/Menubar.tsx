@@ -9,12 +9,11 @@ import {
 	useEffect,
 } from "react";
 import { Link } from "react-router";
+
 import LoginButton from "../LoginButton";
 import { Icon } from "./Icon";
 
-const MenubarContext = createContext<
-	Dispatch<SetStateAction<MenubarContextProps[]>>
->(null!);
+const MenubarContext = createContext<Dispatch<SetStateAction<MenubarContextProps[]>>>(null!);
 
 type MenubarContextProps = {
 	children?: ReactNode;
@@ -34,7 +33,7 @@ export default function Menubar({ children }: { children?: ReactNode }) {
 	);
 	return (
 		<>
-			<div className="h-8 px-4 bg-black/80 border-b border-white/25 flex gap-2 items-center">
+			<div className="flex h-8 items-center gap-2 border-b border-white/25 bg-black/80 px-4">
 				<Link to="/" className="btn btn-primary btn-xs btn-outline">
 					<Icon name="home" className="text-base" />
 				</Link>
@@ -52,19 +51,14 @@ export default function Menubar({ children }: { children?: ReactNode }) {
 					</>
 				)}
 			</div>
-			<MenubarContext.Provider value={setProps}>
-				{children}
-			</MenubarContext.Provider>
+			<MenubarContext.Provider value={setProps}>{children}</MenubarContext.Provider>
 		</>
 	);
 }
 
 export function useMenubar(props: MenubarContextProps) {
 	const setProps = useContext(MenubarContext);
-	if (!setProps)
-		throw new Error(
-			"useMenubar must be used inside a child of a Menubar component.",
-		);
+	if (!setProps) throw new Error("useMenubar must be used inside a child of a Menubar component.");
 
 	useEffect(() => {
 		setProps((oldProps) => [...oldProps, props]);

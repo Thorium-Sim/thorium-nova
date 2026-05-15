@@ -1,17 +1,14 @@
+import { Navigate } from "@thorium/components/Navigate";
+import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
+import { useFlightQuickStart } from "@thorium/routes/quickStart/quickStartContext";
+import Button from "@thorium/ui/Button";
+import Modal from "@thorium/ui/Modal";
 import { Outlet } from "react-router";
 import { useNavigate, useMatch, Link } from "react-router";
-import { q, clientId } from "@thorium/context/AppContext";
-import Modal from "@thorium/ui/Modal";
-import { capitalCase } from "change-case";
-import Button from "@thorium/ui/Button";
-import { toast } from "@thorium/context/ToastContext";
-import { Navigate } from "@thorium/components/Navigate";
-import { useFlightQuickStart } from "@thorium/routes/quickStart/quickStartContext";
-import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 
 export default function FlightQuickStart() {
 	const [flight] = q.flight.active.useNetRequest();
-	const [client] = q.client.get.useNetRequest({ clientId });
 	const flightStart = q.flight.start.useNetSend();
 
 	const [state, dispatch] = useFlightQuickStart();
@@ -19,11 +16,11 @@ export default function FlightQuickStart() {
 	const navigate = useNavigate();
 
 	const match = useMatch("/flight/quick/:step");
+	const lobbyMatch = useMatch("/flight/lobby/quick/:step");
 
-	if (!match) return <Navigate to="/flight/quick/ship" replace />;
 	if (flight) return <Navigate to="/flight/lobby" replace />;
 
-	const { step } = match.params;
+	const { step } = match ? match.params : lobbyMatch!.params;
 
 	return (
 		<Modal
@@ -36,26 +33,21 @@ export default function FlightQuickStart() {
 			<div className="pt-4">
 				<Outlet />
 			</div>
-			<div className="flex justify-end mt-4 gap-4">
+			<div className="mt-4 flex justify-end gap-4">
 				{step !== "ship" && (
 					<Link className="btn btn-warning" to="ship">
 						Prev
 					</Link>
 				)}
 				{step === "ship" && (
-					<Button
-						className="btn-info"
-						onClick={() => dispatch({ type: "addShip" })}
-					>
+					<Button className="btn-info" onClick={() => dispatch({ type: "addShip" })}>
 						Add Player Ship
 					</Button>
 				)}
 				{step !== "mission" && (
 					<Link
 						className={`btn btn-primary ${
-							step === "ship" && (!state.ships || state.ships.length === 0)
-								? "btn-disabled"
-								: ""
+							step === "ship" && (!state.ships || state.ships.length === 0) ? "btn-disabled" : ""
 						}`}
 						to="mission"
 					>

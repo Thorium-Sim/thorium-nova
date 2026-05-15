@@ -45,6 +45,7 @@ export function useResizeObserver<T extends HTMLElement = any>() {
 		if (rect) {
 			setRect(rect);
 		}
+		return rect;
 	}, []);
 
 	useEffect(() => {

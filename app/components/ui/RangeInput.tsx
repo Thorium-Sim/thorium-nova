@@ -39,13 +39,11 @@ export const RangeInput = (
 		<div className={`flex flex-col ${fixed ? "" : "w-full"}`}>
 			<span
 				{...labelProps}
-				className={`${labelProps?.className || ""} ${
-					labelHidden ? "hidden" : ""
-				}`}
+				className={`${labelProps?.className || ""} ${labelHidden ? "hidden" : ""}`}
 			>
 				{label}
 			</span>
-			<div className="flex justify-between w-full gap-2">
+			<div className="flex w-full justify-between gap-2">
 				<input
 					autoComplete="off"
 					{...(inputProps as React.InputHTMLAttributes<HTMLInputElement>)}
@@ -57,10 +55,7 @@ export const RangeInput = (
 					})}
 					onBlur={(event) => {
 						if (Number.isNaN(Number.parseFloat(event.target.value))) return;
-						onBlur?.([
-							Number(event.target.value),
-							value?.[1] ?? defaultValue?.[1] ?? 1,
-						]);
+						onBlur?.([Number(event.target.value), value?.[1] ?? defaultValue?.[1] ?? 1]);
 					}}
 				/>
 				<input
@@ -74,17 +69,12 @@ export const RangeInput = (
 					})}
 					onBlur={(event) => {
 						if (Number.isNaN(Number.parseFloat(event.target.value))) return;
-						onBlur?.([
-							value?.[0] ?? defaultValue?.[0] ?? 1,
-							Number(event.target.value),
-						]);
+						onBlur?.([value?.[0] ?? defaultValue?.[0] ?? 1, Number(event.target.value)]);
 					}}
 				/>
 			</div>
 			{isInvalid && <p className="text-red-500">{invalidMessage}</p>}
-			{helperText && (
-				<p className="text-gray-400 text-sm leading-tight mb-2">{helperText}</p>
-			)}
+			{helperText && <p className="mb-2 text-sm leading-tight text-gray-400">{helperText}</p>}
 		</div>
 	);
 };

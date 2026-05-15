@@ -1,31 +1,26 @@
-import { Suspense, useRef } from "react";
 import { useTexture } from "@react-three/drei";
-import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
-import { Rings } from "./Rings";
-import { Clouds } from "./Clouds";
-import Selected from "../Selected";
-import Dot from "./Dot.svg";
-import { useGetStarmapStore } from "../starmapStore";
-import SystemLabel from "../SystemMarker/SystemLabel";
-import type { Group, Vector3 } from "three";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
+import { setCursor } from "@thorium/utils/setCursor";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { degToRad } from "@thorium/utils/unitTypes";
+import { Suspense, useRef } from "react";
+import type { Group, Vector3 } from "three";
+
 import { OrbitLine } from "../OrbitContainer";
-import { setCursor } from "@thorium/utils/setCursor";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
+import Selected from "../Selected";
+import { useGetStarmapStore } from "../starmapStore";
+import SystemLabel from "../SystemMarker/SystemLabel";
+import { Clouds } from "./Clouds";
+import Dot from "./Dot.svg";
+import { Rings } from "./Rings";
 
 export const PlanetSprite = ({ color = "white", userData = {} }) => {
 	const spriteMap = useShipSprite(Dot);
 
 	return (
 		<sprite userData={userData}>
-			<spriteMaterial
-				attach="material"
-				map={spriteMap}
-				color={color}
-				sizeAttenuation={false}
-			/>
+			<spriteMaterial attach="material" map={spriteMap} color={color} sizeAttenuation={false} />
 		</sprite>
 	);
 };
@@ -89,17 +84,14 @@ export function Planet({
 }) {
 	const useStarmapStore = useGetStarmapStore();
 
-	const selected = useStarmapStore((state) =>
-		state.selectedObjectIds.includes(planet.id),
-	);
+	const selected = useStarmapStore((state) => state.selectedObjectIds.includes(planet.id));
 	const {
 		radius,
 		ringMapAsset: rings,
 		cloudMapAsset: clouds,
 		textureMapAsset: texture,
 	} = planet.isPlanet;
-	const { axialTilt, inclination, semiMajorAxis, eccentricity } =
-		planet.satellite;
+	const { axialTilt, inclination, semiMajorAxis, eccentricity } = planet.satellite;
 	const viewingMode = useStarmapStore((state) => state.viewingMode);
 
 	const position = getOrbitPosition(planet.satellite);
@@ -108,7 +100,7 @@ export function Planet({
 	const size = radius;
 
 	// TODO - April 7, 2022 - Add moons
-	const satellites: PlanetPlugin[] = [];
+	// const satellites: PlanetPlugin[] = [];
 
 	const wireframe = false;
 
@@ -192,11 +184,7 @@ export function Planet({
 				</group>
 			)}
 			<group position={position}>
-				<group
-					onPointerOver={onPointerOver}
-					onPointerOut={onPointerOut}
-					onClick={onClick}
-				>
+				<group onPointerOver={onPointerOver} onPointerOut={onPointerOut} onClick={onClick}>
 					<Suspense fallback={null}>
 						<group
 							ref={planetSpriteRef}

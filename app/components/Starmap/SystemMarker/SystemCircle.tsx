@@ -1,10 +1,11 @@
-import { q } from "@thorium/context/AppContext";
 import { useFrame, type ElementProps } from "@react-three/fiber";
+import { q } from "@thorium/context/AppContext";
 import useObjectDrag from "@thorium/hooks/useObjectDrag";
 import * as React from "react";
 import { useCallback } from "react";
-import { useNavigate, useParams } from "react-router";
+import { href, useNavigate, useParams } from "react-router";
 import { CanvasTexture, type Group, type Mesh, Vector3 } from "three";
+
 import { useGetStarmapStore } from "../starmapStore";
 
 const size = 50;
@@ -15,19 +16,15 @@ export const DraggableSystemCircle: React.FC<
 		systemId: string | number;
 		parentObject: React.RefObject<Group>;
 	} & ElementProps<typeof Mesh>
-> = ({
-	parentObject: parent,
-	hoveringDirection,
-	systemId,
-	position,
-	...props
-}) => {
+> = ({ parentObject: parent, hoveringDirection, systemId, position, ...props }) => {
 	const useStarmapStore = useGetStarmapStore();
 
 	const doubleClickRef = React.useRef(Date.now());
 	const { pluginId } = useParams() as {
 		pluginId: string;
 	};
+	const navigate = useNavigate();
+
 	const bind = useObjectDrag(parent, {
 		onMouseUp: (newPosition: Vector3) => {
 			useStarmapStore.getState().setCameraControlsEnabled(true);
@@ -48,7 +45,12 @@ export const DraggableSystemCircle: React.FC<
 		},
 		onMouseDown: () => {
 			if (Date.now() - 200 <= doubleClickRef.current) {
-				navigate(systemId.toString());
+				navigate(
+					href("/config/:pluginId/starmap/:systemId", {
+						systemId: systemId.toString(),
+						pluginId,
+					}),
+				);
 				return;
 			}
 			doubleClickRef.current = Date.now();
@@ -65,7 +67,6 @@ export const DraggableSystemCircle: React.FC<
 			});
 		},
 	});
-	const navigate = useNavigate();
 
 	return (
 		<SystemCircle
@@ -117,23 +118,11 @@ const SystemCircle: React.FC<
 			ctx.lineWidth = size / (1 / lineWidth);
 			ctx.strokeStyle = isSelected ? "white" : "rgba(0,255,255,0.5)";
 			ctx.beginPath();
-			ctx.arc(
-				size / 2,
-				size / 2,
-				size / 2 - size / (1 / lineWidth),
-				0,
-				Math.PI * 2,
-			);
+			ctx.arc(size / 2, size / 2, size / 2 - size / (1 / lineWidth), 0, Math.PI * 2);
 			ctx.stroke();
 			ctx.strokeStyle = "cyan";
 			ctx.beginPath();
-			ctx.arc(
-				size / 2,
-				size / 2,
-				size / 2 - size / (1 / lineWidth),
-				-Math.PI / 2,
-				endArc,
-			);
+			ctx.arc(size / 2, size / 2, size / 2 - size / (1 / lineWidth), -Math.PI / 2, endArc);
 			ctx.stroke();
 		},
 		[ctx, systemId, useStarmapStore],

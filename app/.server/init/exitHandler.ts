@@ -1,13 +1,10 @@
-import { database } from "./buildDatabase";
+import { DataStore } from "@thorium/utils/.server/db-fs";
 
 export function exitHandler() {
 	if (process.env.NODE_ENV === "production") {
 		process.stdin.resume(); //so the program will not close instantly
 
-		async function exitHandler(
-			options: { cleanup?: boolean; exit?: boolean },
-			exitCode: number,
-		) {
+		async function exitHandler(options: { cleanup?: boolean; exit?: boolean }) {
 			if (options.cleanup) {
 				await snapshot();
 			}
@@ -30,6 +27,7 @@ export function exitHandler() {
 }
 
 export async function snapshot() {
+	const database = DataStore.operations.getStore()!.database;
 	await database.server.write(true);
 	await Promise.all(
 		database.server.plugins.map(async (plugin) => {

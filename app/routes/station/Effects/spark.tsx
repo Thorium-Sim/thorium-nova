@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
-import SimplexNoise from "./simplexNoise";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useEffect, useRef } from "react";
+
+import SimplexNoise from "./simplexNoise";
 
 /**
  * Vector
@@ -87,6 +88,8 @@ class Lightning {
 	blurColor = "128, 128, 255";
 	points: Vector[] = [];
 	off = 0;
+	// @ts-expect-error
+	// oxlint-disable-next-line typescript/no-redundant-type-constituents
 	_simplexNoise: SimplexNoise | null = new SimplexNoise();
 	_timeoutId: ReturnType<typeof setTimeout> | null = null;
 	// Case by child
@@ -192,8 +195,7 @@ class Lightning {
 		const drawBlur = () => {
 			for (let i = 0, len = points.length; i < len; i++) {
 				const p = points[i];
-				const d =
-					len > 1 ? p.distanceTo(points[i === len - 1 ? i - 1 : i + 1]) : 0;
+				const d = len > 1 ? p.distanceTo(points[i === len - 1 ? i - 1 : i + 1]) : 0;
 				ctx.moveTo(p.x + d, p.y);
 				ctx.arc(p.x, p.y, d, 0, Math.PI * 2, false);
 			}
@@ -275,8 +277,7 @@ class Lightning {
 		if (!this.parent) return;
 		const parentStep = this.parent.step;
 		this.startStep = randint(parentStep - 2);
-		this.endStep =
-			this.startStep + randint(parentStep - this.startStep - 2) + 2;
+		this.endStep = this.startStep + randint(parentStep - this.startStep - 2) + 2;
 		this.step = this.endStep - this.startStep;
 	}
 }
@@ -315,10 +316,7 @@ export default function Spark() {
 			random(window.innerWidth, 0),
 			random(window.innerHeight, 0),
 		);
-		lightningRef.current.endPoint.set(
-			random(window.innerWidth, 0),
-			random(window.innerHeight, 0),
-		);
+		lightningRef.current.endPoint.set(random(window.innerWidth, 0), random(window.innerHeight, 0));
 		lightningRef.current.setChildNum(3);
 	}, []);
 	useAnimationFrame(() => {

@@ -1,22 +1,12 @@
 import { solarSystemsObjects } from "@thorium/.server/systems/SolarSystemPositionSystem";
 import type { Entity } from "@thorium/utils/ecs";
-import {
-	CatmullRomCurve3,
-	Mesh,
-	type Object3D,
-	Raycaster,
-	Vector3,
-} from "three";
+import { CatmullRomCurve3, Raycaster, Vector3 } from "three";
 
 const raycaster = new Raycaster();
 const position = new Vector3();
 const direction = new Vector3();
 export function pathfinder(entity: Entity, targetPosition: Vector3) {
-	if (
-		!entity.components.position ||
-		entity.components.position.parentId === null
-	)
-		return;
+	if (!entity.components.position || entity.components.position.parentId === null) return;
 	// First, set up our raycaster
 	position.set(
 		entity.components.position.x,
@@ -32,9 +22,7 @@ export function pathfinder(entity: Entity, targetPosition: Vector3) {
 	raycaster.far = position.distanceTo(targetPosition);
 
 	// Cast it into our scene
-	const solarSystemScene = solarSystemsObjects.get(
-		entity.components.position.parentId,
-	);
+	const solarSystemScene = solarSystemsObjects.get(entity.components.position.parentId);
 	const objects = [...(solarSystemScene?.values() || [])];
 
 	const path = calculatePath(
@@ -71,11 +59,7 @@ function calculatePath(start: Vector3, end: Vector3, obstacles: Obstacle[]) {
 			const detour = chooseBestTangent(tangents, end);
 			// We need to make sure there isn't a collision going the opposite direction with the previous obstacle
 			const prevPoint = path.at(-1)!;
-			const backwardsCollision = detectCollision(
-				prevPoint,
-				detour,
-				previousObstacle,
-			);
+			const backwardsCollision = detectCollision(prevPoint, detour, previousObstacle);
 			if (backwardsCollision) {
 				const tangents = calculateTangents(prevPoint, previousObstacle);
 				const backwardsDetour = chooseBestTangent(tangents, detour);
@@ -91,11 +75,7 @@ function calculatePath(start: Vector3, end: Vector3, obstacles: Obstacle[]) {
 	return smoothPath(path);
 }
 
-function detectCollision(
-	point1: Vector3,
-	point2: Vector3,
-	obstacle: Obstacle,
-): boolean {
+function detectCollision(point1: Vector3, point2: Vector3, obstacle: Obstacle): boolean {
 	// Calculate direction vector of the line
 	const dx = point2.x - point1.x;
 	const dy = point2.y - point1.y;
@@ -163,10 +143,7 @@ function calculateTangents(point: Vector3, obstacle: Obstacle) {
 	const toCenterNormalized = toCenter.clone().normalize();
 
 	// Find perpendicular vector to `toCenterNormalized` in 3D space
-	const perp = new Vector3().crossVectors(
-		toCenterNormalized,
-		new Vector3(0, 1, 0),
-	);
+	const perp = new Vector3().crossVectors(toCenterNormalized, new Vector3(0, 1, 0));
 	if (perp.lengthSq() === 0) {
 		// Handle edge case where `toCenterNormalized` is collinear with the Y-axis
 		perp.crossVectors(toCenterNormalized, new Vector3(1, 0, 0));

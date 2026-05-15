@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import type { Rect } from "../Rect";
 
 export interface ISizeTrackerProps {

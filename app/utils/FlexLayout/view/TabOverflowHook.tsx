@@ -1,11 +1,12 @@
 import * as React from "react";
-import type { TabSetNode } from "../model/TabSetNode";
+
 import type { BorderNode } from "../model/BorderNode";
-import { Orientation } from "../Orientation";
-import type { LayoutInternal } from "./Layout";
 import type { TabNode } from "../model/TabNode";
-import { startDrag } from "./Utils";
+import type { TabSetNode } from "../model/TabSetNode";
+import { Orientation } from "../Orientation";
 import type { Rect } from "../Rect";
+import type { LayoutInternal } from "./Layout";
+import { startDrag } from "./Utils";
 
 /** @internal */
 export const useTabOverflow = (
@@ -18,21 +19,19 @@ export const useTabOverflow = (
 ) => {
 	const [hiddenTabs, setHiddenTabs] = React.useState<number[]>([]);
 	const [isShowHiddenTabs, setShowHiddenTabs] = React.useState<boolean>(false);
-	const [isDockStickyButtons, setDockStickyButtons] =
-		React.useState<boolean>(false);
+	const [isDockStickyButtons, setDockStickyButtons] = React.useState<boolean>(false);
 
 	const selfRef = React.useRef<HTMLDivElement | null>(null);
 	const userControlledPositionRef = React.useRef<boolean>(false);
-	const updateHiddenTabsTimerRef = React.useRef<
-		ReturnType<typeof setTimeout> | undefined
-	>(undefined);
+	const updateHiddenTabsTimerRef = React.useRef<ReturnType<typeof setTimeout> | undefined>(
+		undefined,
+	);
 	const hiddenTabsRef = React.useRef<number[]>([]);
 	const thumbInternalPos = React.useRef<number>(0);
 	const repositioningRef = React.useRef<boolean>(false);
 	hiddenTabsRef.current = hiddenTabs;
 
 	// if node id changes (new model) then reset scroll to 0
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useLayoutEffect(() => {
 		if (tabStripRef.current) {
 			setScrollPosition(0);
@@ -40,7 +39,6 @@ export const useTabOverflow = (
 	}, [node.getId()]);
 
 	// if selected node or tabset/border rectangle change then unset usercontrolled (so selected tab will be kept in view)
-	// biome-ignore lint/correctness/useExhaustiveDependencies: We don't mess around with FlexLayout
 	React.useLayoutEffect(() => {
 		userControlledPositionRef.current = false;
 	}, [node.getSelectedNode(), node.getRect().width, node.getRect().height]);
@@ -152,13 +150,7 @@ export const useTabOverflow = (
 		} else {
 			thumbInternalPos.current = event.clientY - r.y;
 		}
-		startDrag(
-			event.currentTarget.ownerDocument,
-			event,
-			onDragMove,
-			onDragEnd,
-			onDragCancel,
-		);
+		startDrag(event.currentTarget.ownerDocument, event, onDragMove, onDragEnd, onDragCancel);
 	};
 
 	const onDragMove = (x: number, y: number) => {
@@ -195,9 +187,7 @@ export const useTabOverflow = (
 			const tabContainer = strip.firstElementChild!;
 
 			const offset = isDockStickyButtons ? 10 : 0; // prevents flashing, after sticky buttons docked set, must be 10 pixels smaller before unsetting
-			const dock =
-				getElementSize(tabContainer) + offset >
-				getElementSize(tabStripRef.current);
+			const dock = getElementSize(tabContainer) + offset > getElementSize(tabStripRef.current);
 			if (dock !== isDockStickyButtons) {
 				setDockStickyButtons(dock);
 			}
@@ -242,9 +232,7 @@ export const useTabOverflow = (
 					delta *= 40;
 				}
 				const newPos = getScrollPosition(tabStripRef.current) - delta;
-				const maxScroll =
-					getScrollSize(tabStripRef.current) -
-					getElementSize(tabStripRef.current);
+				const maxScroll = getScrollSize(tabStripRef.current) - getElementSize(tabStripRef.current);
 				const p = Math.max(0, Math.min(maxScroll, newPos));
 				setScrollPosition(p);
 				event.stopPropagation();
@@ -317,8 +305,5 @@ export const useTabOverflow = (
 };
 
 function arraysEqual(arr1: number[], arr2: number[]) {
-	return (
-		arr1.length === arr2.length &&
-		arr1.every((val, index) => val === arr2[index])
-	);
+	return arr1.length === arr2.length && arr1.every((val, index) => val === arr2[index]);
 }

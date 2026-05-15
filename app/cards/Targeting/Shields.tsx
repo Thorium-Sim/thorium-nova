@@ -1,11 +1,11 @@
 import { q } from "@thorium/context/AppContext";
+import { useCardContext } from "@thorium/context/CardContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
 import chroma from "chroma-js";
 import { useRef } from "react";
-import { useStation } from "@thorium/routes/station/useStation";
-import { useCardContext } from "@thorium/context/CardContext";
 
 const shieldColors = [
 	"oklch(10.86% 0.045 29.25)", // Black
@@ -31,17 +31,11 @@ const shieldStyle = (
 	shields.forEach((s) => {
 		const integrity = s.strength / s.maxStrength;
 		const color = shieldColor(integrity);
-		if (
-			(s.direction === "starboard" && !extra) ||
-			(s.direction === "fore" && extra)
-		) {
+		if ((s.direction === "starboard" && !extra) || (s.direction === "fore" && extra)) {
 			output.push(`20px 0px 20px -15px ${color}`);
 			output.push(`inset -20px 0px 20px -15px ${color}`);
 		}
-		if (
-			(s.direction === "port" && !extra) ||
-			(s.direction === "aft" && extra)
-		) {
+		if ((s.direction === "port" && !extra) || (s.direction === "aft" && extra)) {
 			output.push(`-20px 0px 20px -15px ${color}`);
 			output.push(`inset 20px 0px 20px -15px ${color}`);
 		}
@@ -73,7 +67,7 @@ export function Shields() {
 	if (shields.length === 0) return null;
 	return (
 		<div>
-			<div className="flex w-full gap-8 mb-4">
+			<div className="mb-4 flex w-full gap-8">
 				<ShieldView />
 			</div>
 			{shields[0].state === "down" ? (
@@ -119,21 +113,15 @@ export function ShieldView() {
 			const strength = interpolate(shield.id)?.x || 0;
 			shieldItems.push({ ...shield, strength });
 		}
-		topViewRef.current?.style.setProperty(
-			"box-shadow",
-			shieldStyle(shieldItems),
-		);
-		sideViewRef.current?.style.setProperty(
-			"box-shadow",
-			shieldStyle(shieldItems, true),
-		);
+		topViewRef.current?.style.setProperty("box-shadow", shieldStyle(shieldItems));
+		sideViewRef.current?.style.setProperty("box-shadow", shieldStyle(shieldItems, true));
 	}, cardLoaded);
 
 	return (
 		<>
 			<div
 				ref={topViewRef}
-				className="flex-1 aspect-square rounded-full p-4"
+				className="aspect-square flex-1 rounded-full p-4"
 				style={{ boxShadow: shieldStyle(shields) }}
 			>
 				<img src={ship.assets?.topView} alt="Top" />
@@ -141,7 +129,7 @@ export function ShieldView() {
 			{shields.length === 6 ? (
 				<div
 					ref={sideViewRef}
-					className="flex-1 aspect-square rounded-full p-4"
+					className="aspect-square flex-1 rounded-full p-4"
 					style={{ boxShadow: shieldStyle(shields, true) }}
 				>
 					<img src={ship.assets?.sideView} alt="Side" />

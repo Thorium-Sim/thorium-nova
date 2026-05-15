@@ -1,4 +1,5 @@
 import type { Sound } from "@thorium/ecs-components/sound";
+
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";

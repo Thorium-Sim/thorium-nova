@@ -1,6 +1,7 @@
 import type { Entity } from "@thorium/utils/ecs";
-import { getDeckNode } from "./getDeckNode";
+
 import { getInventoryTemplates } from "../getInventoryTemplates";
+import { getDeckNode } from "./getDeckNode";
 
 /**
  * Get the inventory currently located in the room associated with this reactor
@@ -11,7 +12,7 @@ export function getReactorInventory(reactor: Entity) {
 	let systemShip: Entity | null = null;
 	for (const system of reactor.ecs?.systems || []) {
 		if (system.constructor.name === "FilterShipsWithReactors") {
-			for (const [id, ship] of system.entities || []) {
+			for (const [_, ship] of system.entities || []) {
 				if (ship.components.shipSystems?.shipSystems.has(reactor.id)) {
 					systemShip = ship;
 					break;
@@ -22,9 +23,7 @@ export function getReactorInventory(reactor: Entity) {
 
 	if (!systemShip) return null;
 
-	const entityRoomId = systemShip.components.shipSystems?.shipSystems.get(
-		reactor.id,
-	)?.roomId;
+	const entityRoomId = systemShip.components.shipSystems?.shipSystems.get(reactor.id)?.roomId;
 	const entityRoom = getDeckNode(entityRoomId, systemShip);
 
 	const inventoryTemplates = getInventoryTemplates(reactor.ecs);

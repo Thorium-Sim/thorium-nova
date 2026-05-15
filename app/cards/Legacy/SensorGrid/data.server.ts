@@ -12,7 +12,7 @@ import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { Entity } from "@thorium/utils/ecs";
 import { degToRad } from "@thorium/utils/unitTypes";
-import { z } from "zod";
+import z from "zod";
 
 function updateContact(
 	contact: Entity,
@@ -34,9 +34,7 @@ function updateContact(
 		> & { speed: number }
 	>,
 ) {
-	const sensors = contact.ecs.getEntityById(
-		contact?.components.isSensorContact?.sensorsId || -1,
-	);
+	const sensors = contact.ecs.getEntityById(contact?.components.isSensorContact?.sensorsId || -1);
 	if (sensors?.components.isLegacySensors?.frozen) {
 		contact.updateComponent("isSensorContact", {
 			frozenState: {
@@ -60,9 +58,7 @@ function updateContact(
 				case "destination":
 					contact.updateComponent("isSensorContact", {
 						destination: properties.destination,
-						speed:
-							properties.speed ||
-							sensors?.components.isLegacySensors?.defaultSpeed,
+						speed: properties.speed || sensors?.components.isLegacySensors?.defaultSpeed,
 					});
 					pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
 						shipId: contact.components.isSensorContact?.shipId || -1,
@@ -165,23 +161,21 @@ export const sensorGrid = t.router({
 		.input(z.object({ shipId: z.number() }))
 		.filter(shipPubsubFilter)
 		.autoPublish([], () => null)
-		.request(({ ctx, input, publish }) => {
+		.request(({ publish }) => {
 			if (!publish) return null;
 			return true;
 		}),
-	freezeSensors: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.send(({ ctx, input }) => {
-			const sensorsSys = getShipSystem(ctx.ecs, {
-				systemType: "sensors",
-				shipId: input.shipId,
-			});
+	freezeSensors: t.procedure.input(z.object({ shipId: z.number() })).send(({ ctx, input }) => {
+		const sensorsSys = getShipSystem(ctx.ecs, {
+			systemType: "sensors",
+			shipId: input.shipId,
+		});
 
-			sensorsSys.updateComponent("isLegacySensors", { frozen: true });
-			pubsub.publish.legacy.sensorGrid.sensors({
-				shipId: input.shipId,
-			});
-		}),
+		sensorsSys.updateComponent("isLegacySensors", { frozen: true });
+		pubsub.publish.legacy.sensorGrid.sensors({
+			shipId: input.shipId,
+		});
+	}),
 	unfreezeSensors: t.procedure
 		.input(z.object({ shipId: z.number(), apply: z.boolean() }))
 		.send(({ ctx, input }) => {
@@ -192,8 +186,7 @@ export const sensorGrid = t.router({
 
 			sensorsSys.updateComponent("isLegacySensors", { frozen: false });
 
-			for (const contact of ctx.ecs.componentCache.get("isSensorContact") ||
-				[]) {
+			for (const contact of ctx.ecs.componentCache.get("isSensorContact") || []) {
 				if (
 					contact.components.isArmyContact ||
 					contact.components.isSensorContact?.sensorsId !== sensorsSys.id
@@ -258,8 +251,7 @@ export const sensorGrid = t.router({
 
 			if (
 				sensorsSys.components.isLegacySensors &&
-				sensorsSys.components.isLegacySensors.timeSincePingMs >=
-					activePingInterval
+				sensorsSys.components.isLegacySensors.timeSincePingMs >= activePingInterval
 			) {
 				pubsub.publish.legacy.sensorGrid.sonarPing({
 					shipId: input.shipId,
@@ -273,9 +265,7 @@ export const sensorGrid = t.router({
 		.input(
 			z.object({
 				shipId: z.number(),
-				program: z
-					.object({ type: z.literal("field"), density: z.number() })
-					.nullable(),
+				program: z.object({ type: z.literal("field"), density: z.number() }).nullable(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -343,8 +333,7 @@ export const sensorGrid = t.router({
 					}
 				> | null;
 			})[] = [];
-			for (const contact of ctx.ecs.componentCache.get("isSensorContact") ||
-				[]) {
+			for (const contact of ctx.ecs.componentCache.get("isSensorContact") || []) {
 				if (
 					contact.components.isSensorContact?.shipId === input.shipId &&
 					!contact.components.isArmyContact
@@ -387,16 +376,12 @@ export const sensorGrid = t.router({
 		)
 		.request(({ ctx, input }) => {
 			const contacts = new Map<number, { x: number; y: number }>();
-			for (const contact of ctx.ecs.componentCache.get("isSensorContact") ||
-				[]) {
+			for (const contact of ctx.ecs.componentCache.get("isSensorContact") || []) {
 				if (
 					contact.components.isSensorContact?.shipId === input.shipId &&
 					!contact.components.isArmyContact
 				) {
-					contacts.set(
-						contact.id,
-						contact.components.isSensorContact.destination,
-					);
+					contacts.set(contact.id, contact.components.isSensorContact.destination);
 				}
 			}
 
@@ -423,34 +408,28 @@ export const sensorGrid = t.router({
 				hostile: contact.components.isSensorContact?.hostile || false,
 				cloaked: contact.components.isSensorContact?.cloaked || false,
 				infrared: contact.components.isSensorContact?.infrared || false,
-				omitFromProgram:
-					contact.components.isArmyContact?.omitFromProgram || false,
+				omitFromProgram: contact.components.isArmyContact?.omitFromProgram || false,
 			}));
 		}),
 
-	addArmyContact: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.send(({ ctx, input }) => {
-			const sensors = getShipSystem(ctx.ecs, {
-				systemType: "sensors",
-				shipId: input.shipId,
-			});
-			// Get the last contact in the list as a template
-			const lastContact = getArmyContacts(ctx.ecs, input.shipId).at(-1);
+	addArmyContact: t.procedure.input(z.object({ shipId: z.number() })).send(({ ctx, input }) => {
+		const sensors = getShipSystem(ctx.ecs, {
+			systemType: "sensors",
+			shipId: input.shipId,
+		});
+		// Get the last contact in the list as a template
+		const lastContact = getArmyContacts(ctx.ecs, input.shipId).at(-1);
 
-			const contact = createContact(
-				sensors.components.isShipSystem?.shipId || -1,
-				sensors.id,
-				lastContact,
-			);
-			contact.addComponent(
-				"isArmyContact",
-				lastContact?.components.isArmyContact,
-			);
+		const contact = createContact(
+			sensors.components.isShipSystem?.shipId || -1,
+			sensors.id,
+			lastContact,
+		);
+		contact.addComponent("isArmyContact", lastContact?.components.isArmyContact);
 
-			ctx.ecs.addEntity(contact);
-			pubsub.publish.legacy.sensorGrid.armyContacts({ shipId: input.shipId });
-		}),
+		ctx.ecs.addEntity(contact);
+		pubsub.publish.legacy.sensorGrid.armyContacts({ shipId: input.shipId });
+	}),
 
 	updateArmyContact: t.procedure
 		.input(
@@ -633,88 +612,76 @@ export const sensorGrid = t.router({
 		)
 		.send(({ ctx, input }) => {
 			const contact = ctx.ecs.getEntityById(input.contactId);
-			const sensors = ctx.ecs.getEntityById(
-				contact?.components.isSensorContact?.sensorsId || -1,
-			);
+			const sensors = ctx.ecs.getEntityById(contact?.components.isSensorContact?.sensorsId || -1);
 			if (!contact || !sensors) return;
 			updateContact(contact, input);
 			pubsub.publish.legacy.sensorGrid.sensorContacts({
 				shipId: contact.components.isSensorContact?.shipId || -1,
 			});
 		}),
-	removeContact: t.procedure
-		.input(z.object({ contactId: z.number() }))
-		.send(({ ctx, input }) => {
-			const contact = ctx.ecs.getEntityById(input.contactId);
-			if (!contact) return;
-			const sensors = ctx.ecs.getEntityById(
-				contact?.components.isSensorContact?.sensorsId || -1,
-			);
-			if (sensors?.components.isLegacySensors?.frozen) {
-				contact.updateComponent("isSensorContact", {
-					frozenState: {
-						...contact.components.isSensorContact?.frozenState,
-						removed: true,
-					},
-				});
-			} else {
-				ctx.ecs.removeEntity(contact);
-			}
+	removeContact: t.procedure.input(z.object({ contactId: z.number() })).send(({ ctx, input }) => {
+		const contact = ctx.ecs.getEntityById(input.contactId);
+		if (!contact) return;
+		const sensors = ctx.ecs.getEntityById(contact?.components.isSensorContact?.sensorsId || -1);
+		if (sensors?.components.isLegacySensors?.frozen) {
+			contact.updateComponent("isSensorContact", {
+				frozenState: {
+					...contact.components.isSensorContact?.frozenState,
+					removed: true,
+				},
+			});
+		} else {
+			ctx.ecs.removeEntity(contact);
+		}
 
-			pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
-				shipId: contact.components.isSensorContact?.shipId || -1,
-			});
-			pubsub.publish.legacy.sensorGrid.sensorContacts({
-				shipId: contact.components.isSensorContact?.shipId || -1,
-			});
-		}),
-	clearContacts: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.send(({ ctx, input }) => {
-			for (const contact of ctx.ecs.componentCache.get("isSensorContact") ||
-				[]) {
-				if (
-					contact.components.isArmyContact ||
-					contact.components.isSensorContact?.shipId !== input.shipId
-				) {
-					continue;
-				}
-				ctx.ecs.removeEntity(contact);
+		pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
+			shipId: contact.components.isSensorContact?.shipId || -1,
+		});
+		pubsub.publish.legacy.sensorGrid.sensorContacts({
+			shipId: contact.components.isSensorContact?.shipId || -1,
+		});
+	}),
+	clearContacts: t.procedure.input(z.object({ shipId: z.number() })).send(({ ctx, input }) => {
+		for (const contact of ctx.ecs.componentCache.get("isSensorContact") || []) {
+			if (
+				contact.components.isArmyContact ||
+				contact.components.isSensorContact?.shipId !== input.shipId
+			) {
+				continue;
 			}
-			pubsub.publish.legacy.sensorGrid.sensorContacts({
-				shipId: input.shipId,
-			});
-			pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
-				shipId: input.shipId,
-			});
-		}),
-	stopContacts: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.send(({ ctx, input }) => {
-			for (const contact of ctx.ecs.componentCache.get("isSensorContact") ||
-				[]) {
-				if (
-					contact.components.isArmyContact ||
-					contact.components.isSensorContact?.shipId !== input.shipId ||
-					!contact.components.position
-				) {
-					continue;
-				}
-				contact.updateComponent("isSensorContact", {
-					destination: {
-						x: contact.components.position.x,
-						y: contact.components.position.y,
-					},
-				});
-				contact.addComponent("snapInterpolation");
+			ctx.ecs.removeEntity(contact);
+		}
+		pubsub.publish.legacy.sensorGrid.sensorContacts({
+			shipId: input.shipId,
+		});
+		pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
+			shipId: input.shipId,
+		});
+	}),
+	stopContacts: t.procedure.input(z.object({ shipId: z.number() })).send(({ ctx, input }) => {
+		for (const contact of ctx.ecs.componentCache.get("isSensorContact") || []) {
+			if (
+				contact.components.isArmyContact ||
+				contact.components.isSensorContact?.shipId !== input.shipId ||
+				!contact.components.position
+			) {
+				continue;
 			}
-			pubsub.publish.legacy.sensorGrid.sensorContacts({
-				shipId: input.shipId,
+			contact.updateComponent("isSensorContact", {
+				destination: {
+					x: contact.components.position.x,
+					y: contact.components.position.y,
+				},
 			});
-			pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
-				shipId: input.shipId,
-			});
-		}),
+			contact.addComponent("snapInterpolation");
+		}
+		pubsub.publish.legacy.sensorGrid.sensorContacts({
+			shipId: input.shipId,
+		});
+		pubsub.publish.legacy.sensorGrid.sensorContactsDestination({
+			shipId: input.shipId,
+		});
+	}),
 	nudge: t.procedure
 		.input(
 			z.object({
@@ -723,11 +690,8 @@ export const sensorGrid = t.router({
 			}),
 		)
 		.send(({ ctx, input }) => {
-			for (const contact of ctx.ecs.componentCache.get("isSensorContact") ||
-				[]) {
-				const sensors = ctx.ecs.getEntityById(
-					contact.components.isSensorContact?.sensorsId || -1,
-				);
+			for (const contact of ctx.ecs.componentCache.get("isSensorContact") || []) {
+				const sensors = ctx.ecs.getEntityById(contact.components.isSensorContact?.sensorsId || -1);
 				if (
 					!sensors ||
 					contact.components.isArmyContact ||
@@ -765,16 +729,14 @@ export const sensorGrid = t.router({
 								-1 * maxDistance,
 								Math.min(
 									1 + maxDistance,
-									contact.components.isSensorContact.destination.x +
-										input.nudge.x * 0.001,
+									contact.components.isSensorContact.destination.x + input.nudge.x * 0.001,
 								),
 							),
 							y: Math.max(
 								-1 * maxDistance,
 								Math.min(
 									1 + maxDistance,
-									contact.components.isSensorContact.destination.y +
-										input.nudge.y * 0.001,
+									contact.components.isSensorContact.destination.y + input.nudge.y * 0.001,
 								),
 							),
 						},
@@ -788,13 +750,18 @@ export const sensorGrid = t.router({
 				shipId: input.shipId,
 			});
 		}),
-	stream: t.procedure
-		.input(z.object({ shipId: z.number() }))
-		.dataStream(
-			({ ctx, input, entity }) =>
-				entity?.components.isSensorContact?.shipId === input.shipId &&
-				!entity.components.isArmyContact,
-		),
+	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
+		const set = new Set<Entity>();
+		for (const entity of ctx.ecs.componentCache.get("isSensorContact") || []) {
+			if (
+				entity.components.isSensorContact?.shipId === input.shipId &&
+				!entity.components.isArmyContact
+			) {
+				set.add(entity);
+			}
+		}
+		return set;
+	}),
 });
 
 export function rotatePoint({ x, y }: { x: number; y: number }, angle: number) {

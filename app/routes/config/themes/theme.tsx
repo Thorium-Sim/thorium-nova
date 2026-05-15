@@ -1,21 +1,19 @@
+import { AspectAssetUpload } from "@thorium/components/AspectAssetUpload";
+import { Editor } from "@thorium/components/MonacoEditor";
+import StationLayout from "@thorium/components/Station/StationLayout";
+import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
+import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
+import colorLogo from "@thorium/images/logo-color.svg?url";
+import normalLogo from "@thorium/images/logo.svg?url";
+import { StationData } from "@thorium/routes/station/useStation";
 import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
-import { Navigate, Outlet, useParams, useNavigate } from "react-router";
-import { toast } from "@thorium/context/ToastContext";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Editor } from "@thorium/components/MonacoEditor";
-import debounce from "lodash.debounce";
-import { useLocalStorage } from "@thorium/hooks/useLocalStorage";
 import Input from "@thorium/ui/Input";
-import { AssetPreview } from "@thorium/ui/AssetPreview";
-import InfoTip from "@thorium/ui/InfoTip";
-import normalLogo from "@thorium/images/logo.svg?url";
-import colorLogo from "@thorium/images/logo-color.svg?url";
-import { q } from "@thorium/context/AppContext";
 import { MockNetRequestContext } from "@thorium/utils/live-query/client/mockContext";
-import { Icon } from "@thorium/ui/Icon";
-import type ThemePlugin from "@thorium/.server/classes/Plugins/Theme";
-import StationLayout from "@thorium/components/Station/StationLayout";
+import debounce from "lodash.debounce";
+import { useState } from "react";
+import { Navigate, Outlet, useParams, useNavigate } from "react-router";
 
 export default function ThemeLayout() {
 	const { themeId, pluginId } = useParams() as {
@@ -27,27 +25,17 @@ export default function ThemeLayout() {
 	const prompt = usePrompt();
 	const [theme] = q.plugin.theme.get.useNetRequest({ pluginId, themeId });
 
-	const [shipName, setShipName] = useLocalStorage(
-		"theme-ship-name",
-		"USS Testing",
-	);
-	const [stationName, setStationName] = useLocalStorage(
-		"theme-station-name",
-		"Command",
-	);
-	const [alertLevel, setAlertLevel] = useLocalStorage(
-		"theme-notice-level",
-		"5",
-	);
+	const [shipName, setShipName] = useLocalStorage("theme-ship-name", "USS Testing");
+	const [stationName, setStationName] = useLocalStorage("theme-station-name", "Command");
+	const [alertLevel, setAlertLevel] = useLocalStorage("theme-notice-level", "5");
 
 	const [previewViewscreen, setPreviewViewscreen] = useState(false);
 
 	if (!themeId || !theme) return <Navigate to={`/config/${pluginId}/themes`} />;
-
 	return (
 		<>
 			<div className="flex w-full gap-8">
-				<div className="flex-col flex-grow flex gap-2 h-full">
+				<div className="flex h-full grow flex-col gap-2">
 					<Editor
 						className="flex-1"
 						defaultValue={theme.rawCSS}
@@ -84,8 +72,8 @@ export default function ThemeLayout() {
 									}))
 								)
 									return;
-								q.plugin.theme.delete.netSend({ pluginId, themeId });
-								navigate(`/config/${pluginId}/themes`);
+								void q.plugin.theme.delete.netSend({ pluginId, themeId });
+								void navigate(`/config/${pluginId}/themes`);
 							}}
 						>
 							Delete Theme
@@ -105,7 +93,7 @@ export default function ThemeLayout() {
 										themeId,
 										name,
 									});
-									navigate(`/config/${pluginId}/themes/${result.themeId}`);
+									void navigate(`/config/${pluginId}/themes/${result.themeId}`);
 								} catch (err) {
 									if (err instanceof Error) {
 										toast({
@@ -129,21 +117,24 @@ export default function ThemeLayout() {
 						</Button>
 					</div>
 				</div>
-				<div className="flex-1 flex flex-grow-0 flex-col w-[384px]">
+				<div className="flex w-[384px] flex-1 grow-0 flex-col">
 					<div
-						className="border border-white bg-black w-[384px] overflow-hidden relative z-10 transition-transform transform hover:scale-[3] origin-top-right"
+						className="relative z-10 w-[384px] origin-top-right transform overflow-hidden border border-white bg-black transition-transform hover:scale-[3]"
 						style={{
 							aspectRatio: "16/9",
 						}}
 					>
 						<div
-							className="w-[1920px] h-[1080px] absolute left-0 top-0 bg-gray-800"
+							className="absolute top-0 left-0 h-[1080px] w-[1920px] bg-gray-800"
 							style={{
 								transform: `scale(0.2) translate(-200%, -200%)`,
 							}}
 						>
-							{/* biome-ignore lint/security/noDangerouslySetInnerHtml: Required to render the CSS */}
-							<style dangerouslySetInnerHTML={{ __html: theme.processedCSS }} />
+							<style
+								dangerouslySetInnerHTML={{
+									__html: theme.rawCSS,
+								}}
+							/>
 							<MockNetRequestContext.Provider
 								value={{
 									client: {
@@ -154,7 +145,12 @@ export default function ThemeLayout() {
 											loginName: "Test User",
 										},
 									} as any,
-									flight: null,
+									flight: {
+										active: {
+											state: "in-progress",
+											paused: false,
+										},
+									},
 									ship: {
 										get: {
 											id: 0,
@@ -171,6 +167,29 @@ export default function ThemeLayout() {
 												},
 											},
 											alertLevel,
+										},
+										player: {
+											id: 481,
+											name: shipName,
+											registry: "",
+											alertLevel: alertLevel,
+											currentSystem: 310,
+											systemPosition: {
+												parentId: null,
+												type: "interstellar",
+												x: 0,
+												y: 0,
+												z: 0,
+											},
+											assets: {
+												logo: normalLogo,
+												model: "/plugins/Thorium Default/ships/Astra Frigate/assets/model.glb",
+												vanity: "/plugins/Thorium Default/ships/Astra Frigate/assets/vanity.png",
+												topView: "/plugins/Thorium Default/ships/Astra Frigate/assets/topView.png",
+												sideView:
+													"/plugins/Thorium Default/ships/Astra Frigate/assets/sideView.png",
+											},
+											isDestroyed: null,
 										},
 									} as any,
 									station: {
@@ -202,7 +221,9 @@ export default function ThemeLayout() {
 									theme: { get: null },
 								}}
 							>
-								<StationLayout />
+								<StationData>
+									<StationLayout />
+								</StationData>
 							</MockNetRequestContext.Provider>
 						</div>
 					</div>
@@ -223,7 +244,7 @@ export default function ThemeLayout() {
 						<select
 							value={alertLevel}
 							onChange={(e) => setAlertLevel(e.target.value)}
-							className="w-32 select select-sm block"
+							className="select select-sm block w-32"
 						>
 							<option>5</option>
 							<option>4</option>
@@ -233,178 +254,29 @@ export default function ThemeLayout() {
 							<option>p</option>
 						</select>
 					</label>
-					<ThemeAssetUpload assets={theme.assets} />
+					<AspectAssetUpload
+						fileUrls={theme.assets.files}
+						handleUpload={async (files) => {
+							if (!files.length) return;
+							const file = files[0];
+							await q.plugin.theme.uploadFile.netSend({
+								pluginId,
+								themeId,
+								file,
+								fileName: file.name,
+							});
+						}}
+						remove={async (file) => {
+							await q.plugin.theme.removeFile.netSend({
+								pluginId,
+								themeId,
+								file,
+							});
+						}}
+					/>
 				</div>
 			</div>
 			<Outlet />
 		</>
 	);
 }
-
-const ThemeAssetUpload = ({ assets }: { assets: ThemePlugin["assets"] }) => {
-	const { themeId, pluginId } = useParams() as {
-		themeId: string;
-		pluginId: string;
-	};
-	// const theme = useNetRequest("pluginTheme", {pluginId, themeId});
-
-	const [dragging, setDragging] = useState(false);
-	async function onChange(files: FileList) {
-		if (!files.length) return;
-		const file = files[0];
-		q.plugin.theme.uploadFile.netSend({
-			pluginId,
-			themeId,
-			file,
-			fileName: file.name,
-		});
-	}
-
-	const accept = /(image|font)\/.*/gi;
-	const acceptString = "image/*, font/*,.ttf,.eot,.woff,.woff2";
-	// Drag and drop is hard to test
-	/* istanbul ignore next */
-	function handleDragEnter(e: React.DragEvent) {
-		e.preventDefault();
-		e.stopPropagation();
-		const acceptMatch = !accept || e.dataTransfer.items[0].type.match(accept);
-
-		if (e.dataTransfer.items?.length === 1 && acceptMatch) {
-			setDragging(true);
-			e.dataTransfer.dropEffect = "copy";
-		} else {
-			setDragging(false);
-			e.dataTransfer.dropEffect = "none";
-		}
-	}
-	/* istanbul ignore next */
-	function handleDragExit(e: React.DragEvent) {
-		e.preventDefault();
-		e.stopPropagation();
-		setDragging(false);
-	}
-	/* istanbul ignore next */
-	function handleDrop(e: React.DragEvent) {
-		const acceptMatch = !accept || e.dataTransfer.items[0].type.match(accept);
-
-		if (!acceptMatch) return;
-		setDragging(false);
-		const files = e.dataTransfer.files;
-		if (files?.length === 1) {
-			onChange(files);
-		}
-	}
-
-	return (
-		<>
-			<div className="flex mt-4">
-				<h3 className="font-bold text-2xl">Theme Assets</h3>
-				<InfoTip>
-					Click on an asset to copy the asset URL to your clipboard.
-				</InfoTip>
-			</div>
-			<div
-				className={`flex-1 relative overflow-y-auto rounded-lg transition-colors ${
-					dragging ? "bg-black/80" : "bg-black/50"
-				}`}
-				onDragEnter={handleDragEnter}
-				onDragOver={handleDragEnter}
-				onDragLeave={handleDragExit}
-				onDragEnd={handleDragExit}
-				onDrop={handleDrop}
-			>
-				{dragging && (
-					<div className="absolute h-full w-full bg-black/50 flex items-center justify-center pointer-events-none">
-						<span className="font-bold text-4xl">Drag file to upload.</span>
-					</div>
-				)}
-				{assets.files.map((file) => {
-					return <UploadedFile file={file} key={file} />;
-				})}
-			</div>
-			<label className="w-full btn btn-info">
-				Upload Asset
-				<input
-					type="file"
-					hidden
-					accept={acceptString}
-					multiple={false}
-					value={""}
-					onChange={(e) => {
-						if (e.target?.files?.length === 1) {
-							onChange(e.target.files);
-						}
-					}}
-				/>
-			</label>
-		</>
-	);
-};
-
-const useClipboard = () => {
-	const [state, setState] = useState<"idle" | "copied">("idle");
-	const timeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
-	const copy = useCallback(function copy(str: string) {
-		const el = Object.assign(document.createElement("textarea"), {
-			value: str,
-		});
-		document.body.appendChild(el);
-		el.select();
-		document.execCommand("copy");
-		document.body.removeChild(el);
-		setState("copied");
-		timeoutRef.current = setTimeout(() => {
-			setState("idle");
-		}, 3000);
-	}, []);
-	useEffect(() => {
-		return () => {
-			clearTimeout(timeoutRef.current as any);
-		};
-	}, []);
-	return { copy, state };
-};
-
-const UploadedFile: React.FC<{ file: string }> = ({ file }) => {
-	const { themeId, pluginId } = useParams() as {
-		themeId: string;
-		pluginId: string;
-	};
-
-	// TODO November 27, 2021 : Implement the function for removing the asset
-	function remove(input: any) {}
-	const confirm = useConfirm();
-	const { copy, state } = useClipboard();
-
-	return (
-		<li key={file} className="list-group-item" onClick={() => copy(file)}>
-			<div className="flex items-center justify-between w-full">
-				<AssetPreview url={file} className="max-h-8 text-2xl" />
-				<span className=" mx-2 flex-1 overflow-x-hidden overflow-ellipsis">
-					{state === "copied"
-						? "Copied!"
-						: file.split("/")[file.split("/").length - 1]}
-				</span>
-				<Button
-					className="btn-error btn-sm"
-					onClick={async () => {
-						if (
-							await confirm({
-								header: "Are you sure you want to remove this asset?",
-								body: "The file will be deleted permanently.",
-							})
-						) {
-							q.plugin.theme.removeFile.netSend({
-								pluginId,
-								themeId,
-								file,
-							});
-						}
-					}}
-				>
-					<Icon name="ban" />
-				</Button>
-			</div>
-		</li>
-	);
-};

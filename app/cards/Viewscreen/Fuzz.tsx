@@ -1,10 +1,11 @@
 import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import { getSphericalPositionWithBias } from "@thorium/utils/starmap/getSphericalPositionWithBias";
 import { useRef } from "react";
 import type { Group, Sprite } from "three";
+
 import { useForwardVelocity } from "../Pilot/ImpulseControls";
 import FuzzTexture from "./fuzz.png";
-import { getSphericalPositionWithBias } from "@thorium/utils/starmap/getSphericalPositionWithBias";
 
 export const Fuzz = () => {
 	const spriteMap = useTexture(FuzzTexture);
@@ -27,18 +28,13 @@ export const Fuzz = () => {
 				(c.position.x === 0 && c.position.y === 0 && c.position.z === 0) ||
 				camera.position.distanceTo(c.position) > distance
 			) {
-				c.position
-					.set(...getSphericalPositionWithBias(distance))
-					.add(camera.position);
+				c.position.set(...getSphericalPositionWithBias(distance)).add(camera.position);
 			}
 			c.material.opacity =
 				cameraOpacity *
 				0.6 *
 				((Math.sin(c.userData.opacitySine) + 1) / 2) *
-				(Math.min(
-					distance * 0.1,
-					Math.max(0, distance - c.position.distanceTo(camera.position)),
-				) /
+				(Math.min(distance * 0.1, Math.max(0, distance - c.position.distanceTo(camera.position))) /
 					(distance * 0.1));
 			if (c.material.opacity < 0.05) {
 				c.visible = false;
@@ -53,10 +49,7 @@ export const Fuzz = () => {
 			{Array.from({ length: 500 }).map((_, i) => {
 				const spriteScale = scale * Math.random() + 2;
 				return (
-					<sprite
-						key={`sprite-${i}`}
-						scale={[spriteScale, spriteScale, spriteScale]}
-					>
+					<sprite key={`sprite-${i}`} scale={[spriteScale, spriteScale, spriteScale]}>
 						<spriteMaterial attach="material" map={spriteMap} color="white" />
 					</sprite>
 				);

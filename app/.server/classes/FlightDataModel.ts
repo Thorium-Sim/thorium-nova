@@ -1,12 +1,14 @@
+import path from "node:path";
+
+import RAPIER from "@thorium-sim/rapier3d-node";
+import { initECS } from "@thorium/.server/classes/initECS";
+import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
+import { loadGltf } from "@thorium/utils/.server/loadGltf";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import randomWords from "@thorium/utils/random-words";
-import type { ServerDataModel } from "./ServerDataModel";
-import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
+
 import type ShipPlugin from "./Plugins/Ship";
-import { loadGltf } from "@thorium/utils/.server/loadGltf";
-import RAPIER from "@thorium-sim/rapier3d-node";
-import path from "node:path";
-import { initECS } from "@thorium/.server/classes/initECS";
+import type { ServerDataModel } from "./ServerDataModel";
 
 export class FlightDataModel extends DataStore {
 	static INTERVAL = 1000 / 60;
@@ -54,8 +56,7 @@ export class FlightDataModel extends DataStore {
 			this.name ??= flightName;
 			this.paused ??= data.paused ?? true;
 			this.mode ??= data.mode ?? params.mode ?? "nova";
-			this.hasFlightDirector ??=
-				data.hasFlightDirector ?? params.hasFlightDirector ?? true;
+			this.hasFlightDirector ??= data.hasFlightDirector ?? params.hasFlightDirector ?? true;
 			this.date ??= Number(data.date ? new Date(data.date) : new Date());
 			this.pluginIds ??= data.pluginIds || [];
 			this.entities ??= data.entities || [];
@@ -108,11 +109,7 @@ export class FlightDataModel extends DataStore {
 				if (!ship.assets.model) return;
 				const assetUrl = path.join(await ship.getAssetUrl(), ship.assets.model);
 				if (!assetUrl) return;
-				const colliderDesc = await generateColliderDesc(
-					assetUrl,
-					ship.mass,
-					ship.length,
-				);
+				const colliderDesc = await generateColliderDesc(assetUrl, ship.mass /*ship.length*/);
 				if (!colliderDesc) return;
 				this.ecs.colliderCache.set(ship.assets.model, colliderDesc);
 			}),
@@ -150,9 +147,7 @@ export class FlightDataModel extends DataStore {
 	 */
 	get availableShips() {
 		const allShips = this.pluginIds.reduce((prev: ShipPlugin[], next) => {
-			const plugin = this.serverDataModel.plugins.find(
-				(plugin) => plugin.id === next,
-			);
+			const plugin = this.serverDataModel.plugins.find((plugin) => plugin.id === next);
 			if (!plugin) return prev;
 			return prev.concat(plugin.aspects.ships);
 		}, []);
@@ -186,6 +181,7 @@ export class FlightDataModel extends DataStore {
 			stateReason: this.stateReason,
 			startInput: this.startInput,
 			defaultRespawnTimeMs: this.defaultRespawnTimeMs,
+			lastSaved: Date.now(),
 		};
 		return data;
 	}
@@ -194,12 +190,10 @@ export class FlightDataModel extends DataStore {
 async function generateColliderDesc(
 	filePath: string,
 	mass: number,
-	size: number,
+	// size: number,
 ) {
 	try {
-		const ConvexHull = await import("three-stdlib").then(
-			(res) => (res as any).ConvexHull,
-		);
+		const ConvexHull = await import("three-stdlib").then((res) => (res as any).ConvexHull);
 		const hull = new ConvexHull();
 		const gltf = await loadGltf(filePath);
 		if (!gltf) {
@@ -214,8 +208,7 @@ async function generateColliderDesc(
 			vertices.push(vertex.point.x, vertex.point.y, vertex.point.z);
 		}
 		const verticesFloat32 = new Float32Array(vertices);
-		const colliderDesc =
-			RAPIER.ColliderDesc.convexHull(verticesFloat32)?.setMass(mass);
+		const colliderDesc = RAPIER.ColliderDesc.convexHull(verticesFloat32)?.setMass(mass);
 
 		return colliderDesc;
 	} catch (err) {

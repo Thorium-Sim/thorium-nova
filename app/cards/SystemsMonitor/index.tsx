@@ -1,13 +1,19 @@
+import type { CardProps } from "@thorium/cards/CardProps";
+import {
+	systemCategories,
+	systemFilterValues,
+} from "@thorium/cards/DamageReports/systemCategories";
 import { q } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import { cn } from "@thorium/utils/cn";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { LiveQueryError } from "@thorium/utils/live-query/client/client";
+import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import RadialDial from "@thorium/ui/RadialDial";
 import { Tooltip } from "@thorium/ui/Tooltip";
+import { cn } from "@thorium/utils/cn";
+import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import {
 	type Dispatch,
 	forwardRef,
@@ -17,12 +23,6 @@ import {
 	useState,
 } from "react";
 import { Fragment } from "react/jsx-runtime";
-import type { CardProps } from "@thorium/cards/CardProps";
-import { useStation } from "@thorium/routes/station/useStation";
-import {
-	systemCategories,
-	systemFilterValues,
-} from "@thorium/cards/DamageReports/systemCategories";
 
 export function SystemsMonitor({ cardLoaded }: CardProps) {
 	const { shipId } = useStation();
@@ -32,13 +32,11 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 
 	q.systemsMonitor.stream.useDataStream({ shipId });
 
-	const [selectedPowerSupplier, setSelectedPowerSupplier] = useState<
-		number | null
-	>(null);
+	const [selectedPowerSupplier, setSelectedPowerSupplier] = useState<number | null>(null);
 	const [selectedFilter, setSelectedFilter] = useState("All");
 	return (
 		<div
-			className="relative grid grid-cols-6 gap-8 h-full"
+			className="relative grid h-full grid-cols-6 gap-8"
 			onClick={() => {
 				setSelectedPowerSupplier(null);
 			}}
@@ -55,7 +53,7 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 					/>
 				))}
 			</div>
-			<div className="grid grid-cols-[auto_2rem_1fr_1rem_1rem_1rem] gap-2 gap-x-4 items-center col-span-2">
+			<div className="col-span-2 grid grid-cols-[auto_2rem_1fr_1rem_1rem_1rem] items-center gap-2 gap-x-4">
 				{batteries.map((battery, i) => (
 					<Battery
 						{...battery}
@@ -68,13 +66,9 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 					/>
 				))}
 			</div>
-			<div className="grid grid-cols-[auto_2rem_1fr_2rem] gap-2 col-span-3 items-center">
+			<div className="col-span-3 grid grid-cols-[auto_2rem_1fr_2rem] items-center gap-2">
 				{systems
-					.filter(
-						(s) =>
-							selectedFilter === "All" ||
-							systemCategories[s.type] === selectedFilter,
-					)
+					.filter((s) => selectedFilter === "All" || systemCategories[s.type] === selectedFilter)
 					.map((system) => (
 						<System
 							key={system.id}
@@ -83,7 +77,7 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 							selectedPowerSupplier={selectedPowerSupplier}
 						/>
 					))}
-				<div className="flex gap-2 justify-start flex-wrap justify-self-end col-span-4">
+				<div className="col-span-4 flex flex-wrap justify-start gap-2 justify-self-end">
 					<Button
 						className={cn("btn-sm", {
 							"btn-primary": selectedFilter === "All",
@@ -162,39 +156,19 @@ function Reactor({
 					el.classList.remove("bg-gray-600", "bg-orange-700", "bg-yellow-400");
 				} else {
 					el.classList.add("bg-yellow-400");
-					el.classList.remove(
-						"bg-gray-600",
-						"bg-orange-700",
-						"bg-green-400",
-						"bg-green-600",
-					);
+					el.classList.remove("bg-gray-600", "bg-orange-700", "bg-green-400", "bg-green-600");
 				}
 			} else if (i + 1 <= Math.ceil(desiredOutput)) {
 				if (id === selectedPowerSupplier) {
 					el.classList.add("bg-green-600");
-					el.classList.remove(
-						"bg-gray-600",
-						"bg-orange-700",
-						"bg-yellow-400",
-						"bg-green-400",
-					);
+					el.classList.remove("bg-gray-600", "bg-orange-700", "bg-yellow-400", "bg-green-400");
 				} else {
 					el.classList.add("bg-orange-700");
-					el.classList.remove(
-						"bg-gray-600",
-						"bg-yellow-400",
-						"bg-green-400",
-						"bg-green-600",
-					);
+					el.classList.remove("bg-gray-600", "bg-yellow-400", "bg-green-400", "bg-green-600");
 				}
 			} else {
 				el.classList.add("bg-gray-600");
-				el.classList.remove(
-					"bg-yellow-400",
-					"bg-orange-700",
-					"bg-green-400",
-					"bg-green-600",
-				);
+				el.classList.remove("bg-yellow-400", "bg-orange-700", "bg-green-400", "bg-green-600");
 			}
 		}
 
@@ -227,7 +201,7 @@ function Reactor({
 				},
 			)}
 		>
-			<div className="col-span-2 gap-1 self-start flex items-center">
+			<div className="col-span-2 flex items-center gap-1 self-start">
 				<span className="truncate">
 					{name} {index + 1}
 				</span>
@@ -259,13 +233,7 @@ function Reactor({
 					</Tooltip>
 				) : null}
 				<Tooltip content={`Active Fuel: ${(fuel * 100).toFixed(0)}%`}>
-					<RadialDial
-						label=""
-						count={fuel}
-						max={1}
-						color="rgb(180 251 32)"
-						backgroundColor="#888"
-					>
+					<RadialDial label="" count={fuel} max={1} color="rgb(180 251 32)" backgroundColor="#888">
 						<Icon name="atomic-slashes" />
 					</RadialDial>
 				</Tooltip>
@@ -282,26 +250,23 @@ function Reactor({
 				</Tooltip>
 			</div>
 
-			<div className="flex flex-col col-span-2 mt-2">
-				<div className="flex-1 flex flex-wrap gap-y-1">
+			<div className="col-span-2 mt-2 flex flex-col">
+				<div className="flex flex-1 flex-wrap gap-y-1">
 					{Array.from({
 						length: maxOutput,
 					}).map((_, i) => (
 						<Fragment key={i}>
 							<div
 								ref={(el) => {
-									el && elementRefs.current.set(i, el);
+									if (el) elementRefs.current.set(i, el);
 								}}
 								className={cn("w-3 h-3 mr-1 last-of-type:mr-0 bg-gray-500", {
 									"mr-0": i + 1 === maxOutput * optimalOutputPercent,
 								})}
 							/>
 							{i + 1 === maxOutput * optimalOutputPercent && (
-								<Tooltip
-									content="Optimal Output"
-									tooltipClassName="-translate-y-1"
-								>
-									<div className="w-0.5 ml-px !mr-px h-3 last-of-type:mr-0 bg-yellow-600 rounded" />
+								<Tooltip content="Optimal Output" tooltipClassName="-translate-y-1">
+									<div className="!mr-px ml-px h-3 w-0.5 rounded bg-yellow-600 last-of-type:mr-0" />
 								</Tooltip>
 							)}
 						</Fragment>
@@ -341,14 +306,10 @@ function Battery({
 	const chargeElementRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 	const outputElementRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 	const storageRef = useRef<HTMLDivElement>(null);
-	const storageProgressRef = useRef<{ setValue: (value: number) => void }>(
-		null,
-	);
+	const storageProgressRef = useRef<{ setValue: (value: number) => void }>(null);
 	const outputRef = useRef<HTMLDivElement>(null);
 	const outputProgressRef = useRef<{ setValue: (value: number) => void }>(null);
-	const batteryIconRef = useRef<{ setPercentage: (value: number) => void }>(
-		null,
-	);
+	const batteryIconRef = useRef<{ setPercentage: (value: number) => void }>(null);
 	const { interpolate } = useLiveQuery();
 	useAnimationFrame(() => {
 		const system = interpolate(id);
@@ -380,45 +341,25 @@ function Battery({
 					el.classList.remove("bg-gray-600", "bg-orange-700", "bg-yellow-400");
 				} else {
 					el.classList.add("bg-yellow-400");
-					el.classList.remove(
-						"bg-gray-600",
-						"bg-orange-700",
-						"bg-green-400",
-						"bg-green-600",
-					);
+					el.classList.remove("bg-gray-600", "bg-orange-700", "bg-green-400", "bg-green-600");
 				}
 			} else if (i + 1 <= Math.ceil(desiredOutput)) {
 				if (id === selectedPowerSupplier) {
 					el.classList.add("bg-green-600");
-					el.classList.remove(
-						"bg-gray-600",
-						"bg-orange-700",
-						"bg-yellow-400",
-						"bg-green-400",
-					);
+					el.classList.remove("bg-gray-600", "bg-orange-700", "bg-yellow-400", "bg-green-400");
 				} else {
 					el.classList.add("bg-orange-700");
-					el.classList.remove(
-						"bg-gray-600",
-						"bg-yellow-400",
-						"bg-green-400",
-						"bg-green-600",
-					);
+					el.classList.remove("bg-gray-600", "bg-yellow-400", "bg-green-400", "bg-green-600");
 				}
 			} else {
 				el.classList.add("bg-gray-600");
-				el.classList.remove(
-					"bg-yellow-400",
-					"bg-orange-700",
-					"bg-green-400",
-					"bg-green-600",
-				);
+				el.classList.remove("bg-yellow-400", "bg-orange-700", "bg-green-400", "bg-green-600");
 			}
 		}
 		if (storageRef.current) {
-			storageRef.current.innerText = `Storage: ${(
-				(storage / capacity) * 100
-			).toFixed(0)}% (${storage.toFixed(2)}MWh)`;
+			storageRef.current.innerText = `Storage: ${((storage / capacity) * 100).toFixed(
+				0,
+			)}% (${storage.toFixed(2)}MWh)`;
 		}
 		if (storageProgressRef.current) {
 			storageProgressRef.current.setValue(storage / capacity);
@@ -436,7 +377,7 @@ function Battery({
 
 	return (
 		<div className="relative contents">
-			<span className="font-medium truncate">{name}</span>
+			<span className="truncate font-medium">{name}</span>
 			<Tooltip content="Allocate Power">
 				<Button
 					className={cn("btn-xs", {
@@ -462,13 +403,10 @@ function Battery({
 					<Icon name="plus" />
 				</Button>
 			</Tooltip>
-			<div className="flex flex-col mt-2">
-				<div className="flex gap-1 items-center">
-					<div className="flex-1 flex items-center flex-wrap gap-y-1">
-						<Tooltip
-							content="Power Input"
-							className="h-4 w-4 flex items-center -ml-2.5 mr-1.5"
-						>
+			<div className="mt-2 flex flex-col">
+				<div className="flex items-center gap-1">
+					<div className="flex flex-1 flex-wrap items-center gap-y-1">
+						<Tooltip content="Power Input" className="mr-1.5 -ml-2.5 flex h-4 w-4 items-center">
 							<Icon name="battery-input" />
 						</Tooltip>
 						{Array.from({
@@ -484,19 +422,16 @@ function Battery({
 								}}
 								key={i}
 								ref={(el) => {
-									el && chargeElementRefs.current.set(i, el);
+									if (el) chargeElementRefs.current.set(i, el);
 								}}
-								className="w-3 h-3 mr-1 last-of-type:mr-0"
+								className="mr-1 h-3 w-3 last-of-type:mr-0"
 							/>
 						))}
 					</div>
 				</div>
-				<div className="flex gap-1 items-center">
-					<div className="flex-1 flex items-center flex-wrap gap-y-1">
-						<Tooltip
-							content="Power Output"
-							className="h-4 w-4 flex items-center -ml-[5px] mr-px"
-						>
+				<div className="flex items-center gap-1">
+					<div className="flex flex-1 flex-wrap items-center gap-y-1">
+						<Tooltip content="Power Output" className="mr-px -ml-[5px] flex h-4 w-4 items-center">
 							<Icon name="battery-output" />
 						</Tooltip>
 						{Array.from({
@@ -505,9 +440,9 @@ function Battery({
 							<div
 								key={i}
 								ref={(el) => {
-									el && outputElementRefs.current.set(i, el);
+									if (el) outputElementRefs.current.set(i, el);
 								}}
-								className="w-3 h-3 mr-1 last-of-type:mr-0 bg-gray-600"
+								className="mr-1 h-3 w-3 bg-gray-600 last-of-type:mr-0"
 							/>
 						))}
 					</div>
@@ -594,45 +529,20 @@ function System({
 		for (const [i, el] of elementRefs.current) {
 			if (i + 1 <= Math.ceil(currentPower)) {
 				if (power?.powerSources[i] === selectedPowerSupplier) {
-					el.classList.remove(
-						"bg-gray-600",
-						"bg-yellow-400",
-						"bg-green-600",
-						"bg-orange-600",
-					);
+					el.classList.remove("bg-gray-600", "bg-yellow-400", "bg-green-600", "bg-orange-600");
 					el.classList.add("bg-green-400");
 				} else {
-					el.classList.remove(
-						"bg-gray-600",
-						"bg-green-400",
-						"bg-green-600",
-						"bg-orange-600",
-					);
+					el.classList.remove("bg-gray-600", "bg-green-400", "bg-green-600", "bg-orange-600");
 					el.classList.add("bg-yellow-400");
 				}
 			} else if (power?.powerSources[i] === selectedPowerSupplier) {
-				el.classList.remove(
-					"bg-gray-600",
-					"bg-yellow-400",
-					"bg-green-400",
-					"bg-orange-600",
-				);
+				el.classList.remove("bg-gray-600", "bg-yellow-400", "bg-green-400", "bg-orange-600");
 				el.classList.add("bg-green-600");
 			} else if (typeof power?.powerSources[i] === "number") {
-				el.classList.remove(
-					"bg-yellow-400",
-					"bg-green-400",
-					"bg-green-600",
-					"bg-gray-600",
-				);
+				el.classList.remove("bg-yellow-400", "bg-green-400", "bg-green-600", "bg-gray-600");
 				el.classList.add("bg-orange-600");
 			} else {
-				el.classList.remove(
-					"bg-yellow-400",
-					"bg-green-400",
-					"bg-green-600",
-					"bg-orange-600",
-				);
+				el.classList.remove("bg-yellow-400", "bg-green-400", "bg-green-600", "bg-orange-600");
 				el.classList.add("bg-gray-600");
 			}
 		}
@@ -650,7 +560,7 @@ function System({
 	return (
 		<div
 			key={id}
-			className="relative group transition-all aria-expanded:cursor-default w-full h-fit contents"
+			className="group relative contents h-fit w-full transition-all aria-expanded:cursor-default"
 		>
 			<span className="truncate">{name}</span>
 
@@ -682,14 +592,14 @@ function System({
 							<Icon name="plus" />
 						</Button>
 					</Tooltip>
-					<div className="flex-1 flex flex-wrap gap-y-1">
+					<div className="flex flex-1 flex-wrap gap-y-1">
 						{Array.from({
 							length: Math.max(...power.powerLevels, power.powerSources.length),
 						}).map((_, i) => (
 							<Fragment key={i}>
 								<div
 									ref={(el) => {
-										el && elementRefs.current.set(i, el);
+										if (el) elementRefs.current.set(i, el);
 									}}
 									onClick={(e) => {
 										e.stopPropagation();
@@ -709,16 +619,15 @@ function System({
 								{power.powerLevels.includes(i + 1) &&
 									(power.powerLevels.indexOf(i + 1) === 0 ? (
 										<Tooltip content="Required Power">
-											<div className="w-0.5 ml-px !mr-px h-3 last-of-type:mr-0 bg-yellow-500 rounded" />
+											<div className="!mr-px ml-px h-3 w-0.5 rounded bg-yellow-500 last-of-type:mr-0" />
 											{/* Display a warning indicator if we're past the max safe power */}
 										</Tooltip>
-									) : power.powerLevels.indexOf(i + 1) ===
-										power.powerLevels.length - 1 ? (
+									) : power.powerLevels.indexOf(i + 1) === power.powerLevels.length - 1 ? (
 										<Tooltip content="Max Safe Power">
-											<div className="w-0.5 ml-px !mr-px h-3 last-of-type:mr-0 bg-red-500 rounded" />
+											<div className="!mr-px ml-px h-3 w-0.5 rounded bg-red-500 last-of-type:mr-0" />
 										</Tooltip>
 									) : (
-										<div className="w-0.5 ml-px !mr-px h-3 last-of-type:mr-0 bg-yellow-500 rounded" />
+										<div className="!mr-px ml-px h-3 w-0.5 rounded bg-yellow-500 last-of-type:mr-0" />
 									))}
 							</Fragment>
 						))}
@@ -729,10 +638,7 @@ function System({
 				<Tooltip ref={heatRef} content={`Heat: K`}>
 					<RadialDial
 						ref={heatProgressRef}
-						marker={
-							(heat.maxSafeHeat - heat.nominalHeat) /
-							(heat.maxHeat - heat.nominalHeat)
-						}
+						marker={(heat.maxSafeHeat - heat.nominalHeat) / (heat.maxHeat - heat.nominalHeat)}
 						label=""
 						count={(0 - heat.nominalHeat) / (heat.maxHeat - heat.nominalHeat)}
 						max={1}
@@ -749,74 +655,64 @@ function System({
 	);
 }
 
-const BatteryIcon = forwardRef<
-	{ setPercentage: (value: number) => void },
-	{ percentage: number }
->(({ percentage }, ref) => {
-	const batteryRef100 = useRef<HTMLDivElement>(null);
-	const batteryRef75 = useRef<HTMLDivElement>(null);
-	const batteryRef50 = useRef<HTMLDivElement>(null);
-	const batteryRef25 = useRef<HTMLDivElement>(null);
-	const batteryRef0 = useRef<HTMLDivElement>(null);
+const BatteryIcon = forwardRef<{ setPercentage: (value: number) => void }, { percentage: number }>(
+	({ percentage }, ref) => {
+		const batteryRef100 = useRef<HTMLDivElement>(null);
+		const batteryRef75 = useRef<HTMLDivElement>(null);
+		const batteryRef50 = useRef<HTMLDivElement>(null);
+		const batteryRef25 = useRef<HTMLDivElement>(null);
+		const batteryRef0 = useRef<HTMLDivElement>(null);
 
-	useImperativeHandle(
-		ref,
-		() => ({
-			setPercentage: (percentage: number) => {
-				batteryRef100.current?.classList.add("hidden");
-				batteryRef75.current?.classList.add("hidden");
-				batteryRef50.current?.classList.add("hidden");
-				batteryRef25.current?.classList.add("hidden");
-				batteryRef0.current?.classList.add("hidden");
-				switch (true) {
-					case percentage > 0.95:
-						batteryRef100.current?.classList.remove("hidden");
-						break;
-					case percentage > 0.6:
-						batteryRef75.current?.classList.remove("hidden");
-						break;
-					case percentage > 0.4:
-						batteryRef50.current?.classList.remove("hidden");
-						break;
-					case percentage > 0.1:
-						batteryRef25.current?.classList.remove("hidden");
-						break;
-					default:
-						batteryRef0.current?.classList.remove("hidden");
-				}
-			},
-		}),
-		[],
-	);
+		useImperativeHandle(
+			ref,
+			() => ({
+				setPercentage: (percentage: number) => {
+					batteryRef100.current?.classList.add("hidden");
+					batteryRef75.current?.classList.add("hidden");
+					batteryRef50.current?.classList.add("hidden");
+					batteryRef25.current?.classList.add("hidden");
+					batteryRef0.current?.classList.add("hidden");
+					switch (true) {
+						case percentage > 0.95:
+							batteryRef100.current?.classList.remove("hidden");
+							break;
+						case percentage > 0.6:
+							batteryRef75.current?.classList.remove("hidden");
+							break;
+						case percentage > 0.4:
+							batteryRef50.current?.classList.remove("hidden");
+							break;
+						case percentage > 0.1:
+							batteryRef25.current?.classList.remove("hidden");
+							break;
+						default:
+							batteryRef0.current?.classList.remove("hidden");
+					}
+				},
+			}),
+			[],
+		);
 
-	return (
-		<>
-			<div ref={batteryRef100} className={percentage < 0.95 ? "hidden" : ""}>
-				<Icon name="battery-100" className="block" />
-			</div>
-			<div
-				ref={batteryRef75}
-				className={percentage >= 0.95 || percentage < 0.6 ? "hidden" : ""}
-			>
-				<Icon name="battery-75" className="block" />
-			</div>
-			<div
-				ref={batteryRef50}
-				className={percentage >= 0.6 || percentage < 0.4 ? "hidden" : ""}
-			>
-				<Icon name="battery-50" className="block" />
-			</div>
-			<div
-				ref={batteryRef25}
-				className={percentage >= 0.4 || percentage < 0.1 ? "hidden" : ""}
-			>
-				<Icon name="battery-25" className="block" />
-			</div>
-			<div ref={batteryRef0} className={percentage >= 0.1 ? "hidden" : ""}>
-				<Icon name="battery-0" className="block" />
-			</div>
-		</>
-	);
-});
+		return (
+			<>
+				<div ref={batteryRef100} className={percentage < 0.95 ? "hidden" : ""}>
+					<Icon name="battery-100" className="block" />
+				</div>
+				<div ref={batteryRef75} className={percentage >= 0.95 || percentage < 0.6 ? "hidden" : ""}>
+					<Icon name="battery-75" className="block" />
+				</div>
+				<div ref={batteryRef50} className={percentage >= 0.6 || percentage < 0.4 ? "hidden" : ""}>
+					<Icon name="battery-50" className="block" />
+				</div>
+				<div ref={batteryRef25} className={percentage >= 0.4 || percentage < 0.1 ? "hidden" : ""}>
+					<Icon name="battery-25" className="block" />
+				</div>
+				<div ref={batteryRef0} className={percentage >= 0.1 ? "hidden" : ""}>
+					<Icon name="battery-0" className="block" />
+				</div>
+			</>
+		);
+	},
+);
 
 BatteryIcon.displayName = "BatteryIcon";

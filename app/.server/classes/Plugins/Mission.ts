@@ -1,9 +1,10 @@
-import type BasePlugin from "./index";
-import { Aspect } from "./Aspect";
-import uniqid from "@thorium/utils/uniqid";
-import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import type { TimelineStep } from "@thorium/.server/classes/Plugins/TimelineStep";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import uniqid from "@thorium/utils/uniqid";
+
+import { Aspect } from "./Aspect";
+import type BasePlugin from "./index";
 export default class MissionPlugin extends Aspect {
 	apiVersion = "timeline/v1" as const;
 	kind = "missions" as const;

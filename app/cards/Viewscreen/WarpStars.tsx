@@ -1,8 +1,9 @@
-import { clientId, q } from "@thorium/context/AppContext";
 import { useFrame } from "@react-three/fiber";
+import { q } from "@thorium/context/AppContext";
+import { useStation } from "@thorium/routes/station/useStation";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
+import { randomPointInSphere } from "@thorium/utils/operations/randomPointInSphere";
 import { getSphericalPositionWithBias } from "@thorium/utils/starmap/getSphericalPositionWithBias";
-
 import { useMemo } from "react";
 import {
 	Color,
@@ -15,25 +16,20 @@ import {
 	Quaternion,
 	Vector3,
 } from "three";
+
 import { useForwardVelocity } from "../Pilot/ImpulseControls";
-import { randomPointInSphere } from "@thorium/utils/operations/randomPointInSphere";
-import { useStation } from "@thorium/routes/station/useStation";
 
 const STAR_COUNT = 5000;
 const FORWARD_DISTANCE = 10000;
 const LY_IN_KM = 9460730472580.8;
 
 const StarPosition = new Vector3();
-const StarQuaternion = new Quaternion().setFromEuler(
-	new Euler(Math.PI / 2, 0, 0),
-);
+const StarQuaternion = new Quaternion().setFromEuler(new Euler(Math.PI / 2, 0, 0));
 const StarScale = new Vector3(2, 1, 2);
 const matrix = new Matrix4();
 const StarColor = new Color();
 const ZeroVector = new Vector3();
-const starRotationQuaternion = new Quaternion().setFromEuler(
-	new Euler(-Math.PI / 2, 0, 0),
-);
+const starRotationQuaternion = new Quaternion().setFromEuler(new Euler(-Math.PI / 2, 0, 0));
 
 const RotateQuaternion = new Quaternion();
 const shipPosition = new Vector3();
@@ -62,8 +58,9 @@ export const WarpStars = () => {
 		}
 		return mesh;
 	}, []);
-	const [{ interstellarCruisingSpeed, solarCruisingSpeed }] =
-		q.pilot.warpEngines.get.useNetRequest({ shipId });
+	const [{ interstellarCruisingSpeed, solarCruisingSpeed }] = q.pilot.warpEngines.get.useNetRequest(
+		{ shipId },
+	);
 
 	const getForwardVelocity = useForwardVelocity();
 	const { interpolate } = useLiveQuery();
@@ -75,12 +72,9 @@ export const WarpStars = () => {
 		const [forwardVelocity] = getForwardVelocity();
 
 		const going = forwardVelocity > 20000;
-		const maxPossibleVelocity = isInSystem
-			? solarCruisingSpeed
-			: interstellarCruisingSpeed;
+		const maxPossibleVelocity = isInSystem ? solarCruisingSpeed : interstellarCruisingSpeed;
 
-		const velocity =
-			(forwardVelocity / maxPossibleVelocity) * 50 + (going ? 4 : 0);
+		const velocity = (forwardVelocity / maxPossibleVelocity) * 50 + (going ? 4 : 0);
 
 		if (rotation) {
 			RotateQuaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
@@ -91,9 +85,7 @@ export const WarpStars = () => {
 				.subVectors(shipPosition, mesh.position)
 				.negate()
 
-				.divideScalar(
-					maxPossibleVelocity / (isInSystem ? 500000 : LY_IN_KM * 5000),
-				);
+				.divideScalar(maxPossibleVelocity / (isInSystem ? 500000 : LY_IN_KM * 5000));
 			mesh.position.copy(shipPosition);
 		}
 		for (let i = 0; i < STAR_COUNT; i++) {
@@ -111,9 +103,7 @@ export const WarpStars = () => {
 			matrix.compose(StarPosition, StarQuaternion, StarScale);
 			mesh.setMatrixAt(i, matrix);
 			const a = 0.184;
-			const hue = Math.round(
-				Math.min(360, Math.max(230, a * StarPosition.z + 230)),
-			);
+			const hue = Math.round(Math.min(360, Math.max(230, a * StarPosition.z + 230)));
 			StarColor.setHSL(hue / 360, 1, 0.9);
 			mesh.setColorAt(i, StarColor);
 		}

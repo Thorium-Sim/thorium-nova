@@ -1,16 +1,19 @@
 import { q, clientId } from "@thorium/context/AppContext";
-import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import { useThoriumAccount } from "@thorium/context/ThoriumAccountContext";
+import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
+import { useStation } from "@thorium/routes/station/useStation";
+import Button from "@thorium/ui/Button";
+import { Portal } from "@thorium/ui/Portal";
+import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
+import { cn } from "@thorium/utils/cn";
+import { useEffect, useRef } from "react";
+
 import { CardArea } from "./CardArea";
 import { CardSwitcher } from "./CardSwitcher";
 import { useManageCard } from "./useManageCard";
 import { Widgets } from "./widgets";
-import { cn } from "@thorium/utils/cn";
-import { useStation } from "@thorium/routes/station/useStation";
-import { useEffect, useRef } from "react";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
-import Button from "@thorium/ui/Button";
-import { Portal } from "@thorium/ui/Portal";
+
+import "./training.css";
 
 const StationLayout = () => {
 	const { client, station, ship } = useStation();
@@ -37,42 +40,29 @@ const StationLayout = () => {
 					} as any
 				}
 			>
-				<link rel="stylesheet" href={theme?.assets.processedCSS} />
+				<link rel="stylesheet" href={theme?.assets.rawCSS} />
 				<CardSwitcher card={card.name} changeCard={changeCard} />
 				<div className="card-frame h-screen">
-					<div className="card-frame-inner h-full w-full absolute">
+					<div className="card-frame-inner absolute h-full w-full">
 						<div className="card-frame-ship-name select-none">{ship.name}</div>
 						{ship.assets?.logo && (
-							<div className="card-frame-ship-logo w-24 h-24">
-								<SVGImageLoader
-									className="card-frame-ship-logo-image"
-									url={ship.assets.logo}
-								/>
+							<div className="card-frame-ship-logo h-24 w-24">
+								<SVGImageLoader className="card-frame-ship-logo-image" url={ship.assets.logo} />
 							</div>
 						)}
-						<div className="card-frame-station-name select-none">
-							{station.name}
-						</div>
+						<div className="card-frame-station-name select-none">{station.name}</div>
 						{station.logo ? (
-							<div className="card-frame-station-logo text-white w-24 h-24">
-								<SVGImageLoader
-									className="card-frame-station-logo-image"
-									url={station.logo}
-								/>
+							<div className="card-frame-station-logo h-24 w-24 text-white">
+								<SVGImageLoader className="card-frame-station-logo-image" url={station.logo} />
 							</div>
 						) : null}
 						<div className="card-frame-card-name select-none">{card.name}</div>
-						<div className="card-frame-card-icon w-24 h-24">
-							<SVGImageLoader
-								className="card-frame-card-icon-image"
-								url={card.icon || ""}
-							/>
+						<div className="card-frame-card-icon h-24 w-24">
+							<SVGImageLoader className="card-frame-card-icon-image" url={card.icon || ""} />
 						</div>
-						<div className="card-frame-login-name select-none">
-							{client.loginName}
-						</div>
+						<div className="card-frame-login-name select-none">{client.loginName}</div>
 						{account && (
-							<div className="card-frame-login-profile w-24 h-24">
+							<div className="card-frame-login-profile h-24 w-24">
 								<img
 									draggable="false"
 									aria-hidden
@@ -98,7 +88,7 @@ const StationLayout = () => {
 					</div>
 					<FlightStatus />
 				</div>
-				<div className="widgets flex items-center gap-2 absolute bottom-8 right-[calc(2rem+50px)]">
+				<div className="widgets absolute right-20.5 bottom-8 flex items-center gap-2">
 					<Widgets />
 				</div>
 				{client.training ? (
@@ -106,16 +96,11 @@ const StationLayout = () => {
 						<div className="theme-container training z-40">
 							<div className="training-overlay" />
 							{client.training?.selector?.map((selector, index) => (
-								<TrainingHighlight
-									key={selector}
-									selector={selector}
-									index={index}
-								/>
+								<TrainingHighlight key={selector} selector={selector} index={index} />
 							))}
-							<div className="training-infobox panel backdrop-blur flex flex-col items-end gap-2">
+							<div className="training-infobox panel flex flex-col items-end gap-2 backdrop-blur">
 								<div
-									className="whitespace-pre-wrap max-w-lg min-w-48"
-									// biome-ignore lint/security/noDangerouslySetInnerHtml: Training supports markdown
+									className="max-w-lg min-w-48 whitespace-pre-wrap"
 									dangerouslySetInnerHTML={{ __html: client.training?.text }}
 								/>
 								{client.training.allowAdvance ? (
@@ -140,13 +125,7 @@ const StationLayout = () => {
 };
 
 const padding = 8;
-function TrainingHighlight({
-	selector,
-	index,
-}: {
-	selector: string;
-	index: number;
-}) {
+function TrainingHighlight({ selector, index }: { selector: string; index: number }) {
 	const ref = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -194,12 +173,10 @@ function FlightStatus() {
 	return (
 		<div
 			className={cn(
-				"absolute z-[500] inset-0 bg-black/50 backdrop-blur transition-all opacity-0 pointer-events-none flex items-center justify-center",
+				"absolute z-500 inset-0 bg-black/50 backdrop-blur transition-all opacity-0 pointer-events-none flex items-center justify-center",
 				{
 					"opacity-100 pointer-events-auto":
-						flight?.state !== "in-progress" ||
-						ship.isDestroyed ||
-						flight.paused,
+						flight?.state !== "in-progress" || ship.isDestroyed || flight.paused,
 				},
 			)}
 		>
@@ -210,14 +187,14 @@ function FlightStatus() {
 						"panel-error": flight?.state === "failure",
 					})}
 				>
-					<p className="text-6xl mb-2">
+					<p className="mb-2 text-6xl">
 						Mission {flight?.state === "success" ? "Success" : "Failure"}
 					</p>
 					<p className="text-4xl">{flight?.stateReason}</p>
 				</div>
 			) : ship.isDestroyed ? (
-				<div className="panel p-6 text-center panel-error">
-					<p className="text-6xl mb-4">Ship Destroyed</p>
+				<div className="panel panel-error p-6 text-center">
+					<p className="mb-4 text-6xl">Ship Destroyed</p>
 					{ship.isDestroyed?.timeToDestroy !== null ? (
 						<p className="text-4xl">
 							Respawn in{" "}
@@ -231,12 +208,9 @@ function FlightStatus() {
 					)}
 				</div>
 			) : flight.paused ? (
-				<div className="panel p-6 text-center panel-alert">
-					<p className="text-6xl mb-4">Flight Paused</p>
-					<Button
-						className="btn-alert"
-						onClick={() => q.flight.resume.netSend()}
-					>
+				<div className="panel panel-alert p-6 text-center">
+					<p className="mb-4 text-6xl">Flight Paused</p>
+					<Button className="btn-alert" onClick={() => q.flight.resume.netSend()}>
 						Resume Flight
 					</Button>
 				</div>
@@ -245,21 +219,14 @@ function FlightStatus() {
 	);
 }
 
-function Countdown({
-	startTime,
-	duration,
-}: {
-	startTime: number;
-	duration: number;
-}) {
+function Countdown({ startTime, duration }: { startTime: number; duration: number }) {
 	const ref = useRef<HTMLSpanElement>(null);
 
 	useAnimationFrame(() => {
 		if (ref.current) {
-			ref.current.textContent = Math.max(
-				0,
-				(duration - (Date.now() - startTime)) / 1000,
-			).toFixed(1);
+			ref.current.textContent = Math.max(0, (duration - (Date.now() - startTime)) / 1000).toFixed(
+				1,
+			);
 		}
 	});
 	return (

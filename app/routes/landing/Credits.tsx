@@ -39,7 +39,7 @@ const creditList = [
 				href="https://github.com/Thorium-Sim/thorium-nova/blob/develop/CONTRIBUTING.md"
 				target="_blank"
 				rel="noreferrer"
-				className="underline text-primary"
+				className="text-primary underline"
 			>
 				Contributors Welcome
 			</a>
@@ -49,7 +49,7 @@ const creditList = [
 				href="https://github.com/Thorium-Sim/thorium-nova/blob/develop/CONTRIBUTING.md"
 				target="_blank"
 				rel="noreferrer"
-				className="underline text-primary"
+				className="text-primary underline"
 			>
 				Your Name Here
 			</a>
@@ -62,23 +62,23 @@ const Credits = ({ className }: { className?: string }) => {
 		<div
 			className={`${className || ""} ${
 				styles.credits
-			} text-right self-end max-h-72 overflow-y-hidden`}
+			} max-h-72 self-end overflow-y-hidden text-right`}
 		>
 			<div
 				className={`${styles["all-credits"]} my-8`}
 				style={{ ["--credits-duration" as any]: `${creditList.length * 2}s` }}
 			>
 				{creditList.map((c, i) => (
-					<div key={i} className="text-white py-2">
+					<div key={i} className="py-2 text-white">
 						<p>{c.header}</p>
-						<p className="font-bold text-lg mt-1">{c.content}</p>
+						<p className="mt-1 text-lg font-bold">{c.content}</p>
 					</div>
 				))}
 				<div className="h-8" />
 				{creditList.map((c, i) => (
-					<div key={i} className="text-white py-2">
+					<div key={i} className="py-2 text-white">
 						<p>{c.header}</p>
-						<p className="font-bold text-lg mt-1">{c.content}</p>
+						<p className="mt-1 text-lg font-bold">{c.content}</p>
 					</div>
 				))}
 			</div>

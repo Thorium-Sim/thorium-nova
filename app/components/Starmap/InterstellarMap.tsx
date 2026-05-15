@@ -1,26 +1,15 @@
-import * as React from "react";
-import { useParams } from "react-router";
-import { useThree } from "@react-three/fiber";
-import { useRef, Suspense, useEffect } from "react";
-import { Box3, type Camera, Vector3 } from "three";
-import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-
-import Starfield from "@thorium/components/Starmap/Starfield";
-import {
-	type LightMinute,
-	type LightYear,
-	lightYearToLightMinute,
-} from "@thorium/utils/unitTypes";
-import { toast } from "@thorium/context/ToastContext";
-import { useConfirm } from "@thorium/ui/AlertDialog";
-import Button from "@thorium/ui/Button";
-import { useExternalCameraControl } from "./CameraControls";
-import CameraControlsClass from "camera-controls";
-import debounce from "lodash.debounce";
-import Input from "@thorium/ui/Input";
-import { PolarGrid } from "./PolarGrid";
-import { q } from "@thorium/context/AppContext";
 import { CameraControls } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
+import Starfield from "@thorium/components/Starmap/Starfield";
+import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
+import { type LightYear, lightYearToLightMinute } from "@thorium/utils/unitTypes";
+import CameraControlsClass from "camera-controls";
+import type * as React from "react";
+import { Suspense, useEffect, useRef } from "react";
+import { Box3, Vector3 } from "three";
+
+import { useExternalCameraControl } from "./CameraControls";
+import { PolarGrid } from "./PolarGrid";
 
 const ACTION = CameraControlsClass.ACTION;
 
@@ -36,18 +25,13 @@ export function InterstellarMap({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		// Set the initial camera position
-		orbitControls.current?.setPosition(
-			0,
-			lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) / 2,
-			0,
-		);
+		orbitControls.current?.setPosition(0, lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) / 2, 0);
 		const max = lightYearToLightMinute(INTERSTELLAR_MAX_DISTANCE) * 0.75;
 		orbitControls.current?.setBoundary(
 			new Box3(new Vector3(-max, -max, -max), new Vector3(max, max, max)),
 		);
 	}, []);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: Update when the camera changes
 	useEffect(() => {
 		if (cameraView === "2d") {
 			orbitControls.current?.rotatePolarTo(0, true);
@@ -101,168 +85,3 @@ export function InterstellarMap({ children }: { children: React.ReactNode }) {
 		</Suspense>
 	);
 }
-
-interface SceneRef {
-	camera: () => Camera;
-}
-
-export function InterstellarMenuButtons({
-	sceneRef,
-}: {
-	sceneRef: React.MutableRefObject<SceneRef | undefined>;
-}) {
-	const { pluginId } = useParams() as {
-		pluginId: string;
-	};
-	const useStarmapStore = useGetStarmapStore();
-
-	const selectedObjectIds = useStarmapStore((s) => s.selectedObjectIds);
-	const cameraView = useStarmapStore((s) => s.cameraView);
-	const confirm = useConfirm();
-	async function deleteObject() {
-		const selectedObjectIds = useStarmapStore.getState().selectedObjectIds;
-		if (
-			selectedObjectIds.length === 0 ||
-			typeof selectedObjectIds[0] === "number"
-		)
-			return;
-
-		const doRemove = await confirm({
-			header: "Are you sure you want to remove this object?",
-			body: "It will remove all of the objects inside of it.",
-		});
-		if (!doRemove) return;
-
-		await q.plugin.starmap.solarSystem.delete.netSend({
-			pluginId,
-			solarSystemId: selectedObjectIds[0],
-		});
-
-		useStarmapStore.setState({
-			selectedObjectIds: [],
-		});
-	}
-
-	return (
-		<>
-			<Button
-				className="btn-success btn-outline btn-xs"
-				onClick={async () => {
-					const camera = sceneRef.current?.camera();
-					if (!camera) return;
-					const vec = new Vector3(0, 0, lightYearToLightMinute(-300));
-
-					vec.applyQuaternion(camera.quaternion).add(camera.position);
-					try {
-						const system = await q.plugin.starmap.solarSystem.create.netSend({
-							pluginId,
-							position: vec,
-						});
-						useStarmapStore.setState({
-							selectedObjectIds: [system.solarSystemId],
-						});
-					} catch (err) {
-						if (err instanceof Error) {
-							toast({
-								title: "Error creating system",
-								body: err.message,
-								color: "error",
-							});
-							return;
-						}
-					}
-				}}
-			>
-				Add
-			</Button>
-			<Button
-				className="btn-error btn-outline btn-xs"
-				disabled={!selectedObjectIds}
-				onClick={deleteObject}
-			>
-				Delete
-			</Button>
-			<Button
-				className="btn-primary btn-outline btn-xs"
-				disabled={!selectedObjectIds}
-			>
-				Edit
-			</Button>
-			<Button
-				className="btn-notice btn-outline btn-xs"
-				onClick={() =>
-					useStarmapStore
-						.getState()
-						.setCameraView(cameraView === "2d" ? "3d" : "2d")
-				}
-			>
-				Go to {cameraView === "2d" ? "3D" : "2D"}
-			</Button>
-		</>
-	);
-}
-
-export const InterstellarPalette = ({
-	selectedStar,
-	update,
-}: {
-	selectedStar: {
-		name: string;
-		position: Record<"x" | "y" | "z", LightMinute>;
-		description: string;
-	};
-	update: (params: {
-		name?: string | undefined;
-		description?: string | undefined;
-	}) => Promise<void>;
-}) => {
-	const useStarmapStore = useGetStarmapStore();
-
-	useEffect(() => {
-		if (!selectedStar) {
-			useStarmapStore.setState({ selectedObjectIds: [] });
-		}
-	}, [selectedStar, useStarmapStore]);
-
-	const [name, setName] = React.useState(selectedStar?.name || "");
-	const [description, setDescription] = React.useState(
-		selectedStar?.description || "",
-	);
-
-	const debouncedUpdate = React.useMemo(
-		() => debounce(update, 500, { maxWait: 2000, trailing: true }),
-		[update],
-	);
-
-	useEffect(() => {
-		if (!selectedStar) return;
-		setName(selectedStar.name);
-		setDescription(selectedStar.description);
-	}, [selectedStar, selectedStar?.name, selectedStar?.description]);
-
-	return (
-		<div className="w-full h-full overflow-y-auto p-2 text-white">
-			<Input
-				label="Name"
-				value={name}
-				onChange={(e) => {
-					setName(e.target.value);
-					debouncedUpdate({ name: e.target.value });
-				}}
-				name="name"
-			/>
-			<Input
-				label="Description"
-				as="textarea"
-				rows={5}
-				className="resize-none"
-				value={description}
-				onChange={(e) => {
-					setDescription(e.target.value);
-					debouncedUpdate({ description: e.target.value });
-				}}
-				name="description"
-			/>
-		</div>
-	);
-};

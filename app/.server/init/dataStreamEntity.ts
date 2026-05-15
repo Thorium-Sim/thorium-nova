@@ -68,6 +68,13 @@ export function dataStreamEntity(e: Entity) {
 			c: e.components.legacyCoolant?.coolant || 0,
 		};
 	}
+	if (e.components.isShortRangeComm) {
+		return {
+			id: e.id.toString(),
+			f: e.components.isShortRangeComm.antennaFrequency,
+			y: e.components.power?.currentPower,
+		};
+	}
 	if (e.components.power) {
 		return {
 			id: e.id.toString(),
@@ -82,8 +89,26 @@ export function dataStreamEntity(e: Entity) {
 			c: e.components.legacyCoolant?.coolant || 0,
 		};
 	}
+	if (e.components.exocomp) {
+		const { parentId: _, type: __, ...position } = e.components.position || {};
+		const shouldSnap = e.components.snapInterpolation ? 1 : 0;
+
+		return {
+			id: e.id.toString(),
+			...position,
+			f: e.components.exocomp.currentCharge ?? 1,
+			c: e.components.exocomp.instructionProgress || 0,
+			s: shouldSnap,
+		};
+	}
+	if (e.components.damageControlAssignment) {
+		return {
+			id: e.id.toString(),
+			x: e.components.damageControlAssignment.progress,
+		};
+	}
 	if (e.components.isTorpedo) {
-		const { parentId, type, ...position } = e.components.position || {};
+		const { parentId: _, type: __, ...position } = e.components.position || {};
 		const { x, y, z } = e.components.velocity || { x: 0, y: 0, z: 0 };
 		const shouldSnap = e.components.snapInterpolation ? 1 : 0;
 		e.removeComponent("snapInterpolation");
@@ -110,7 +135,7 @@ export function dataStreamEntity(e: Entity) {
 		};
 	}
 
-	const { parentId, type, ...position } = e.components.position || {};
+	const { parentId: _, type: __, ...position } = e.components.position || {};
 	const shouldSnap = e.components.snapInterpolation ? 1 : 0;
 	e.removeComponent("snapInterpolation");
 	return {

@@ -1,13 +1,14 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useThoriumAccount } from "@thorium/context/ThoriumAccountContext";
+import { toast } from "@thorium/context/ToastContext";
+import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
+import Dropdown, { DropdownItem } from "@thorium/ui/Dropdown";
+import { Icon } from "@thorium/ui/Icon";
 import { Model } from "@thorium/utils/FlexLayout";
 import { useContext, useState } from "react";
-import { useThoriumAccount } from "@thorium/context/ThoriumAccountContext";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import Dropdown, { DropdownItem } from "@thorium/ui/Dropdown";
-import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
-import { toast } from "@thorium/context/ToastContext";
-import { CoreFlexLayoutContext, defaultJson } from "./CoreFlexLayoutContext";
-import { Icon } from "@thorium/ui/Icon";
 import { Button } from "react-aria-components";
+
+import { CoreFlexLayoutContext, defaultJson } from "./CoreFlexLayoutContext";
 
 export function CoreFlexLayoutDropdown() {
 	const { layoutModel, setLayoutModel } = useContext(CoreFlexLayoutContext);
@@ -35,13 +36,7 @@ export function CoreFlexLayoutDropdown() {
 	});
 
 	const coreLayoutMutation = useMutation({
-		mutationFn: ({
-			method,
-			body,
-		}: {
-			method: "POST" | "PUT" | "DELETE";
-			body: any;
-		}) => {
+		mutationFn: ({ method, body }: { method: "POST" | "PUT" | "DELETE"; body: any }) => {
 			return fetch(`${process.env.THORIUMSIM_URL}/api/coreLayouts`, {
 				method,
 				body: JSON.stringify(body),
@@ -68,15 +63,9 @@ export function CoreFlexLayoutDropdown() {
 			triggerEl={
 				<Button className="btn btn-xs btn-outline btn-warning">
 					<span>
-						{coreLayoutQuery.isLoading
-							? "Loading Flex Layouts..."
-							: "Change Flex Layout"}
+						{coreLayoutQuery.isLoading ? "Loading Flex Layouts..." : "Change Flex Layout"}
 					</span>
-					<Icon
-						name="chevron-down"
-						className="-mr-1 ml-2 h-5 w-5"
-						aria-hidden="true"
-					/>
+					<Icon name="chevron-down" className="-mr-1 ml-2 h-5 w-5" aria-hidden="true" />
 				</Button>
 			}
 		>
@@ -99,7 +88,7 @@ export function CoreFlexLayoutDropdown() {
 						setSelectedLayout(c.id);
 						setLayoutModel(Model.fromJson(JSON.parse(c.layout_json)));
 					}}
-					className="btn-sm py-1 flex"
+					className="btn-sm flex py-1"
 					inactiveClass="btn-ghost"
 					activeClass="btn-warning text-white"
 				>
@@ -174,9 +163,7 @@ export function CoreFlexLayoutDropdown() {
 					</DropdownItem>
 					<DropdownItem
 						onClick={async () => {
-							const layout = coreLayoutQuery.data?.coreLayouts.find(
-								(l) => l.id === selectedLayout,
-							);
+							const layout = coreLayoutQuery.data?.coreLayouts.find((l) => l.id === selectedLayout);
 							const name = await prompt({
 								header: "Enter a new name for this new core layout",
 								defaultValue: layout?.name,

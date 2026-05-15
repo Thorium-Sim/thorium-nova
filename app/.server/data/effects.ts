@@ -1,24 +1,38 @@
-import {
-	type EffectPayload,
-	effectConfig,
-	effectOptions,
-	notBridgeStation,
-} from "@thorium/utils/flags/effects";
-import type { SoundEffect } from "@thorium/ecs-components/soundEffect";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
-import { randomFromList } from "@thorium/utils/operations/randomFromList";
-import { z } from "zod";
 import type { position as positionComponent } from "@thorium/ecs-components/position";
 import { sound } from "@thorium/ecs-components/sound";
-import type { DataContext } from "@thorium/.server/DataContext";
+import type { SoundEffect } from "@thorium/ecs-components/soundEffect";
+import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
 import { playServerSound } from "@thorium/utils/.server/playRangedSound";
+import { type EffectPayload, effectOptions, notBridgeStation } from "@thorium/utils/flags/effects";
+import { randomFromList } from "@thorium/utils/operations/randomFromList";
+import z from "zod";
 
 type SoundPayload =
 	| { type: "sound"; entityId: number; sound: SoundEffect & { id: string } }
 	| { type: "cancelLooping"; entityId: number; soundId: string }
 	| { type: "stop"; entityId: number; soundId: string }
 	| { type: "stopAll" };
+
+type DialoguePayload =
+	| {
+			type: "dialogue";
+			conversationId: number;
+			audioFilepath: string;
+			shipId: number;
+	  }
+	| { type: "stopDialogue"; conversationId: number; shipId: number };
+
+const stationOrClient = z.union([
+	z.object({ clientName: z.string() }),
+	z.object({
+		shipId: z.number(),
+		station: z
+			.union([z.literal("all"), z.literal("bridge"), z.literal("random"), z.string()])
+			.optional(),
+	}),
+]);
 
 export const effects = t.router({
 	sub: t.procedure
@@ -27,38 +41,39 @@ export const effects = t.router({
 		.autoPublish([], () => null)
 		.filter((payload: EffectPayload | null, { ctx, input: { clientId } }) => {
 			if (!payload) return true;
+			const flightClient = ctx.getFlightClient(clientId);
+			const client = ctx.getClient(clientId);
+			const clientData = flightClient?.components.flightClient;
 
-			if (payload.clientId !== clientId) {
-				const flightClient = ctx.getFlightClient(clientId);
-				const clientData = flightClient?.components.flightClient;
-				if (clientData?.shipId !== payload.shipId) return false;
-
-				switch (payload.station) {
-					case "all":
-						break;
-					case "bridge":
-						if (
-							!clientData?.stationId ||
-							notBridgeStation.includes(clientData.stationId)
-						)
-							return false;
-						break;
-					default:
-						if (clientData.stationId !== payload.station) return false;
-				}
+			if ("clientId" in payload) {
+				return payload.clientId === clientId || payload.clientId === client?.name;
 			}
+
+			if (clientData?.shipId !== payload.shipId) return false;
+
+			switch (payload.station) {
+				case "all":
+					break;
+				case "bridge":
+					if (!clientData?.stationId || notBridgeStation.includes(clientData.stationId))
+						return false;
+					break;
+				default:
+					if (clientData.stationId !== payload.station) return false;
+			}
+
 			return true;
 		})
 		.request(({ publish }) => {
 			if (!publish) return null;
-
-			return { effect: publish.effect, config: publish.config };
+			return { effect: publish.effect };
 		}),
 	sounds: t.procedure
 		.input(z.object({ clientId: z.string() }))
 		// This request can only be triggered by a publish.
 		.autoPublish([], () => null)
 		.filter((payload: SoundPayload | null, { ctx, input: { clientId } }) => {
+			const clientSettings = ctx.getClient(clientId)?.settings || {};
 			/**
 			 * Logic for filtering out sound payloads
 			 * - If the sound has `clients`, it only plays on those clients
@@ -75,15 +90,23 @@ export const effects = t.router({
 			let sound: SoundEffect | null = null;
 
 			if (payload.type === "sound") {
+				// Cancel starting a new sound if the the sound isn't targeted to a specific station or client,
+				// and if the client has sound effects turned off
+				if (!payload.sound.stations && !payload.sound.clients && !clientSettings.soundPlayer) {
+					return false;
+				}
 				sound = payload.sound;
 			}
 			const entity = ctx.flight?.ecs.getEntityById(payload.entityId);
 			if (payload.type === "cancelLooping" || payload.type === "stop") {
 				if (!entity) return false;
 				sound =
-					entity.components.soundEffects?.looping?.find(
-						(s) => s.id === payload.soundId,
-					) || null;
+					entity.components.soundEffects?.looping?.find((s) => s.id === payload.soundId) || null;
+
+				entity.updateComponent("soundEffects", {
+					looping:
+						entity.components.soundEffects?.looping.filter((s) => s.key !== sound?.key) || [],
+				});
 			}
 
 			if (!sound) return false;
@@ -120,17 +143,11 @@ export const effects = t.router({
 		.input(z.object({ clientId: z.string() }))
 		// This request can only be triggered by a publish.
 		.autoPublish([], () => null)
-		.filter(
-			(
-				publish: { shipId?: number; stationId?: string },
-				{ ctx, input: { clientId } },
-			) => {
-				const shipId =
-					ctx.getFlightClient(clientId)?.components.flightClient?.shipId;
-				if (publish && publish.shipId !== shipId) return false;
-				return true;
-			},
-		)
+		.filter((publish: { shipId?: number; stationId?: string }, { ctx, input: { clientId } }) => {
+			const shipId = ctx.getFlightClient(clientId)?.components.flightClient?.shipId;
+			if (publish && publish.shipId !== shipId) return false;
+			return true;
+		})
 		.request(({ ctx, input: { clientId } }) => {
 			const loopingSounds: SoundEffect[] = [];
 			const flightClient = ctx.getFlightClient(clientId);
@@ -152,9 +169,23 @@ export const effects = t.router({
 				}),
 			);
 		}),
+	dialogue: t.procedure
+		.input(z.object({ clientId: z.string() })) // This request can only be triggered by a publish.
+		.autoPublish([], () => null)
+		.filter((publish: DialoguePayload, { ctx, input: { clientId } }) => {
+			const shipId = ctx.getFlightClient(clientId)?.components.flightClient?.shipId;
+			const dialoguePlayer = ctx.getClient(clientId).settings.dialoguePlayer;
+			if (!dialoguePlayer) return false;
+
+			if (publish && publish.shipId !== shipId) return false;
+			return true;
+		})
+		.request(({ publish }) => {
+			return publish;
+		}),
 	playSound: t.procedure
 		.meta({
-			action: (ctx: DataContext) => ({
+			action: () => ({
 				sound: {
 					name: "Sound Effect",
 					type: "sound",
@@ -180,50 +211,111 @@ export const effects = t.router({
 			playServerSound(
 				ship,
 				input.sound,
-				Array.isArray(input.station)
-					? input.station
-					: input.station
-						? [input.station]
-						: undefined,
+				Array.isArray(input.station) ? input.station : input.station ? [input.station] : undefined,
 			);
 		}),
 	trigger: t.procedure
 		.meta({ action: true, event: true })
 		.input(
-			z.object({
-				effect: effectOptions,
-				config: effectConfig,
-				shipId: z.number().optional(),
-				station: z
-					.union([z.literal("all"), z.literal("bridge"), z.string()])
-					.optional(),
-				clientId: z.string().optional(),
-			}),
+			z
+				.object({
+					effect: effectOptions,
+				})
+				.and(
+					z.union([
+						z.object({ clientId: z.string() }),
+						z.object({
+							shipId: z.number(),
+							station: z.union([z.literal("all"), z.literal("bridge"), z.string()]).optional(),
+						}),
+					]),
+				),
 		)
 		.send(({ ctx, input }) => {
-			const clientId = "clientId" in input ? input.clientId || null : null;
-			const shipId = "shipId" in input ? input.shipId || null : null;
-			let station: string | null = null;
-			if ("shipId" in input) {
-				const stationList =
-					ctx.flight?.ecs.getEntityById(shipId ?? -1)?.components
-						.stationComplement?.stations || [];
-
-				station =
-					("shipId" in input
-						? input.station
-						: randomFromList(stationList)?.name) || null;
-			}
-			const payload = {
-				effect: input.effect,
-				config: input.config,
-				station,
-				shipId,
-				clientId,
-			};
 			// TODO: Properly handle all of the effects that are not handled client-side, such as
 			// offline card transitions.
-			pubsub.publish.effects.sub(payload);
+			if ("shipId" in input) {
+				const stationList =
+					ctx.flight?.ecs.getEntityById(input.shipId)?.components.stationComplement?.stations || [];
+
+				const station =
+					input.station === "random" ? randomFromList(stationList)?.name : input.station;
+
+				pubsub.publish.effects.sub({
+					effect: input.effect,
+					station,
+					shipId: input.shipId,
+				});
+			} else {
+				pubsub.publish.effects.sub({
+					effect: input.effect,
+					clientId: input.clientId,
+				});
+			}
+		}),
+	notify: t.procedure
+		.meta({ action: true })
+		.input(
+			z
+				.object({
+					title: z.string(),
+					body: z.string().optional(),
+					duration: z.coerce.number().optional(),
+					color: z.enum(["info", "success", "warning", "error", "notice"]),
+					/** Add a highlight to the indicated cards, if they're present */
+					cards: z.string().array().optional(),
+				})
+				.and(stationOrClient),
+		)
+		.send(({ ctx, input }) => {
+			if ("clientName" in input) {
+				const { clientName: _, ...notification } = input;
+				const clientId = ctx.server.getClientByName(input.clientName)?.id || "";
+				pubsub.publish.effects.sub({
+					effect: {
+						type: "message",
+						...notification,
+						action: { type: "cardChange", cards: input.cards || [] },
+					},
+					clientId,
+				});
+
+				// Add the card highlight to this client's station
+				const flightClient = ctx.getFlightClient(input.clientName);
+				applyCardHighlight(
+					ctx.ecs,
+					flightClient?.components.flightClient?.shipId || -1,
+					flightClient?.components.flightClient?.stationId,
+					input.cards,
+				);
+
+				pubsub.publish.station.get({ clientId });
+			} else {
+				const { shipId, station, ...notification } = input;
+
+				pubsub.publish.effects.sub({
+					effect: {
+						type: "message",
+						...notification,
+						action: { type: "cardChange", cards: input.cards || [] },
+					},
+					shipId,
+					station,
+				});
+				// Add the card highlight
+				applyCardHighlight(ctx.ecs, input.shipId, input.station, input.cards);
+				// Find all clients assigned this station
+				for (const client of ctx.ecs.componentCache.get("flightClient") || []) {
+					const flightClient = client.components.flightClient;
+					if (
+						flightClient &&
+						flightClient.shipId === shipId &&
+						flightClient.stationId === station
+					) {
+						pubsub.publish.station.get({ clientId: flightClient.clientId });
+					}
+				}
+			}
 		}),
 });
 
@@ -236,17 +328,13 @@ function matchSound(
 ) {
 	if (clientId && sound.clients?.includes(clientId)) return true;
 	if (
-		sound.stations?.some(
-			(s) =>
-				s.shipId === shipId! && (!s.stationId || s.stationId === stationId),
-		)
+		sound.stations?.some((s) => s.shipId === shipId! && (!s.stationId || s.stationId === stationId))
 	)
 		return true;
 
 	if (sound.range) {
 		const position = sound.range.position;
-		if (!shipPosition || shipPosition.parentId !== position.parentId)
-			return false;
+		if (!shipPosition || shipPosition.parentId !== position.parentId) return false;
 
 		const distance = Math.hypot(
 			shipPosition.x - position.x,

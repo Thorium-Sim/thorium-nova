@@ -1,0 +1,12 @@
+@utility panel {
+	--btn-bg: var(--color-neutral-content);
+	@apply bg-neutral border-neutral-content/0 rounded-lg border;
+	border-color: var(--btn-bg);
+}
+@utility panel-* {
+	--btn-bg: --value(--color-*);
+}
+
+@utility panel-opaque {
+	@apply bg-neutral;
+}

@@ -1,11 +1,12 @@
 import * as React from "react";
+
 import { RowNode } from "../model/RowNode";
 import { TabSetNode } from "../model/TabSetNode";
+import { Orientation } from "../Orientation";
 import { CLASSES } from "../Types";
 import type { LayoutInternal } from "./Layout";
-import { TabSet } from "./TabSet";
 import { Splitter } from "./Splitter";
-import { Orientation } from "../Orientation";
+import { TabSet } from "./TabSet";
 
 /** @internal */
 export interface IRowProps {
@@ -63,11 +64,7 @@ export const Row = (props: IRowProps) => {
 	}
 
 	return (
-		<div
-			ref={selfRef}
-			className={layout.getClassName(CLASSES.FLEXLAYOUT__ROW)}
-			style={style}
-		>
+		<div ref={selfRef} className={layout.getClassName(CLASSES.FLEXLAYOUT__ROW)} style={style}>
 			{items}
 		</div>
 	);

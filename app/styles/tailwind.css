@@ -1,83 +1,202 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "./base.css";
+@import "./utils/rounded.css";
+@import "./utils/join.css";
+@import "./alert.css";
+@import "./badge.css";
+@import "./button.css";
+@import "./cursor.css";
+@import "./faded-scroll.css";
+@import "./input.css";
+@import "./panel.css";
+@import "./progress.css";
+@import "./range.css";
+@import "./slider.css";
+@import "./textarea.css";
+@plugin "@tailwindcss/typography";
+@plugin "tailwindcss-react-aria-components";
 
-@layer components {
-	.list-group-item {
-		@apply select-none block w-full border border-solid bg-black border-white border-opacity-50 pointer-events-auto cursor-pointer;
+@theme static {
+	--depth: 0;
+	--radius-field: 0.5rem;
+	--radius-selector: 0.5rem;
+	--radius-box: 1rem;
+	--border: 1px;
+	--size-field: 0.25rem;
+	--size-selector: 0.25rem;
+
+	--color-primary: #60a5fa;
+	--color-primary-focus: #2563eb;
+	--color-primary-content: #ffffff;
+	--color-primary-highlight: #91c1fb;
+	--color-secondary: #718096;
+	--color-secondary-focus: #2d3748;
+	--color-secondary-content: #ffffff;
+	--color-secondary-highlight: #8e9aab;
+	--color-accent: #37cdbe;
+	--color-accent-focus: #2aa79b;
+	--color-accent-content: #ffffff;
+	--color-accent-highlight: #60d7cb;
+	--color-neutral: #3d4451;
+	--color-neutral-focus: #2a2e37;
+	--color-neutral-content: #ffffff;
+	--color-neutral-highlight: #535c6e;
+	--color-base-100: #535c6e;
+	--color-base-200: #3d4451;
+	--color-base-300: #535c6e;
+	--color-base-content: #ffffff;
+	--color-base-highlight: #535c6e;
+	--color-info: #319795;
+	--color-info-focus: #285e61;
+	--color-info-content: #ffffff;
+	--color-info-highlight: #3dbdbb;
+	--color-success: #38a169;
+	--color-success-focus: #276749;
+	--color-success-content: #ffffff;
+	--color-success-highlight: #4bc182;
+	--color-warning: #dd6b20;
+	--color-warning-focus: #9c4221;
+	--color-warning-content: #ffffff;
+	--color-warning-highlight: #e5884b;
+	--color-error: #e53e3e;
+	--color-error-focus: #9b2c2c;
+	--color-error-content: #ffffff;
+	--color-error-highlight: #eb6b6b;
+	--color-notice: #805ad5;
+	--color-notice-focus: #553c9a;
+	--color-notice-content: #ffffff;
+	--color-notice-highlight: #9f83df;
+	--color-alert-color: var(--alert-color, #60a5fa);
+}
+
+@utility prose {
+	--tw-prose-headings: var(--color-gray-100);
+	--tw-prose-code: var(--color-gray-400);
+	--tw-prose-links: var(--color-primary);
+	--tw-prose-bullets: var(--color-gray-100);
+	--tw-prose-body: var(--color-gray-100);
+	--tw-prose-bold: var(--color-gray-100);
+}
+
+@utility list-group-item {
+	@apply pointer-events-auto block w-full cursor-pointer border border-solid border-white/50 bg-black select-none;
+	& > div,
+	& > a,
+	&:not(&:has(> div), &:has(> a)) {
+		@apply px-4 py-2;
+	}
+	&.list-group-item-small {
+		@apply text-sm;
 		& > div,
 		& > a,
 		&:not(&:has(> div), &:has(> a)) {
-			@apply px-4 py-2;
+			@apply px-2 py-1;
 		}
-		&.list-group-item-small {
-			@apply text-sm;
-			& > div,
-			& > a,
-			&:not(&:has(> div), &:has(> a)) {
-				@apply px-2 py-1;
-			}
+	}
+	&.list-group-item-xs {
+		@apply text-xs;
+		& > div,
+		& > a,
+		&:not(&:has(> div), &:has(> a)) {
+			@apply px-1 py-0.5;
 		}
-		&.list-group-item-xs {
-			@apply text-sm;
-			& > div,
-			& > a,
-			&:not(&:has(> div), &:has(> a)) {
-				@apply px-1 py-0.5;
-			}
+	}
+	&:hover {
+		@apply bg-black/50;
+	}
+	&.selected {
+		@apply bg-white/40;
+		&.subtle {
+			@apply border-blue-500 bg-transparent shadow-inner shadow-blue-500;
 		}
-		&:hover {
-			@apply bg-opacity-50;
-		}
-		&.selected {
-			@apply bg-opacity-40 bg-white;
-			&.subtle {
-				@apply bg-transparent shadow-inner shadow-blue-500 border-blue-500;
-			}
-		}
-		&:disabled,
-		&.disabled {
-			@apply text-gray-400 pointer-events-none;
-		}
-		& + .list-group-item {
-			@apply border-t-0;
-		}
-		&:first-of-type {
-			@apply rounded-t-md;
-		}
-		&:last-of-type {
-			@apply rounded-b-md;
-		}
+	}
+	&.selected:hover {
+		@apply bg-white/50;
+	}
+	&:disabled,
+	&.disabled {
+		@apply pointer-events-none text-gray-400;
+	}
+	& + .list-group-item {
+		@apply border-t-0;
+	}
+	&:first-of-type {
+		@apply rounded-t-md;
+	}
+	&:last-of-type {
+		@apply rounded-b-md;
 	}
 }
 
-.striped-gradient {
-	background: linear-gradient(
+@utility striped-gradient {
+	--striped-gradient-color: oklch(0.8691 0.3248 141.96);
+	background:
+		linear-gradient(
 			to bottom,
 			rgba(0, 0, 0, 0.5) 0%,
 			rgba(0, 0, 0, 0) 50%,
 			rgba(0, 0, 0, 0.5) 100%
 		),
 		linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(255, 255, 255, 0) 100%);
-	background-size: 5px 3px, 100%;
-	background-color: oklch(0.8691 0.3248 141.96);
+	background-size:
+		5px 3px,
+		100%;
+	background-color: var(--striped-gradient-color);
+}
+@utility striped-gradient-horizontal {
+	--striped-gradient-color: oklch(0.8691 0.3248 141.96);
+	background:
+		linear-gradient(to right, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 100%),
+		linear-gradient(to left, rgba(0, 0, 0, 0.75) 0%, rgba(255, 255, 255, 0) 100%);
+	background-size:
+		3px 5px,
+		100%;
+	background-color: var(--striped-gradient-color);
 }
 
-.striped-red {
-	background-color: oklch(0.6558 0.2906 29.23);
-}
-.striped-cyan {
-	background-color: oklch(0.6308 0.2171 254.09);
+@utility striped-gradient-* {
+	--striped-gradient-color: --value(--color-*);
 }
 
 @layer utilities {
-
 	.animate-pong {
 		animation: pong 1s cubic-bezier(0, 0, 0.2, 1) infinite;
 	}
 }
 @keyframes pong {
-	75%, 100% {
-		opacity:0;
+	75%,
+	100% {
+		opacity: 0;
 	}
+}
+
+.select-button {
+	@apply text-center;
+}
+
+.prose code:before,
+.prose code:after {
+	display: none;
+}
+.prose code {
+	font-family: monospace;
+	@apply rounded bg-purple-600/40 p-1 text-white;
+}
+.prose pre code {
+	@apply bg-transparent;
+}
+.prose a code {
+	@apply text-purple-300;
+}
+.prose h1 {
+	@apply font-bold;
+}
+.prose {
+	@apply text-xl leading-relaxed;
+}
+.prose pre {
+	@apply text-base;
+}
+.prose blockquote {
+	@apply text-white;
 }

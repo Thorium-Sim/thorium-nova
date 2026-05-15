@@ -1,11 +1,16 @@
-import { Quaternion, Vector3, Matrix4 } from "three";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { clearAutopilotState } from "@thorium/utils/.server/ship/clearAutopilotState";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { autopilotGetCoordinates } from "@thorium/utils/starmap/autopilotGetCoordinates";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { KM_TO_LY, lightYearToLightMinute } from "@thorium/utils/unitTypes";
+import { Quaternion, Vector3, Matrix4 } from "three";
 
 const rotationQuat = new Quaternion();
 const desiredRotationQuat = new Quaternion();
 const up = new Vector3(0, 1, 0);
+const forward = new Vector3();
+const toWaypoint = new Vector3();
 const matrix = new Matrix4();
 const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
 
@@ -58,30 +63,68 @@ export class AutoRotateSystem extends System {
 			? this.ecs.getEntityById(entity.components.autopilot.desiredSolarSystemId)
 			: null;
 
-		const { nextDestination, positionVec } = autopilotGetCoordinates(
+		const { nextDestination, positionVec, isInInterstellar } = autopilotGetCoordinates(
 			entity,
 			entitySystem,
 			destinationSystem,
 		);
-		const distance = positionVec.distanceToSquared(nextDestination);
 		desiredRotationQuat.identity();
 
 		if (autopilot.desiredCoordinates) {
 			let doneWithPath = false;
-			if (distance < 1) {
+
+			// Use the ship's current speed to determine when to advance to the
+			// next waypoint, matching AutoThrustSystem's approach. This prevents
+			// chaotic rotation at warp when the ship overshoots closely-spaced
+			// intermediate waypoints.
+			const currentSpeed = entity.components.velocity?.forwardVelocity || 0;
+			const distanceToNext = positionVec.distanceTo(nextDestination);
+			const distanceToNextInKM =
+				distanceToNext * (isInInterstellar ? 1 / lightYearToLightMinute(KM_TO_LY) : 1);
+			const distanceThreshold = currentSpeed * 2;
+
+			// Check if the ship has passed the waypoint by testing if it's behind
+			// the ship's forward direction. This handles high-speed travel (e.g. warp)
+			// where the ship can overshoot waypoints between frames.
+			rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
+			forward.set(0, 0, 1).applyQuaternion(rotationQuat);
+			toWaypoint.copy(nextDestination).sub(positionVec);
+			const waypointIsBehind = distanceToNext > 0.001 && toWaypoint.dot(forward) < 0;
+
+			if (distanceToNextInKM < Math.max(1, distanceThreshold) || waypointIsBehind) {
+				// Check if we're already at the final leg of the journey (no intermediate
+				// waypoints left). If nextCoordinates was null and path is empty,
+				// autopilotGetCoordinates used desiredDestination as nextDestination.
+				const wasAtFinalLeg = !autopilot.nextCoordinates && autopilot.path.length === 0;
+
 				autopilot.nextCoordinates = autopilot.path.shift()!;
 				if (!autopilot.nextCoordinates) {
-					doneWithPath = true;
+					if (wasAtFinalLeg && !autopilot.forwardAutopilot && waypointIsBehind) {
+						// Ship has blown past the final destination while using manual
+						// engine controls. Deactivate autopilot and unlock the course,
+						// similar to arriving normally via WaypointRemoveSystem.
+						const waypointId = autopilot.destinationWaypointId;
+						clearAutopilotState(entity);
+						if (typeof waypointId === "number") {
+							const waypoint = this.ecs.getEntityById(waypointId);
+							waypoint?.updateComponent("isWaypoint", { isActive: false });
+						}
+						pubsub.publish.pilot.autopilot.get({ shipId: entity.id });
+						pubsub.publish.waypoints.all({ shipId: entity.id });
+						return;
+					}
 					if (autopilot.desiredRotation) {
+						doneWithPath = true;
 						desiredRotationQuat.set(
 							autopilot.desiredRotation.x,
 							autopilot.desiredRotation.y,
 							autopilot.desiredRotation.z,
 							autopilot.desiredRotation.w,
 						);
-					} else {
-						return;
 					}
+					// Otherwise, fall through — nextDestination is already set to
+					// desiredDestination by autopilotGetCoordinates, so the lookAt
+					// will smoothly point the ship toward the final destination.
 				} else {
 					nextDestination.set(
 						autopilot.nextCoordinates.x,
@@ -94,9 +137,7 @@ export class AutoRotateSystem extends System {
 				rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
 				up.set(0, 1, 0).applyQuaternion(rotationQuat);
 
-				matrix
-					.lookAt(positionVec, nextDestination, up)
-					.multiply(rotationMatrix);
+				matrix.lookAt(positionVec, nextDestination, up).multiply(rotationMatrix);
 				// Use the thrusters to adjust the rotation of the ship to point towards the desired destination.
 				// First, determine the angle to the destination.
 				desiredRotationQuat.setFromRotationMatrix(matrix);

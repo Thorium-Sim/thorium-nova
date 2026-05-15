@@ -1,16 +1,14 @@
-import StationComplementPlugin from "./StationComplement";
-import Plugin from "./index";
-import type { ServerDataModel } from "../ServerDataModel";
-import { describe, expect, it } from "vitest";
-import {
-	DataStore,
-	type DataStoreOperations,
-} from "@thorium/utils/.server/db-fs";
+import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
+import { describe, expect, it } from "vitest";
+
+import type { ServerDataModel } from "../ServerDataModel";
+import Plugin from "./index";
+import StationComplementPlugin from "./StationComplement";
 
 describe("StationComplementPlugin", () => {
 	it("should instantiate correctly", async () => {
-		DataStore.operations.run(testDataStoreProps, () => {
+		await DataStore.operations.run(testDataStoreProps, async () => {
 			const plugin = new Plugin(
 				{},
 				{

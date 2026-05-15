@@ -1,20 +1,18 @@
+import path from "node:path";
+
+import { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
+import { initECS } from "@thorium/.server/classes/initECS";
+import { traverseFiles } from "@thorium/.server/data/traverseFiles";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
-import { z } from "zod";
+import { flightStartInput, startFlight } from "@thorium/.server/spawners/flight";
+import { DataStore } from "@thorium/utils/.server/db-fs";
+import { loadYml } from "@thorium/utils/.server/db-fs/loadYml";
 import inputAuth from "@thorium/utils/.server/inputAuth";
+import { ECS, Entity } from "@thorium/utils/ecs";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import randomWords from "@thorium/utils/random-words";
-import { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
-import { DataStore } from "@thorium/utils/.server/db-fs";
-import path from "node:path";
-import { traverseFiles } from "@thorium/.server/data/traverseFiles";
-import {
-	flightStartInput,
-	startFlight,
-} from "@thorium/.server/spawners/flight";
-import { ECS, Entity } from "@thorium/utils/ecs";
-import { loadYml } from "@thorium/utils/.server/db-fs/loadYml";
-import { initECS } from "@thorium/.server/classes/initECS";
+import z from "zod";
 
 export const flight = t.router({
 	active: t.procedure
@@ -22,15 +20,7 @@ export const flight = t.router({
 		.request(async ({ ctx }) => {
 			const flight = ctx.flight;
 			if (!flight) return null;
-			const {
-				date,
-				name,
-				paused,
-				hasFlightDirector,
-				mode,
-				state,
-				stateReason,
-			} = flight;
+			const { date, name, paused, hasFlightDirector, mode, state, stateReason } = flight;
 			return {
 				date,
 				name,
@@ -90,49 +80,45 @@ export const flight = t.router({
 		pubsub.publishAll();
 		return null;
 	}),
-	load: t.procedure
-		.input(z.object({ flightName: z.string() }))
-		.send(async ({ ctx, input }) => {
-			inputAuth(ctx);
-			if (ctx.flight) return ctx.flight;
+	load: t.procedure.input(z.object({ flightName: z.string() })).send(async ({ ctx, input }) => {
+		inputAuth(ctx);
+		if (ctx.flight) return ctx.flight;
 
-			ctx.flight = new FlightDataModel(
-				{
-					entities: [],
-					initialLoad: false,
-					serverDataModel: ctx.server,
+		ctx.flight = new FlightDataModel(
+			{
+				entities: [],
+				initialLoad: false,
+				serverDataModel: ctx.server,
+			},
+			{
+				meta: {
+					filePath: `/flights/${input.flightName}/data.yml`,
+					flightName: input.flightName,
 				},
-				{
-					meta: {
-						filePath: `/flights/${input.flightName}/data.yml`,
-						flightName: input.flightName,
-					},
-				},
-			);
-			await ctx.flight.initEcs(ctx.server);
-			await ctx.flight.initPhysics();
+			},
+		);
+		await ctx.flight.initEcs(ctx.server);
+		await ctx.flight.initPhysics();
 
-			ctx.server.activeFlightName = input.flightName;
-			pubsub.publishAll();
-			return ctx.flight;
-		}),
-	delete: t.procedure
-		.input(z.object({ name: z.string() }))
-		.send(async ({ ctx, input }) => {
-			inputAuth(ctx);
-			if (ctx.flight?.name === input.name) {
-				ctx.flight = null;
-				ctx.server.activeFlightName = null;
-			}
-			try {
-				await ctx.removeFile(`/flights/${input.name}.flight`);
-			} catch {
-				// Do nothing; the file probably didn't exist.
-			}
-			pubsub.publish.flight.active();
-			pubsub.publish.flight.all();
-			return null;
-		}),
+		ctx.server.activeFlightName = input.flightName;
+		pubsub.publishAll();
+		return ctx.flight;
+	}),
+	delete: t.procedure.input(z.object({ name: z.string() })).send(async ({ ctx, input }) => {
+		inputAuth(ctx);
+		if (ctx.flight?.name === input.name) {
+			ctx.flight = null;
+			ctx.server.activeFlightName = null;
+		}
+		try {
+			await ctx.removeFile(`/flights/${input.name}.flight`);
+		} catch {
+			// Do nothing; the file probably didn't exist.
+		}
+		pubsub.publish.flight.active();
+		pubsub.publish.flight.all();
+		return null;
+	}),
 	pause: t.procedure.meta({ action: true }).send(({ ctx }) => {
 		if (ctx.flight) {
 			ctx.flight.paused = true;
@@ -143,7 +129,7 @@ export const flight = t.router({
 	resume: t.procedure.send(({ ctx }) => {
 		if (ctx.flight) {
 			ctx.flight.paused = false;
-			ctx.ecs.lastUpdate = performance.now();
+			ctx.ecs.lastUpdate = ctx.ecs.now();
 			ctx.flight.state = "in-progress";
 			ctx.flight.stateReason = "";
 			pubsub.publish.flight.active();
@@ -171,23 +157,13 @@ export const flight = t.router({
 				if (!snapshotNames.includes(input.name)) {
 					throw new Error(`Snapshot not found for flight: ${input.name}`);
 				}
-				snapshotPath = path.join(
-					assetUrl,
-					`flights`,
-					ctx.flight.name,
-					`${input.name}.yml`,
-				);
+				snapshotPath = path.join(assetUrl, `flights`, ctx.flight.name, `${input.name}.yml`);
 			} else {
 				// Load all the snapshots to see which is the most recently saved.
 				snapshotPath = (
 					await Promise.all(
-						snapshotNames.map(async (s) => {
-							const spath = path.join(
-								assetUrl,
-								"flights",
-								ctx.flight!.name,
-								`${input.name}.yml`,
-							);
+						snapshotNames.map(async () => {
+							const spath = path.join(assetUrl, "flights", ctx.flight!.name, `${input.name}.yml`);
 							const snapshot = loadYml(await ctx.readFile(spath));
 							return { path: spath, snapshot };
 						}),
@@ -206,8 +182,7 @@ export const flight = t.router({
 			}
 			const file = await ctx.readFile(snapshotPath);
 			const snapshot = loadYml(file);
-			if (!("entities" in snapshot))
-				throw new Error("Invalid snapshot format.");
+			if (!("entities" in snapshot)) throw new Error("Invalid snapshot format.");
 			// Replace the properties of the flight with the snapshot properties
 			ctx.flight.paused = true;
 			ctx.flight.ecs.dispose();
@@ -239,8 +214,7 @@ export const flight = t.router({
 		for (const client of Object.values(flightClients)) {
 			if (!client?.components.flightClient) return;
 			const entity = new Entity();
-			const { clientId, flightId, shipId, stationId } =
-				client.components.flightClient;
+			const { clientId, flightId, shipId, stationId } = client.components.flightClient;
 			entity.addComponent("flightClient", {
 				clientId,
 				flightId,
@@ -292,11 +266,7 @@ export const flight = t.router({
 		)
 		.send(async ({ input, ctx }) => {
 			if (!ctx.flight) throw new Error("Flight not found.");
-			const assetPath = await ctx.uploadFile.call(
-				ctx.flight,
-				input.asset,
-				input.assetPath,
-			);
+			const assetPath = await ctx.uploadFile.call(ctx.flight, input.asset, input.assetPath);
 			pubsub.publish.flight.assets();
 			return { asset: assetPath };
 		}),

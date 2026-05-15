@@ -12,10 +12,10 @@ export function CodeCyphers() {
 	const [selectedCypherName, setSelectedCypher] = useState<string | null>(null);
 	const selectedCypher = cyphers.find((c) => c.name === selectedCypherName);
 	return (
-		<div className="grid grid-cols-3 gap-4 flex-1 overflow-hidden">
-			<div className="flex flex-col min-h-0 flex-1">
+		<div className="grid flex-1 grid-cols-3 gap-4 overflow-hidden">
+			<div className="flex min-h-0 flex-1 flex-col">
 				<p>Cyphers</p>
-				<ul className="panel panel-alert list-group overflow-y-auto flex-1">
+				<ul className="panel panel-alert list-group flex-1 overflow-y-auto">
 					{cyphers.map((c) => (
 						<li
 							key={c.font}
@@ -28,18 +28,13 @@ export function CodeCyphers() {
 						</li>
 					))}
 				</ul>
-				<Button
-					className="btn-secondary w-full btn-sm"
-					onClick={() => window.print()}
-				>
+				<Button className="btn-secondary btn-sm w-full" onClick={() => window.print()}>
 					Print
 				</Button>
 			</div>
 			<Printable preview>
-				<div className="cypher-printing col-span-2 grid grid-cols-4 code-list">
-					<h1 className="col-span-4 text-center font-medium text-lg">
-						=== Code Cypher ===
-					</h1>
+				<div className="cypher-printing code-list col-span-2 grid grid-cols-4">
+					<h1 className="col-span-4 text-center text-lg font-medium">=== Code Cypher ===</h1>
 					{selectedCypher && <CodeList font={selectedCypher?.name} />}
 				</div>
 			</Printable>

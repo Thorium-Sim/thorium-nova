@@ -1,9 +1,5 @@
 import { damageEffectsObject } from "@thorium/ecs-components/shipSystems/damageEffectsObject";
-import {
-	damageEffects,
-	damageTypes,
-	diagnosticRecord,
-} from "@thorium/utils/flags/damageTypes";
+import { damageEffects, damageTypes, diagnosticRecord } from "@thorium/utils/flags/damageTypes";
 import z from "zod";
 
 export const diagnostic = z

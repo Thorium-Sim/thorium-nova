@@ -26,14 +26,11 @@ export function threatKnowledge(ship: Entity) {
 	if (!position) return threats;
 	const activeRange = npcKnowledge?.activeRange || 100000;
 	// {[id]:distance}
-	const nearbyObjects = ship.components.nearbyObjects?.objects as Map<
-		number,
-		number
-	>;
+	const nearbyObjects = ship.components.nearbyObjects?.objects as Map<number, number>;
 	const reputation = ship.components.reputation?.reputation || {};
 	const faction =
-		ship.ecs?.getEntityById(ship.components.faction?.factionId || -1)
-			?.components.reputation?.reputation || {};
+		ship.ecs?.getEntityById(ship.components.faction?.factionId || -1)?.components.reputation
+			?.reputation || {};
 	for (const [objectId, distance] of nearbyObjects) {
 		const object = ship.ecs?.getEntityById(Number(objectId));
 		if (!object?.components.position || !object.components.isShip) continue;
@@ -65,9 +62,7 @@ export function threatKnowledge(ship: Entity) {
 			systemType: "sensors",
 			shipId: ship.id,
 		});
-		const objectScanResults = sensors.components.isSensors?.resultsDatabase.get(
-			object.id,
-		);
+		const objectScanResults = sensors.components.isSensors?.resultsDatabase.get(object.id);
 
 		const targetId = objectScanResults?.targeting?.targetId;
 		let targetingScore = 0;
@@ -93,9 +88,7 @@ export function threatKnowledge(ship: Entity) {
 
 		// Shields - bigger threat if shields are raised.
 		const shieldsScore =
-			objectScanResults?.shields?.status === "up"
-				? objectScanResults.shields.strength || 0
-				: 0;
+			objectScanResults?.shields?.status === "up" ? objectScanResults.shields.strength || 0 : 0;
 
 		// Weapons - bigger threat if weapons are ready
 		const weaponsScore =

@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { loadWebSocket } from "./dataChannel";
-import { ClientSocket } from "./clientSocket";
 import type ReconnectingWebSocket from "reconnecting-websocket";
+
 import { SERVER_FPS } from "../constants";
+import { ClientSocket } from "./clientSocket";
+import { loadWebSocket } from "./dataChannel";
 import type { RequestContext } from "./liveQueryContext";
-export type NetResponseData =
-	| { id: string; error: any }
-	| { id: string; data: any };
+export type NetResponseData = { id: string; error: any } | { id: string; data: any };
 
 const connectClient = async <TContext extends RequestContext>(
 	socket: ReconnectingWebSocket,
@@ -31,9 +30,7 @@ export function useDataConnection<TContext extends RequestContext>(
 			if (socketSet.current) return;
 			try {
 				const context = await getRequestContext();
-				setReconnectionState((state) =>
-					state === "idle" ? "connecting" : "reconnecting",
-				);
+				setReconnectionState((state) => (state === "idle" ? "connecting" : "reconnecting"));
 				const socket = await loadWebSocket();
 				await connectClient(socket, context);
 
@@ -49,14 +46,13 @@ export function useDataConnection<TContext extends RequestContext>(
 				});
 				setReconnectionState("connected");
 				socketSet.current = true;
-			} catch (err) {
+			} catch {
 				setReconnectionState("disconnected");
 			}
 		},
 		[getRequestContext],
 	);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: Causes infinite websocket connections
 	useEffect(() => {
 		if (isTestEnv) return;
 		startDataConnection();

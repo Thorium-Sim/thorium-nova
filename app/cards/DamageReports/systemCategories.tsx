@@ -8,16 +8,14 @@ export const systemFilterValues = [
 	"Science",
 	"Misc.",
 ] as const;
-export const systemCategories: Record<
-	ShipSystemTypes,
-	(typeof systemFilterValues)[number]
-> = {
+export const systemCategories: Record<ShipSystemTypes, (typeof systemFilterValues)[number]> = {
 	battery: "Power",
 	coolantTank: "Misc.",
 	generic: "Misc.",
 	impulseEngines: "Propulsion",
 	inertialDampeners: "Propulsion",
 	longRangeComm: "Communications",
+	shortRangeComm: "Communications",
 	mainComputer: "Science",
 	navigation: "Propulsion",
 	phasers: "Defense",
@@ -28,6 +26,7 @@ export const systemCategories: Record<
 	thrusters: "Propulsion",
 	torpedoLauncher: "Defense",
 	warpEngines: "Propulsion",
+	exocomps: "Misc.",
 };
 
 export const systemSortValues = ["Name", "Type", "Offline", "Damage"];

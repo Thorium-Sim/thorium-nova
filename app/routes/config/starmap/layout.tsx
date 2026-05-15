@@ -1,28 +1,19 @@
-import { InterstellarMenuButtons } from "@thorium/components/Starmap/InterstellarMap";
-import {
-	SolarSystemMenuButtons,
-	SolarSystemPalette,
-} from "@thorium/components/Starmap/SolarSystemMap";
+import { useThree } from "@react-three/fiber";
+import { InterstellarMenuButtons } from "@thorium/components/Starmap/InterstellarMenuButtons";
+import { InterstellarPalette } from "@thorium/components/Starmap/InterstellarPalette";
+import Nebula from "@thorium/components/Starmap/Nebula";
+import { SolarSystemMenuButtons } from "@thorium/components/Starmap/SolarSystemMenuButtons";
+import { SolarSystemPalette } from "@thorium/components/Starmap/SolarSystemPalette";
+import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
-import { Outlet, useMatch, useParams } from "react-router";
+import { q } from "@thorium/context/AppContext";
 import { EditorPalette } from "@thorium/ui/EditorPalette";
 import { useMenubar } from "@thorium/ui/Menubar";
-import {
-	Suspense,
-	forwardRef,
-	useEffect,
-	useImperativeHandle,
-	useRef,
-} from "react";
-import type { Camera } from "three";
 import { lightMinuteToLightYear } from "@thorium/utils/unitTypes";
-import Nebula from "@thorium/components/Starmap/Nebula";
-import { useThree } from "@react-three/fiber";
-import StarmapCanvas from "@thorium/components/Starmap/StarmapCanvas";
+import { forwardRef, Suspense, useCallback, useEffect, useImperativeHandle, useRef } from "react";
+import { Outlet, useMatch, useParams } from "react-router";
 import { ClientOnly } from "remix-utils/client-only";
-import { InterstellarPalette } from "@thorium/components/Starmap/InterstellarMap";
-import { q } from "@thorium/context/AppContext";
-import { useCallback } from "react";
+import type { Camera } from "three";
 
 interface SceneRef {
 	camera: () => Camera;
@@ -55,13 +46,11 @@ export default function StarMap() {
 	const systemId = useSystemId();
 
 	useMenubar({
-		backTo: systemId
-			? `/config/${pluginId}/starmap`
-			: `/config/${pluginId}/list`,
+		backTo: systemId ? `/config/${pluginId}/starmap` : `/config/${pluginId}/list`,
 		children: (
 			<>
 				{!systemId && <InterstellarMenuButtons sceneRef={sceneRef} />}
-				{systemId && <SolarSystemMenuButtons sceneRef={sceneRef} />}
+				{systemId && <SolarSystemMenuButtons />}
 			</>
 		),
 	});
@@ -75,7 +64,7 @@ export default function StarMap() {
 					{systemId ? <SolarSystemPalette /> : <InterstellarPaletteWrapper />}
 				</Suspense>
 			</EditorPalette>
-			<div className="h-[calc(100%-2rem)]  relative bg-black">
+			<div className="relative h-[calc(100%-2rem)] bg-black">
 				<Suspense fallback={null}>
 					<StarmapCanvas>
 						<StarmapScene ref={sceneRef} />
@@ -113,7 +102,7 @@ export function StatusBar() {
 
 	const hoveredPosition = useStarmapStore((s) => s.hoveredPosition);
 	return (
-		<div className="absolute bottom-0 w-full text-white z-20 flex justify-end select-none">
+		<div className="absolute bottom-0 z-20 flex w-full justify-end text-white select-none">
 			{hoveredPosition && (
 				<span>
 					{Math.round(lightMinuteToLightYear(hoveredPosition[0]) * 100) / 100},{" "}
@@ -139,7 +128,12 @@ export function InterstellarPaletteWrapper() {
 	const selectedStar = stars.find((s) => selectedObjectIds?.includes(s.name));
 
 	const update = useCallback(
-		async (params: { name?: string; description?: string }) => {
+		async (params: {
+			name?: string;
+			description?: string;
+			commSatellite?: boolean;
+			commSatelliteRadius?: number;
+		}) => {
 			if (
 				!selectedObjectIds?.length ||
 				selectedObjectIds.length > 1 ||

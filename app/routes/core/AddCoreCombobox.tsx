@@ -1,48 +1,30 @@
 import * as Cores from "@thorium/cores";
-import { capitalCase } from "change-case";
-import { Icon } from "@thorium/ui/Icon";
-import {
-	Button,
-	ComboBox,
-	Input,
-	ListBox,
-	ListBoxItem,
-	Popover,
-} from "react-aria-components";
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
+import { Icon } from "@thorium/ui/Icon";
+import { capitalCase } from "change-case";
+import { Button, ComboBox, Input, ListBox, ListBoxItem, Popover } from "react-aria-components";
 
 export const coreNames = Object.keys(Cores);
 
-export function AddCoreCombobox({
-	onChange,
-}: {
-	onChange: (coreName: string | null) => void;
-}) {
+export function AddCoreCombobox({ onChange }: { onChange: (coreName: string | null) => void }) {
 	return (
-		<ComboBox
-			aria-label="ship"
-			onSelectionChange={(c) => onChange(c as string | null)}
-		>
-			<div className="cursor-pointer min-h-6 h-6 leading-5 relative border-info border rounded-lg">
+		<ComboBox aria-label="ship" onSelectionChange={(c) => onChange(c as string | null)}>
+			<div className="border-info relative h-6 min-h-6 cursor-pointer rounded-lg border leading-5">
 				<Input
 					placeholder="Add Core"
-					className="w-full bg-transparent placeholder:text-info placeholder:font-semibold text-info border-none outline-none focus:ring-0 pl-3 pr-10 text-xs leading-5"
+					className="placeholder:text-info text-info w-full border-none bg-transparent pr-10 pl-3 text-xs leading-5 outline-none placeholder:font-semibold focus:ring-0"
 				/>
-				<Button className="absolute w-10 bg-info/20 hover:bg-info/50 cursor-pointer rounded inset-y-0 right-0 flex items-center justify-center">
-					<Icon
-						name="chevrons-up-down"
-						className="w-5 h-5 text-success"
-						aria-hidden="true"
-					/>
+				<Button className="bg-info/20 hover:bg-info/50 absolute inset-y-0 right-0 flex w-10 cursor-pointer items-center justify-center rounded">
+					<Icon name="chevrons-up-down" className="text-success h-5 w-5" aria-hidden="true" />
 				</Button>
 			</div>
 			<Popover className={popoverTransitionClasses}>
 				<ListBox
-					className="w-full overflow-auto text-base bg-gray-900/90 border-gray-400 border rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+					className="max-h-60 w-full overflow-auto rounded-md border border-gray-400 bg-gray-900/90 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm"
 					items={coreNames.map((id) => ({ id }))}
 				>
 					{(item) => (
-						<ListBoxItem className="font-normal truncate cursor-default select-none py-1 px-2 data-[focused]:bg-info text-white">
+						<ListBoxItem className="data-[focused]:bg-info cursor-default truncate px-2 py-1 font-normal text-white select-none">
 							{capitalCase(item.id).replace("Core", "").trim()}
 						</ListBoxItem>
 					)}

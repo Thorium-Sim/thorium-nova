@@ -1,14 +1,9 @@
-import type {
-	Degree,
-	Kelvin,
-	SolarMass,
-	SolarRadius,
-	Year,
-} from "@thorium/utils/unitTypes";
-import type SolarSystemPlugin from "./SolarSystem";
-import type { SpectralTypes } from "@thorium/utils/flags/starTypes";
 import type { satellite } from "@thorium/ecs-components/satellite";
+import type { SpectralTypes } from "@thorium/utils/flags/starTypes";
+import type { Degree, Kelvin, SolarMass, SolarRadius, Year } from "@thorium/utils/unitTypes";
 import type z from "zod";
+
+import type SolarSystemPlugin from "./SolarSystem";
 
 const ALPHABET = "ABC";
 
@@ -69,9 +64,7 @@ export default class StarPlugin {
 		>,
 		solarSystem: SolarSystemPlugin,
 	) {
-		this.name =
-			params.name ||
-			`${solarSystem.name} ${ALPHABET[solarSystem.stars.length]}`;
+		this.name = params.name || `${solarSystem.name} ${ALPHABET[solarSystem.stars.length]}`;
 		this.description = params.description || "";
 		this.tags = params.tags || [];
 

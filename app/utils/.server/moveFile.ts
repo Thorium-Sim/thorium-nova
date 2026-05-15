@@ -1,12 +1,9 @@
-import path from "node:path";
 import { mkdir, rename } from "node:fs/promises";
+import path from "node:path";
+
 import { thoriumPath } from "@thorium/utils/.server/appPaths";
 
-export async function moveFile(
-	file: Blob | File | string,
-	filePath: string,
-	assetPath: string,
-) {
+export async function moveFile(file: Blob | File | string, filePath: string, assetPath: string) {
 	await mkdir(path.join(thoriumPath, assetPath), {
 		recursive: true,
 	});

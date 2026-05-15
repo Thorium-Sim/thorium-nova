@@ -2,9 +2,7 @@ import z from "zod";
 
 export const isTorpedoLauncher = z
 	.object({
-		status: z
-			.enum(["ready", "loading", "unloading", "loaded", "firing"])
-			.default("ready"),
+		status: z.enum(["ready", "loading", "unloading", "loaded", "firing"]).default("ready"),
 		/**
 		 * Progression from one status to another.
 		 * Set to a time in ms when the process starts and is decremented each game frame

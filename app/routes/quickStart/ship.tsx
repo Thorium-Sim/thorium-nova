@@ -33,8 +33,7 @@ const FleetConfig = () => {
 	const [state, dispatch] = useFlightQuickStart();
 	const [pluginShips] = q.plugin.ship.available.useNetRequest();
 
-	if (!pluginShips)
-		return <div>No ships are present in the active plugins.</div>;
+	if (!pluginShips) return <div>No ships are present in the active plugins.</div>;
 
 	const ships = state.ships || [];
 	return (
@@ -47,9 +46,7 @@ const FleetConfig = () => {
 				inputButton={
 					<Button
 						className="btn-sm btn-outline btn-notice"
-						onClick={() =>
-							dispatch({ type: "flightName", name: randomNameGenerator() })
-						}
+						onClick={() => dispatch({ type: "flightName", name: randomNameGenerator() })}
 					>
 						<Icon name="repeat-2" width="2rem" />
 					</Button>
@@ -58,9 +55,7 @@ const FleetConfig = () => {
 			<RadioGroup
 				className="mb-4"
 				value={state.mode}
-				onChange={(mode) =>
-					dispatch({ type: "mode", mode: mode as "nova" | "legacy" })
-				}
+				onChange={(mode) => dispatch({ type: "mode", mode: mode as "nova" | "legacy" })}
 			>
 				<Label>Mode</Label>
 				<div className="flex gap-2">
@@ -74,14 +69,13 @@ const FleetConfig = () => {
 							})
 						}
 					>
-						<div className="text-lg flex justify-between">
+						<div className="flex justify-between text-lg">
 							Nova
 							<InfoTip>
-								Currently under development. Play Thorium in a realistic
-								simulation. 3D space, ship systems, heat, power distribution,
-								crew members, NPC ships, and everything else is modeled and
-								simulated. Once you understand the rules of the simulation, you
-								can exploit them to your advantage. Flight Director optional.
+								Currently under development. Play Thorium in a realistic simulation. 3D space, ship
+								systems, heat, power distribution, crew members, NPC ships, and everything else is
+								modeled and simulated. Once you understand the rules of the simulation, you can
+								exploit them to your advantage. Flight Director optional.
 							</InfoTip>
 						</div>
 					</Radio>
@@ -95,15 +89,13 @@ const FleetConfig = () => {
 							})
 						}
 					>
-						<div className="text-lg flex justify-between">
+						<div className="flex justify-between text-lg">
 							Legacy
 							<InfoTip>
-								Currently under development. Grab a Flight Director and play
-								Thorium more like a tabletop roleplaying game. The Flight
-								Director controls the entire simulation, which is more ephemeral
-								and less fixed. Great if you have an experienced Flight Director
-								or want to have experiences that aren't possible in the Nova
-								game engine.
+								Currently under development. Grab a Flight Director and play Thorium more like a
+								tabletop roleplaying game. The Flight Director controls the entire simulation, which
+								is more ephemeral and less fixed. Great if you have an experienced Flight Director
+								or want to have experiences that aren't possible in the Nova game engine.
 							</InfoTip>
 						</div>
 					</Radio>
@@ -122,7 +114,7 @@ const FleetConfig = () => {
 					}
 				/>
 			</div>
-			<h2 className="text-2xl font-medium mt-4">Ships</h2>
+			<h2 className="mt-4 text-2xl font-medium">Ships</h2>
 			{ships.length === 1 ? (
 				<ShipConfig key={ships[0].id} dispatch={dispatch} ship={ships[0]} />
 			) : ships.length > 1 ? (
@@ -137,27 +129,26 @@ const FleetConfig = () => {
 function ShipsList({
 	ships,
 	dispatch,
-}: { dispatch: React.Dispatch<FlightConfigAction>; ships: Ship[] }) {
+}: {
+	dispatch: React.Dispatch<FlightConfigAction>;
+	ships: Ship[];
+}) {
 	const [selectedKey, onSelectionChange] = React.useState<Key>(ships[0].id);
 	return (
 		<Tabs selectedKey={selectedKey} onSelectionChange={onSelectionChange}>
-			<TabList aria-label="Player Ships" className="flex gap-1 flex-wrap">
+			<TabList aria-label="Player Ships" className="flex flex-wrap gap-1">
 				{ships.map((ship) => (
 					<Tab
 						id={ship.id}
 						key={ship.id}
-						className="px-2 rounded-t bg-gray-700 data-[selected]:bg-notice"
+						className="data-[selected]:bg-notice rounded-t bg-gray-700 px-2"
 					>
 						{ship.name}
 					</Tab>
 				))}
 			</TabList>
 			{ships.map((ship) => (
-				<TabPanel
-					id={ship.id}
-					key={ship.id}
-					className="w-[24rem] max-w-[24rem]"
-				>
+				<TabPanel id={ship.id} key={ship.id}>
 					<ShipConfig dispatch={dispatch} ship={ship} />
 					{ships.length > 1 && (
 						<Button
@@ -189,12 +180,11 @@ function ShipConfig({
 	const availableCrewSizes = availableStations
 		.map((station) => station.stationCount)
 		.filter((a, i, arr) => arr.indexOf(a) === i)
-		.sort();
+		.sort((a, b) => a - b);
 
 	const pickedShip = pluginShips.find(
 		(pluginShip) =>
-			pluginShip.pluginName === ship.shipId?.pluginId &&
-			pluginShip.name === ship.shipId?.shipId,
+			pluginShip.pluginName === ship.shipId?.pluginId && pluginShip.name === ship.shipId?.shipId,
 	);
 
 	return (
@@ -206,15 +196,13 @@ function ShipConfig({
 					label="Ship Name"
 					labelHidden={false}
 					value={ship.name}
-					onChange={(e) =>
-						dispatch({ type: "shipName", id: ship.id, name: e.target.value })
-					}
+					onChange={(e) => dispatch({ type: "shipName", id: ship.id, name: e.target.value })}
 				/>
 				<div>
 					<p className="text-nowrap">Station Count</p>
-					<div className="flex justify-around items-center select-none">
+					<div className="flex items-center justify-around select-none">
 						<button
-							className="text-2xl cursor-pointer hover:text-white/80 active:text-white/50 focus:outline-none focus:ring rounded-full appearance-none"
+							className="cursor-pointer appearance-none rounded-full text-2xl hover:text-white/80 focus:ring focus:outline-none active:text-white/50"
 							onClick={() =>
 								dispatch({
 									type: "increaseCrewCount",
@@ -225,11 +213,11 @@ function ShipConfig({
 						>
 							<Icon name="arrow-up" />
 						</button>
-						<div className="flex justify-center tabular-nums w-8 h-8 items-center border-2 border-white/60 rounded-lg px-2">
+						<div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-white/60 px-2 tabular-nums">
 							{ship.crewCount}
 						</div>
 						<button
-							className="text-2xl cursor-pointer hover:text-white/80 active:text-white/50 focus:outline-none focus:ring rounded-full appearance-none"
+							className="cursor-pointer appearance-none rounded-full text-2xl hover:text-white/80 focus:ring focus:outline-none active:text-white/50"
 							onClick={() =>
 								dispatch({
 									type: "decreaseCrewCount",
@@ -271,15 +259,11 @@ function ShipConfig({
 				</div>
 			) : (
 				<button
-					className="p-2 border border-white/30 rounded-lg hover:bg-white/10 cursor-pointer w-full text-left flex gap-2"
+					className="flex w-full cursor-pointer gap-2 rounded-lg border border-white/30 p-2 text-left hover:bg-white/10"
 					type="button"
 					onClick={() => setPickingShip(true)}
 				>
-					<img
-						src={pickedShip?.vanityUrl}
-						alt={pickedShip?.name}
-						className="h-12 w-12"
-					/>
+					<img src={pickedShip?.vanityUrl} alt={pickedShip?.name} className="h-12 w-12" />
 					<div className="flex-auto">
 						<p className="font-bold">{pickedShip?.name}</p>
 						<p>{pickedShip?.description}</p>

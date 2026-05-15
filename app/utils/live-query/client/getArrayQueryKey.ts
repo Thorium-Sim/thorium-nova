@@ -12,8 +12,7 @@ export function getArrayQueryKey(
 	const queryKeyArrayed = Array.isArray(queryKey) ? queryKey : [queryKey];
 	const [path, input] = queryKeyArrayed;
 
-	const arrayPath =
-		typeof path !== "string" || path === "" ? [] : path.split(".");
+	const arrayPath = typeof path !== "string" || path === "" ? [] : path.split(".");
 
 	// Construct a query key that is easy to destructure and flexible for
 	// partial selecting etc.

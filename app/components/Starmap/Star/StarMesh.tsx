@@ -1,25 +1,25 @@
+import { useFrame } from "@react-three/fiber";
+import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
+import ColorUtil from "chroma-js";
 import React, { forwardRef, Suspense } from "react";
 import {
-	TextureLoader,
-	RepeatWrapping,
-	type Mesh,
-	type ShaderMaterial,
-	type Color,
-	Vector3,
 	AdditiveBlending,
+	type Color,
 	type Group,
+	type Mesh,
+	RepeatWrapping,
+	type ShaderMaterial,
 	type Texture,
+	TextureLoader,
+	Vector3,
 } from "three";
-import LensFlare from "./lensFlare";
-import { fragment, vertex } from "./shaders";
-import getUniforms from "./uniforms";
-import ColorUtil from "chroma-js";
-import { useFrame } from "@react-three/fiber";
-import { useGetStarmapStore } from "../starmapStore";
 
+import { useGetStarmapStore } from "../starmapStore";
+import { fragment, vertex } from "./shaders";
 import texturePath from "./textures/01_Texture.jpg";
 import spritePath from "./textures/Star.svg";
-import { useShipSprite } from "@thorium/components/Starmap/StarmapShip";
+import getUniforms from "./uniforms";
+
 const distanceVector = new Vector3();
 
 const SPRITE_SCALE_FACTOR = 50;
@@ -35,15 +35,13 @@ const Star: React.FC<{
 	color1 = 0x224488,
 	color2 = 0xf6fcff,
 	size,
-	noLensFlare,
+	noLensFlare: _,
 	showSprite,
 	userData,
 	...props
 }) => {
 	const useStarmapStore = useGetStarmapStore();
-	const isViewscreen = useStarmapStore(
-		(store) => store.viewingMode === "viewscreen",
-	);
+	const isViewscreen = useStarmapStore((store) => store.viewingMode === "viewscreen");
 
 	const texture = React.useMemo(() => {
 		const loader = new TextureLoader();
@@ -101,9 +99,7 @@ const Star: React.FC<{
 	return (
 		<group {...props}>
 			<pointLight intensity={0.8} decay={2} color={color} castShadow />
-			{!isViewscreen && (
-				<StarSprite size={size} color1={color1} userData={userData} />
-			)}
+			{!isViewscreen && <StarSprite size={size} color1={color1} userData={userData} />}
 
 			<group ref={starMesh}>
 				<mesh ref={shader} userData={userData}>
@@ -147,19 +143,11 @@ export const StarSprite = forwardRef<
 
 StarSprite.displayName = "StarSprite";
 
-const StarSpriteInner = ({
-	color1,
-	userData,
-}: { color1: Color | number; userData: any }) => {
+const StarSpriteInner = ({ color1, userData }: { color1: Color | number; userData: any }) => {
 	const spriteMap = useShipSprite(spritePath) as Texture;
 	return (
 		<sprite userData={userData}>
-			<spriteMaterial
-				attach="material"
-				map={spriteMap}
-				color={color1}
-				sizeAttenuation={false}
-			/>
+			<spriteMaterial attach="material" map={spriteMap} color={color1} sizeAttenuation={false} />
 		</sprite>
 	);
 };

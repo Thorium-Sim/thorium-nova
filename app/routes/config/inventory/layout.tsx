@@ -1,11 +1,11 @@
-import { usePrompt } from "@thorium/ui/AlertDialog";
-import { useParams, useNavigate, Outlet } from "react-router";
-import { useMenubar } from "@thorium/ui/Menubar";
-import Button from "@thorium/ui/Button";
-import { toast } from "@thorium/context/ToastContext";
-import SearchableList from "@thorium/ui/SearchableList";
-import { Fragment, Suspense } from "react";
 import { q } from "@thorium/context/AppContext";
+import { toast } from "@thorium/context/ToastContext";
+import { usePrompt } from "@thorium/ui/AlertDialog";
+import Button from "@thorium/ui/Button";
+import { useMenubar } from "@thorium/ui/Menubar";
+import SearchableList from "@thorium/ui/SearchableList";
+import { Fragment } from "react";
+import { useParams, useNavigate, Outlet } from "react-router";
 
 export default function InventoryList() {
 	const { pluginId, inventoryId } = useParams() as {
@@ -20,10 +20,10 @@ export default function InventoryList() {
 	const inventory = data.find((d) => d.name === inventoryId);
 
 	return (
-		<div className="p-8 h-[calc(100%-2rem)]">
-			<h1 className="font-bold text-white text-3xl mb-4">Inventory Config</h1>
-			<div className="flex gap-8 h-[calc(100%-3rem)]">
-				<div className="flex flex-col w-80 h-full">
+		<div className="h-[calc(100%-2rem)] p-8">
+			<h1 className="mb-4 text-3xl font-bold text-white">Inventory Config</h1>
+			<div className="flex h-[calc(100%-3rem)] gap-8">
+				<div className="flex h-full w-80 flex-col">
 					<Button
 						className="btn-success btn-sm w-full"
 						onClick={async () => {
@@ -36,7 +36,7 @@ export default function InventoryList() {
 									name,
 									pluginId,
 								});
-								navigate(`${result.inventoryId}`);
+								void navigate(`${result.inventoryId}`);
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({
@@ -57,12 +57,13 @@ export default function InventoryList() {
 							id: d.name,
 							name: d.name,
 							description: d.description,
+							flags: d.flags,
 						}))}
-						searchKeys={["name"]}
+						searchKeys={["name", "flags"]}
 						selectedItem={inventoryId || null}
 						setSelectedItem={({ id }) => navigate(`${id}`)}
 						renderItem={(c) => (
-							<div className="flex justify-between items-center" key={c.id}>
+							<div className="flex items-center justify-between" key={c.id}>
 								<div>{c.name}</div>
 							</div>
 						)}

@@ -1,19 +1,22 @@
-import GenericSystemPlugin from "./Generic";
-import ImpulseEnginesPlugin from "./ImpulseEngines";
-import WarpEnginesPlugin from "./warpEngines";
-import InertialDampenersPlugin from "./InertialDampeners";
-import ThrustersPlugin from "./Thrusters";
-import ReactorPlugin from "./Reactor";
-import BatteryPlugin from "./Battery";
-import TorpedoLauncherPlugin from "./TorpedoLauncher";
-import TargetingSystemPlugin from "./Targeting";
-import ShieldsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Shields";
+import CoolantTankSystemPlugin from "@thorium/.server/classes/Plugins/ShipSystems/CoolantTank";
+import ExocompsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Exocomps";
+import LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
+import MainComputerPlugin from "@thorium/.server/classes/Plugins/ShipSystems/MainComputer";
+import NavigationPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Navigation";
 import PhasersPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Phasers";
 import SensorsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Sensors";
-import MainComputerPlugin from "@thorium/.server/classes/Plugins/ShipSystems/MainComputer";
-import CoolantTankSystemPlugin from "@thorium/.server/classes/Plugins/ShipSystems/CoolantTank";
-import NavigationPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Navigation";
-import LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
+import ShieldsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Shields";
+
+import BatteryPlugin from "./Battery";
+import GenericSystemPlugin from "./Generic";
+import ImpulseEnginesPlugin from "./ImpulseEngines";
+import InertialDampenersPlugin from "./InertialDampeners";
+import ReactorPlugin from "./Reactor";
+import ShortRangeCommPlugin from "./ShortRangeComm";
+import TargetingSystemPlugin from "./Targeting";
+import ThrustersPlugin from "./Thrusters";
+import TorpedoLauncherPlugin from "./TorpedoLauncher";
+import WarpEnginesPlugin from "./warpEngines";
 
 // Make sure you update the isShipSystem component when adding a new ship system type
 // We can't derive the isShipSystem list from this list because ECS components
@@ -35,12 +38,12 @@ export const ShipSystemTypes = {
 	coolantTank: CoolantTankSystemPlugin,
 	navigation: NavigationPlugin,
 	longRangeComm: LongRangeCommPlugin,
+	shortRangeComm: ShortRangeCommPlugin,
+	exocomps: ExocompsPlugin,
 };
 
 export type ShipSystemFlags = "power" | "heat" | "damage" | "sounds";
 
 export type AllShipSystems = {
-	[k in keyof typeof ShipSystemTypes]: InstanceType<
-		(typeof ShipSystemTypes)[k]
-	>;
+	[k in keyof typeof ShipSystemTypes]: InstanceType<(typeof ShipSystemTypes)[k]>;
 };

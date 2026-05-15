@@ -10,12 +10,12 @@ import { BorderSet } from "./BorderSet";
 import type { IDraggable } from "./IDraggable";
 import type { IDropTarget } from "./IDropTarget";
 import type { IJsonModel, IJsonPopout, ITabSetAttributes } from "./IJsonModel";
+import { LayoutWindow } from "./LayoutWindow";
 import type { Node } from "./Node";
 import { RowNode } from "./RowNode";
 import { TabNode } from "./TabNode";
 import { TabSetNode } from "./TabSetNode";
 import { randomUUID } from "./Utils";
-import { LayoutWindow } from "./LayoutWindow";
 
 /** @internal */
 export const DefaultMin = 0;
@@ -29,8 +29,7 @@ export class Model {
 	static MAIN_WINDOW_ID = "__main_window_id__";
 
 	/** @internal */
-	private static attributeDefinitions: AttributeDefinitions =
-		Model.createAttributeDefinitions();
+	private static attributeDefinitions: AttributeDefinitions = Model.createAttributeDefinitions();
 
 	/** @internal */
 	private attributes: Record<string, any>;
@@ -92,8 +91,7 @@ export class Model {
 				break;
 			}
 			case Actions.MOVE_NODE: {
-				const fromNode = this.idMap.get(action.data.fromNode) as Node &
-					IDraggable;
+				const fromNode = this.idMap.get(action.data.fromNode) as Node & IDraggable;
 
 				if (
 					fromNode instanceof TabNode ||
@@ -104,8 +102,7 @@ export class Model {
 						const fromWindow = this.windows.get(fromNode.getWindowId())!;
 						fromWindow.maximizedTabSet = undefined;
 					}
-					const toNode = this.idMap.get(action.data.toNode) as Node &
-						IDropTarget;
+					const toNode = this.idMap.get(action.data.toNode) as Node & IDropTarget;
 					if (
 						toNode instanceof TabSetNode ||
 						toNode instanceof BorderNode ||
@@ -188,10 +185,7 @@ export class Model {
 						r = (node.getParent() as BorderNode).getContentRect();
 					}
 					const oldLayoutWindow = this.windows.get(node.getWindowId())!;
-					const layoutWindow = new LayoutWindow(
-						windowId,
-						oldLayoutWindow.toScreenRectFunction(r),
-					);
+					const layoutWindow = new LayoutWindow(windowId, oldLayoutWindow.toScreenRectFunction(r));
 					const tabsetId = randomUUID();
 					const json = {
 						type: "row",
@@ -225,10 +219,7 @@ export class Model {
 			}
 			case Actions.CREATE_WINDOW: {
 				const windowId = randomUUID();
-				const layoutWindow = new LayoutWindow(
-					windowId,
-					Rect.fromJson(action.data.rect),
-				);
+				const layoutWindow = new LayoutWindow(windowId, Rect.fromJson(action.data.rect));
 				const row = RowNode.fromJson(action.data.layout, this, layoutWindow);
 				layoutWindow.root = row;
 				this.windows.set(windowId, layoutWindow);
@@ -244,9 +235,7 @@ export class Model {
 			}
 			case Actions.SELECT_TAB: {
 				const tabNode = this.idMap.get(action.data.tabNode);
-				const windowId = action.data.windowId
-					? action.data.windowId
-					: Model.MAIN_WINDOW_ID;
+				const windowId = action.data.windowId ? action.data.windowId : Model.MAIN_WINDOW_ID;
 				const window = this.windows.get(windowId)!;
 				if (tabNode instanceof TabNode) {
 					const parent = tabNode.getParent() as Node;
@@ -268,9 +257,7 @@ export class Model {
 				break;
 			}
 			case Actions.SET_ACTIVE_TABSET: {
-				const windowId = action.data.windowId
-					? action.data.windowId
-					: Model.MAIN_WINDOW_ID;
+				const windowId = action.data.windowId ? action.data.windowId : Model.MAIN_WINDOW_ID;
 				const window = this.windows.get(windowId)!;
 				if (action.data.tabsetNode === undefined) {
 					window.activeTabSet = undefined;
@@ -299,9 +286,7 @@ export class Model {
 				break;
 			}
 			case Actions.MAXIMIZE_TOGGLE: {
-				const windowId = action.data.windowId
-					? action.data.windowId
-					: Model.MAIN_WINDOW_ID;
+				const windowId = action.data.windowId ? action.data.windowId : Model.MAIN_WINDOW_ID;
 				const window = this.windows.get(windowId)!;
 				const node = this.idMap.get(action.data.node);
 				if (node instanceof TabSetNode) {
@@ -417,9 +402,7 @@ export class Model {
 	 * @param node The top node you want to begin searching from, deafults to the root node
 	 * @returns The first Tab Set
 	 */
-	getFirstTabSet(
-		node = this.windows.get(Model.MAIN_WINDOW_ID)!.root as Node,
-	): TabSetNode {
+	getFirstTabSet(node = this.windows.get(Model.MAIN_WINDOW_ID)!.root as Node): TabSetNode {
 		const child = node.getChildren()[0];
 		if (child instanceof TabSetNode) {
 			return child;
@@ -596,21 +579,14 @@ export class Model {
 	addNode(node: Node) {
 		const id = node.getId();
 		if (this.idMap.has(id)) {
-			throw new Error(
-				`Error: each node must have a unique id, duplicate id:${node.getId()}`,
-			);
+			throw new Error(`Error: each node must have a unique id, duplicate id:${node.getId()}`);
 		}
 
 		this.idMap.set(id, node);
 	}
 
 	/** @internal */
-	findDropTargetNode(
-		windowId: string,
-		dragNode: Node & IDraggable,
-		x: number,
-		y: number,
-	) {
+	findDropTargetNode(windowId: string, dragNode: Node & IDraggable, x: number, y: number) {
 		let node = (this.windows.get(windowId)!.root as RowNode).findDropTargetNode(
 			windowId,
 			dragNode,
@@ -656,32 +632,15 @@ export class Model {
 	}
 
 	static toTypescriptInterfaces() {
-		Model.attributeDefinitions.pairAttributes(
-			"RowNode",
-			RowNode.getAttributeDefinitions(),
-		);
-		Model.attributeDefinitions.pairAttributes(
-			"TabSetNode",
-			TabSetNode.getAttributeDefinitions(),
-		);
-		Model.attributeDefinitions.pairAttributes(
-			"TabNode",
-			TabNode.getAttributeDefinitions(),
-		);
-		Model.attributeDefinitions.pairAttributes(
-			"BorderNode",
-			BorderNode.getAttributeDefinitions(),
-		);
+		Model.attributeDefinitions.pairAttributes("RowNode", RowNode.getAttributeDefinitions());
+		Model.attributeDefinitions.pairAttributes("TabSetNode", TabSetNode.getAttributeDefinitions());
+		Model.attributeDefinitions.pairAttributes("TabNode", TabNode.getAttributeDefinitions());
+		Model.attributeDefinitions.pairAttributes("BorderNode", BorderNode.getAttributeDefinitions());
 
 		const sb = [];
+		sb.push(Model.attributeDefinitions.toTypescriptInterface("Global", undefined));
 		sb.push(
-			Model.attributeDefinitions.toTypescriptInterface("Global", undefined),
-		);
-		sb.push(
-			RowNode.getAttributeDefinitions().toTypescriptInterface(
-				"Row",
-				Model.attributeDefinitions,
-			),
+			RowNode.getAttributeDefinitions().toTypescriptInterface("Row", Model.attributeDefinitions),
 		);
 		sb.push(
 			TabSetNode.getAttributeDefinitions().toTypescriptInterface(
@@ -690,10 +649,7 @@ export class Model {
 			),
 		);
 		sb.push(
-			TabNode.getAttributeDefinitions().toTypescriptInterface(
-				"Tab",
-				Model.attributeDefinitions,
-			),
+			TabNode.getAttributeDefinitions().toTypescriptInterface("Tab", Model.attributeDefinitions),
 		);
 		sb.push(
 			BorderNode.getAttributeDefinitions().toTypescriptInterface(
@@ -730,15 +686,11 @@ export class Model {
 		attributeDefinitions
 			.add("splitterSize", 8)
 			.setType(Attribute.NUMBER)
-			.setDescription(
-				`width in pixels of all splitters between tabsets/borders`,
-			);
+			.setDescription(`width in pixels of all splitters between tabsets/borders`);
 		attributeDefinitions
 			.add("splitterExtra", 0)
 			.setType(Attribute.NUMBER)
-			.setDescription(
-				`additional width in pixels of the splitter hit test area`,
-			);
+			.setDescription(`additional width in pixels of the splitter hit test area`);
 		attributeDefinitions
 			.add("splitterEnableHandle", false)
 			.setType(Attribute.BOOLEAN)
@@ -751,124 +703,52 @@ export class Model {
 			.add("tabEnablePopout", false)
 			.setType(Attribute.BOOLEAN)
 			.setAlias("tabEnableFloat");
-		attributeDefinitions
-			.add("tabEnablePopoutIcon", true)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabEnablePopoutOverlay", false)
-			.setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabEnablePopoutIcon", true).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabEnablePopoutOverlay", false).setType(Attribute.BOOLEAN);
 		attributeDefinitions.add("tabEnableDrag", true).setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabEnableRename", true)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabContentClassName", undefined)
-			.setType(Attribute.STRING);
-		attributeDefinitions
-			.add("tabClassName", undefined)
-			.setType(Attribute.STRING);
+		attributeDefinitions.add("tabEnableRename", true).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabContentClassName", undefined).setType(Attribute.STRING);
+		attributeDefinitions.add("tabClassName", undefined).setType(Attribute.STRING);
 		attributeDefinitions.add("tabIcon", undefined).setType(Attribute.STRING);
-		attributeDefinitions
-			.add("tabEnableRenderOnDemand", true)
-			.setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabEnableRenderOnDemand", true).setType(Attribute.BOOLEAN);
 		attributeDefinitions.add("tabDragSpeed", 0.3).setType(Attribute.NUMBER);
 		attributeDefinitions.add("tabBorderWidth", -1).setType(Attribute.NUMBER);
 		attributeDefinitions.add("tabBorderHeight", -1).setType(Attribute.NUMBER);
 
 		// tabset
-		attributeDefinitions
-			.add("tabSetEnableDeleteWhenEmpty", true)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabSetEnableDrop", true)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabSetEnableDrag", true)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabSetEnableDivide", true)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabSetEnableMaximize", true)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabSetEnableClose", false)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabSetEnableSingleTabStretch", false)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabSetAutoSelectTab", true)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabSetEnableActiveIcon", false)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabSetClassNameTabStrip", undefined)
-			.setType(Attribute.STRING);
-		attributeDefinitions
-			.add("tabSetEnableTabStrip", true)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabSetEnableTabWrap", false)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("tabSetTabLocation", "top")
-			.setType("ITabLocation");
-		attributeDefinitions
-			.add("tabMinWidth", DefaultMin)
-			.setType(Attribute.NUMBER);
-		attributeDefinitions
-			.add("tabMinHeight", DefaultMin)
-			.setType(Attribute.NUMBER);
-		attributeDefinitions
-			.add("tabSetMinWidth", DefaultMin)
-			.setType(Attribute.NUMBER);
-		attributeDefinitions
-			.add("tabSetMinHeight", DefaultMin)
-			.setType(Attribute.NUMBER);
-		attributeDefinitions
-			.add("tabMaxWidth", DefaultMax)
-			.setType(Attribute.NUMBER);
-		attributeDefinitions
-			.add("tabMaxHeight", DefaultMax)
-			.setType(Attribute.NUMBER);
-		attributeDefinitions
-			.add("tabSetMaxWidth", DefaultMax)
-			.setType(Attribute.NUMBER);
-		attributeDefinitions
-			.add("tabSetMaxHeight", DefaultMax)
-			.setType(Attribute.NUMBER);
-		attributeDefinitions
-			.add("tabSetEnableTabScrollbar", false)
-			.setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetEnableDeleteWhenEmpty", true).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetEnableDrop", true).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetEnableDrag", true).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetEnableDivide", true).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetEnableMaximize", true).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetEnableClose", false).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetEnableSingleTabStretch", false).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetAutoSelectTab", true).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetEnableActiveIcon", false).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetClassNameTabStrip", undefined).setType(Attribute.STRING);
+		attributeDefinitions.add("tabSetEnableTabStrip", true).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetEnableTabWrap", false).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("tabSetTabLocation", "top").setType("ITabLocation");
+		attributeDefinitions.add("tabMinWidth", DefaultMin).setType(Attribute.NUMBER);
+		attributeDefinitions.add("tabMinHeight", DefaultMin).setType(Attribute.NUMBER);
+		attributeDefinitions.add("tabSetMinWidth", DefaultMin).setType(Attribute.NUMBER);
+		attributeDefinitions.add("tabSetMinHeight", DefaultMin).setType(Attribute.NUMBER);
+		attributeDefinitions.add("tabMaxWidth", DefaultMax).setType(Attribute.NUMBER);
+		attributeDefinitions.add("tabMaxHeight", DefaultMax).setType(Attribute.NUMBER);
+		attributeDefinitions.add("tabSetMaxWidth", DefaultMax).setType(Attribute.NUMBER);
+		attributeDefinitions.add("tabSetMaxHeight", DefaultMax).setType(Attribute.NUMBER);
+		attributeDefinitions.add("tabSetEnableTabScrollbar", false).setType(Attribute.BOOLEAN);
 
 		// border
 		attributeDefinitions.add("borderSize", 200).setType(Attribute.NUMBER);
-		attributeDefinitions
-			.add("borderMinSize", DefaultMin)
-			.setType(Attribute.NUMBER);
-		attributeDefinitions
-			.add("borderMaxSize", DefaultMax)
-			.setType(Attribute.NUMBER);
-		attributeDefinitions
-			.add("borderEnableDrop", true)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("borderAutoSelectTabWhenOpen", true)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("borderAutoSelectTabWhenClosed", false)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("borderClassName", undefined)
-			.setType(Attribute.STRING);
-		attributeDefinitions
-			.add("borderEnableAutoHide", false)
-			.setType(Attribute.BOOLEAN);
-		attributeDefinitions
-			.add("borderEnableTabScrollbar", false)
-			.setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("borderMinSize", DefaultMin).setType(Attribute.NUMBER);
+		attributeDefinitions.add("borderMaxSize", DefaultMax).setType(Attribute.NUMBER);
+		attributeDefinitions.add("borderEnableDrop", true).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("borderAutoSelectTabWhenOpen", true).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("borderAutoSelectTabWhenClosed", false).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("borderClassName", undefined).setType(Attribute.STRING);
+		attributeDefinitions.add("borderEnableAutoHide", false).setType(Attribute.BOOLEAN);
+		attributeDefinitions.add("borderEnableTabScrollbar", false).setType(Attribute.BOOLEAN);
 
 		return attributeDefinitions;
 	}

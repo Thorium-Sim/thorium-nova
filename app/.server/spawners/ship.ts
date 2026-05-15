@@ -1,23 +1,25 @@
-import { Entity } from "@thorium/utils/ecs";
-import type ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
-import type { position } from "@thorium/ecs-components/position";
-import { randomFromList } from "@thorium/utils/operations/randomFromList";
-import { generateShipInventory } from "./inventory";
-import type { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
-import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
-import { greekLetters } from "@thorium/utils/constants";
-import { spawnShipSystem } from "./shipSystem";
-import ReactorPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Reactor";
-import type BaseShipSystemPlugin from "@thorium/.server/classes/Plugins/ShipSystems/BaseSystem";
-import { getInventoryTemplates } from "@thorium/utils/.server/getInventoryTemplates";
-import { getPowerSupplierPowerNeeded } from "@thorium/.server/systems/ReactorFuelSystem";
-import { Box3, Vector3 } from "three";
-import { loadGltf } from "@thorium/utils/.server/loadGltf";
-import { capitalCase } from "change-case";
 import path from "node:path";
-import { mergeDeep } from "@thorium/utils/operations/mergeDeep";
+
+import type { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
+import type ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
+import type BaseShipSystemPlugin from "@thorium/.server/classes/Plugins/ShipSystems/BaseSystem";
 import type PhasersPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Phasers";
+import ReactorPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Reactor";
+import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
+import { getPowerSupplierPowerNeeded } from "@thorium/.server/systems/ReactorFuelSystem";
+import type { position } from "@thorium/ecs-components/position";
+import { getInventoryTemplates } from "@thorium/utils/.server/getInventoryTemplates";
+import { loadGltf } from "@thorium/utils/.server/loadGltf";
+import { greekLetters } from "@thorium/utils/constants";
+import { Entity } from "@thorium/utils/ecs";
+import { mergeDeep } from "@thorium/utils/operations/mergeDeep";
+import { randomFromList } from "@thorium/utils/operations/randomFromList";
+import { capitalCase } from "change-case";
+import { Box3, Vector3 } from "three";
 import type z from "zod";
+
+import { generateShipInventory } from "./inventory";
+import { spawnShipSystem } from "./shipSystem";
 
 const systemCache: Record<string, BaseShipSystemPlugin> = {};
 function getSystem(
@@ -26,12 +28,8 @@ function getSystem(
 	pluginId: string,
 ) {
 	if (!systemCache[`${systemId}-${pluginId}`]) {
-		const plugin = dataContext.server.plugins.find(
-			(plugin) => pluginId === plugin.id,
-		);
-		const systemPlugin = plugin?.aspects.shipSystems.find(
-			(sys) => sys.name === systemId,
-		);
+		const plugin = dataContext.server.plugins.find((plugin) => pluginId === plugin.id);
+		const systemPlugin = plugin?.aspects.shipSystems.find((sys) => sys.name === systemId);
 		if (!systemPlugin) return undefined;
 		systemCache[`${systemId}-${pluginId}`] = systemPlugin;
 	}
@@ -84,14 +82,9 @@ export async function spawnShip(
 	entity.addComponent("rotationVelocity");
 	entity.addComponent("reputation");
 
-	const modelPath = path.join(
-		(await template.getAssetUrl!()) || "",
-		template.assets!.model,
-	);
+	const modelPath = path.join((await template.getAssetUrl!()) || "", template.assets!.model);
 	const size =
-		modelPath && modelPath !== "."
-			? await getMeshSize(modelPath)
-			: new Vector3(10, 10, 10);
+		modelPath && modelPath !== "." ? await getMeshSize(modelPath) : new Vector3(10, 10, 10);
 
 	size.multiplyScalar(template.length || 1);
 	entity.addComponent("size", {
@@ -104,19 +97,80 @@ export async function spawnShip(
 
 	entity.addComponent("shipSystems");
 	entity.addComponent("nearbyObjects", { objects: new Map() });
+	entity.addComponent("facingWaypoints");
+
+	if (params.playerShip) {
+		entity.addComponent("isPlayerShip");
+		entity.addComponent("physicsHandles");
+		entity.addComponent("tweaks");
+		entity.addComponent("shipAlerts");
+	} else {
+		entity.addComponent("shipBehavior", {
+			objective: "hold",
+			behaviorTarget: entity.components.position,
+			actionTarget: entity.components.position,
+		});
+		entity.addComponent("autopilot");
+	}
+
+	// Rooms need to be spawned before ship systems so systems can place entities inside
+	const extraEntities: Entity[] = [];
+	// Initialize the ship map. For now, we'll just load the ship map onto a component of the ship.
+	// In the future, rooms themselves might become entities.
+	if (entity.components.isPlayerShip && template.decks && template.decks?.length > 0) {
+		const deckNodes =
+			template.decks?.flatMap((deck, i) =>
+				deck.nodes.map((n) => ({ ...n, deckIndex: i, contents: {} })),
+			) || [];
+
+		entity.addComponent("shipMap", {
+			decks: template.decks || [],
+			deckNodes,
+			deckEdges: template.deckEdges || [],
+		});
+
+		// Place cargo containers
+		Array.from({ length: template.cargoContainers || 0 }).forEach((_, i) => {
+			// TODO June 24, 2022: Maybe make this use the ECS PRNG
+			const randomRoom = randomFromList(deckNodes.filter((n) => n.isRoom));
+			if (!randomRoom) return;
+			const cargoContainer = new Entity();
+			cargoContainer.addComponent("identity", {
+				name: `Container ${greekLetters[i]}${i > 25 ? i : ""}`,
+			});
+			cargoContainer.addComponent("isCargoContainer");
+			cargoContainer.addComponent("cargoContainer", {
+				volume: template.cargoContainerVolume || 1,
+			});
+			cargoContainer.addComponent("position", {
+				x: randomRoom.x,
+				y: randomRoom.y,
+				z: randomRoom.deckIndex,
+				type: "ship",
+				parentId: entity.id,
+			});
+			cargoContainer.addComponent("passengerMovement", {
+				destinationNode: randomRoom.id,
+			});
+			extraEntities.push(cargoContainer);
+		});
+	} else {
+		// Give the ship some cargo space without creating any rooms
+		entity.addComponent("cargoContainer", {
+			// TODO June 24, 2022: Make this a configurable value
+			volume: 500,
+		});
+	}
+
+	const shipRooms = entity.components.shipMap?.deckNodes || [];
 
 	const systemEntities: Entity[] = [];
 	let phaseCapacitorCount = 0;
 	template.shipSystems?.forEach((system) => {
-		const systemPlugin = getSystem(
-			dataContext,
-			system.systemId,
-			system.pluginId,
-		);
+		const systemPlugin = getSystem(dataContext, system.systemId, system.pluginId);
 		if (!systemPlugin) return;
 		// @ts-expect-error
-		if (!systemPlugin.constructor.flightModes.includes(params.flightMode))
-			return;
+		if (!systemPlugin.constructor.flightModes.includes(params.flightMode)) return;
 		switch (systemPlugin.type) {
 			case "reactor":
 				// Reactors are special, so take care of them later.
@@ -128,12 +182,12 @@ export async function spawnShip(
 						shipId,
 						systemPlugin,
 						params.flightMode,
+						shipRooms,
 						params.playerShip,
 						system.overrides,
 					);
 					if (entity.components.isBattery) {
-						entity.components.isBattery.storage =
-							entity.components.isBattery.capacity;
+						entity.components.isBattery.storage = entity.components.isBattery.capacity;
 					}
 					systemEntities.push(entity, ...rest);
 				}
@@ -142,14 +196,7 @@ export async function spawnShip(
 			}
 			case "shields": {
 				// Create enough shield systems for each shield
-				const shieldDirections = [
-					"fore",
-					"aft",
-					"port",
-					"starboard",
-					"dorsal",
-					"ventral",
-				];
+				const shieldDirections = ["fore", "aft", "port", "starboard", "dorsal", "ventral"];
 				const shieldCount =
 					system.overrides?.shieldCount ||
 					("shieldCount" in systemPlugin && systemPlugin.shieldCount) ||
@@ -159,6 +206,7 @@ export async function spawnShip(
 						shipId,
 						systemPlugin,
 						params.flightMode,
+						shipRooms,
 						params.playerShip,
 						{
 							...system.overrides,
@@ -182,22 +230,21 @@ export async function spawnShip(
 					shipId,
 					systemPlugin,
 					params.flightMode,
+					shipRooms,
 					params.playerShip,
 					system.overrides,
 				);
 
 				systemEntities.push(phaser, ...rest);
 
-				const template = mergeDeep(
-					systemPlugin,
-					system.overrides || {},
-				) as PhasersPlugin;
+				const template = mergeDeep(systemPlugin, system.overrides || {}) as PhasersPlugin;
 
 				if (params.flightMode === "nova") {
 					const [capacitor] = spawnShipSystem(
 						shipId,
 						{ type: "battery" },
 						params.flightMode,
+						shipRooms,
 						params.playerShip,
 						{},
 					);
@@ -227,6 +274,7 @@ export async function spawnShip(
 					shipId,
 					systemPlugin,
 					params.flightMode,
+					shipRooms,
 					params.playerShip,
 					system.overrides,
 				);
@@ -245,16 +293,9 @@ export async function spawnShip(
 			params.flightMode === "legacy"
 				? 1
 				: template.shipSystems?.reduce((prev, system) => {
-						const systemPlugin = getSystem(
-							dataContext,
-							system.systemId,
-							system.pluginId,
-						);
+						const systemPlugin = getSystem(dataContext, system.systemId, system.pluginId);
 						if (systemPlugin instanceof ReactorPlugin) {
-							return (
-								prev +
-								(system.overrides?.reactorCount || systemPlugin.reactorCount)
-							);
+							return prev + (system.overrides?.reactorCount || systemPlugin.reactorCount);
 						}
 						return prev;
 					}, 0) || 1;
@@ -263,17 +304,14 @@ export async function spawnShip(
 		const reactorPower = Math.ceil(totalPower / reactorCount / 10) * 10;
 
 		template.shipSystems?.forEach((system) => {
-			const systemPlugin = getSystem(
-				dataContext,
-				system.systemId,
-				system.pluginId,
-			);
+			const systemPlugin = getSystem(dataContext, system.systemId, system.pluginId);
 			if (systemPlugin instanceof ReactorPlugin) {
 				Array.from({ length: reactorCount }).forEach(() => {
 					const [sys, ...rest] = spawnShipSystem(
 						shipId,
 						systemPlugin,
 						params.flightMode,
+						shipRooms,
 						params.playerShip,
 						system.overrides,
 					);
@@ -304,10 +342,7 @@ export async function spawnShip(
 				const reactor = randomFromList(reactors);
 				if (!reactor) return;
 				entity.updateComponent("isBattery", {
-					powerSources: [
-						...entity.components.isBattery.powerSources,
-						reactor.id,
-					],
+					powerSources: [...entity.components.isBattery.powerSources, reactor.id],
 				});
 			}
 			if (entity.components.power) {
@@ -335,31 +370,15 @@ export async function spawnShip(
 		entity.components.shipSystems?.shipSystems.set(e.id, {});
 	});
 
-	// Now we can add the ship to the ECS
-	if (params.playerShip) {
-		entity.addComponent("isPlayerShip");
-		entity.addComponent("physicsHandles");
-		entity.addComponent("tweaks");
-	} else {
-		entity.addComponent("shipBehavior", {
-			objective: "hold",
-			behaviorTarget: entity.components.position,
-			actionTarget: entity.components.position,
-		});
-		entity.addComponent("autopilot");
-	}
-	const extraEntities: Entity[] = [];
-	// Initialize the ship map. For now, we'll just load the ship map onto a component of the ship.
-	// In the future, rooms themselves might become entities.
+	// Create inventory
 	if (
+		entity.components.shipMap?.deckNodes &&
 		entity.components.isPlayerShip &&
 		template.decks &&
 		template.decks?.length > 0
 	) {
-		const deckNodes =
-			template.decks?.flatMap((deck, i) =>
-				deck.nodes.map((n) => ({ ...n, deckIndex: i, contents: {} })),
-			) || [];
+		const deckNodes = entity.components.shipMap.deckNodes;
+
 		generateShipInventory(
 			deckNodes.map((node) => ({
 				id: node.id,
@@ -373,43 +392,7 @@ export async function spawnShip(
 				powerNeed: totalPower * 2.5, // Convert megawatts into 2.5 MegaWatt hours
 			},
 		);
-
-		entity.addComponent("shipMap", {
-			decks: template.decks || [],
-			deckNodes,
-			deckEdges: template.deckEdges || [],
-		});
-
-		// Place cargo containers
-		Array.from({ length: template.cargoContainers || 0 }).forEach((_, i) => {
-			// TODO June 24, 2022: Maybe make this use the ECS PRNG
-			const randomRoom = randomFromList(deckNodes.filter((n) => n.isRoom));
-			if (!randomRoom) return;
-			const cargoContainer = new Entity();
-			cargoContainer.addComponent("identity", {
-				name: `Container ${greekLetters[i]}${i > 25 ? i : ""}`,
-			});
-			cargoContainer.addComponent("cargoContainer", {
-				volume: template.cargoContainerVolume || 1,
-			});
-			cargoContainer.addComponent("position", {
-				x: randomRoom.x,
-				y: randomRoom.y,
-				z: randomRoom.deckIndex,
-				type: "ship",
-				parentId: entity.id,
-			});
-			cargoContainer.addComponent("passengerMovement", {
-				destinationNode: randomRoom.id,
-			});
-			extraEntities.push(cargoContainer);
-		});
 	} else {
-		// Give the ship some cargo space without creating any rooms
-		entity.addComponent("cargoContainer", {
-			// TODO June 24, 2022: Make this a configurable value
-			volume: 500,
-		});
 		generateShipInventory(
 			[
 				{
@@ -434,9 +417,8 @@ export async function spawnShip(
 		const systemType = system?.components.isShipSystem?.type;
 		if (!systemType) continue;
 		const availableRooms =
-			entity.components.shipMap?.deckNodes.filter((node) =>
-				node.systems?.includes(systemType),
-			) || [];
+			entity.components.shipMap?.deckNodes.filter((node) => node.systems?.includes(systemType)) ||
+			[];
 
 		if (occupiedRooms.length === availableRooms.length) {
 			occupiedRooms = [];

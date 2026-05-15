@@ -8,7 +8,7 @@ import {
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
+import z from "zod";
 
 export const mainComputer = t.router({
 	get: t.procedure
@@ -16,8 +16,7 @@ export const mainComputer = t.router({
 		.filter(pluginFilter)
 		.request(({ ctx, input }) => {
 			const system = getShipSystem({ input, ctx });
-			if (system.type !== "mainComputer")
-				throw new Error("System is not Main Computer");
+			if (system.type !== "mainComputer") throw new Error("System is not Main Computer");
 
 			return system as MainComputerPlugin;
 		}),
@@ -35,23 +34,14 @@ export const mainComputer = t.router({
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
-			const [system, override] = getShipSystemForInput<"mainComputer">(
-				ctx,
-				input,
-			);
+			const [system, override] = getShipSystemForInput<"mainComputer">(ctx, input);
 			const shipSystem = override || system;
 
 			if (typeof input.minDiagnosticEnergyCost === "number") {
-				shipSystem.minDiagnosticEnergyCost = Math.max(
-					0,
-					input.minDiagnosticEnergyCost,
-				);
+				shipSystem.minDiagnosticEnergyCost = Math.max(0, input.minDiagnosticEnergyCost);
 			}
 			if (typeof input.maxDiagnosticEnergyCost === "number") {
-				shipSystem.maxDiagnosticEnergyCost = Math.max(
-					0,
-					input.maxDiagnosticEnergyCost,
-				);
+				shipSystem.maxDiagnosticEnergyCost = Math.max(0, input.maxDiagnosticEnergyCost);
 			}
 
 			pubsub.publish.plugin.systems.get({

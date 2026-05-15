@@ -1,10 +1,5 @@
-import { load } from "js-yaml";
+import { YAML } from "bun";
 
 export function loadYml(fileData: string | undefined, initialData?: any) {
-	return fileData
-		? load(fileData, {
-				json: true,
-				onWarning: (e) => console.warn("YAML load warning:", e),
-			})
-		: initialData;
+	return fileData ? YAML.parse(fileData) : initialData;
 }

@@ -1,19 +1,19 @@
-import type { TabNode } from "./TabNode";
 import { Attribute } from "../Attribute";
 import { AttributeDefinitions } from "../AttributeDefinitions";
 import { DockLocation } from "../DockLocation";
 import { DropInfo } from "../DropInfo";
 import { Orientation } from "../Orientation";
 import { CLASSES } from "../Types";
+import { canDockToWindow } from "../view/Utils";
 import { BorderNode } from "./BorderNode";
 import type { IDraggable } from "./IDraggable";
 import type { IDropTarget } from "./IDropTarget";
 import type { IJsonRowNode } from "./IJsonModel";
+import type { LayoutWindow } from "./LayoutWindow";
 import { DefaultMax, DefaultMin, Model } from "./Model";
 import { Node } from "./Node";
+import type { TabNode } from "./TabNode";
 import { TabSetNode } from "./TabSetNode";
-import { canDockToWindow } from "../view/Utils";
-import type { LayoutWindow } from "./LayoutWindow";
 
 export class RowNode extends Node implements IDropTarget {
 	static readonly TYPE = "row";
@@ -38,8 +38,7 @@ export class RowNode extends Node implements IDropTarget {
 	}
 
 	/** @internal */
-	private static attributeDefinitions: AttributeDefinitions =
-		RowNode.createAttributeDefinitions();
+	private static attributeDefinitions: AttributeDefinitions = RowNode.createAttributeDefinitions();
 
 	/** @internal */
 	private windowId: string;
@@ -330,8 +329,7 @@ export class RowNode extends Node implements IDropTarget {
 						for (let j = 0; j < subChildChildren.length; j++) {
 							const subsubChild = subChildChildren[j] as RowNode | TabSetNode;
 							subsubChild.setWeight(
-								(child.getWeight() * subsubChild.getWeight()) /
-									subChildrenTotal,
+								(child.getWeight() * subsubChild.getWeight()) / subChildrenTotal,
 							);
 							this.addChild(subsubChild, i + j);
 						}
@@ -342,10 +340,7 @@ export class RowNode extends Node implements IDropTarget {
 				} else {
 					i++;
 				}
-			} else if (
-				child instanceof TabSetNode &&
-				child.getChildren().length === 0
-			) {
+			} else if (child instanceof TabSetNode && child.getChildren().length === 0) {
 				if (child.isEnableDeleteWhenEmpty()) {
 					this.removeChild(child);
 					if (child === this.model.getMaximizedTabset(this.windowId)) {
@@ -360,10 +355,7 @@ export class RowNode extends Node implements IDropTarget {
 		}
 
 		// add tabset into empty root
-		if (
-			this === this.model.getRoot(this.windowId) &&
-			this.children.length === 0
-		) {
+		if (this === this.model.getRoot(this.windowId) && this.children.length === 0) {
 			const callback = this.model.getOnCreateTabSet();
 			let attrs = callback ? callback() : {};
 			attrs = { ...attrs, selected: -1 };
@@ -374,11 +366,7 @@ export class RowNode extends Node implements IDropTarget {
 	}
 
 	/** @internal */
-	canDrop(
-		dragNode: Node & IDraggable,
-		x: number,
-		y: number,
-	): DropInfo | undefined {
+	canDrop(dragNode: Node & IDraggable, x: number, y: number): DropInfo | undefined {
 		const yy = y - this.rect.y;
 		const xx = x - this.rect.x;
 		const w = this.rect.width;
@@ -387,10 +375,7 @@ export class RowNode extends Node implements IDropTarget {
 		const half = 50; // half width of edge rect
 		let dropInfo: DropInfo | undefined;
 
-		if (
-			this.getWindowId() !== Model.MAIN_WINDOW_ID &&
-			!canDockToWindow(dragNode)
-		) {
+		if (this.getWindowId() !== Model.MAIN_WINDOW_ID && !canDockToWindow(dragNode)) {
 			return undefined;
 		}
 
@@ -406,11 +391,7 @@ export class RowNode extends Node implements IDropTarget {
 					-1,
 					CLASSES.FLEXLAYOUT__OUTLINE_RECT_EDGE,
 				);
-			} else if (
-				x > this.rect.getRight() - margin &&
-				yy > h / 2 - half &&
-				yy < h / 2 + half
-			) {
+			} else if (x > this.rect.getRight() - margin && yy > h / 2 - half && yy < h / 2 + half) {
 				const dockLocation = DockLocation.RIGHT;
 				const outlineRect = dockLocation.getDockRect(this.rect);
 				outlineRect.width = outlineRect.width / 2;
@@ -422,11 +403,7 @@ export class RowNode extends Node implements IDropTarget {
 					-1,
 					CLASSES.FLEXLAYOUT__OUTLINE_RECT_EDGE,
 				);
-			} else if (
-				y < this.rect.y + margin &&
-				xx > w / 2 - half &&
-				xx < w / 2 + half
-			) {
+			} else if (y < this.rect.y + margin && xx > w / 2 - half && xx < w / 2 + half) {
 				const dockLocation = DockLocation.TOP;
 				const outlineRect = dockLocation.getDockRect(this.rect);
 				outlineRect.height = outlineRect.height / 2;
@@ -437,11 +414,7 @@ export class RowNode extends Node implements IDropTarget {
 					-1,
 					CLASSES.FLEXLAYOUT__OUTLINE_RECT_EDGE,
 				);
-			} else if (
-				y > this.rect.getBottom() - margin &&
-				xx > w / 2 - half &&
-				xx < w / 2 + half
-			) {
+			} else if (y > this.rect.getBottom() - margin && xx > w / 2 - half && xx < w / 2 + half) {
 				const dockLocation = DockLocation.BOTTOM;
 				const outlineRect = dockLocation.getDockRect(this.rect);
 				outlineRect.height = outlineRect.height / 2;
@@ -490,18 +463,14 @@ export class RowNode extends Node implements IDropTarget {
 			if (
 				node instanceof RowNode &&
 				node.getOrientation() === this.getOrientation() &&
-				(location.getOrientation() === this.getOrientation() ||
-					location === DockLocation.CENTER)
+				(location.getOrientation() === this.getOrientation() || location === DockLocation.CENTER)
 			) {
 				node = new RowNode(this.model, this.windowId, {});
 				node.addChild(dragNode);
 			}
 		} else {
 			const callback = this.model.getOnCreateTabSet();
-			node = new TabSetNode(
-				this.model,
-				callback ? callback(dragNode as TabNode) : {},
-			);
+			node = new TabSetNode(this.model, callback ? callback(dragNode as TabNode) : {});
 			node.addChild(dragNode);
 		}
 		let size = this.children.reduce((sum, child) => {
@@ -610,16 +579,11 @@ export class RowNode extends Node implements IDropTarget {
 	/** @internal */
 	private static createAttributeDefinitions(): AttributeDefinitions {
 		const attributeDefinitions = new AttributeDefinitions();
-		attributeDefinitions
-			.add("type", RowNode.TYPE, true)
-			.setType(Attribute.STRING)
-			.setFixed();
+		attributeDefinitions.add("type", RowNode.TYPE, true).setType(Attribute.STRING).setFixed();
 		attributeDefinitions
 			.add("id", undefined)
 			.setType(Attribute.STRING)
-			.setDescription(
-				`the unique id of the row, if left undefined a uuid will be assigned`,
-			);
+			.setDescription(`the unique id of the row, if left undefined a uuid will be assigned`);
 		attributeDefinitions
 			.add("weight", 100)
 			.setType(Attribute.NUMBER)

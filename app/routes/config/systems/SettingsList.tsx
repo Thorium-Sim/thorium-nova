@@ -24,19 +24,12 @@ export function SettingsList() {
 	return (
 		<div className="mb-2 w-72">
 			{Object.entries(links).map(([key, value]) => {
-				if (
-					!["basic", "system"]
-						.concat(systemType?.flags || [])
-						.includes(key as any)
-				)
-					return null;
+				if (!["basic", "system"].concat(systemType?.flags || []).includes(key as any)) return null;
 				return (
 					<Link
 						key={key}
 						to={key}
-						className={`list-group-item ${
-							setting.includes(key) ? "selected" : ""
-						}`}
+						className={`list-group-item ${setting.includes(key) ? "selected" : ""}`}
 					>
 						{value}
 					</Link>

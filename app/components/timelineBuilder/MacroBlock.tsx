@@ -1,8 +1,4 @@
-import {
-	MadLibSelect,
-	ValueInput,
-	type BlockProps,
-} from "@thorium/components/timelineBuilder/BlockInputs";
+import { type BlockProps } from "@thorium/components/timelineBuilder/BlockInputs";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { q } from "@thorium/context/AppContext";
@@ -25,14 +21,11 @@ export function MacroBlock({
 }) {
 	const [macro] = q.plugin.macro.get.useNetRequest({ pluginId, macroId });
 
-	const missingRequiredVariables = getRequiredVariables(
-		macro.blocks,
-		definedVariables,
-	);
+	const missingRequiredVariables = getRequiredVariables(macro.blocks, definedVariables);
 
 	return (
 		<div>
-			<div className="flex items-center gap-x-1 gap-y-5 flex-wrap">
+			<div className="flex flex-wrap items-center gap-x-1 gap-y-5">
 				{macro ? (
 					<>
 						Run macro
@@ -41,7 +34,7 @@ export function MacroBlock({
 								<code className="text-purple-200">{macro.name}</code>
 							</Button>
 							<Popover className={popoverTransitionClasses}>
-								<Dialog className="isolate scale-50 -translate-y-1/4 bg-black/70 border border-white/50 text-white rounded p-2">
+								<Dialog className="isolate -translate-y-1/4 scale-50 rounded border border-white/50 bg-black/70 p-2 text-white">
 									<SortableBlocks
 										macro={isMacro}
 										blocks={macro.blocks}
@@ -67,8 +60,8 @@ export function MacroBlock({
 					</>
 				) : (
 					<>
-						Macro <code className="text-purple-200">{macroId}</code> not found
-						in plugin <code className="text-purple-200">{pluginId}</code>.
+						Macro <code className="text-purple-200">{macroId}</code> not found in plugin{" "}
+						<code className="text-purple-200">{pluginId}</code>.
 					</>
 				)}
 			</div>
@@ -82,10 +75,7 @@ export function MacroBlock({
 	);
 }
 
-function getRequiredVariables(
-	blocks: TimelineBlock[],
-	definedVariables: string[] = [],
-): string[] {
+function getRequiredVariables(blocks: TimelineBlock[], definedVariables: string[] = []): string[] {
 	const output = [];
 	for (const block of blocks) {
 		if ("variable" in block) {
@@ -111,15 +101,10 @@ function getRequiredVariables(
 			}
 		}
 		if ("triggerBlocks" in block) {
-			for (const value of getRequiredVariables(
-				block.triggerBlocks,
-				definedVariables,
-			)) {
+			for (const value of getRequiredVariables(block.triggerBlocks, definedVariables)) {
 				output.push(value);
 			}
 		}
 	}
-	return output.filter(
-		(a, i, arr) => arr.indexOf(a) === i && !definedVariables.includes(a),
-	);
+	return output.filter((a, i, arr) => arr.indexOf(a) === i && !definedVariables.includes(a));
 }

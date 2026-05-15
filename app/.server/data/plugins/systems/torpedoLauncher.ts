@@ -1,14 +1,10 @@
 import type TorpedoLauncherPlugin from "@thorium/.server/classes/Plugins/ShipSystems/TorpedoLauncher";
-import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
-import { z } from "zod";
-import {
-	getShipSystem,
-	getShipSystemForInput,
-	pluginFilter,
-	systemInput,
-} from "../utils";
+import z from "zod";
+
+import { getShipSystem, getShipSystemForInput, pluginFilter, systemInput } from "../utils";
 
 export const torpedoLauncher = t.router({
 	get: t.procedure
@@ -17,8 +13,7 @@ export const torpedoLauncher = t.router({
 		.request(({ ctx, input }) => {
 			const system = getShipSystem({ input, ctx });
 
-			if (system.type !== "torpedoLauncher")
-				throw new Error("System is not Torpedo Launcher");
+			if (system.type !== "torpedoLauncher") throw new Error("System is not Torpedo Launcher");
 
 			return system as TorpedoLauncherPlugin;
 		}),
@@ -37,10 +32,7 @@ export const torpedoLauncher = t.router({
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
-			const [system, override] = getShipSystemForInput<"torpedoLauncher">(
-				ctx,
-				input,
-			);
+			const [system, override] = getShipSystemForInput<"torpedoLauncher">(ctx, input);
 			const shipSystem = override || system;
 
 			if (typeof input.loadTime === "number") {

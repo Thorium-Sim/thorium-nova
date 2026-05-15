@@ -17,10 +17,7 @@ export function LegacyPowerDistribution() {
 	const maxPower = Math.max(40, ...systems.flatMap((sys) => sys.powerLevels));
 	const reactorPower = reactors.reduce(
 		(prev, reactor) =>
-			prev +
-			Math.round(
-				reactor.maxOutput * reactor.efficiency * (reactor.offline ? 0 : 1),
-			),
+			prev + Math.round(reactor.maxOutput * reactor.efficiency * (reactor.offline ? 0 : 1)),
 		0,
 	);
 	const systemsPower = systems.reduce((acc, sys) => acc + sys.currentPower, 0);
@@ -31,8 +28,8 @@ export function LegacyPowerDistribution() {
 		},
 	});
 	return (
-		<div className="grid grid-cols-5 h-full">
-			<div className="grid grid-cols-[auto_auto_1fr] h-full gap-x-4 gap-y-0.5 col-span-3 select-none content-between overflow-y-auto overflow-x-hidden">
+		<div className="grid h-full grid-cols-5">
+			<div className="col-span-3 grid h-full grid-cols-[auto_auto_1fr] content-between gap-x-4 gap-y-0.5 overflow-x-hidden overflow-y-auto select-none">
 				{systems.map((system) => (
 					<SystemBar key={system.id} {...system} maxPower={maxPower} />
 				))}
@@ -40,10 +37,8 @@ export function LegacyPowerDistribution() {
 			<div className="col-span-2 flex flex-col justify-around">
 				<Batteries />
 				<div>
-					<p className="font-semibold text-2xl">
-						Total Power Available: {reactorPower}
-					</p>
-					<p className="font-semibold text-2xl">
+					<p className="text-2xl font-semibold">Total Power Available: {reactorPower}</p>
+					<p className="text-2xl font-semibold">
 						Total Power Used:{" "}
 						<span
 							className={cn({
@@ -86,8 +81,7 @@ function SystemBar({
 	const [localPower, setLocalPower] = useState(currentPower);
 	const [isMouseDown, setIsMouseDown] = useState(false);
 	const updatePower = q.legacy.powerDistribution.setPower.useNetSend();
-	const displayPower =
-		updatePower.isPending || isMouseDown ? localPower : currentPower;
+	const displayPower = updatePower.isPending || isMouseDown ? localPower : currentPower;
 
 	function handlePointerDown(e: PointerEvent) {
 		if (!containerRef.current) return 0;
@@ -96,10 +90,7 @@ function SystemBar({
 
 		const x = e.clientX - rect.left;
 		const barWidth = rect.width / (maxPower + 1) + GAP_PX;
-		let storedBarIndex = Math.max(
-			0,
-			Math.min(maxPower, Math.floor(x / barWidth)),
-		);
+		let storedBarIndex = Math.max(0, Math.min(maxPower, Math.floor(x / barWidth)));
 		setLocalPower(storedBarIndex);
 
 		if (storedBarIndex !== currentPower) {
@@ -116,10 +107,7 @@ function SystemBar({
 			(event) => {
 				const x = event.clientX - rect.left;
 				const barWidth = rect.width / (maxPower + 1) + GAP_PX;
-				const barIndex = Math.max(
-					0,
-					Math.min(maxPower, Math.floor(x / barWidth)),
-				);
+				const barIndex = Math.max(0, Math.min(maxPower, Math.floor(x / barWidth)));
 				if (barIndex === storedBarIndex) return;
 
 				storedBarIndex = barIndex;
@@ -155,10 +143,10 @@ function SystemBar({
 			>
 				{name}
 			</p>
-			<p className="w-[2ch] tabular-nums text-center">{displayPower}</p>
+			<p className="w-[2ch] text-center tabular-nums">{displayPower}</p>
 			<div className="flex gap-1" ref={containerRef}>
 				<div
-					className="bg-gray-400 border-2 border-gray-500 h-full flex-1 cursor-pointer"
+					className="h-full flex-1 cursor-pointer border-2 border-gray-500 bg-gray-400"
 					onPointerDown={handlePointerDown}
 				/>
 				{Array.from({ length: maxPower }).map((_, i) => (
@@ -169,8 +157,7 @@ function SystemBar({
 							{
 								"after:h-[calc(100%+4px)] after:bg-yellow-400 after:w-1 after:block after:rounded after:right-0 after:top-0 after:absolute after:translate-x-1/2 after:-translate-y-[2px] cursor-pointer":
 									powerLevels.includes(i + 1),
-								"bg-transparent border-transparent cursor-default":
-									displayPower <= i,
+								"bg-transparent border-transparent cursor-default": displayPower <= i,
 							},
 						)}
 						onPointerDown={handlePointerDown}

@@ -2,8 +2,8 @@ import type { ElectrobunConfig } from "electrobun";
 
 export default {
 	app: {
-		name: "photo-booth",
-		identifier: "photobooth.electrobun.dev",
+		name: "Thorium Nova",
+		identifier: "com.thoriumsim.nova",
 		version: "0.0.1",
 	},
 	build: {

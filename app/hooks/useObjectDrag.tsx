@@ -1,15 +1,11 @@
 import { useThree } from "@react-three/fiber";
+import { useGesture } from "@use-gesture/react";
 import React from "react";
 import { Matrix4, type Object3D, Plane, Raycaster, Vector3 } from "three";
-import { useGesture } from "@use-gesture/react";
 
 export default function useObjectDrag(
 	obj: React.MutableRefObject<Object3D | undefined>,
-	{
-		onMouseUp,
-		onMouseDown,
-		onDrag,
-	}: { onMouseUp?: any; onMouseDown?: any; onDrag?: any },
+	{ onMouseUp, onMouseDown, onDrag }: { onMouseUp?: any; onMouseDown?: any; onDrag?: any },
 ) {
 	const { mouse, camera } = useThree();
 	const raycaster = React.useRef(new Raycaster());
@@ -33,23 +29,16 @@ export default function useObjectDrag(
 					worldPosition.current.setFromMatrixPosition(obj.current.matrixWorld),
 				);
 				if (
-					raycaster.current.ray.intersectPlane(
-						plane.current,
-						intersection.current,
-					) &&
+					raycaster.current.ray.intersectPlane(plane.current, intersection.current) &&
 					obj.current.parent
 				) {
 					inverseMatrix.current.copy(obj.current.parent.matrixWorld).invert();
 					offset.current
 						.copy(intersection.current)
-						.sub(
-							worldPosition.current.setFromMatrixPosition(
-								obj.current.matrixWorld,
-							),
-						);
+						.sub(worldPosition.current.setFromMatrixPosition(obj.current.matrixWorld));
 				}
 			},
-			onDragEnd: (e) => {
+			onDragEnd: () => {
 				if (!obj.current) return;
 				onMouseUp?.(obj.current.position);
 			},
@@ -58,12 +47,7 @@ export default function useObjectDrag(
 				if (!e.intentional) return;
 				onDrag?.(obj.current?.position);
 				raycaster.current.setFromCamera(mouse, camera);
-				if (
-					raycaster.current.ray.intersectPlane(
-						plane.current,
-						intersection.current,
-					)
-				) {
+				if (raycaster.current.ray.intersectPlane(plane.current, intersection.current)) {
 					obj.current?.position.copy(
 						intersection.current
 							// .sub(offset.current)

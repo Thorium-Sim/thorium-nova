@@ -1,8 +1,9 @@
-import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
-import { useParams } from "react-router";
-import { useContext } from "react";
-import { systemConfigs } from "../../systems/system";
 import { q } from "@thorium/context/AppContext";
+import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import { useContext } from "react";
+import { useParams } from "react-router";
+
+import { systemConfigs } from "../../systems/system";
 
 export default function SystemConfig() {
 	const { systemId, shipId, pluginId } = useParams() as {

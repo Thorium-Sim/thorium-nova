@@ -4,6 +4,7 @@ export const timelineBlockTypes = [
 	"EventCondition",
 	"IfCondition",
 	"Wait",
+	"WaitComplete",
 	"ShipSystemGetter",
 	"ResultPropertyIntoVariable",
 	"EntityPropertyIntoVariable",
@@ -12,6 +13,7 @@ export const timelineBlockTypes = [
 	"Action",
 	"RandomIntoVariable",
 	"MathIntoVariable",
+	"ForEachEntity",
 	"Macro",
 	"TimelineAvailability",
 	"MacroSlot",
@@ -85,6 +87,7 @@ export const timelineBlockDefaults: {
 		time: 5,
 		unit: "seconds",
 	},
+	WaitComplete: {},
 	ShipSystemGetter: {
 		count: "all",
 		entity: "",
@@ -116,6 +119,11 @@ export const timelineBlockDefaults: {
 		number2: "0",
 		operation: "+",
 		variable: "",
+	},
+	ForEachEntity: {
+		entity: "",
+		variable: "entityId",
+		triggerBlocks: [],
 	},
 	Macro: {
 		pluginId: "",
@@ -186,6 +194,9 @@ interface WaitBlock extends BaseBlock {
 	time: number;
 	unit: "milliseconds" | "seconds" | "minutes";
 }
+interface WaitCompleteBlock extends BaseBlock {
+	type: "WaitComplete";
+}
 
 interface ShipSystemsBlock extends BaseBlock {
 	type: "ShipSystemGetter";
@@ -243,6 +254,12 @@ interface MathIntoVariableBlock extends BaseBlock {
 	operation: "+" | "-" | "×" | "÷";
 	variable: string;
 }
+interface ForEachEntityBlock extends BaseBlock {
+	type: "ForEachEntity";
+	entity: string;
+	variable: string;
+	triggerBlocks: TimelineBlock[];
+}
 
 interface MacroBlock extends BaseBlock {
 	type: "Macro";
@@ -275,6 +292,7 @@ export type TimelineBlock =
 	| EventConditionBlock
 	| IfConditionBlock
 	| WaitBlock
+	| WaitCompleteBlock
 	| ShipSystemsBlock
 	| ResultPropertyIntoVariableBlock
 	| EntityPropertyIntoVariableBlock
@@ -283,6 +301,7 @@ export type TimelineBlock =
 	| ActionBlock
 	| RandomIntoVariableBlock
 	| MathIntoVariableBlock
+	| ForEachEntityBlock
 	| MacroBlock
 	| TimelineAvailabilityBlock
 	| MacroSlot

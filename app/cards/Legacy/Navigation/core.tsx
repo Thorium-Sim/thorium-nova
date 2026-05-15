@@ -35,10 +35,8 @@ export function LegacyNavigationCore() {
 					}
 				/>
 			</div>
-			<div className="grid grid-cols-[6ch_1fr_1fr_1fr_1fr] grid-rows-5 gap-x-1 grid-flow-col w-full">
-				<div className="text-right row-start-2">
-					{navigation.thrusters ? "Yaw" : "X"}
-				</div>
+			<div className="grid w-full grid-flow-col grid-cols-[6ch_1fr_1fr_1fr_1fr] grid-rows-5 gap-x-1">
+				<div className="row-start-2 text-right">{navigation.thrusters ? "Yaw" : "X"}</div>
 				<div className="text-right">{navigation.thrusters ? "Pitch" : "Y"}</div>
 				<div className="text-right">{navigation.thrusters ? "Roll" : "Z"}</div>
 
@@ -46,24 +44,18 @@ export function LegacyNavigationCore() {
 					{navigation.destination}
 				</OutputField>
 				<p>Current</p>
-				<OutputField
-					alert={navigation.currentCourse.x !== navigation.calculatedCourse.x}
-				>
+				<OutputField alert={navigation.currentCourse.x !== navigation.calculatedCourse.x}>
 					{navigation.currentCourse.x}
 				</OutputField>
-				<OutputField
-					alert={navigation.currentCourse.y !== navigation.calculatedCourse.y}
-				>
+				<OutputField alert={navigation.currentCourse.y !== navigation.calculatedCourse.y}>
 					{navigation.currentCourse.y}
 				</OutputField>
-				<OutputField
-					alert={navigation.currentCourse.z !== navigation.calculatedCourse.z}
-				>
+				<OutputField alert={navigation.currentCourse.z !== navigation.calculatedCourse.z}>
 					{navigation.currentCourse.z}
 				</OutputField>
 				<p>New</p>
 				<input
-					className="bg-slate-400 text-black border border-gray-700 text-center w-full"
+					className="w-full border border-gray-700 bg-slate-400 text-center text-black"
 					onChange={(event) =>
 						setNewCourse((course) => ({
 							...course,
@@ -73,7 +65,7 @@ export function LegacyNavigationCore() {
 					value={newCourse.x}
 				/>
 				<input
-					className="bg-slate-400 text-black border border-gray-700 text-center w-full"
+					className="w-full border border-gray-700 bg-slate-400 text-center text-black"
 					onChange={(event) =>
 						setNewCourse((course) => ({
 							...course,
@@ -83,7 +75,7 @@ export function LegacyNavigationCore() {
 					value={newCourse.y}
 				/>
 				<input
-					className="bg-slate-400 text-black border border-gray-700 text-center w-full"
+					className="w-full border border-gray-700 bg-slate-400 text-center text-black"
 					onChange={(event) =>
 						setNewCourse((course) => ({
 							...course,
@@ -118,7 +110,7 @@ export function LegacyNavigationCore() {
 					Unknown
 				</Button>
 				<Button
-					className="btn-xs col-span-2 btn-primary"
+					className="btn-xs btn-primary col-span-2"
 					onClick={() =>
 						q.legacy.navigation.courseResult.netSend({
 							shipId,

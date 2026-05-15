@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 
 /** This is a legacy system */
 export const isNavigation = z
