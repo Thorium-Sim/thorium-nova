@@ -3,6 +3,7 @@
 dist
 packages
 node_modules
+external-deps
 .DS_Store
 data/*
 tsconfig.tsbuildinfo

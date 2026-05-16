@@ -1,3 +1,4 @@
+import Logo from "@thorium/images/logo.svg?url";
 import Button from "@thorium/ui/Button";
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
 import { useEffect, useRef, useState } from "react";
@@ -6,6 +7,7 @@ import { Menu, MenuItem, MenuTrigger, Popover, Button as RAButton } from "react-
 import { useThoriumAccount } from "../context/ThoriumAccountContext";
 import { useIssueTracker } from "./IssueTracker";
 import { Icon } from "./ui/Icon";
+
 // https://stackoverflow.com/a/16861050/4697675
 const popupCenter = ({
 	url,
@@ -61,13 +63,20 @@ function AccountMenu({ size = "md" }) {
 		<MenuTrigger>
 			<RAButton className="inline-flex justify-center">
 				{noImg ? (
-					"Thorium Account"
+					<img
+						draggable={false}
+						src={Logo}
+						alt="Thorium Logo"
+						className={`avatar ${
+							size === "sm" ? "h-8 w-8" : "h-10 w-10"
+						} rounded-full border border-gray-500 object-contain`}
+					/>
 				) : (
 					<img
 						draggable={false}
 						className={`avatar ${
 							size === "sm" ? "h-8 w-8" : "h-10 w-10"
-						} rounded-full border border-gray-500`}
+						} rounded-full border border-gray-500 object-contain`}
 						src={account.profilePictureUrl}
 						alt={account.displayName}
 						onError={() => setNoImg(true)}
@@ -126,6 +135,8 @@ export default function LoginButton({
 			windowRef.current = null;
 		}
 	}, [account]);
+
+	console.log({ account, verifying });
 	return (
 		<div className="flex items-center place-self-end self-start">
 			<a ref={linkRef} href={verificationUrl} target="thorium-account" className="opacity-0">

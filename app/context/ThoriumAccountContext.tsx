@@ -72,7 +72,7 @@ export function ThoriumAccountContextProvider({ children }: { children: ReactNod
 			setDeviceCode(data);
 		}
 		return {
-			account,
+			account: account && Object.keys(account).length === 0 ? null : account,
 			login,
 			logout,
 			userCode: deviceCode?.user_code,

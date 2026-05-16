@@ -64,7 +64,9 @@ export default {
 		// 		external: [],
 		// 	},
 		// },
-		copy: {},
+		copy: {
+			"external-deps/node_modules": "bun/node_modules",
+		},
 		mac: {
 			bundleCEF: false,
 			codesign: false,
