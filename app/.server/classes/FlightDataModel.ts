@@ -6,6 +6,7 @@ import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 import { loadGltf } from "@thorium/utils/.server/loadGltf";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import randomWords from "@thorium/utils/random-words";
+import { ConvexHull } from "@thorium/utils/starmap/ConvexHull.js";
 
 import type ShipPlugin from "./Plugins/Ship";
 import type { ServerDataModel } from "./ServerDataModel";
@@ -193,7 +194,6 @@ async function generateColliderDesc(
 	// size: number,
 ) {
 	try {
-		const ConvexHull = await import("three-stdlib").then((res) => (res as any).ConvexHull);
 		const hull = new ConvexHull();
 		const gltf = await loadGltf(filePath);
 		if (!gltf) {

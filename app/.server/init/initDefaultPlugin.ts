@@ -2,13 +2,13 @@ import { promises as fs } from "node:fs";
 import { readdir } from "node:fs/promises";
 import path from "node:path";
 
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import { DataStore } from "@thorium/utils/.server/db-fs";
 import { unzip } from "@thorium/utils/.server/zip";
 import { embeddedFiles } from "bun";
 
 export async function initDefaultPlugin() {
 	if (process.env.NODE_ENV !== "production") return;
-
+	const thoriumPath = DataStore.operations.getStore()!.thoriumPath;
 	await fs.mkdir(path.join(thoriumPath, "plugins"), { recursive: true });
 	const tempPath = await fs.mkdtemp("thorium-nova");
 	const tempFile = path.join(tempPath, "defaultPlugin.plug");

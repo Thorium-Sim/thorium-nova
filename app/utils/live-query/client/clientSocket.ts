@@ -24,7 +24,11 @@ export class ClientSocket extends EventEmitter {
 			} else if (typeof event.data === "string") {
 				try {
 					const data = JSON.parse(event.data);
-					this.emit(data.type, data.data);
+					if ("type" in data) {
+						this.emit(data.type, data.data);
+					} else {
+						this.SI.snapshot.add(data);
+					}
 				} catch {
 					// Do nothing
 				}

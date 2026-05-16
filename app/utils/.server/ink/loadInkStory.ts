@@ -1,6 +1,5 @@
 import path from "node:path";
 
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { Compiler } from "inkjs/full";
 
 import { DataStore } from "../db-fs";
@@ -11,9 +10,10 @@ export async function loadInkStory(
 	variables?: Record<string, any>,
 ) {
 	try {
+		const assetUrl = DataStore.operations.getStore()!.thoriumPath;
 		const inkText = await DataStore.operations
 			.getStore()
-			?.readAsset(path.join(thoriumPath, inkFilePath));
+			?.readAsset(path.join(assetUrl, inkFilePath));
 		if (!inkText) throw new Error("No ink text at path");
 		const story = new Compiler(inkText).Compile();
 		if (state) {

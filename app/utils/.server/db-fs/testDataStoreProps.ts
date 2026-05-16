@@ -3,10 +3,8 @@ import type { DataStoreOperations } from "@thorium/utils/.server/db-fs";
 
 export const testDataStoreProps: DataStoreOperations = {
 	database: {} as DatabaseContext,
+	thoriumPath: "",
 	async getData() {
-		return "";
-	},
-	async getAssetUrl() {
 		return "";
 	},
 	async readAsset() {

@@ -1,9 +1,10 @@
 import { mkdir, rename } from "node:fs/promises";
 import path from "node:path";
 
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import { DataStore } from "@thorium/utils/.server/db-fs";
 
 export async function moveFile(file: Blob | File | string, filePath: string, assetPath: string) {
+	const thoriumPath = DataStore.operations.getStore()!.thoriumPath;
 	await mkdir(path.join(thoriumPath, assetPath), {
 		recursive: true,
 	});

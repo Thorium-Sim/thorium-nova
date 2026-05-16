@@ -16,6 +16,7 @@ export interface DataStoreOptions {
 
 export interface DataStoreOperations {
 	database: DatabaseContext;
+	thoriumPath: string;
 	getData(this: DataStore): Promise<unknown>;
 	write(
 		this: Pick<DataStore, "safeMode" | "meta" | "initialData" | "toJSON">,
@@ -23,7 +24,6 @@ export interface DataStoreOperations {
 		name?: string,
 	): Promise<void>;
 	remove(this: DataStore, force?: boolean): Promise<void>;
-	getAssetUrl(this: DataStore): Promise<string>;
 	readAsset(asset: string): Promise<string>;
 	uploadAsset(this: DataStore, asset: File | Blob, fileName?: string): Promise<string>;
 	removeAsset(assetPath: string): Promise<void>;
@@ -129,6 +129,6 @@ export abstract class DataStore {
 		return DataStore.operations.getStore()!.remove.call(this, force);
 	}
 	async getAssetUrl() {
-		return DataStore.operations.getStore()!.getAssetUrl.call(this);
+		return DataStore.operations.getStore()!.thoriumPath;
 	}
 }

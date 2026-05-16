@@ -2,10 +2,11 @@ import { exec, type ExecException } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import { getThoriumPath } from "@thorium/utils/.server/appPaths";
 import { zip } from "@thorium/utils/.server/zip";
 
 const ignoreFiles = [".git", ".DS_Store"];
+const thoriumPath = getThoriumPath("development");
 
 await mkdir("./build", { recursive: true });
 

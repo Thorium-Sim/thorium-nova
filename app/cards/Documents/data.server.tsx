@@ -3,7 +3,7 @@ import { Writable } from "node:stream";
 
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
+import { DataStore } from "@thorium/utils/.server/db-fs";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { Entity } from "@thorium/utils/ecs";
@@ -161,7 +161,7 @@ export const documents = t.router({
 
 			const file = await new Promise<Blob>((resolve) => {
 				const doc = new PDFDocument({ size: "LETTER" });
-
+				const thoriumPath = DataStore.operations.getStore()!.thoriumPath;
 				doc.registerFont(cypher.name, path.join(thoriumPath, cypher.font));
 				const stream = doc.pipe(new BlobStream());
 				stream.on("finish", () => {

@@ -7,13 +7,9 @@ import { exitHandler, snapshot } from "@thorium/.server/init/exitHandler";
 import { initDefaultPlugin } from "@thorium/.server/init/initDefaultPlugin";
 import { createContext, initWebsocket } from "@thorium/.server/init/liveQuery";
 import { router } from "@thorium/.server/init/router";
-import { thoriumPath } from "@thorium/utils/.server/appPaths";
 import { DataStore } from "@thorium/utils/.server/db-fs";
-import {
-	bunDataStoreProps,
-	loadPlugins,
-	setBasePath,
-} from "@thorium/utils/.server/db-fs/bunDataStoreProps";
+import { bunDataStoreProps, setBasePath } from "@thorium/utils/.server/db-fs/bunDataStoreProps";
+import { loadPlugins } from "@thorium/utils/.server/db-fs/loadPlugins";
 import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
 import { vanity } from "@thorium/utils/.server/vanity";
 import { liveQueryPlugin } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
@@ -28,7 +24,9 @@ import { isObject } from "./typeguards/isObject";
 export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; isKiosk: boolean }) {
 	try {
 		console.info(`Starting Thorium...`);
-		return DataStore.operations.run(bunDataStoreProps, async () => {
+		const dataStoreProps = bunDataStoreProps(isProd || isKiosk ? "production" : "development");
+		return await DataStore.operations.run(dataStoreProps, async () => {
+			const thoriumPath = DataStore.operations.getStore()!.thoriumPath;
 			setBasePath(thoriumPath);
 			let inited = false;
 			try {
@@ -67,7 +65,7 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 			app.get("/healthcheck", () => new Response("OK", { status: 200 }));
 
 			app.post("/snapshot", async () => {
-				await snapshot();
+				await snapshot(database);
 				return new Response("OK", { status: 200 });
 			});
 
@@ -137,7 +135,7 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 				});
 			}
 
-			exitHandler();
+			exitHandler(dataStoreProps);
 
 			const port =
 				Number(process.env.PORT) + (process.env.NODE_ENV === "test" ? 1 : 0) ||

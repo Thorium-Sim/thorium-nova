@@ -24,6 +24,7 @@ icons/sprite.svg
 
 # Bun server
 /binaries/
+artifacts
 
 .wrangler
 

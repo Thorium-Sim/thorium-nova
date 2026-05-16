@@ -11,10 +11,8 @@ import { aroundEach, expect, test } from "vitest";
 const fileMap = new Map<string, string>();
 const testDataStoreProps: DataStoreOperations = {
 	database: {} as DatabaseContext,
+	thoriumPath: "",
 	async getData() {
-		return "";
-	},
-	async getAssetUrl() {
 		return "";
 	},
 	async readAsset(assetPath) {

@@ -58,11 +58,13 @@ const ShipConfig = () => {
 					}))}
 				/>
 			</div>
-			<img
-				src={mission?.cover}
-				alt=""
-				className={cn("shadow-xl rounded-lg", { "col-span-2": !isSandbox })}
-			/>
+			{mission?.cover ? (
+				<img
+					src={mission?.cover}
+					alt=""
+					className={cn("shadow-xl rounded-lg", { "col-span-2": !isSandbox })}
+				/>
+			) : null}
 			<p
 				className={cn("text-xl flex-1 overflow-y-auto row-start-2 col-start-2", {
 					"col-span-2": !isSandbox,
