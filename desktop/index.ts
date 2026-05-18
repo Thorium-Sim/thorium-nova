@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { BrowserWindow, BrowserView, Utils } from "electrobun/bun";
 
 import type { ThoriumRPC } from "./rpc";

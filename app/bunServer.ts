@@ -1,22 +1,25 @@
 import { readdir } from "node:fs/promises";
-import path from "node:path";
 
 import type LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
 import { buildDatabase } from "@thorium/.server/init/buildDatabase";
-import { exitHandler, snapshot } from "@thorium/.server/init/exitHandler";
+import { loadOrCreateCerts } from "@thorium/.server/init/certs";
+import { exitHandler, registerExitFunction } from "@thorium/.server/init/exitHandler";
 import { initDefaultPlugin } from "@thorium/.server/init/initDefaultPlugin";
 import { createContext, initWebsocket } from "@thorium/.server/init/liveQuery";
+import { advertiseMdns } from "@thorium/.server/init/mdns";
 import { router } from "@thorium/.server/init/router";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { bunDataStoreProps, setBasePath } from "@thorium/utils/.server/db-fs/bunDataStoreProps";
 import { loadPlugins } from "@thorium/utils/.server/db-fs/loadPlugins";
 import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
+import { snapshot } from "@thorium/utils/.server/snapshot";
 import { vanity } from "@thorium/utils/.server/vanity";
 import { liveQueryPlugin } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
 import type { ProcedureCallOptions } from "@thorium/utils/live-query/.server/procedure";
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { websocket, upgradeWebSocket } from "hono/bun";
+import { getCookie, setCookie } from "hono/cookie";
 import { getMimeType } from "hono/utils/mime";
 
 import { isObject } from "./typeguards/isObject";
@@ -62,7 +65,14 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 
 			app.use(middleware);
 
-			app.get("/healthcheck", () => new Response("OK", { status: 200 }));
+			app.get(
+				"/healthcheck",
+				() =>
+					new Response("OK", {
+						status: 200,
+						headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET" },
+					}),
+			);
 
 			app.post("/snapshot", async () => {
 				await snapshot(database);
@@ -112,7 +122,32 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 				);
 			});
 
+			let httpsRunning: string | null = null;
 			if (isProd) {
+				// Automatically redirect to HTTPS if this cookie is set,
+				// which means the certificate is working correctly in the user's browser
+				app.use(async (c, next) => {
+					const url = new URL(c.req.url);
+					const cookieName = "thorium_https";
+					if (httpsRunning && url.protocol === "http:") {
+						const cookie = getCookie(c, cookieName);
+						if (cookie === "true") {
+							url.protocol = "https:";
+							return c.redirect(url.toString());
+						}
+						return await next();
+					}
+					if (url.protocol === "https:") {
+						await next();
+						setCookie(c, cookieName, "true", {
+							httpOnly: true,
+							maxAge: 34560000,
+							secure: true,
+							path: "/",
+						});
+					}
+				});
+
 				const getClientBundleFile = (await import("./utils/.server/embeddedUtils"))
 					.getClientBundleFile;
 				app.use(async (c) => {
@@ -137,58 +172,63 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 
 			exitHandler(dataStoreProps);
 
+			registerExitFunction(async () => {
+				const database = DataStore.operations.getStore()!.database;
+				await snapshot(database);
+			});
+
+			if (isProd) {
+				const certs = await loadOrCreateCerts();
+				app.get(
+					"/ca.crt",
+					() =>
+						new Response(certs.caPem, {
+							headers: {
+								"Content-Type": "application/x-x509-ca-cert",
+								"Content-Disposition": 'attachment; filename="ThoriumNova-CA.crt"',
+							},
+						}),
+				);
+
+				const tls = {
+					cert: certs.serverCertPem,
+					key: certs.serverKeyPem,
+				};
+
+				const https = Bun.serve({
+					port: 443,
+					fetch: app.fetch,
+					websocket,
+					reusePort: true,
+					tls,
+				});
+				httpsRunning = https.url.href;
+			}
+
 			const port =
 				Number(process.env.PORT) + (process.env.NODE_ENV === "test" ? 1 : 0) ||
-				(isProd ? Number(process.env.PORT) || 4444 : 3001);
+				(isProd ? Number(process.env.PORT) || 80 : 3001);
 
 			const server = Bun.serve({
 				port,
 				fetch: app.fetch,
 				websocket,
 				reusePort: true,
+				http3: true,
 			});
 
-			vanity();
-			// This exact string is required for the kiosk to recognize
-			// that the server has started.
-			console.info(`Server running on ${server.url.href}`);
-
 			if (isProd) {
-				let tls: { cert: string; key: string } | undefined;
-				if (isKiosk) {
-					const bundledFiles = await readdir(import.meta.dirname);
-					const certFile = bundledFiles.find((f) => f.startsWith("server") && f.endsWith(".cert"));
-					const keyFile = bundledFiles.find((f) => f.startsWith("server") && f.endsWith(".key"));
-					if (certFile && keyFile) {
-						tls = {
-							cert: await Bun.file(path.join(import.meta.dirname, certFile)).text(),
-							key: await Bun.file(path.join(import.meta.dirname, keyFile)).text(),
-						};
-					}
-				} else {
-					const { certFile, keyFile } = await (
-						await import("./utils/.server/embeddedUtils")
-					).getSSLCert();
-					if (certFile && keyFile) {
-						tls = {
-							// TODO: Support user-provided TLS certificates
-							cert: await certFile.text(),
-							key: await keyFile.text(),
-						};
-					}
-				}
-				if (tls) {
-					const https = Bun.serve({
-						port: port + 1,
-						fetch: app.fetch,
-						websocket,
-						reusePort: true,
-						tls,
-					});
-					console.info(`HTTPS running on ${https.url.href}`);
-				}
+				await advertiseMdns(server.port!);
 			}
-			return `http://${server.hostname}:${server.port}`;
+
+			vanity();
+			console.info(`Server running on ${server.url.href}`);
+			if (httpsRunning) {
+				console.info(`HTTPS running on ${httpsRunning}`);
+				return httpsRunning;
+			}
+
+			return server.url.href;
 		});
 	} catch (error) {
 		console.error("Error Starting Server:", error);

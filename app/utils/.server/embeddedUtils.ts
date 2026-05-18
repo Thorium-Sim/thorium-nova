@@ -50,25 +50,3 @@ export async function getClientBundleFile(filePath: string) {
 
 	return null;
 }
-
-export async function getSSLCert() {
-	// @ts-expect-error
-	await import("../../.server/server.cert", {
-		with: { type: "file" },
-	});
-	// @ts-expect-error
-	await import("../../.server/server.key", {
-		with: { type: "file" },
-	});
-
-	const certFile = embeddedFiles.find(
-		// @ts-expect-error Bun adds the file name
-		(file) => file.name === "server.cert",
-	);
-	const keyFile = embeddedFiles.find(
-		// @ts-expect-error Bun adds the file name
-		(file) => file.name === "server.key",
-	);
-
-	return { certFile, keyFile };
-}

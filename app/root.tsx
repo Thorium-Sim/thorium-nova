@@ -9,7 +9,7 @@ import { getBackground } from "@thorium/utils/getBackground";
 import "./styles/tailwind.css";
 // @ts-expect-error
 import "@fontsource-variable/outfit";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
 	isRouteErrorResponse,
 	Links,
@@ -104,6 +104,7 @@ function Preload() {
 }
 
 export default function Root() {
+	useHttpRedirect();
 	return (
 		<AppContext>
 			<Preload />
@@ -153,4 +154,18 @@ function Snapshot() {
 			<Icon name="camera" size="md" className="text-white" />
 		</Button>
 	);
+}
+
+function useHttpRedirect() {
+	useEffect(() => {
+		if (window.location.protocol === "http:") {
+			const url = new URL(window.location.href);
+			url.protocol = "https:";
+			fetch(url).then((res) => {
+				if (res.ok) {
+					window.location.assign(url);
+				}
+			});
+		}
+	}, []);
 }

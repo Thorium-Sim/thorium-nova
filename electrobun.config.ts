@@ -69,8 +69,8 @@ export default {
 		},
 		mac: {
 			bundleCEF: false,
-			codesign: false,
-			notarize: false,
+			codesign: true,
+			notarize: true,
 			entitlements: {},
 			icons: "scripts/Icon.icon",
 		},

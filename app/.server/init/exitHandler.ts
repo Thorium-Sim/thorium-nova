@@ -1,5 +1,11 @@
-import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 import { DataStore, type DataStoreOperations } from "@thorium/utils/.server/db-fs";
+
+const exitFunctions = new Set<() => Promise<void> | void>();
+
+export function registerExitFunction(fn: () => Promise<void> | void) {
+	exitFunctions.add(fn);
+	return () => exitFunctions.delete(fn);
+}
 
 export function exitHandler(operations: DataStoreOperations) {
 	if (process.env.NODE_ENV === "production") {
@@ -8,7 +14,11 @@ export function exitHandler(operations: DataStoreOperations) {
 		async function exitHandler(options: { cleanup?: boolean; exit?: boolean }) {
 			if (options.cleanup) {
 				await DataStore.operations.run(operations, async () => {
-					await snapshot(operations.database);
+					for (const fn of exitFunctions) {
+						try {
+							await fn();
+						} catch {}
+					}
 				});
 			}
 			if (options.exit) process.exit();
@@ -27,14 +37,4 @@ export function exitHandler(operations: DataStoreOperations) {
 		//catches uncaught exceptions
 		process.on("uncaughtException", exitHandler.bind(null, { exit: true }));
 	}
-}
-
-export async function snapshot(database: DatabaseContext) {
-	await database.server.write(true);
-	await Promise.all(
-		database.server.plugins.map(async (plugin) => {
-			await plugin.write(true);
-		}),
-	);
-	await database.flight?.write(true);
 }

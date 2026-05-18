@@ -1,13 +1,11 @@
 import ReconnectingWebSocket from "reconnecting-websocket";
 
 export async function loadWebSocket() {
-	const hostname = window.location.hostname;
-	const protocol = window.location.protocol;
+	const url = new URL(window.location.href);
 	try {
-		const port =
-			process.env.NODE_ENV === "production" ? Number(window.location.port) || 4444 : 3001;
-
-		const socketUrl = `${protocol === "https:" ? "wss" : "ws"}://${hostname}:${port}/ws`;
+		url.protocol = url.protocol === "https:" ? "wss:" : "ws:";
+		url.pathname = "/ws";
+		const socketUrl = url.toString();
 
 		const socket = new ReconnectingWebSocket(socketUrl, [], {
 			minReconnectionDelay: 500,
