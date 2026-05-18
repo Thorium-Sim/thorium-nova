@@ -13,14 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
       - name: Install Dependencies
         run: bun install
       - name: Release
         run: bunx semantic-release
       - name: Archive production artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build
           path: build
@@ -39,7 +39,7 @@ jobs:
           - platform: "macos-latest" # for Intel based macs.
             args: "--target x86_64-apple-darwin"
             arch: "x86_64-apple-darwin"
-          - platform: "ubuntu-24.04" # for Tauri v1 you could replace this with ubuntu-20.04.
+          - platform: "ubuntu-24.04"
             args: ""
             arch: "x86_64-unknown-linux-gnu"
           - platform: "windows-latest"
@@ -48,7 +48,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: alpha
           path: app
@@ -59,7 +59,7 @@ jobs:
         working-directory: ./app
         run: bun install
       - name: Download production artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build
           path: app/build
@@ -93,16 +93,22 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       - name: Build Electrobun Desktop
-        working-director: ./app
+        if: matrix.platform != 'ubuntu-24.04'
+        working-directory: ./app
         run: bun run build:desktop
         env:
           ELECTROBUN_TEAMID: ${{ secrets.APPLE_TEAM_ID }}
           ELECTROBUN_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
           ELECTROBUN_APPLEID: ${{ secrets.APPLE_ID }}
           ELECTROBUN_APPLEIDPASS: ${{ secrets.APPLE_ID_PASSWORD }}
+      - name: Get Version
+        id: get-version
+        working-directory: ./app
+        run: |
+          bun .github/actions/getVersion.ts
       - name: Release
         id: make-release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.get-version.outputs.version }}
           make_latest: true
@@ -114,6 +120,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v2
+        uses: mxschmitt/action-tmate@v3
         timeout-minutes: 10
         if: failure()

@@ -104,7 +104,7 @@ export async function loadOrCreateCerts() {
 	}
 
 	const { cert: caCert, keys: caKeys } = await generateCA();
-	fs.writeFileSync(caCertFile, caCert.toString("hex"));
+	fs.writeFileSync(caCertFile, caCert.toString("pem"));
 	fs.writeFileSync(caKeyFile, await exportPrivateKeyPem(caKeys.privateKey));
 
 	const { cert: serverCert, keys: serverKeys } = await generateServerCert(caKeys, caCert);

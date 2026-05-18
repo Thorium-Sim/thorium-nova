@@ -11,7 +11,7 @@ export async function advertiseMdns(port: number, name: string = "Thorium Nova")
 		subtypes: ["thorium"],
 	});
 	service.on("name-change", (event) => {
-		console.log("Name changed", event);
+		console.info("Name changed", event);
 	});
 	await service.advertise();
 

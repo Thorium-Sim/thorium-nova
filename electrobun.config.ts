@@ -56,6 +56,7 @@ export default {
 			entrypoint: "desktop/index.ts",
 			external: ["@msgpack/msgpack", "pdfkit"],
 			plugins: [bunTsconfigPaths()],
+			define: { "process.env.NODE_ENV": '"production"', "process.env.IS_KIOSK": "true" },
 			// tsconfig: "./tsconfig.json",
 		},
 		// views: {

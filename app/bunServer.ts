@@ -19,7 +19,6 @@ import type { ProcedureCallOptions } from "@thorium/utils/live-query/.server/pro
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { websocket, upgradeWebSocket } from "hono/bun";
-import { getCookie, setCookie } from "hono/cookie";
 import { getMimeType } from "hono/utils/mime";
 
 import { isObject } from "./typeguards/isObject";
@@ -69,6 +68,14 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 				"/healthcheck",
 				() =>
 					new Response("OK", {
+						status: 200,
+						headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET" },
+					}),
+			);
+			app.get(
+				"/https",
+				() =>
+					new Response(httpsPort.toString(), {
 						status: 200,
 						headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET" },
 					}),
@@ -123,30 +130,55 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 			});
 
 			let httpsRunning: string | null = null;
+			// Quick check to see if root ports are allowed.
+			let rootPortsAllowed = true;
+			let testHttpServer, testHttpsServer;
+			try {
+				testHttpServer = Bun.serve({ port: 80, websocket, fetch: () => {} });
+				if (isProd) {
+					testHttpsServer = Bun.serve({ port: 443, websocket, fetch: () => {} });
+				}
+			} catch {
+				rootPortsAllowed = false;
+			} finally {
+				await testHttpServer?.stop(true);
+				await testHttpsServer?.stop(true);
+			}
+
+			const port =
+				Number(process.env.PORT) + (process.env.NODE_ENV === "test" ? 1 : 0) ||
+				(isProd ? Number(process.env.PORT) || (rootPortsAllowed ? 80 : 4444) : 3001);
+			const httpsPort = process.env.HTTPS_PORT
+				? Number(process.env.HTTPS_PORT)
+				: process.env.PORT
+					? Number(process.env.PORT) + 1
+					: rootPortsAllowed
+						? 443
+						: port + 1;
+
+			exitHandler(dataStoreProps);
+
+			registerExitFunction(async () => {
+				const database = DataStore.operations.getStore()!.database;
+				await snapshot(database);
+			});
+
 			if (isProd) {
-				// Automatically redirect to HTTPS if this cookie is set,
-				// which means the certificate is working correctly in the user's browser
-				app.use(async (c, next) => {
-					const url = new URL(c.req.url);
-					const cookieName = "thorium_https";
-					if (httpsRunning && url.protocol === "http:") {
-						const cookie = getCookie(c, cookieName);
-						if (cookie === "true") {
-							url.protocol = "https:";
-							return c.redirect(url.toString());
-						}
-						await next();
-					}
-					if (url.protocol === "https:") {
-						setCookie(c, cookieName, "true", {
-							httpOnly: true,
-							maxAge: 34560000,
-							secure: true,
-							path: "/",
-						});
-						await next();
-					}
+				const certs = await loadOrCreateCerts();
+
+				app.get("/ca.crt", () => {
+					return new Response(certs.caPem, {
+						headers: {
+							"Content-Type": "application/x-x509-ca-cert",
+							"Content-Disposition": 'attachment; filename="ThoriumNova-CA.crt"',
+						},
+					});
 				});
+
+				const tls = {
+					cert: certs.serverCertPem,
+					key: certs.serverKeyPem,
+				};
 
 				const getClientBundleFile = (await import("./utils/.server/embeddedUtils"))
 					.getClientBundleFile;
@@ -168,53 +200,23 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 						return new Response("", { status: 404 });
 					}
 				});
-			}
-
-			exitHandler(dataStoreProps);
-
-			registerExitFunction(async () => {
-				const database = DataStore.operations.getStore()!.database;
-				await snapshot(database);
-			});
-
-			if (isProd) {
-				const certs = await loadOrCreateCerts();
-				app.get(
-					"/ca.crt",
-					() =>
-						new Response(certs.caPem, {
-							headers: {
-								"Content-Type": "application/x-x509-ca-cert",
-								"Content-Disposition": 'attachment; filename="ThoriumNova-CA.crt"',
-							},
-						}),
-				);
-
-				const tls = {
-					cert: certs.serverCertPem,
-					key: certs.serverKeyPem,
-				};
 
 				const https = Bun.serve({
-					port: 443,
+					port: httpsPort,
 					fetch: app.fetch,
 					websocket,
 					reusePort: true,
 					tls,
+					http3: true,
 				});
 				httpsRunning = https.url.href;
 			}
-
-			const port =
-				Number(process.env.PORT) + (process.env.NODE_ENV === "test" ? 1 : 0) ||
-				(isProd ? Number(process.env.PORT) || 80 : 3001);
 
 			const server = Bun.serve({
 				port,
 				fetch: app.fetch,
 				websocket,
 				reusePort: true,
-				http3: true,
 			});
 
 			if (isProd) {
@@ -225,7 +227,6 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 			console.info(`Server running on ${server.url.href}`);
 			if (httpsRunning) {
 				console.info(`HTTPS running on ${httpsRunning}`);
-				return httpsRunning;
 			}
 
 			return server.url.href;

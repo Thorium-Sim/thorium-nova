@@ -31,7 +31,7 @@ function Blackout({ children }: { children: ReactNode }) {
 	const { station, client } = useStation();
 	if (!station) {
 		return (
-			<Stars className="bg-gradient-to-b from-black to-slate-950">
+			<Stars className="bg-linear-to-b from-black to-slate-950">
 				<h1 className="text-4xl font-bold">Awaiting Station Assignment...</h1>
 			</Stars>
 		);

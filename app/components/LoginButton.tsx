@@ -136,7 +136,6 @@ export default function LoginButton({
 		}
 	}, [account]);
 
-	console.log({ account, verifying });
 	return (
 		<div className="flex items-center place-self-end self-start">
 			<a ref={linkRef} href={verificationUrl} target="thorium-account" className="opacity-0">

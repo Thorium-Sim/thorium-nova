@@ -70,6 +70,9 @@ export default defineConfig({
 		port,
 		host: "0.0.0.0",
 		open: process.env.NODE_ENV !== "test",
+		hmr: {
+			path: "/vite-hmr",
+		},
 		fs: {
 			strict: false,
 
@@ -82,7 +85,7 @@ export default defineConfig({
 			"/plugins": `http://localhost:${port + 1}`,
 			"/flights": `http://localhost:${port + 1}`,
 			"/ws": {
-				target: `ws://localhost:${port + 1}/ws`,
+				target: `ws://localhost:${port + 1}`,
 				ws: true,
 			},
 		},

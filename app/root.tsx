@@ -1,14 +1,15 @@
 import { UNSAFE_PortalProvider } from "@react-aria/overlays";
 import { useQueries } from "@tanstack/react-query";
 import { NoMatch } from "@thorium/components/NotFound";
+import Stars from "@thorium/components/Station/Stars";
 import AppContext, { clientId, liveQueryClient, q } from "@thorium/context/AppContext";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
-import { getBackground } from "@thorium/utils/getBackground";
 
 import "./styles/tailwind.css";
 // @ts-expect-error
 import "@fontsource-variable/outfit";
+import { getBackground } from "@thorium/utils/getBackground";
 import { useEffect, useRef } from "react";
 import {
 	isRouteErrorResponse,
@@ -114,7 +115,11 @@ export default function Root() {
 }
 
 export function HydrateFallback() {
-	return <p>Loading Thorium Nova...</p>;
+	return (
+		<Stars className="bg-linear-to-b from-black to-fuchsia-950">
+			<h1 className="text-4xl font-bold">Loading Thorium Nova..</h1>
+		</Stars>
+	);
 }
 
 export function ErrorBoundary({ error }: { error: Error }) {
@@ -166,11 +171,15 @@ function useHttpRedirect() {
 			const url = new URL(window.location.href);
 			const oldPathname = url.pathname;
 			url.protocol = "https:";
-			url.pathname = "/healthcheck";
+			url.pathname = "/https";
 			fetch(url)
-				.then((res) => {
+				.then(async (res) => {
 					if (res.ok) {
+						const port = await res.text();
 						url.pathname = oldPathname;
+						if (port !== "443") {
+							url.port = port;
+						}
 						window.location.assign(url);
 					}
 				})

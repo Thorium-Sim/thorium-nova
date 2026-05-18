@@ -29,8 +29,11 @@ export async function getClientBundleFile(filePath: string) {
 			.then((buffer) => new Uint8Array(buffer)[0]);
 		startByte += 1;
 
-		const name = await file.slice(startByte, startByte + nameLength).text();
+		let name = await file.slice(startByte, startByte + nameLength).text();
 		startByte += nameLength;
+
+		// On Windows, the file paths are stored using \, but the URL paths are /
+		name = name.replaceAll(path.sep, path.posix.sep);
 
 		const fileSize = await file
 			.slice(startByte, startByte + 4)

@@ -3,7 +3,7 @@
 ## Environment Variables
 
 - `PORT` - Set the port for the HTTP server. Useful for headless setups.
-  Defaults to 4444. The HTTPS server with use the port + 1, defaulting to 4445.
+  Defaults to 80 and 443. If there are insufficient permissions for those ports, the HTTP server runs on 4444 by default and the HTTPS server with use the port + 1, defaulting to 4445.
 - `THORIUM_PATH` - The directory that will contain the data and assets for
   Thorium. Defaults to the "thorium-nova" folder in the user's Documents folder,
   eg "~/Documents/thorium-nova"

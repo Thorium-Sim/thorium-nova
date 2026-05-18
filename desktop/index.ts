@@ -1,10 +1,10 @@
 import "reflect-metadata";
-import { BrowserWindow, BrowserView, Utils } from "electrobun/bun";
+import { BrowserWindow, BrowserView, Utils, ApplicationMenu } from "electrobun/bun";
 
 import type { ThoriumRPC } from "./rpc";
 
 // Create RPC instance using BrowserView.defineRPC
-const photoBoothRPC = BrowserView.defineRPC<ThoriumRPC>({
+const thoriumRPC = BrowserView.defineRPC<ThoriumRPC>({
 	maxRequestTime: 5000,
 	handlers: {
 		requests: {
@@ -17,7 +17,11 @@ const photoBoothRPC = BrowserView.defineRPC<ThoriumRPC>({
 	},
 });
 
-process.env.IS_KIOSK = "true";
+ApplicationMenu.setApplicationMenu([
+	{
+		submenu: [{ label: "Quit", role: "quit", accelerator: "q" }],
+	},
+]);
 
 const server = await (
 	await import("../app/bunServer")
@@ -37,5 +41,5 @@ new BrowserWindow({
 		x: 100,
 		y: 100,
 	},
-	rpc: photoBoothRPC,
+	rpc: thoriumRPC,
 });

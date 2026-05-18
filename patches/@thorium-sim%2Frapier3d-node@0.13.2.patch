@@ -1,18 +1,27 @@
+diff --git a/node_modules/@thorium-sim/rapier3d-node/.bun-tag-2892ac39b5a6ab2a b/.bun-tag-2892ac39b5a6ab2a
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/node_modules/@thorium-sim/rapier3d-node/.bun-tag-a46edb8bb6b58a91 b/.bun-tag-a46edb8bb6b58a91
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/@thorium-sim/rapier3d-node/.bun-tag-f7ff88bdd7f65e41 b/.bun-tag-f7ff88bdd7f65e41
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/dist/rapier_wasm3d.js b/dist/rapier_wasm3d.js
-index f506e35499d4d419a211ac6c82e1753198dca1b4..967275b1e864dcfa2fb67f4794ced9b9e11642ff 100644
+index f506e35499d4d419a211ac6c82e1753198dca1b4..ff117b41e4d82fae192362656c91d974b5b6ec1c 100644
 --- a/dist/rapier_wasm3d.js
 +++ b/dist/rapier_wasm3d.js
-@@ -5797,8 +5797,14 @@ module.exports.__wbindgen_memory = function() {
+@@ -5797,8 +5797,17 @@ module.exports.__wbindgen_memory = function() {
      return addHeapObject(ret);
  };
  
 -const path = require('path').join(__dirname, 'rapier_wasm3d_bg.wasm');
 -const bytes = require('fs').readFileSync(path);
 +let bytes = new ArrayBuffer();
-+if (process.env.NODE_ENV === "production") {
++if (process.env.IS_KIOSK === true) {
++    const path = require.resolve('@thorium-sim/rapier3d-node/dist/rapier_wasm3d_bg.wasm')
++    bytes = require('fs').readFileSync(path);
++} else if (process.env.NODE_ENV === "production") {
 +    const {embeddedFiles, peek} = require('bun')
 +    bytes = (peek(embeddedFiles.find(f => f.name === "rapier_wasm3d_bg.wasm").arrayBuffer()))
 +} else {

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.20](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.19...1.0.0-alpha.20) (2025-07-07)
+
+
+### Features
+
+* Add Macros, which can be inserted into timelines and expanded to replace themselves with the blocks they are made of. ([9e6c5b2](https://github.com/Thorium-Sim/thorium-nova/commit/9e6c5b28fb0fd247cdc073030ebcd2a333aba2e1))
+* Improved asset management ([20ec34c](https://github.com/Thorium-Sim/thorium-nova/commit/20ec34ca96ecefbea3b957cc48579295ee5e06ff))
+* new Timeline blocks UI for defining timelines ([c329c27](https://github.com/Thorium-Sim/thorium-nova/commit/c329c276a0ff83d7225970df3d9def2d2d9e6af8))
+* Play Sound action. ([6b281e5](https://github.com/Thorium-Sim/thorium-nova/commit/6b281e5c74ba313e106df40134821a8e7b4baae4))
+* Triggers for executing actions based on events that occur during the flight. ([9c4fed3](https://github.com/Thorium-Sim/thorium-nova/commit/9c4fed36ef0112112d36415c9b11a6dfa084f81b))
+
 # [1.0.0-alpha.19](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.18...1.0.0-alpha.19) (2025-05-28)
 
 ### Bug Fixes
