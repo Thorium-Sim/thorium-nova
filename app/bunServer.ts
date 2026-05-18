@@ -135,16 +135,16 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 							url.protocol = "https:";
 							return c.redirect(url.toString());
 						}
-						return await next();
+						await next();
 					}
 					if (url.protocol === "https:") {
-						await next();
 						setCookie(c, cookieName, "true", {
 							httpOnly: true,
 							maxAge: 34560000,
 							secure: true,
 							path: "/",
 						});
+						await next();
 					}
 				});
 

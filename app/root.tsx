@@ -113,6 +113,10 @@ export default function Root() {
 	);
 }
 
+export function HydrateFallback() {
+	return <p>Loading Thorium Nova...</p>;
+}
+
 export function ErrorBoundary({ error }: { error: Error }) {
 	let message = "Oops!";
 	let details = "An unexpected error occurred.";
@@ -160,12 +164,17 @@ function useHttpRedirect() {
 	useEffect(() => {
 		if (window.location.protocol === "http:") {
 			const url = new URL(window.location.href);
+			const oldPathname = url.pathname;
 			url.protocol = "https:";
-			fetch(url).then((res) => {
-				if (res.ok) {
-					window.location.assign(url);
-				}
-			});
+			url.pathname = "/healthcheck";
+			fetch(url)
+				.then((res) => {
+					if (res.ok) {
+						url.pathname = oldPathname;
+						window.location.assign(url);
+					}
+				})
+				.catch(() => {});
 		}
 	}, []);
 }

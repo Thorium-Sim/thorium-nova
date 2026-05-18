@@ -1,6 +1,6 @@
 #!/bin/bash
 # Create a temporary zip of the binary for notarization
-echo "Signing and Notarizing thoriumNovaServer-$BUILD_ARCH"
+echo "Signing and Notarizing server-$BUILD_ARCH"
 
 # Create a temporary keychain
 security create-keychain -p "temppass" build.keychain
@@ -17,7 +17,7 @@ security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "temppass"
 
 security find-identity -v -p codesigning build.keychain-db
 
-codesign -s "F8073E0C8C2848A0313B8CA4741551AC2C449BD2" -f --timestamp --entitlements ./desktop/Entitlements.plist -o runtime "./binaries/server-$BUILD_ARCH"
+codesign -s "$APPLE_DEVELOPER_ID" -f --timestamp --entitlements ./desktop/Entitlements.plist -o runtime "./binaries/server-$BUILD_ARCH"
 
 zip -j "server-$BUILD_ARCH.zip" "./binaries/server-$BUILD_ARCH"
 
