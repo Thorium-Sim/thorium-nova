@@ -3,6 +3,48 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.20](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.19...1.0.0-alpha.20) (2026-05-20)
+
+
+### Bug Fixes
+
+* correctly apply damage efficiency to shield recharge rate ([9fa3ca6](https://github.com/Thorium-Sim/thorium-nova/commit/9fa3ca661560c14865e12c9640400c2b40a72210))
+* Refactor physics worlds to behave a bit nicer. ([69431ad](https://github.com/Thorium-Sim/thorium-nova/commit/69431add978f47ad29e7992f06c937eebbbe98fd))
+* **types:** added types and made some changes to the code to match the types that already existed ([04de385](https://github.com/Thorium-Sim/thorium-nova/commit/04de385758ab75c4ff90053a3e166f4949e4c83a))
+* Update Alert Level card UI ([4b0507e](https://github.com/Thorium-Sim/thorium-nova/commit/4b0507ed0a0cd9cf1de712e59fff77a99a8b6bb2))
+
+
+### Features
+
+* Actions for mission success or failure. ([739fe57](https://github.com/Thorium-Sim/thorium-nova/commit/739fe5795c0696c6b416e12d8b7d077ceeac006a))
+* Add "Ship: Move" timeline action. ([d2aecf1](https://github.com/Thorium-Sim/thorium-nova/commit/d2aecf15c645fb408a2bcb1e8c682984529023d9))
+* Add an HTTP Request Action. Closes [#718](https://github.com/Thorium-Sim/thorium-nova/issues/718) ([cb22c1a](https://github.com/Thorium-Sim/thorium-nova/commit/cb22c1a04f001c09a8b09957a2080f1ccf6b80af))
+* Add flight paused indicator ([f75957f](https://github.com/Thorium-Sim/thorium-nova/commit/f75957fcbd012f5108032747499fce9b5c1a62a9))
+* Add flight snapshot and restore controls to the lobby ([ff47c13](https://github.com/Thorium-Sim/thorium-nova/commit/ff47c137c055560aa053147a8f356c4713a63b52))
+* Add Macros, which can be inserted into timelines and expanded to replace themselves with the blocks they are made of. ([9e6c5b2](https://github.com/Thorium-Sim/thorium-nova/commit/9e6c5b28fb0fd247cdc073030ebcd2a333aba2e1))
+* Add overlays to the viewscreen ([91a6198](https://github.com/Thorium-Sim/thorium-nova/commit/91a61989ecc8482a70f29919c0b02e56791b36c5))
+* Add Ship destroyed and respawn behavior ([c7cf545](https://github.com/Thorium-Sim/thorium-nova/commit/c7cf545fc330cdf904b00e76b5a01df090046f17))
+* Code Cyphers ([97b4b5d](https://github.com/Thorium-Sim/thorium-nova/commit/97b4b5da54c91d34f808c0aa1a622ca06d252696))
+* Damage Reports Card ([84d398e](https://github.com/Thorium-Sim/thorium-nova/commit/84d398ed5ed133b0fc7f2e2e0a50eafe9db42659))
+* **damage:** added damage check to determine when a system to go offline or vice-versa ([8c470a2](https://github.com/Thorium-Sim/thorium-nova/commit/8c470a2625b6de48d3abaef22bd6b874ffe3e113))
+* Documents card ([172f0fc](https://github.com/Thorium-Sim/thorium-nova/commit/172f0fc96133ea2125fdf9db0cbd06fdf5ec1926))
+* Engine Control ([b965a94](https://github.com/Thorium-Sim/thorium-nova/commit/b965a948ab1f8b883643d6f0687aa31efd1b3b2b))
+* Exocomps ([fe2d298](https://github.com/Thorium-Sim/thorium-nova/commit/fe2d29879aebe774f542127fd2e96711c4976389))
+* **failure:** added spontaneous failure system ([547d6ab](https://github.com/Thorium-Sim/thorium-nova/commit/547d6ab741d8078c1b5af9e8aaba3c586029cef3))
+* Improved asset management ([20ec34c](https://github.com/Thorium-Sim/thorium-nova/commit/20ec34ca96ecefbea3b957cc48579295ee5e06ff))
+* **instability:** added logic for checking system instability when commands are sent to systems ([b20f63a](https://github.com/Thorium-Sim/thorium-nova/commit/b20f63a95c2659fb1759e24ba362acc4bb613065))
+* **instability:** added logic for checking system instability when commands are sent to systems ([926a0b0](https://github.com/Thorium-Sim/thorium-nova/commit/926a0b0321acc4e80cc87ccd37395ca2bb2bc944))
+* **instability:** added logic for checking system instability when commands are sent to systems ([f94deb0](https://github.com/Thorium-Sim/thorium-nova/commit/f94deb001b95603ca784a728fdd53df6a1603cbc))
+* Legacy Thruster Control ([4ba4156](https://github.com/Thorium-Sim/thorium-nova/commit/4ba41564c975c64f7d70e828e888860be1920a19))
+* Long Range Communications system ([10a8b53](https://github.com/Thorium-Sim/thorium-nova/commit/10a8b530d123aeea807425894026253a4720642b))
+* Messages card and core ([80ba40b](https://github.com/Thorium-Sim/thorium-nova/commit/80ba40b3869eb1d1576247cab4f7200ac9c5cceb))
+* new Timeline blocks UI for defining timelines ([c329c27](https://github.com/Thorium-Sim/thorium-nova/commit/c329c276a0ff83d7225970df3d9def2d2d9e6af8))
+* Note block. ([b26af3c](https://github.com/Thorium-Sim/thorium-nova/commit/b26af3c6935d5954e887953bc06c0731b5848db9))
+* Play Sound action. ([6b281e5](https://github.com/Thorium-Sim/thorium-nova/commit/6b281e5c74ba313e106df40134821a8e7b4baae4))
+* **satellite:** added options for controlling the comm satellites data in the starmap ([c8ba4b4](https://github.com/Thorium-Sim/thorium-nova/commit/c8ba4b4fcc9816f60d70b9c08d96d7200f16f6e8))
+* Searching and editing rooms in the ship map config. ([b696284](https://github.com/Thorium-Sim/thorium-nova/commit/b6962844a35a57a06ba29b8c6d6b310a9a57c8ce))
+* Triggers for executing actions based on events that occur during the flight. ([9c4fed3](https://github.com/Thorium-Sim/thorium-nova/commit/9c4fed36ef0112112d36415c9b11a6dfa084f81b))
+
 # [1.0.0-alpha.20](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.19...1.0.0-alpha.20) (2025-07-07)
 
 
