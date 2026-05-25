@@ -62,7 +62,7 @@ export default class TrainingPlugin extends Aspect {
 	}
 	insertStep(name: string, selectedStepId: string) {
 		const id = uniqid("ts-");
-		const index = this.steps.findIndex((s) => s.id === selectedStepId);
+		const index = this.steps.findIndex((s) => s.id === selectedStepId) + 1;
 		this.steps.splice(index, 0, {
 			id,
 			name,

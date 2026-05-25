@@ -9,13 +9,13 @@ import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
 import { useState } from "react";
 import { Button } from "react-aria-components";
-import { useNavigate, useParams } from "react-router";
+import { href, useNavigate } from "react-router";
 
-export default function TrainingDetails() {
-	const { pluginId, timelineId } = useParams() as {
-		pluginId: string;
-		timelineId: string;
-	};
+import type { Route } from "./+types/details";
+
+export default function TrainingDetails({
+	params: { pluginId, timelineId },
+}: Route.ComponentProps) {
 	const [training] = q.plugin.timeline.get.useNetRequest({
 		pluginId,
 		timelineId,
@@ -23,7 +23,7 @@ export default function TrainingDetails() {
 	});
 	const [error, setError] = useState(false);
 	const navigate = useNavigate();
-	if (!training) return <Navigate to={`/config/${pluginId}/trainings`} />;
+	if (!training) return <Navigate to={href("/config/:pluginId/trainings", { pluginId })} />;
 
 	const { prerequisiteBlocks } = training;
 	return (
@@ -50,7 +50,12 @@ export default function TrainingDetails() {
 									timelineType: "trainings",
 									name: e.target.value,
 								});
-								void navigate(`/config/${pluginId}/timelines/${result.timelineId}`);
+								void navigate(
+									href("/config/:pluginId/trainings/:timelineId", {
+										pluginId,
+										timelineId: result.timelineId,
+									}),
+								);
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({

@@ -1,0 +1,34 @@
+.panel-grid {
+	display: grid;
+	grid-auto-flow: dense;
+	box-sizing: border-box;
+	user-select: none;
+}
+.panel-cell {
+	display: grid;
+	grid-template-rows: subgrid;
+	grid-row: span 2;
+	align-items: center;
+	justify-items: center;
+	gap: 1.5rem;
+	width: 100%;
+	height: 100%;
+	padding: 1rem;
+	--hue: 223;
+	--focus-t: hsla(var(--hue), 90%, 60%, 0);
+	--trans-dur: 0.3s;
+	box-shadow:
+		0 0 0 0.125em var(--focus-t),
+		0.0625em 0.0625em 0.0625em hsl(var(--hue), 10%, 40%) inset,
+		-0.0625em -0.0625em 0.0625em hsl(var(--hue), 10%, 20%) inset,
+		5px 5px 10px rgb(0 0 0 /0.5);
+	background-color: hsl(var(--hue), 10%, 30%);
+	border-radius: 0.25em;
+	transition:
+		background-color var(--trans-dur),
+		box-shadow var(--trans-dur),
+		transform calc(var(--trans-dur) / 3) cubic-bezier(0.65, 0, 0.35, 1);
+	font-weight: 600;
+	font-family: monospace;
+	text-transform: uppercase;
+}

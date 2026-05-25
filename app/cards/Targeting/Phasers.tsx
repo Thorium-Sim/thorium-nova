@@ -151,7 +151,7 @@ export function Phasers() {
 	const { shipId } = useStation();
 	const [phasers] = q.targeting.phasers.list.useNetRequest({ shipId });
 	return (
-		<div className="flex flex-col gap-4">
+		<div className="phasers-container flex flex-col gap-4">
 			{phasers.map((phaser) => (
 				<PhaserControl key={phaser.id} {...phaser} />
 			))}

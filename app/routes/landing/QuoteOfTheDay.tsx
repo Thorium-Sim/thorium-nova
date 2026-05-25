@@ -406,6 +406,10 @@ const quotes = [
 	"Something changes when you are in love. It's not just that a new person is added to your life, one person among many. It's that this new person changes for you what it means to be alive.",
 	// Clement Mok
 	"Remember, the music is not in the piano.",
+	// Terry Pratchett
+	"The trouble with having an open mind, of course, is that people will insist on coming along and trying to put things in it.",
+	"In the beginning there was nothing, which exploded.",
+	"Sometimes the moon is light and sometimes it's in shadow, but you should always remember it's the same moon.",
 ];
 
 const QuoteOfTheDay = () => {

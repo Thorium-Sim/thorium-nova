@@ -30,13 +30,16 @@ export function Targeting({ cardLoaded }: CardProps) {
 	return (
 		<CircleGridStoreProvider zoomMax={25000}>
 			<div className="grid h-full grid-cols-4 grid-rows-1 place-content-center gap-4">
-				{/* Padding is protection from the bottom of the card container */}
 				<div className="flex flex-col justify-between pb-4">
+					<div className="panel hull-container flex flex-col items-center text-center">
+						<div className="my-2 text-2xl font-bold tabular-nums">{hull}</div>
+						<div>Hull Integrity</div>
+					</div>
 					<Shields />
-					<div>Hull: {hull}</div>
+					<div className="flex-auto" />
 					<Phasers />
 				</div>
-				<div className="col-span-2 aspect-square w-full self-center">
+				<div className="targeting-radar col-span-2 aspect-square w-full self-center">
 					<React.Suspense fallback={null}>
 						<GridCanvas
 							shouldRender={cardLoaded}
@@ -64,7 +67,6 @@ export function Targeting({ cardLoaded }: CardProps) {
 					</React.Suspense>
 				</div>
 				<div className="flex h-full flex-col gap-2 overflow-y-hidden">
-					<Torpedoes />
 					<div className={cn("panel", targetedContact ? "panel-error" : "panel-primary")}>
 						{targetedContact?.id ? (
 							<React.Suspense fallback={<h3 className="px-2 text-2xl">Accessing...</h3>}>
@@ -75,9 +77,14 @@ export function Targeting({ cardLoaded }: CardProps) {
 						)}
 					</div>
 					<div>
-						<PilotZoomSlider />
-						<CircleGridTiltButton />
+						<div className="targeting-slider">
+							<PilotZoomSlider />
+						</div>
+						<div className="targeting-tilt">
+							<CircleGridTiltButton />
+						</div>
 					</div>
+					<Torpedoes />
 				</div>
 			</div>
 		</CircleGridStoreProvider>

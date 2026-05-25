@@ -7,14 +7,13 @@ import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
 import { Button } from "react-aria-components";
-import { Outlet, useParams } from "react-router";
+import { href, Outlet } from "react-router";
 
-export default function TimelineStep() {
-	const { pluginId, timelineId, stepId } = useParams() as {
-		pluginId: string;
-		timelineId: string;
-		stepId: string;
-	};
+import type { Route } from "./+types/step";
+
+export default function TimelineStep({
+	params: { pluginId, timelineId, stepId },
+}: Route.ComponentProps) {
 	const [timeline] = q.plugin.timeline.get.useNetRequest({
 		pluginId,
 		timelineId,
@@ -23,7 +22,10 @@ export default function TimelineStep() {
 
 	const step = timeline.steps.find((s) => s.id === stepId);
 
-	if (!step) return <Navigate to={`/config/${pluginId}/timelines/${timelineId}`} />;
+	if (!step)
+		return (
+			<Navigate to={href("/config/:pluginId/missions/:timelineId", { pluginId, timelineId })} />
+		);
 
 	return (
 		<div className="flex flex-1 flex-col">
