@@ -112,6 +112,11 @@ export const starmapCore = t.router({
 				logoUrl?: string;
 				size: number;
 				isDestroyed?: IsDestroyed;
+				/**
+				 * Whether the ThreeJS object should render an HTML element on top.
+				 * Mostly used for training
+				 **/
+				html: boolean;
 			}[] = [];
 			for (const { components, id } of shipEntities) {
 				if (
@@ -126,6 +131,7 @@ export const starmapCore = t.router({
 						logoUrl: components.isShip.assets.logo,
 						size: components.size?.length || 50,
 						isDestroyed: components.isDestroyed,
+						html: !!components.tags?.tags.includes("html"),
 					});
 				}
 			}

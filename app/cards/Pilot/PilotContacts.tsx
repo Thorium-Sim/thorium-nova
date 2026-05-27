@@ -1,4 +1,4 @@
-import { Edges, Line, Outlines, useGLTF } from "@react-three/drei";
+import { Edges, Html, Line, Outlines, useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import BracketTexture from "@thorium/cards/Pilot/bracket.svg";
 import ReticleTexture from "@thorium/cards/Pilot/reticle.svg";
@@ -85,7 +85,7 @@ export function CircleGridContacts({
 					/>
 				);
 			})}
-			{ships.map(({ id, modelUrl, logoUrl, size }) => {
+			{ships.map(({ id, modelUrl, logoUrl, size, html }) => {
 				if (!modelUrl || !logoUrl || (includeEntityIds && !includeEntityIds.includes(id)))
 					return null;
 				return (
@@ -102,6 +102,7 @@ export function CircleGridContacts({
 								isTargeted={targetedContactId === id}
 								isSelected={selectedContactId === id}
 								onContactOcclusion={onContactOcclusion}
+								html={html}
 							/>
 						</ErrorBoundary>
 					</Suspense>
@@ -159,6 +160,7 @@ export const ShipEntity = ({
 	isTargeted,
 	isSelected,
 	onContactOcclusion,
+	html,
 }: {
 	id: number;
 	systemId: number | null;
@@ -170,6 +172,7 @@ export const ShipEntity = ({
 	isTargeted?: boolean;
 	isSelected?: boolean;
 	onContactOcclusion?: (id: number, occluded: boolean) => void;
+	html?: boolean;
 }) => {
 	const { shipId } = useStation();
 	const [orbs] = q.starmapCore.entities.useNetRequest({
@@ -368,6 +371,7 @@ export const ShipEntity = ({
 		<Fragment>
 			<group ref={shipRef} {...eventHandlers}>
 				<primitive object={scene} rotation={[Math.PI / 2, Math.PI, 0]} />
+				{html ? <Html className={`entity-${id}`}></Html> : null}
 			</group>
 			{id !== shipId && (
 				<Fragment>

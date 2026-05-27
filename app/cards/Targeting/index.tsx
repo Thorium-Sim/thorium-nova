@@ -36,7 +36,7 @@ export function Targeting({ cardLoaded }: CardProps) {
 					<div>Hull: {hull}</div>
 					<Phasers />
 				</div>
-				<div className="col-span-2 aspect-square w-full self-center">
+				<div className="targeting-radar col-span-2 aspect-square w-full self-center">
 					<React.Suspense fallback={null}>
 						<GridCanvas
 							shouldRender={cardLoaded}
