@@ -21,6 +21,18 @@ export const isReactor = z
 		 */
 		currentOutput: z.number().default(8),
 		/**
+		 * What the current desired output of the reactor is. Set by the crew.
+		 */
+		desiredOutput: z.number().default(12),
+		/**
+		 * Determines how fast the reactor powers up when changing the output in megawatts per second
+		 */
+		powerUpSpeed: z.number().default(0.5),
+		/**
+		 * When reactor power is balanced between all reactors, fuel use and heat increase is multiplied by this
+		 */
+		balancedBonusMultiplier: z.number().default(0.9),
+		/**
 		 * How much fuel is left to burn after the previous tick. Fuel is only removed
 		 * from inventory in whole units. Any fuel not turned into power remains in the
 		 * reactor.

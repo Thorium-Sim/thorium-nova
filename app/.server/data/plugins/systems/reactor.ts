@@ -27,6 +27,8 @@ export const reactor = t.router({
 				optimalOutputPercent: z.number().optional(),
 				reactorCount: z.number().optional(),
 				powerMultiplier: z.number().optional(),
+				powerUpSpeed: z.number().optional(),
+				balancedBonusMultiplier: z.number().optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -42,6 +44,12 @@ export const reactor = t.router({
 			}
 			if (typeof input.powerMultiplier === "number") {
 				shipSystem.powerMultiplier = Math.max(0, input.powerMultiplier);
+			}
+			if (typeof input.powerUpSpeed === "number") {
+				shipSystem.powerUpSpeed = Math.max(0.1, input.powerUpSpeed);
+			}
+			if (typeof input.balancedBonusMultiplier === "number") {
+				shipSystem.balancedBonusMultiplier = Math.max(0.1, input.balancedBonusMultiplier);
 			}
 
 			pubsub.publish.plugin.systems.get({

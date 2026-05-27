@@ -74,6 +74,8 @@ export default class ReactorPlugin extends BaseShipSystemPlugin {
 	 * in case.
 	 */
 	reactorCount: number;
+	powerUpSpeed: number;
+	balancedBonusMultiplier: number;
 	/**
 	 * For legacy mode: Settings for adjusting the reactor efficiency/output
 	 */
@@ -88,6 +90,8 @@ export default class ReactorPlugin extends BaseShipSystemPlugin {
 		this.optimalOutputPercent = params.optimalOutputPercent || 0.7;
 		this.reactorCount = params.reactorCount || 4;
 		this.powerMultiplier = params.powerMultiplier || 1;
+		this.powerUpSpeed = params.powerUpSpeed || 0.5;
+		this.balancedBonusMultiplier = params.balancedBonusMultiplier || 0.9;
 		this.legacySettings = params.legacySettings || structuredClone(defaultLegacySettings);
 		this.soundEffects = params.soundEffects || {
 			ambiance: [],

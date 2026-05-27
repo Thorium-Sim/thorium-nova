@@ -158,6 +158,78 @@ export default function ReactorsConfig() {
 						/>
 						<OverrideResetButton property="powerMultiplier" setRekey={setRekey} className="mt-6" />
 					</div>
+					<div className="flex items-start pb-2">
+						<Input
+							labelHidden={false}
+							inputMode="numeric"
+							pattern="[0-9]*"
+							label="Power Up Speed"
+							placeholder={"0.5"}
+							helperText={
+								"How fast the reactor's output changes when increased in megawatts per second."
+							}
+							defaultValue={system.powerUpSpeed}
+							onBlur={async (e) => {
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
+								try {
+									await q.plugin.systems.reactor.update.netSend({
+										pluginId,
+										systemId: systemId,
+										shipId,
+										shipPluginId,
+										powerUpSpeed: Number(e.target.value),
+									});
+								} catch (err) {
+									if (err instanceof Error) {
+										toast({
+											title: "Error changing power up speed",
+											body: err.message,
+											color: "error",
+										});
+									}
+								}
+							}}
+						/>
+						<OverrideResetButton property="powerUpSpeed" setRekey={setRekey} className="mt-6" />
+					</div>
+					<div className="flex items-start pb-2">
+						<Input
+							labelHidden={false}
+							inputMode="numeric"
+							pattern="[0-9]*"
+							label="Balanced Bonus Multiplier"
+							placeholder={"0.0"}
+							helperText={
+								"When there are multiple reactors online and their power is balanced, this multiplier is applied to heat and fuel use. Works best when between 0 and 1"
+							}
+							defaultValue={system.balancedBonusMultiplier}
+							onBlur={async (e) => {
+								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
+								try {
+									await q.plugin.systems.reactor.update.netSend({
+										pluginId,
+										systemId: systemId,
+										shipId,
+										shipPluginId,
+										balancedBonusMultiplier: Number(e.target.value),
+									});
+								} catch (err) {
+									if (err instanceof Error) {
+										toast({
+											title: "Error changing balanced bonus multiplier",
+											body: err.message,
+											color: "error",
+										});
+									}
+								}
+							}}
+						/>
+						<OverrideResetButton
+							property="balancedBonusMultiplier"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
+					</div>
 				</div>
 			</div>
 		</fieldset>
