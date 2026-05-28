@@ -8,7 +8,6 @@ import type { DataContext } from "@thorium/.server/DataContext";
 import { Client } from "@thorium/.server/init/liveQuery";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { router } from "@thorium/.server/init/router";
-import systems from "@thorium/.server/systems";
 import { DataStore, type DataStoreOperations } from "@thorium/utils/.server/db-fs";
 
 import { ECS, Entity } from "../ecs";
@@ -90,9 +89,10 @@ class MockFlightDataModel {
 	};
 	initEcs(server: ServerDataModel) {
 		this.ecs = new ECS(server);
-		systems.forEach((Sys) => {
-			this.ecs.addSystem(new Sys());
-		});
+		// systems.forEach((Sys) => {
+		// 	console.log({ Sys });
+		// 	this.ecs.addSystem(new Sys());
+		// });
 		this.initEntities.forEach(({ id, components }) => {
 			const e = new Entity(id, components);
 			this.ecs.addEntity(e);

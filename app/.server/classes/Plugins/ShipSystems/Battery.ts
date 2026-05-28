@@ -24,13 +24,13 @@ export default class BatteryPlugin extends BaseShipSystemPlugin {
 	/**
 	 * How much energy the battery provides to connected systems.
 	 */
-	dischargeRate: MegaWatt;
+	outputRate: MegaWatt;
 	constructor(params: Partial<BatteryPlugin>, plugin: BasePlugin) {
 		super(params, plugin);
 
 		this.capacity = params.capacity || 46;
 		this.chargeRate = params.chargeRate || 180;
-		this.dischargeRate = params.dischargeRate || 120;
+		this.outputRate = params.outputRate || 120;
 	}
 }
 registerSystem("battery", BatteryPlugin);

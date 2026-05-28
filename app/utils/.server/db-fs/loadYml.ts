@@ -1,5 +1,5 @@
-import { YAML } from "bun";
+import { load } from "js-yaml";
 
 export function loadYml(fileData: string | undefined, initialData?: any) {
-	return fileData ? YAML.parse(fileData) : initialData;
+	return fileData ? load(fileData) : initialData;
 }

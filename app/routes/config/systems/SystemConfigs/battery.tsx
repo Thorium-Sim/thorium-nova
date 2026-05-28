@@ -104,7 +104,7 @@ export default function BatteryConfig() {
 							label="Discharge Rate"
 							placeholder={"1"}
 							helperText={"How much energy the battery provides to connected systems."}
-							defaultValue={system.dischargeRate}
+							defaultValue={system.outputRate}
 							onBlur={async (e) => {
 								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
@@ -113,7 +113,7 @@ export default function BatteryConfig() {
 										systemId: systemId,
 										shipId,
 										shipPluginId,
-										dischargeRate: Number(e.target.value),
+										outputRate: Number(e.target.value),
 									});
 								} catch (err) {
 									if (err instanceof Error) {

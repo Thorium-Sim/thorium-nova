@@ -128,7 +128,7 @@ export const systems = t.router({
 				tags: z.string().array().optional(),
 				powerLevels: z.number().array().optional(),
 				defaultPower: z.number().optional(),
-				maxSafePower: z.number().optional(),
+				connectedBatteryType: z.enum(["none", "capacity", "output", "median"]).optional(),
 				powerToHeat: z.number().optional(),
 				heatDissipationRate: z.number().optional(),
 				nominalHeat: z.number().optional(),
@@ -181,6 +181,9 @@ export const systems = t.router({
 			}
 			if (typeof input.defaultPower === "number") {
 				shipSystem.defaultPower = input.defaultPower;
+			}
+			if (typeof input.connectedBatteryType === "string") {
+				shipSystem.connectedBatteryType = input.connectedBatteryType;
 			}
 			if (typeof input.powerToHeat === "number") {
 				shipSystem.powerToHeat = input.powerToHeat;

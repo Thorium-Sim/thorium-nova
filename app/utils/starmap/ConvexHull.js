@@ -604,4 +604,3 @@ class VertexList {
 	}
 }
 export { ConvexHull, Face, HalfEdge, VertexList, VertexNode };
-//# sourceMappingURL=ConvexHull.js.map

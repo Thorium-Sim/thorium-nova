@@ -23,5 +23,9 @@ export const power = z
 		 * Which reactor or battery each unit of power is coming from. One unit = 1MW
 		 */
 		powerSources: z.number().array().default([]),
+		/**
+		 * Which battery the system is drawing extra power from
+		 */
+		batterySource: z.number().nullable().default(null),
 	})
 	.default({});

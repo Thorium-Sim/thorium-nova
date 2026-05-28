@@ -26,7 +26,7 @@ export const battery = t.router({
 				shipId: z.string().optional(),
 				capacity: z.number().optional(),
 				chargeRate: z.number().optional(),
-				dischargeRate: z.number().optional(),
+				outputRate: z.number().optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -40,8 +40,8 @@ export const battery = t.router({
 			if (typeof input.chargeRate === "number") {
 				shipSystem.chargeRate = Math.max(0, input.chargeRate);
 			}
-			if (typeof input.dischargeRate === "number") {
-				shipSystem.dischargeRate = Math.max(0, input.dischargeRate);
+			if (typeof input.outputRate === "number") {
+				shipSystem.outputRate = Math.max(0, input.outputRate);
 			}
 
 			pubsub.publish.plugin.systems.get({

@@ -166,6 +166,37 @@ export async function spawnShip(
 
 	const systemEntities: Entity[] = [];
 	let phaseCapacitorCount = 0;
+
+	const batteries: { id: number; output: number; capacity: number; assignmentCount: number }[] = [];
+	// Spawn batteries first so we can attach them to systems later
+	template.shipSystems?.forEach((system) => {
+		const systemPlugin = getSystem(dataContext, system.systemId, system.pluginId);
+		if (!systemPlugin || systemPlugin.type !== "battery") return;
+		// @ts-expect-error
+		if (!systemPlugin.constructor.flightModes.includes(params.flightMode)) return;
+
+		if (params.playerShip) {
+			const [entity, ...rest] = spawnShipSystem(
+				shipId,
+				systemPlugin,
+				params.flightMode,
+				shipRooms,
+				params.playerShip,
+				system.overrides,
+			);
+			if (entity.components.isBattery) {
+				entity.components.isBattery.storage = entity.components.isBattery.capacity;
+				batteries.push({
+					id: entity.id,
+					output: entity.components.isBattery.outputRate,
+					capacity: entity.components.isBattery.capacity,
+					assignmentCount: 0,
+				});
+			}
+			systemEntities.push(entity, ...rest);
+		}
+	});
+
 	template.shipSystems?.forEach((system) => {
 		const systemPlugin = getSystem(dataContext, system.systemId, system.pluginId);
 		if (!systemPlugin) return;
@@ -177,20 +208,7 @@ export async function spawnShip(
 
 				break;
 			case "battery": {
-				if (params.playerShip) {
-					const [entity, ...rest] = spawnShipSystem(
-						shipId,
-						systemPlugin,
-						params.flightMode,
-						shipRooms,
-						params.playerShip,
-						system.overrides,
-					);
-					if (entity.components.isBattery) {
-						entity.components.isBattery.storage = entity.components.isBattery.capacity;
-					}
-					systemEntities.push(entity, ...rest);
-				}
+				// Already handled above
 
 				break;
 			}
@@ -221,6 +239,8 @@ export async function spawnShip(
 						});
 					}
 					systemEntities.push(entity, ...rest);
+
+					assignBattery(entity, batteries, systemPlugin.connectedBatteryType);
 				}
 				break;
 			}
@@ -239,6 +259,7 @@ export async function spawnShip(
 
 				const template = mergeDeep(systemPlugin, system.overrides || {}) as PhasersPlugin;
 
+				// We'll let phasers add their own batteries to simplify config.
 				if (params.flightMode === "nova") {
 					const [capacitor] = spawnShipSystem(
 						shipId,
@@ -279,6 +300,7 @@ export async function spawnShip(
 					system.overrides,
 				);
 				systemEntities.push(entity, ...rest);
+				assignBattery(entity, batteries, systemPlugin.connectedBatteryType);
 				break;
 			}
 		}
@@ -449,4 +471,85 @@ async function getMeshSize(url: string | null): Promise<Vector3> {
 	vector.normalize().multiplyScalar(1 / x);
 
 	return vector;
+}
+
+function assignBattery(
+	entity: Entity,
+	batteries: { id: number; output: number; capacity: number; assignmentCount: number }[],
+	batteryType: "none" | "capacity" | "median" | "output",
+) {
+	const batteriesHalf = batteries.length / 2;
+
+	let batteryCapacityMedian =
+		batteries.sort((a, b) => b.capacity - a.capacity)[Math.floor(batteriesHalf)]?.capacity || 0;
+	if (!Number.isInteger(batteriesHalf)) {
+		const upperMedian = batteries.sort((a, b) => b.capacity - a.capacity)[Math.ceil(batteriesHalf)];
+		if (upperMedian) {
+			batteryCapacityMedian = (batteryCapacityMedian + upperMedian.capacity) / 2;
+		}
+	}
+	let batteryOutputMedian =
+		batteries.sort((a, b) => b.output - a.output)[Math.floor(batteriesHalf)]?.output || 0;
+	if (!Number.isInteger(batteriesHalf)) {
+		const upperMedian = batteries.sort((a, b) => b.output - a.output)[Math.ceil(batteriesHalf)];
+		if (upperMedian) {
+			batteryOutputMedian = (batteryOutputMedian + upperMedian.output) / 2;
+		}
+	}
+
+	// Start by getting the batteries that closest match, ordered by assignment count.
+	// If there are none, then widen the scope so that _any_ battery is assigned.
+
+	switch (batteryType) {
+		case "none":
+			break;
+		case "capacity":
+			{
+				let battery = batteries
+					.filter((b) => b.capacity > batteryCapacityMedian)
+					.sort((a, b) => a.assignmentCount - b.assignmentCount)[0];
+				if (!battery) {
+					battery = batteries.sort((a, b) => {
+						if (a.capacity === b.capacity) return a.assignmentCount - b.assignmentCount;
+						return b.capacity - a.capacity;
+					})[0];
+				}
+				entity.updateComponent("power", { batterySource: battery?.id || null });
+			}
+			break;
+		case "output":
+			{
+				let battery = batteries
+					.filter((b) => b.output > batteryOutputMedian)
+					.sort((a, b) => a.assignmentCount - b.assignmentCount)[0];
+				if (!battery) {
+					battery = batteries.sort((a, b) => {
+						if (a.output === b.output) return a.assignmentCount - b.assignmentCount;
+						return b.output - a.output;
+					})[0];
+				}
+				entity.updateComponent("power", { batterySource: battery?.id || null });
+			}
+			break;
+		case "median":
+			// Whichever has the shortest distance to the medians
+			{
+				let battery = batteries.sort((a, b) => {
+					const aOutputDistance = Math.abs(a.output - batteryOutputMedian);
+					const aCapacityDistance = Math.abs(a.capacity - batteryCapacityMedian);
+					const aDistance = aCapacityDistance + aOutputDistance;
+
+					const bOutputDistance = Math.abs(b.output - batteryOutputMedian);
+					const bCapacityDistance = Math.abs(b.capacity - batteryCapacityMedian);
+					const bDistance = bCapacityDistance + bOutputDistance;
+
+					if (aDistance !== bDistance) {
+						return aDistance - bDistance;
+					}
+					return a.assignmentCount - b.assignmentCount;
+				})[0];
+				entity.updateComponent("power", { batterySource: battery?.id || null });
+			}
+			break;
+	}
 }

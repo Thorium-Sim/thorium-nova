@@ -1,3 +1,6 @@
+import { ProcessTriggersSystem } from "@thorium/.server/systems/ProcessTriggersSystem";
+import { ShortRangeCommPowerSystem } from "@thorium/.server/systems/ShortRangeCommPowerSystem";
+import { TimerSystem } from "@thorium/.server/systems/TimerSystem";
 import {
 	createMockDataContext,
 	createMockRouter,
@@ -388,6 +391,10 @@ function setUpTests() {
 	ship3.addComponent("shipSystems", {
 		shipSystems: new Map([[shortRangeComm3.id, {}]]),
 	});
+
+	dataContext.ecs.addSystem(new ShortRangeCommPowerSystem());
+	dataContext.ecs.addSystem(new ProcessTriggersSystem());
+	dataContext.ecs.addSystem(new TimerSystem());
 
 	return {
 		router,

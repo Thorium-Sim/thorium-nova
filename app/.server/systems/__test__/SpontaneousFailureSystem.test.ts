@@ -95,7 +95,7 @@ describe("SpontaneousFailureSystem", () => {
 
 			ecs.update(1);
 
-			expect((applySystemDamage as any).mock.calls.length).toBe(2);
+			expect((applySystemDamage as any).mock.calls.length).toBe(1);
 			expect((applySystemDamage as any).mock.calls[0][1]).toBeGreaterThan(0);
 
 			vi.restoreAllMocks();

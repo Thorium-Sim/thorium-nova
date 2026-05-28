@@ -47,6 +47,8 @@ export default class BaseShipSystemPlugin extends Aspect {
 	powerLevels: MegaWatt[];
 	/** The normal amount of power this system will request  */
 	defaultPower: MegaWatt;
+	/** What type, of the available batteries, should this system connect itself to? */
+	connectedBatteryType: "none" | "capacity" | "output" | "median";
 
 	//////////
 	// Heat //
@@ -110,6 +112,7 @@ export default class BaseShipSystemPlugin extends Aspect {
 		this.allowMultiple = params.allowMultiple ?? false;
 		this.powerLevels = params.powerLevels || [5, 20];
 		this.defaultPower = params.defaultPower || 10;
+		this.connectedBatteryType = params.connectedBatteryType || "none";
 		this.powerToHeat = params.powerToHeat || 10;
 		this.heatDissipationRate = params.heatDissipationRate || 1;
 		this.nominalHeat = params.nominalHeat || 295.37;

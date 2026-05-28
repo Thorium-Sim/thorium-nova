@@ -33,9 +33,9 @@ describe("Exocomp System", () => {
 		exocompPowerSystem = new ExocompPowerSystem();
 		ecs.addSystem(exocompPowerSystem);
 		passengerMovementSystem = new PassengerMovementSystem();
+		ecs.addSystem(passengerMovementSystem);
 		ecs.addSystem(new FilterInventorySystem());
 
-		ecs.addSystem(passengerMovementSystem);
 		inventoryTemplate = new Entity();
 		inventoryTemplate.addComponent("identity", { name: "Repair Item" });
 		inventoryTemplate.addComponent("isInventory", {

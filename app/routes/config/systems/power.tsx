@@ -1,9 +1,11 @@
 import { Navigate } from "@thorium/components/Navigate";
 import { q } from "@thorium/context/AppContext";
 import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
+import { toast } from "@thorium/context/ToastContext";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import Input from "@thorium/ui/Input";
+import Select from "@thorium/ui/Select";
 import { produce } from "immer";
 import { useContext, useReducer } from "react";
 import { useParams } from "react-router";
@@ -128,6 +130,47 @@ export default function Power() {
 							}}
 						/>
 						<OverrideResetButton property="defaultPower" setRekey={setRekey} className="mt-6" />
+					</div>
+					<div className="flex items-start pb-2">
+						<Select
+							label="Connected Battery Type"
+							items={[
+								{ id: "none", label: "None" },
+								{ id: "capacity", label: "High Capacity" },
+								{ id: "output", label: "High Output" },
+								{ id: "median", label: "Median Capacity, Median Output" },
+							]}
+							selected={system.connectedBatteryType}
+							setSelected={async (value) => {
+								if (!value) return;
+								try {
+									await q.plugin.systems.update.netSend({
+										pluginId,
+										systemId: systemId,
+										shipId,
+										shipPluginId,
+										connectedBatteryType: value,
+									});
+								} catch (err) {
+									if (err instanceof Error) {
+										toast({
+											title: "Error changing connected battery type",
+											body: err.message,
+											color: "error",
+										});
+									}
+								}
+							}}
+						/>
+						<p className="mb-2 text-sm leading-tight text-gray-400">
+							What type of battery this system should be connected to by default.
+						</p>
+
+						<OverrideResetButton
+							property="balancedBonusMultiplier"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
 					</div>
 				</div>
 			</div>

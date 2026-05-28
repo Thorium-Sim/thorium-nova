@@ -1,3 +1,5 @@
+import { ProcessTriggersSystem } from "@thorium/.server/systems/ProcessTriggersSystem";
+import { TimerSystem } from "@thorium/.server/systems/TimerSystem";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
@@ -24,6 +26,8 @@ it("should perform simple actions", async () => {
 	};
 	const database = DataStore.operations.getStore()!.database;
 	const ecs = database.flight!.ecs;
+	ecs.addSystem(new ProcessTriggersSystem());
+	ecs.addSystem(new TimerSystem());
 
 	const ship = new Entity();
 	ship.addComponent("isShip");
