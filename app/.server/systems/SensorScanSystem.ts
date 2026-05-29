@@ -131,7 +131,7 @@ export class SensorScanSystem extends System {
 		const currentPower =
 			(parent.components.isPlayerShip
 				? sensors.components.power?.currentPower
-				: sensors.components.power?.defaultPower) || 0;
+				: sensors.components.power?.powerLevels.at(-1)) || 0;
 		const powerProvided = currentPower / scanCount;
 		// The energy provided in kilowatt hours, by converting from megawatts
 		const energyProvided: KiloWattHour = powerProvided * elapsedTimeHours * 1000;

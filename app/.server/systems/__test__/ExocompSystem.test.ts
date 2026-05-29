@@ -144,10 +144,8 @@ describe("Exocomp System", () => {
 		exocompShipSystem.addComponent("isShipSystem", { type: "exocomps", shipId: ship.id });
 		exocompShipSystem.addComponent("power", {
 			currentPower: 2,
-			defaultPower: 2,
 			powerDraw: 2,
 			powerLevels: [1, 5],
-			powerSources: [1, 2],
 		});
 		exocompShipSystem.addComponent("isExocomps");
 		ecs.addEntity(exocompShipSystem);

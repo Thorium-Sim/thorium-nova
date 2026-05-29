@@ -8,9 +8,7 @@ export const power = z
 		 * make this system operate in megawatts. The highest is the maximum threshold of power
 		 * usage for safely using this system in megawatts
 		 **/
-		powerLevels: z.array(z.number()).default([5, 20]),
-		/** The normal amount of power this system will request in megawatts  */
-		defaultPower: z.number().default(10),
+		powerLevels: z.number().array().default([5, 20]),
 		/** The current power in megawatts provided to this system, calculated every frame. */
 		currentPower: z.number().default(10),
 		/**
@@ -20,12 +18,12 @@ export const power = z
 		 */
 		powerDraw: z.number().default(0),
 		/**
-		 * Which reactor or battery each unit of power is coming from. One unit = 1MW
-		 */
-		powerSources: z.number().array().default([]),
-		/**
 		 * Which battery the system is drawing extra power from
 		 */
 		batterySource: z.number().nullable().default(null),
+		/**
+		 * Whether the system is drawing power from the reactors
+		 */
+		powerActivated: z.boolean().default(true),
 	})
 	.default({});

@@ -135,7 +135,6 @@ export function spawnShipSystem(
 			maxSafeHeat,
 			nominalHeat,
 			powerLevels,
-			defaultPower,
 			coolantConsumptionRate,
 			coolantTransferRate,
 		} = systemPlugin;
@@ -168,7 +167,6 @@ export function spawnShipSystem(
 		if (flags.includes("power")) {
 			entity.addComponent("power", {
 				powerLevels: overrides.powerLevels || powerLevels,
-				defaultPower: overrides.defaultPower || defaultPower,
 			});
 		}
 	}

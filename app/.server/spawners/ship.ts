@@ -6,7 +6,6 @@ import type BaseShipSystemPlugin from "@thorium/.server/classes/Plugins/ShipSyst
 import type PhasersPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Phasers";
 import ReactorPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Reactor";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
-import { getPowerSupplierPowerNeeded } from "@thorium/.server/systems/ReactorFuelSystem";
 import type { position } from "@thorium/ecs-components/position";
 import { getInventoryTemplates } from "@thorium/utils/.server/getInventoryTemplates";
 import { loadGltf } from "@thorium/utils/.server/loadGltf";
@@ -185,7 +184,9 @@ export async function spawnShip(
 				system.overrides,
 			);
 			if (entity.components.isBattery) {
-				entity.components.isBattery.storage = entity.components.isBattery.capacity;
+				entity.updateComponent("isBattery", {
+					storage: entity.components.isBattery.capacity * 0.2,
+				});
 				batteries.push({
 					id: entity.id,
 					output: entity.components.isBattery.outputRate,
@@ -276,14 +277,12 @@ export async function spawnShip(
 					capacitor.updateComponent("isBattery", {
 						storage: 0,
 						capacity: template.fullChargeYield,
-						outputRate: phaser.components.power?.defaultPower || 1,
+						outputRate: phaser.components.power?.powerLevels.at(-1) || 1,
 						chargeRate: phaser.components.power?.powerLevels[0] || 1,
 					});
 					systemEntities.push(capacitor, ...rest);
 					phaser.updateComponent("power", {
-						powerSources: Array.from({
-							length: phaser.components.power?.defaultPower || 0,
-						}).map(() => capacitor.id),
+						batterySource: capacitor.id,
 					});
 				}
 
@@ -306,9 +305,9 @@ export async function spawnShip(
 		}
 	});
 
-	// Now let's power up the reactors
+	// Now let's power up the reactors. We'll start with the reactors providing the minimum power for the entire ship.
 	const totalPower = systemEntities.reduce((prev, next) => {
-		return prev + (next.components.power?.defaultPower || 0);
+		return prev + (next.components.power?.powerLevels[0] || 0);
 	}, 0);
 	if (params.playerShip) {
 		const reactorCount =
@@ -345,45 +344,6 @@ export async function spawnShip(
 					});
 					systemEntities.push(sys, ...rest);
 				});
-			}
-		});
-
-		// Make sure each system and battery has a reactor to charge it
-		systemEntities.forEach((entity) => {
-			if (entity.components.isBattery) {
-				const reactors = systemEntities.filter(
-					(e) =>
-						e.components.isReactor &&
-						getPowerSupplierPowerNeeded(e) < e.components.isReactor.maxOutput,
-				);
-				// Don't fill up phase capacitors, since that basically equates to
-				// having the phasers charged immediately
-				if (entity.components.isPhaseCapacitor) {
-					return;
-				}
-				const reactor = randomFromList(reactors);
-				if (!reactor) return;
-				entity.updateComponent("isBattery", {
-					powerSources: [...entity.components.isBattery.powerSources, reactor.id],
-				});
-			}
-			if (entity.components.power) {
-				if (entity.components.isPhasers) {
-					// Phasers are powered by phase capacitors, skip
-					return;
-				}
-				for (let i = 0; i < entity.components.power.defaultPower; i++) {
-					const reactors = systemEntities.filter(
-						(e) =>
-							e.components.isReactor &&
-							getPowerSupplierPowerNeeded(e) < e.components.isReactor.maxOutput,
-					);
-					const reactor = randomFromList(reactors);
-					if (!reactor) return;
-					entity.updateComponent("power", {
-						powerSources: [...entity.components.power.powerSources, reactor.id],
-					});
-				}
 			}
 		});
 	}

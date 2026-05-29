@@ -2,35 +2,6 @@ import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInvent
 import { type Entity, System } from "@thorium/utils/ecs";
 import type { MegaWatt, MegaWattHour } from "@thorium/utils/unitTypes";
 
-export function getPowerSupplierPowerNeeded(entity: Entity) {
-	if (!entity.components.isReactor && !entity.components.isBattery) return 0;
-	const shipId = entity.components.isShipSystem?.shipId;
-	const systems = [];
-	for (const system of entity.ecs?.componentCache.get("power") || []) {
-		if (system.components.isShipSystem?.shipId === shipId) {
-			systems.push(system);
-		}
-	}
-	for (const system of entity.ecs?.componentCache.get("isBattery") || []) {
-		if (system.components.isShipSystem?.shipId === shipId) {
-			systems.push(system);
-		}
-	}
-
-	return systems.reduce((prev, next) => {
-		return (
-			prev +
-			(next.components.power?.powerSources.reduce(
-				(prev, next) => prev + (next === entity.id ? 1 : 0),
-				0,
-			) || 0) +
-			(next.components.isBattery?.powerSources.reduce(
-				(prev, next) => prev + (next === entity.id ? 1 : 0),
-				0,
-			) || 0)
-		);
-	}, 0);
-}
 export class ReactorFuelSystem extends System {
 	static flightMode = ["nova"];
 	test(entity: Entity) {
@@ -39,6 +10,8 @@ export class ReactorFuelSystem extends System {
 	update(entity: Entity, elapsed: number) {
 		if (!entity.components.isReactor) return;
 		const efficiency = entity.components.damage?.efficiency ?? 1;
+		const elapsedTimeHours = elapsed / 1000 / 60 / 60;
+
 		if (efficiency === 0) {
 			entity.updateComponent("isReactor", {
 				currentOutput: 0,
@@ -46,29 +19,36 @@ export class ReactorFuelSystem extends System {
 			return;
 		}
 
-		const { optimalOutputPercent, maxOutput } = entity.components.isReactor;
-
-		const powerNeeded = getPowerSupplierPowerNeeded(entity);
+		const {
+			optimalOutputPercent,
+			balanced,
+			balancedBonusMultiplier,
+			currentOutput,
+			unusedFuel,
+			maxOutput,
+		} = entity.components.isReactor;
 
 		const optimalOutput = maxOutput * optimalOutputPercent;
-		const outputBonus = Math.max(powerNeeded / optimalOutput, 0.5);
+		const outputBonus =
+			Math.max(currentOutput / optimalOutput, 0.5) * (balanced ? balancedBonusMultiplier : 1);
 
 		// E(mWh) = P(mW) * T(h)
-		const elapsedTimeHours = elapsed / 1000 / 60 / 60;
 		const energyNeeded: MegaWattHour =
-			powerNeeded * elapsedTimeHours * outputBonus * (1 / efficiency);
+			currentOutput * elapsedTimeHours * outputBonus * (1 / efficiency);
 
 		// Reduce energyNeeded by the unused fuel
-		const unusedFuelEnergy: MegaWattHour =
-			entity.components.isReactor.unusedFuel.amount *
-			entity.components.isReactor.unusedFuel.density;
+		const unusedFuelEnergy: MegaWattHour = unusedFuel.amount * unusedFuel.density;
 		let energyProvided = unusedFuelEnergy;
 		if (energyNeeded - energyProvided < 0) {
-			entity.components.isReactor.unusedFuel.amount =
-				Math.abs(energyNeeded - energyProvided) / entity.components.isReactor.unusedFuel.density;
-			entity.updateComponent("isReactor", { currentOutput: powerNeeded });
+			entity.updateComponent("isReactor", {
+				unusedFuel: {
+					amount: Math.abs(energyNeeded - energyProvided) / unusedFuel.density,
+					density: unusedFuel.density,
+				},
+			});
 			return;
 		}
+
 		entity.updateComponent("isReactor", {
 			unusedFuel: {
 				density: entity.components.isReactor.unusedFuel.density,
@@ -86,7 +66,13 @@ export class ReactorFuelSystem extends System {
 
 		// More Fuel!
 		if (toBurn?.flags.fuel?.fuelDensity && toBurn?.count) {
-			entity.components.isReactor.unusedFuel.density = toBurn.flags.fuel.fuelDensity;
+			entity.updateComponent("isReactor", {
+				unusedFuel: {
+					amount: 0,
+					density: toBurn.flags.fuel.fuelDensity,
+				},
+			});
+
 			let fuelUnitsNeeded = Math.ceil(energyNeeded / toBurn.flags.fuel.fuelDensity);
 			let fuelRemaining = (toBurn.room?.contents[toBurn.name].count || 0) - fuelUnitsNeeded;
 
@@ -101,9 +87,13 @@ export class ReactorFuelSystem extends System {
 			energyProvided = fuelUnitsNeeded * toBurn.flags.fuel.fuelDensity;
 
 			if (energyNeeded - energyProvided < 0) {
-				entity.components.isReactor.unusedFuel.amount =
-					Math.abs(energyNeeded - energyProvided) / entity.components.isReactor.unusedFuel.density;
-				entity.updateComponent("isReactor", { currentOutput: powerNeeded });
+				entity.updateComponent("isReactor", {
+					unusedFuel: {
+						amount: Math.abs(energyNeeded - energyProvided) / toBurn.flags.fuel.fuelDensity,
+						density: toBurn.flags.fuel.fuelDensity,
+					},
+				});
+
 				return;
 			}
 		}

@@ -3,8 +3,8 @@ import { q } from "@thorium/context/AppContext";
 import { ShipPluginIdContext } from "@thorium/context/ShipSystemOverrideContext";
 import { toast } from "@thorium/context/ToastContext";
 import Button from "@thorium/ui/Button";
+import Checkbox from "@thorium/ui/Checkbox";
 import { Icon } from "@thorium/ui/Icon";
-import Input from "@thorium/ui/Input";
 import Select from "@thorium/ui/Select";
 import { produce } from "immer";
 import { useContext, useReducer } from "react";
@@ -79,57 +79,51 @@ export default function Power() {
 										</button>
 									</div>
 								))}
-								<Button
-									className="btn-sm btn-info"
-									onClick={() => {
-										q.plugin.systems.update.netSend({
-											pluginId,
-											systemId,
-											shipId,
-											shipPluginId,
-											powerLevels: [
-												...system.powerLevels,
-												(system.powerLevels[system.powerLevels.length - 1] || 0) + 1,
-											].sort(numSort),
-										});
-									}}
-								>
-									+
-								</Button>
+								{system.powerLevels.length < 2 ? (
+									<Button
+										className="btn-sm btn-info"
+										onClick={() => {
+											q.plugin.systems.update.netSend({
+												pluginId,
+												systemId,
+												shipId,
+												shipPluginId,
+												powerLevels: [
+													...system.powerLevels,
+													(system.powerLevels[system.powerLevels.length - 1] || 0) + 1,
+												].sort(numSort),
+											});
+										}}
+									>
+										+
+									</Button>
+								) : null}
 							</div>
 							<p className="mb-2 text-sm leading-tight text-gray-400">
-								Power indicator levels on the power management screen in MegaWatts. The lowest
-								number is the minimum required power for the system to run. The highest number is
-								the maximum recommended amount of power for this system. Any additional power
-								consumption will cause the system to sustain damage. Values between the highest and
-								lowest have no direct effect on the system and are only for convenience when
-								distributing power.
+								The lowest number is the minimum required power for the system to run. The highest
+								number is the maximum recommended amount of power for this system. Any additional
+								power consumption will cause the system to sustain damage.
 							</p>
 						</div>
 						<OverrideResetButton property="powerLevels" setRekey={setRekey} className="mt-6" />
 					</div>
 
 					<div className="flex pb-4">
-						<Input
-							labelHidden={false}
-							label="Default Power"
-							helperText="The normal amount of power this system will request in MegaWatts."
-							type="text"
-							inputMode="numeric"
-							pattern="[0-9]*"
-							defaultValue={system.defaultPower}
-							onBlur={(e: any) => {
-								if (Number.isNaN(Number(e.target.value))) return;
+						<Checkbox
+							label="Activated By Default"
+							helperText="Whether this system is connected to reactor power when the flight starts."
+							defaultChecked={system.powerActivated}
+							onChange={(e) => {
 								q.plugin.systems.update.netSend({
 									pluginId,
 									systemId: systemId,
 									shipId,
 									shipPluginId,
-									defaultPower: Number(e.target.value),
+									powerActivated: e.target.checked,
 								});
 							}}
 						/>
-						<OverrideResetButton property="defaultPower" setRekey={setRekey} className="mt-6" />
+						<OverrideResetButton property="powerActivated" setRekey={setRekey} className="mt-6" />
 					</div>
 					<div className="flex items-start pb-2">
 						<Select
@@ -163,7 +157,8 @@ export default function Power() {
 							}}
 						/>
 						<p className="mb-2 text-sm leading-tight text-gray-400">
-							What type of battery this system should be connected to by default.
+							What type of battery this system should be connected to by default. Make sure the ship
+							has a battery of this type compared to other batteries on the ship.
 						</p>
 
 						<OverrideResetButton

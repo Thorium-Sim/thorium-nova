@@ -41,7 +41,7 @@ export const shortRangeComm = t.router({
 					id: srcomm.id,
 					requiredPower: srcomm.components.power?.powerLevels[0] || 0,
 					maxSafePower: srcomm.components.power?.powerLevels.at(-1) || 1,
-					currentPower: srcomm.components.power?.powerSources.length || 0,
+					currentPower: srcomm.components.power?.currentPower || 0,
 					frequency: srcomm.components.isShortRangeComm.antennaFrequency,
 					gain: srcomm.components.isShortRangeComm.antennaGain,
 					actualGain: srcomm.components.isShortRangeComm.actualGain,

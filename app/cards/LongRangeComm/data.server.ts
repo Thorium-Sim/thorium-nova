@@ -49,7 +49,7 @@ export const longRangeComm = t.router({
 				id: lrcomm.id,
 				requiredPower: lrcomm.components.power?.powerLevels[0] || 0,
 				maxSafePower: lrcomm.components.power?.powerLevels.at(-1) || 1,
-				currentPower: lrcomm.components.power?.powerSources.length || 0,
+				currentPower: lrcomm.components.power?.currentPower || 0,
 				frequency: lrcomm.components.isLongRangeComm.antennaFrequency,
 				gain: lrcomm.components.isLongRangeComm.antennaGain,
 				minSatelliteRange: lrcomm.components.isLongRangeComm.minSatelliteRange,

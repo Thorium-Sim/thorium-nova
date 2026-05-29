@@ -503,10 +503,7 @@ function System({
 }: {
 	id: number;
 	name: string;
-	power?: {
-		powerLevels: number[];
-		powerSources: number[];
-	};
+	power?: [number, number];
 	heat?: {
 		heat: number;
 		maxSafeHeat: number;

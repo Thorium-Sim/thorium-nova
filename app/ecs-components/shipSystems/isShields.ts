@@ -10,6 +10,8 @@ export const isShields = z
 		strength: z.number().default(0),
 		/** The maximum blocking energy of the shields in MegaWatt Hours */
 		maxStrength: z.number().default(5),
+		/** What percentage of the max power is being poured into the shields when charging. */
+		chargeRate: z.number().default(0.5),
 		/**
 		 * Damage to ship systems, regardless of whether shields are raised or not, is calculated based on the max strength, current strength.
 		 * E = (1 - (Current / Max)) * Multiplier

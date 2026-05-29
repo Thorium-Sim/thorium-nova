@@ -18,6 +18,8 @@ import type { HeatCapacity, Kelvin, Kilograms, MegaWatt } from "@thorium/utils/u
 const HEAT_CAPACITY: HeatCapacity = 0.475;
 const MASS: Kilograms = 10000;
 
+// TODO May 28, 2026 — If the net reactor output is greater than 0, pump all
+// of that extra energy into heat.
 export class ReactorHeatSystem extends System {
 	static flightMode = ["nova"];
 	test(entity: Entity) {
@@ -26,10 +28,11 @@ export class ReactorHeatSystem extends System {
 	update(entity: Entity, elapsed: number) {
 		const elapsedInSeconds = elapsed / 1000;
 		if (!entity.components.isReactor || !entity.components.heat) return;
-		const { currentOutput } = entity.components.isReactor;
+		const { currentOutput, balanced, balancedBonusMultiplier } = entity.components.isReactor;
 		const { powerToHeat } = entity.components.heat;
 
-		const heatGenerated: MegaWatt = currentOutput * powerToHeat;
+		const heatGenerated: MegaWatt =
+			currentOutput * powerToHeat * (balanced ? balancedBonusMultiplier : 1);
 
 		const heatInWatts = heatGenerated * 1e6;
 

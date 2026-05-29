@@ -1,4 +1,3 @@
-import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { getPowerSupplierPowerNeeded } from "@thorium/.server/systems/ReactorFuelSystem";
 import { getRoomBySystem } from "@thorium/cards/CargoControl/data.server";
@@ -112,7 +111,6 @@ export const systemsMonitor = t.router({
 					chargeRate: b.components.isBattery!.chargeRate,
 					outputAmount: b.components.isBattery!.outputAmount,
 					outputRate: b.components.isBattery!.outputRate,
-					powerSources: b.components.isBattery!.powerSources,
 				}));
 			}),
 	}),
@@ -136,10 +134,7 @@ export const systemsMonitor = t.router({
 					id: number;
 					name: string;
 					type: ShipSystemTypes;
-					power?: {
-						powerLevels: number[];
-						powerSources: number[];
-					};
+					power?: { powerLevels: number[]; batterySource: number | null };
 					heat?: {
 						heat: number;
 						maxHeat: number;
@@ -165,7 +160,7 @@ export const systemsMonitor = t.router({
 						power: system.components.power
 							? {
 									powerLevels: system.components.power.powerLevels,
-									powerSources: system.components.power.powerSources,
+									batterySource: system.components.power.batterySource,
 								}
 							: undefined,
 
@@ -182,115 +177,6 @@ export const systemsMonitor = t.router({
 				}
 
 				return systems;
-			}),
-		removePowerSource: t.procedure
-			.input(
-				z.object({
-					systemId: z.number(),
-					powerSourceIndex: z.number(),
-				}),
-			)
-			.send(({ input, ctx }) => {
-				const system = ctx.flight?.ecs.getEntityById(input.systemId);
-
-				const shipId = system?.components.isShipSystem?.shipId;
-				if (!shipId) return;
-
-				if (system.components.power) {
-					const newPowerSources = [...(system?.components.power.powerSources || [])];
-					newPowerSources.splice(input.powerSourceIndex, 1);
-					system.updateComponent("power", {
-						powerSources: newPowerSources,
-					});
-				}
-				if (system.components.isBattery) {
-					const newPowerSources = [...(system?.components.isBattery.powerSources || [])];
-					newPowerSources.splice(input.powerSourceIndex, 1);
-					system.updateComponent("isBattery", {
-						powerSources: newPowerSources,
-					});
-				}
-
-				pubsub.publish.systemsMonitor.systems.get({ shipId });
-				pubsub.publish.systemsMonitor.reactors.get({ shipId });
-				pubsub.publish.systemsMonitor.batteries.get({ shipId });
-
-				if (system.components.isPhasers) {
-					// Update the output megawatts of the phasers
-					pubsub.publish.targeting.phasers.list({ shipId });
-				}
-				if (system.components.isLongRangeComm) {
-					pubsub.publish.longRangeComm.get({ shipId });
-				}
-				return null;
-			}),
-		addPowerSource: t.procedure
-			.input(
-				z.object({
-					systemId: z.number(),
-					powerSourceId: z.number(),
-				}),
-			)
-			.send(({ input, ctx }) => {
-				const system = ctx.flight?.ecs.getEntityById(input.systemId);
-
-				const shipId = system?.components.isShipSystem?.shipId;
-				if (!shipId) return;
-
-				const powerSource = ctx.flight?.ecs.getEntityById(input.powerSourceId);
-				if (!powerSource)
-					throw new Error("Invalid power source. Power source must be a reactor or battery.");
-
-				if (system.components.isPhasers && !powerSource.components.isPhaseCapacitor) {
-					throw new Error("Invalid power source. Power source must be a phase capacitor.");
-				}
-
-				const powerSupplied = getPowerSupplierPowerNeeded(powerSource);
-
-				if (
-					powerSource.components.isReactor &&
-					powerSource.components.isReactor?.maxOutput < powerSupplied + 1
-				) {
-					throw new Error("Reactor is at maximum output.");
-				}
-				if (
-					powerSource.components.isBattery &&
-					powerSource.components.isBattery.outputRate < powerSupplied + 1
-				) {
-					throw new Error("Battery is at maximum output.");
-				}
-
-				if (system.components.power) {
-					const newPowerSources = [
-						...(system?.components.power?.powerSources || []),
-						input.powerSourceId,
-					];
-
-					system.updateComponent("power", {
-						powerSources: newPowerSources,
-					});
-				} else if (system.components.isBattery) {
-					const newPowerSources = [
-						...(system?.components.isBattery?.powerSources || []),
-						input.powerSourceId,
-					].slice(0, system.components.isBattery.chargeRate);
-					system.updateComponent("isBattery", {
-						powerSources: newPowerSources,
-					});
-				}
-
-				pubsub.publish.systemsMonitor.systems.get({ shipId });
-				pubsub.publish.systemsMonitor.reactors.get({ shipId });
-				pubsub.publish.systemsMonitor.batteries.get({ shipId });
-
-				if (system.components.isPhasers) {
-					// Update the output megawatts of the phasers
-					pubsub.publish.targeting.phasers.list({ shipId });
-				}
-				if (system.components.isLongRangeComm) {
-					pubsub.publish.longRangeComm.get({ shipId });
-				}
-				return null;
 			}),
 	}),
 	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {

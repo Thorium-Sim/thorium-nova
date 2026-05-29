@@ -45,8 +45,8 @@ export default class BaseShipSystemPlugin extends Aspect {
 	 * usage for safely using this system in megawatts
 	 **/
 	powerLevels: MegaWatt[];
-	/** The normal amount of power this system will request  */
-	defaultPower: MegaWatt;
+	/** Whether the system is connected to reactor power */
+	powerActivated: boolean;
 	/** What type, of the available batteries, should this system connect itself to? */
 	connectedBatteryType: "none" | "capacity" | "output" | "median";
 
@@ -111,7 +111,7 @@ export default class BaseShipSystemPlugin extends Aspect {
 		this.soundEffects = params.soundEffects;
 		this.allowMultiple = params.allowMultiple ?? false;
 		this.powerLevels = params.powerLevels || [5, 20];
-		this.defaultPower = params.defaultPower || 10;
+		this.powerActivated = params.powerActivated ?? true;
 		this.connectedBatteryType = params.connectedBatteryType || "none";
 		this.powerToHeat = params.powerToHeat || 10;
 		this.heatDissipationRate = params.heatDissipationRate || 1;

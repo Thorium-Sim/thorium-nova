@@ -58,7 +58,7 @@ export class MainComputerDiagnosticSystem extends System {
 		const currentPower =
 			(parent?.components.isPlayerShip
 				? mainComputer.components.power?.currentPower
-				: mainComputer.components.power?.defaultPower) || 0;
+				: mainComputer.components.power?.powerLevels[0]) || 0;
 		const powerProvided = currentPower / diagnosticCount;
 		// The energy provided in kilowatt hours, by converting from megawatts
 		const energyProvided: KiloWattHour = powerProvided * elapsedTimeHours * 1000;

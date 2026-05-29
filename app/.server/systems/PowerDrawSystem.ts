@@ -2,14 +2,6 @@ import { getTargetIsInPhaserRange } from "@thorium/.server/systems/PhasersSystem
 import { getRoomBySystem } from "@thorium/cards/CargoControl/data.server";
 import { type Entity, System } from "@thorium/utils/ecs";
 
-/**
- * There's a subtle distinction between powerDraw and requestedPower (powerSources.length)
- * - powerDraw is how much power the system is currently pulling based
- *   on it's current workload.
- * - requestedPower is an artificial limit placed by the crew that keeps
- *   the power draw at or below that limit.
- */
-
 export class PowerDrawSystem extends System {
 	static flightMode = ["nova"];
 	test(entity: Entity) {
@@ -25,11 +17,10 @@ export class PowerDrawSystem extends System {
 		const efficiencyMultiple = 1 / efficiency;
 		if (!systemType?.type || !power) return;
 
-		const { powerLevels, powerSources } = power;
+		const { powerLevels } = power;
 		const requiredPower = powerLevels[0];
-		const maxSafePower = powerLevels[powerLevels.length - 1];
-		const requestedPower = powerSources.length;
-		let powerDraw = 0;
+		const maxSafePower = powerLevels.at(-1) || requiredPower;
+		let powerDraw = requiredPower;
 		switch (systemType.type) {
 			case "warpEngines": {
 				if (!entity.components.isWarpEngines) return;
@@ -44,12 +35,6 @@ export class PowerDrawSystem extends System {
 			case "impulseEngines": {
 				if (!entity.components.isImpulseEngines) return;
 				const { cruisingSpeed, targetSpeed } = entity.components.isImpulseEngines;
-				// If we're going faster than the cruising speed,
-				// draw as much power as possible
-				if (targetSpeed > cruisingSpeed) {
-					powerDraw = requestedPower;
-					break;
-				}
 				if (targetSpeed === 0) break;
 				// We divide the target speed in four, but we can't go below 1/4th
 				// So we scale it where 0.25 is 0, and 1 is 1
@@ -63,30 +48,27 @@ export class PowerDrawSystem extends System {
 				const { direction, rotationDelta } = entity.components.isThrusters;
 				const directionOutput = Math.hypot(direction.x, direction.y, direction.z);
 				const rotationOutput = Math.hypot(rotationDelta.x, rotationDelta.y, rotationDelta.z);
-				const overloadPercent = Math.min(1, requestedPower / maxSafePower);
-				const totalOutput = (directionOutput + rotationOutput) * overloadPercent;
+				const totalOutput = directionOutput + rotationOutput;
 				powerDraw = (maxSafePower - requiredPower) * totalOutput + requiredPower;
 				break;
 			}
 			case "shields": {
 				if (!entity.components.isShields) return;
-				const { strength, maxStrength, state } = entity.components.isShields;
-				if (state === "down") {
-					powerDraw = 0;
-				} else if (strength === maxStrength) {
+				const { strength, maxStrength, state, chargeRate } = entity.components.isShields;
+				if (state === "down" || strength === maxStrength) {
 					powerDraw = requiredPower;
 				} else {
-					powerDraw = requestedPower;
+					powerDraw = requiredPower + (maxSafePower - requiredPower) * chargeRate;
 				}
 				break;
 			}
 			case "torpedoLauncher": {
 				if (!entity.components.isTorpedoLauncher) return;
 				const { status } = entity.components.isTorpedoLauncher;
-				if (status === "loading" || status === "loaded" || status === "firing") {
-					powerDraw = requestedPower;
-				} else {
-					powerDraw = 0;
+				if (status === "loading" || status === "loaded") {
+					powerDraw = power.powerLevels[0];
+				} else if (status === "firing") {
+					powerDraw = maxSafePower;
 				}
 				break;
 			}
@@ -96,28 +78,30 @@ export class PowerDrawSystem extends System {
 					powerDraw = 0;
 					break;
 				}
-				powerDraw = power.powerSources.length * (entity.components.isPhasers?.firePercent || 0);
+				const battery = this.ecs.getEntityById(power.batterySource || -1);
+				const batteryOutput = battery?.components.isBattery?.outputRate || 0;
+				powerDraw = batteryOutput * (entity.components.isPhasers?.firePercent || 0);
 
 				break;
 			}
 			case "sensors": {
 				// If there is an active scan, just draw the full amount of power
-				let activeScans = false;
 				for (const scan of this.ecs.componentCache.get("scan") || []) {
-					if (scan.components.scan?.parentId === ship.id) activeScans = true;
-					break;
+					if (scan.components.scan?.parentId === ship.id) {
+						powerDraw = maxSafePower;
+						break;
+					}
 				}
-				powerDraw = Math.max(requiredPower, activeScans ? requestedPower : 0);
 				break;
 			}
 			case "mainComputer": {
 				// If there is an active scan, just draw the full amount of power
-				let activeDiagnostic = false;
 				for (const diagnostic of this.ecs.componentCache.get("diagnostic") || []) {
-					if (diagnostic.components.diagnostic?.shipId === ship.id) activeDiagnostic = true;
-					break;
+					if (diagnostic.components.diagnostic?.shipId === ship.id) {
+						powerDraw = maxSafePower;
+						break;
+					}
 				}
-				powerDraw = Math.max(power.powerLevels[0], activeDiagnostic ? requestedPower : 0);
 				break;
 			}
 			case "longRangeComm": {
@@ -154,10 +138,8 @@ export class PowerDrawSystem extends System {
 						}
 					}
 				}
+				powerDraw = Math.min(powerDraw, maxSafePower);
 			}
-			case "generic":
-				powerDraw = requestedPower;
-				break;
 			default:
 				return;
 		}

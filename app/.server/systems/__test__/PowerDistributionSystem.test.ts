@@ -40,7 +40,6 @@ describe("PowerDistributionSystem", () => {
 		system.addComponent("power", {
 			powerDraw: 4,
 			currentPower: 0,
-			powerSources: [reactor.id, reactor.id, reactor.id, reactor.id],
 		});
 		ship.components.shipSystems?.shipSystems.set(system.id, {});
 		ecs.addEntity(system);
@@ -50,17 +49,14 @@ describe("PowerDistributionSystem", () => {
 		ecs.update(16);
 		expect(system.components.power?.currentPower).toEqual(4);
 
-		system.updateComponent("power", {
-			powerSources: [reactor.id, reactor.id, reactor.id],
-		});
 		ecs.update(16);
-		expect(system.components.power?.currentPower).toEqual(3);
-		expect(reactor.components.isReactor?.currentOutput).toEqual(3);
+		expect(system.components.power?.currentPower).toEqual(4);
+		expect(reactor.components.isReactor?.currentOutput).toEqual(6);
 
 		system.updateComponent("power", { powerDraw: 2 });
 		ecs.update(16);
 		expect(system.components.power?.currentPower).toEqual(2);
-		expect(reactor.components.isReactor?.currentOutput).toEqual(2);
+		expect(reactor.components.isReactor?.currentOutput).toEqual(6);
 	});
 
 	it("should properly distribute power from a single reactor to multiple systems", () => {
@@ -77,7 +73,6 @@ describe("PowerDistributionSystem", () => {
 		system1.addComponent("power", {
 			powerDraw: 3,
 			currentPower: 0,
-			powerSources: [reactor.id, reactor.id, reactor.id],
 		});
 		ship.components.shipSystems?.shipSystems.set(system1.id, {});
 		ecs.addEntity(system1);
@@ -86,7 +81,6 @@ describe("PowerDistributionSystem", () => {
 		system2.addComponent("power", {
 			powerDraw: 3,
 			currentPower: 0,
-			powerSources: [reactor.id, reactor.id, reactor.id],
 		});
 		ship.components.shipSystems?.shipSystems.set(system2.id, {});
 		ecs.addEntity(system2);
@@ -105,7 +99,7 @@ describe("PowerDistributionSystem", () => {
 		const reactor = new Entity();
 		reactor.addComponent("isShipSystem", { type: "reactor" });
 		reactor.addComponent("isReactor", {
-			currentOutput: 12,
+			currentOutput: 10,
 		});
 		ship.components.shipSystems?.shipSystems.set(reactor.id, {});
 		ecs.addEntity(reactor);
@@ -115,7 +109,6 @@ describe("PowerDistributionSystem", () => {
 		system1.addComponent("power", {
 			powerDraw: 4,
 			currentPower: 0,
-			powerSources: [reactor.id, reactor.id],
 		});
 		ship.components.shipSystems?.shipSystems.set(system1.id, {});
 		ecs.addEntity(system1);
@@ -124,7 +117,6 @@ describe("PowerDistributionSystem", () => {
 		system2.addComponent("power", {
 			powerDraw: 4,
 			currentPower: 0,
-			powerSources: [reactor.id, reactor.id],
 		});
 		ship.components.shipSystems?.shipSystems.set(system2.id, {});
 		ecs.addEntity(system2);
@@ -133,7 +125,6 @@ describe("PowerDistributionSystem", () => {
 		system3.addComponent("power", {
 			powerDraw: 4,
 			currentPower: 0,
-			powerSources: [reactor.id, reactor.id],
 		});
 		ship.components.shipSystems?.shipSystems.set(system3.id, {});
 		ecs.addEntity(system3);
@@ -142,16 +133,17 @@ describe("PowerDistributionSystem", () => {
 		system4.addComponent("power", {
 			powerDraw: 4,
 			currentPower: 0,
-			powerSources: [reactor.id, reactor.id],
 		});
 		ship.components.shipSystems?.shipSystems.set(system4.id, {});
 		ecs.addEntity(system4);
 
 		ecs.update(16);
-		expect(system1.components.power?.currentPower).toEqual(2);
-		expect(system2.components.power?.currentPower).toEqual(2);
-		expect(system3.components.power?.currentPower).toEqual(2);
-		expect(system4.components.power?.currentPower).toEqual(2);
+		expect(system1.components.power?.currentPower).toEqual(4);
+		expect(system2.components.power?.currentPower).toEqual(4);
+		expect(system3.components.power?.currentPower).toEqual(0);
+		expect(system4.components.power?.currentPower).toEqual(0);
+		expect(system3.components.power?.powerActivated).toEqual(false);
+		expect(system4.components.power?.powerActivated).toEqual(false);
 
 		const reactor2 = new Entity();
 		reactor2.addComponent("isShipSystem", { type: "reactor" });
@@ -160,64 +152,52 @@ describe("PowerDistributionSystem", () => {
 		});
 		ship.components.shipSystems?.shipSystems.set(reactor2.id, {});
 		ecs.addEntity(reactor2);
+		system3.updateComponent("power", { powerActivated: true });
+		system4.updateComponent("power", { powerActivated: true });
 
-		system3.updateComponent("power", {
-			powerSources: [reactor.id, reactor2.id, reactor.id],
-		});
-		system4.updateComponent("power", {
-			powerSources: [reactor2.id, reactor.id, reactor2.id],
-		});
 		ecs.update(16);
-		expect(system1.components.power?.currentPower).toEqual(2);
-		expect(system2.components.power?.currentPower).toEqual(2);
-		expect(system3.components.power?.currentPower).toEqual(3);
-		expect(system4.components.power?.currentPower).toEqual(3);
+		expect(system1.components.power?.currentPower).toEqual(4);
+		expect(system2.components.power?.currentPower).toEqual(4);
+		expect(system3.components.power?.currentPower).toEqual(4);
+		expect(system4.components.power?.currentPower).toEqual(0);
+		expect(system3.components.power?.powerActivated).toEqual(true);
+		expect(system4.components.power?.powerActivated).toEqual(false);
 	});
 	it("should properly charge and discharge batteries", () => {
 		const reactor = new Entity();
 		reactor.addComponent("isShipSystem", { type: "reactor" });
 		reactor.addComponent("isReactor", {
-			currentOutput: 3,
+			currentOutput: 8,
 		});
 		ship.components.shipSystems?.shipSystems.set(reactor.id, {});
 		ecs.addEntity(reactor);
-
-		const system = new Entity();
-		system.addComponent("isShipSystem", { type: "generic" });
-		system.addComponent("power", { powerDraw: 20, currentPower: 0 });
-		ship.components.shipSystems?.shipSystems.set(system.id, {});
-		ecs.addEntity(system);
 
 		const battery = new Entity();
 		battery.addComponent("isShipSystem", { type: "battery" });
 		battery.addComponent("isBattery", {
 			storage: 0,
-			powerSources: [reactor.id],
 		});
 		ship.components.shipSystems?.shipSystems.set(battery.id, {});
 		ecs.addEntity(battery);
+
+		const system = new Entity();
+		system.addComponent("isShipSystem", { type: "generic" });
+		system.addComponent("power", { powerDraw: 2, currentPower: 0 });
+		ship.components.shipSystems?.shipSystems.set(system.id, {});
+		ecs.addEntity(system);
 
 		expect(battery.components.isBattery?.storage).toEqual(0);
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(battery.components.isBattery?.storage).toMatchInlineSnapshot("0.0002666666666666669");
-		system.updateComponent("power", {
-			powerSources: [battery.id, battery.id],
-		});
+		expect(battery.components.isBattery?.storage).toMatchInlineSnapshot(`0.0010666666666666676`);
 		for (let i = 0; i < 30; i++) {
 			ecs.update(16);
 		}
-		expect(battery.components.isBattery?.storage).toMatchInlineSnapshot("0.0001333333333333334");
+		expect(battery.components.isBattery?.storage).toMatchInlineSnapshot(`0.0016000000000000016`);
 
-		system.updateComponent("power", {
-			powerSources: [],
-		});
 		battery.updateComponent("isBattery", {
 			storage: 0,
-			powerSources: Array.from({
-				length: battery.components.isBattery!.chargeRate,
-			}).map(() => reactor.id),
 		});
 		ecs.update(16);
 		const storage = battery.components.isBattery?.storage;
@@ -225,9 +205,6 @@ describe("PowerDistributionSystem", () => {
 
 		battery.updateComponent("isBattery", {
 			storage: 0,
-			powerSources: Array.from({
-				length: battery.components.isBattery!.chargeRate,
-			}).map(() => reactor.id),
 		});
 		ecs.update(16);
 		expect(storage).toEqual(battery.components.isBattery?.storage);
@@ -240,32 +217,28 @@ describe("PowerDistributionSystem", () => {
 		for (let i = 0; i < 60 * 60 * 32; i++) {
 			ecs.update(16);
 		}
-		expect(battery.components.isBattery?.storage).toEqual(battery.components.isBattery?.capacity);
+		expect(battery.components.isBattery?.storage).toBeCloseTo(
+			battery.components.isBattery!.capacity,
+		);
 
-		// It should take about 21 minutes to fully discharge a battery at this rate.
+		// It should take about 10 1/2 minutes to fully discharge a battery at this rate.
 		expect(battery.components.isBattery?.storage).toEqual(2);
-		battery.updateComponent("isBattery", {
-			powerSources: [],
-		});
-		system.updateComponent("power", {
-			powerSources: Array.from({
-				length: battery.components.isBattery!.outputRate,
-			}).map(() => battery.id),
-		});
+		system.updateComponent("power", { batterySource: battery.id, powerDraw: 6 });
+		reactor.updateComponent("isReactor", { currentOutput: 0 });
 		ecs.update(16);
 		expect(battery.components.isBattery?.storage).toEqual(1.9999733333333334);
 		expect(battery.components.isBattery?.outputAmount).toEqual(6);
 		expect(system.components.power?.currentPower).toEqual(6);
-		for (let i = 0; i < 60 * 60 * 21; i++) {
+		for (let i = 0; i < 60 * 60 * 10.417; i++) {
 			ecs.update(16);
 		}
+		expect(battery.components.isBattery?.storage).toEqual(0);
 		expect(battery.components.isBattery?.outputAmount).toEqual(0);
 		expect(system.components.power?.currentPower).toEqual(0);
-		expect(battery.components.isBattery?.storage).toEqual(0);
 	});
 
 	it("should perform decently well", () => {
-		const reactors = Array.from({ length: 5 }).map(() => {
+		Array.from({ length: 5 }).map(() => {
 			const reactor = new Entity();
 			reactor.addComponent("isShipSystem", { type: "reactor" });
 			reactor.addComponent("isReactor", {
@@ -282,20 +255,12 @@ describe("PowerDistributionSystem", () => {
 			battery.addComponent("isBattery", {
 				storage: 0,
 			});
-			Array.from({
-				length: battery.components.isBattery?.outputRate || 0,
-			}).forEach(() => {
-				const reactor = randomFromList(reactors);
-				battery.updateComponent("isBattery", {
-					powerSources: [...(battery.components.isBattery?.powerSources || []), reactor.id],
-				});
-			});
+
 			ship.components.shipSystems?.shipSystems.set(battery.id, {});
 			ecs.addEntity(battery);
 			return battery;
 		});
 
-		const reactorsAndBatteries = [...reactors, ...batteries];
 		Array.from({ length: 50 }).map(() => {
 			const system = new Entity();
 			system.addComponent("isShipSystem", { type: "generic" });
@@ -306,9 +271,8 @@ describe("PowerDistributionSystem", () => {
 			ship.components.shipSystems?.shipSystems.set(system.id, {});
 			ecs.addEntity(system);
 			for (let i = 0; i < (system.components.power?.powerDraw || 0); i++) {
-				const powerSource = randomFromList(reactorsAndBatteries);
-				system.updateComponent("isBattery", {
-					powerSources: [...(system.components.power?.powerSources || []), powerSource.id],
+				system.updateComponent("power", {
+					batterySource: Math.random() > 0.5 ? randomFromList(batteries).id : null,
 				});
 			}
 

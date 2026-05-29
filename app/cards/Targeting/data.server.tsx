@@ -330,6 +330,9 @@ export const targeting = t.router({
 				return systems.flatMap((system) => {
 					if (!system.components.isPhasers) return [];
 
+					const connectedBattery = ctx.ecs.getEntityById(
+						system.components.power?.batterySource || -1,
+					);
 					return {
 						id: system.id,
 						name: system.components.identity?.name || "Phasers",
@@ -337,7 +340,7 @@ export const targeting = t.router({
 						arc: system.components.isPhasers.arc,
 						heading: system.components.isPhasers.headingDegree,
 						pitch: system.components.isPhasers.pitchDegree,
-						maxOutput: system.components.power?.powerSources.length || 0,
+						maxOutput: connectedBattery?.components.isBattery?.outputRate || 0,
 						maxRange: system.components.isPhasers.maxRange,
 						maxArc: system.components.isPhasers.maxArc,
 						nominalHeat: system.components.heat?.nominalHeat || 0,
@@ -447,14 +450,8 @@ export const targeting = t.router({
 				phaser.updateComponent("isPhasers", {
 					firePercent: input.firePercent,
 				});
-				const currentPower =
-					phaser.components.power?.powerSources.reduce((acc, id) => {
-						const powerSource = ctx.flight?.ecs.getEntityById(id);
-						if (powerSource?.components.isPhaseCapacitor) {
-							return acc + (powerSource.components.isBattery?.storage || 0);
-						}
-						return acc;
-					}, 0) || 0;
+				const batterySource = ctx.ecs.getEntityById(phaser.components.power?.batterySource || -1);
+				const currentPower = batterySource?.components.isBattery?.storage || 0;
 
 				const ship = ctx.flight?.ecs.getEntityById(phaser.components.isShipSystem?.shipId || -1);
 

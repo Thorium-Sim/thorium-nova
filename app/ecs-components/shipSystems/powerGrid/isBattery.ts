@@ -33,9 +33,5 @@ export const isBattery = z
 		 * or equal to the length of outputAssignment.
 		 */
 		outputAmount: z.number().default(0),
-		/**
-		 * Which reactor each unit of power is coming from. One unit = 1MW
-		 */
-		powerSources: z.number().array().default([]),
 	})
 	.default({});

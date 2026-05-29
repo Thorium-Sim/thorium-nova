@@ -33,6 +33,10 @@ export const isReactor = z
 		 */
 		balancedBonusMultiplier: z.number().default(0.9),
 		/**
+		 * Whether all reactors power output is balanced, calculated by the power ECS.
+		 */
+		balanced: z.boolean().default(true),
+		/**
 		 * How much fuel is left to burn after the previous tick. Fuel is only removed
 		 * from inventory in whole units. Any fuel not turned into power remains in the
 		 * reactor.

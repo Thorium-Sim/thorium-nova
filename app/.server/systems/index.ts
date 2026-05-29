@@ -12,6 +12,7 @@ import { NPCDecisionSystem } from "@thorium/.server/systems/NPCDecisionSystem";
 import { NPCFireWeaponsSystem } from "@thorium/.server/systems/NPCFireWeaponsSystem";
 import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem";
 import { PowerEfficiencyOverloadSystem } from "@thorium/.server/systems/PowerEfficiencyOverloadSystem";
+import { ReactorPowerUpSystem } from "@thorium/.server/systems/ReactorPowerUpSystem";
 import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
 import { ShortRangeCommPowerSystem } from "@thorium/.server/systems/ShortRangeCommPowerSystem";
 import { SpontaneousFailureSystem } from "@thorium/.server/systems/SpontaneousFailureSystem";
@@ -55,6 +56,7 @@ const systems = [
 	PassengerMovementSystem,
 	NPCFireWeaponsSystem,
 	TimerSystem,
+	ReactorPowerUpSystem,
 	ReactorFuelSystem,
 	ReactorHeatSystem,
 	PowerDrawSystem,

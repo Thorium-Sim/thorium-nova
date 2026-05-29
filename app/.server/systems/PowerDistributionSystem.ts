@@ -1,4 +1,28 @@
+import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
 import { type Entity, System } from "@thorium/utils/ecs";
+
+// Order that systems will be auto-deactivated, highest number is lowest priority
+const systemPowerPriority: Record<ShipSystemTypes, number> = {
+	// Life support will go here someday
+	mainComputer: 2,
+	longRangeComm: 3,
+	sensors: 4,
+	shortRangeComm: 5,
+	shields: 6,
+	inertialDampeners: 7,
+	thrusters: 8,
+	impulseEngines: 9,
+	navigation: 10,
+	coolantTank: 11,
+	exocomps: 12,
+	targeting: 13,
+	warpEngines: 14,
+	phasers: 15,
+	torpedoLauncher: 16,
+	generic: 17,
+	battery: 1000,
+	reactor: 1000,
+};
 
 export class PowerDistributionSystem extends System {
 	static flightMode = ["nova"];
@@ -7,95 +31,160 @@ export class PowerDistributionSystem extends System {
 	}
 	update(entity: Entity, elapsed: number) {
 		const elapsedTimeHours = elapsed / 1000 / 60 / 60;
+		const systemIds = entity.components.shipSystems?.shipSystems.keys() || [];
+
+		// Save a bunch of time by skipping this rigamarole for NPC ships
+		if (!entity.components.isPlayerShip) {
+			for (const sysId of systemIds) {
+				const sys = this.ecs.getEntityById(sysId);
+				if (sys?.components.power) {
+					sys.updateComponent("power", { currentPower: sys.components.power.powerDraw });
+				}
+			}
+			return;
+		}
 
 		const poweredSystems = new Map<number, Entity>();
 		const reactors = new Map<number, Entity>();
 		const batteries = new Map<number, Entity>();
+		const batterySystems = new Map<number, Entity[]>();
 
-		const systemIds = entity.components.shipSystems?.shipSystems.keys() || [];
-
+		let individualReactorOutput = 0; // Calculate the power output of each reactor
+		let powerBalanced = true;
+		let grossReactorOutput = 0;
 		for (const sysId of systemIds) {
 			const sys = this.ecs.getEntityById(sysId);
-			if (sys?.components.isReactor) reactors.set(sys.id, sys);
-			else if (sys?.components.isBattery) batteries.set(sys.id, sys);
-			else if (sys?.components.isShipSystem && sys.components.power)
-				poweredSystems.set(sys.id, sys);
+			if (sys?.components.isReactor) {
+				reactors.set(sys.id, sys);
+				if (individualReactorOutput === 0) {
+					individualReactorOutput = sys.components.isReactor.currentOutput;
+				} else if (individualReactorOutput !== sys.components.isReactor.currentOutput) {
+					powerBalanced = false;
+				}
+				grossReactorOutput += sys.components.isReactor.currentOutput;
+			} else if (sys?.components.isBattery) batteries.set(sys.id, sys);
+			else if (sys?.components.isShipSystem && sys.components.power) {
+				if (sys.components.power.powerActivated) {
+					poweredSystems.set(sys.id, sys);
+				}
+				if (sys.components.power.batterySource) {
+					if (!batterySystems.has(sys.components.power.batterySource)) {
+						batterySystems.set(sys.components.power.batterySource, []);
+					}
+					batterySystems.get(sys.components.power.batterySource)?.push(sys);
+				}
+				// Reset the power to this system
+				sys.updateComponent("power", { currentPower: 0 });
+			}
 		}
 
-		// Reset all of the battery metrics
-		batteries.forEach((battery) => {
+		for (const [, reactor] of reactors) {
+			reactor.updateComponent("isReactor", { balanced: powerBalanced });
+		}
+
+		// Reset all of the battery metrics and distribute battery power evenly to connected systems
+		for (const [_, battery] of batteries) {
+			if (!battery.components.isBattery) continue;
 			battery.updateComponent("isBattery", {
 				chargeAmount: 0,
 				outputAmount: 0,
 			});
-		});
 
-		// Key is reactor/battery id, value is power supplied
-		const powerSuppliedSources = new Map<number, number>();
-
-		// Apply power to the systems from batteries and reactors
-		for (const [_, system] of poweredSystems) {
-			const power = system.components.power;
-			if (!power) continue;
-			const { powerDraw, powerSources } = power;
-			let suppliedPower = 0;
-			if (
-				entity.components.isPlayerShip ||
-				(!entity.components.isPlayerShip && powerSources.length > 0)
-			) {
-				for (let i = 0; i < powerDraw; i++) {
-					let powerSupply = 1;
-					const source = powerSources[i];
-					if (typeof source === "number") {
-						const sourceEntity = this.ecs.getEntityById(source);
-						// Phasers can only get power from phase capacitors
-						if (system.components.isPhasers && !sourceEntity?.components.isPhaseCapacitor) continue;
-						if (system.components.isPhasers) {
-							powerSupply = system.components.isPhasers.yieldMultiplier;
-						}
-
-						// If the battery is empty, don't supply power
-						if (sourceEntity?.components.isBattery?.storage === 0) continue;
-
-						suppliedPower += powerSupply;
-						powerSuppliedSources.set(source, (powerSuppliedSources.get(source) || 0) + powerSupply);
-					}
-				}
-			} else {
-				// We allow NPC ships to cheat for simplicity
-				suppliedPower = powerDraw;
-			}
-
-			system.updateComponent("power", { currentPower: suppliedPower });
-		}
-		// Apply power to batteries from reactors
-		for (const [_, battery] of batteries) {
-			const isBattery = battery.components.isBattery;
-			if (!isBattery) continue;
-			let suppliedPower = 0;
-			for (const source of isBattery.powerSources) {
-				suppliedPower++;
-				powerSuppliedSources.set(source, (powerSuppliedSources.get(source) || 0) + 1);
-			}
-			const outputAmount = powerSuppliedSources.get(battery.id) || 0;
-			const storage = isBattery.storage;
-			const storageAdjustment = suppliedPower - outputAmount;
-			const newStorage = Math.min(
-				Math.max(storage + storageAdjustment * elapsedTimeHours, 0),
-				isBattery.capacity,
+			const systems = batterySystems.get(battery.id) || [];
+			let totalOutput = systems.length === 0 ? 0 : battery.components.isBattery.outputRate;
+			let outputAmount = 0;
+			// Fill systems from least power draw to most power draw, updating the per system output as necessary
+			const sortedSystems = systems.sort(
+				(a, b) => (a.components.power?.powerDraw || 0) - (b.components.power?.powerDraw || 0),
 			);
+			let remainingSystems = sortedSystems.length || 1;
+			for (const system of sortedSystems) {
+				const perSystemOutput = totalOutput / remainingSystems;
+				remainingSystems -= 1;
+				const systemPowerInput = Math.min(
+					perSystemOutput,
+					system.components.power!.powerDraw,
+					battery.components.isBattery.outputRate,
+					battery.components.isBattery.storage / elapsedTimeHours,
+				);
+				totalOutput -= systemPowerInput;
+				outputAmount += systemPowerInput;
+				system.updateComponent("power", { currentPower: systemPowerInput });
+			}
 			battery.updateComponent("isBattery", {
-				chargeAmount: suppliedPower,
 				outputAmount,
-				storage: newStorage,
 			});
 		}
 
-		// Update the reactor metrics
-		for (const [_, reactor] of reactors) {
-			const powerSupplied = powerSuppliedSources.get(reactor.id) || 0;
-			reactor.updateComponent("isReactor", {
-				currentOutput: powerSupplied,
+		// Distribute power to all systems from the reactor
+		// If the current power need is greater than the current power supply,
+		// start chopping systems in priority order
+		let hasEnoughPower = false;
+		let insufficientPower = false;
+		const poweredSystemsByPriority = Array.from(poweredSystems.values()).sort(
+			(a, b) =>
+				systemPowerPriority[a.components.isShipSystem!.type] -
+				systemPowerPriority[b.components.isShipSystem!.type],
+		);
+		while (!hasEnoughPower) {
+			const totalRequiredPower = poweredSystemsByPriority.reduce(
+				(power, sys) =>
+					power + sys.components.power!.powerDraw - sys.components.power!.currentPower,
+				0,
+			);
+			if (totalRequiredPower === 0) break;
+			if (totalRequiredPower <= grossReactorOutput) {
+				hasEnoughPower = true;
+				break;
+			}
+			insufficientPower = true;
+			const ejectedSystem = poweredSystemsByPriority.pop();
+			if (!ejectedSystem) break;
+			ejectedSystem.updateComponent("power", { powerActivated: false });
+			poweredSystems.delete(ejectedSystem.id);
+		}
+
+		let netReactorOutput = 0;
+
+		// Now we can confidently deliver power to all systems in the poweredSystems list
+		for (const [_, sys] of poweredSystems) {
+			sys.updateComponent("power", {
+				currentPower: sys.components.power!.powerDraw,
+			});
+			netReactorOutput += sys.components.power!.powerDraw;
+		}
+
+		// If we ran out of power and had to turn off systems,
+		//  we're going to say all of the extra power is tied up
+		// and not use it to charge batteries.
+		if (insufficientPower) {
+			netReactorOutput = grossReactorOutput;
+		}
+
+		// Apply power to batteries from reactors and update the storage
+		let surplusPower = grossReactorOutput - netReactorOutput;
+		// Fill systems from least charge rate to most charge rate, updating the per battery input as necessary
+		const sortedBatteries = Array.from(batteries.values()).sort(
+			(a, b) =>
+				(a.components.isBattery?.chargeRate || 0) - (b.components.isBattery?.chargeRate || 0),
+		);
+		let remainingBatteries = sortedBatteries.length || 1;
+		for (const battery of sortedBatteries) {
+			let perBatteryInput = surplusPower / remainingBatteries;
+			remainingBatteries -= 1;
+			const isBattery = battery.components.isBattery;
+			if (!isBattery) continue;
+			const { capacity, storage, chargeRate, outputAmount } = isBattery;
+			if (storage >= capacity) {
+				perBatteryInput = 0;
+			}
+			const storageInput = Math.min(chargeRate, perBatteryInput);
+			battery.updateComponent("isBattery", {
+				storage: Math.min(
+					capacity,
+					Math.max(0, storage + (storageInput - outputAmount) * elapsedTimeHours),
+				),
+				chargeAmount: storageInput,
 			});
 		}
 	}

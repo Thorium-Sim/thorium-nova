@@ -112,25 +112,12 @@ export function getCurrentTarget(ship: Entity) {
 	}
 }
 
-/** Returns the average charge of all the phase capacitors connected this phaser system */
+/** Returns the charge of the battery connected this phaser system */
 export function getPhaserCharge(e: Entity) {
-	const phaseCapacitors = e.components.power?.powerSources.reduce((prev, next) => {
-		if (prev.has(next)) return prev;
-		const entity = e.ecs?.getEntityById(next);
-		if (!entity?.components.isPhaseCapacitor || !entity.components.isBattery) return prev;
-		prev.set(next, {
-			storage: entity.components.isBattery.storage,
-			capacity: entity.components.isBattery.capacity,
-		});
-		return prev;
-	}, new Map<number, { storage: number; capacity: number }>());
-
-	let chargePercent = 0;
-	if (phaseCapacitors) {
-		for (const capacitor of phaseCapacitors.values()) {
-			chargePercent += capacitor.storage / capacitor.capacity / phaseCapacitors.size;
-		}
-	}
+	const phaseCapacitor = e.ecs.getEntityById(e.components.power?.batterySource || -1);
+	let chargePercent = phaseCapacitor?.components.isBattery
+		? phaseCapacitor.components.isBattery.storage / phaseCapacitor.components.isBattery.capacity
+		: 0;
 
 	return chargePercent;
 }
