@@ -1,5 +1,5 @@
+import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
-import { getPowerSupplierPowerNeeded } from "@thorium/.server/systems/ReactorFuelSystem";
 import { getRoomBySystem } from "@thorium/cards/CargoControl/data.server";
 import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
@@ -45,7 +45,7 @@ export const systemsMonitor = t.router({
 					return {
 						id: r.id,
 						name: r.components.identity!.name,
-						desiredOutput: getPowerSupplierPowerNeeded(r),
+						desiredOutput: r.components.isReactor!.desiredOutput,
 						maxOutput: r.components.isReactor!.maxOutput,
 						optimalOutputPercent: r.components.isReactor!.optimalOutputPercent,
 						nominalHeat: r.components.heat!.nominalHeat,
@@ -56,6 +56,22 @@ export const systemsMonitor = t.router({
 						efficiency: r.components.damage?.efficiency,
 						ambiance: r.components.soundEffects?.soundBank.ambiance,
 					};
+				});
+			}),
+		setDesiredOutput: t.procedure
+			.input(z.object({ reactorId: z.number(), output: z.number() }))
+			.send(({ ctx, input }) => {
+				const reactor = ctx.ecs.getEntityById(input.reactorId);
+				if (!reactor?.components.isReactor) throw new Error("Reactor not found.");
+				reactor.updateComponent("isReactor", {
+					desiredOutput: Math.max(
+						0,
+						Math.min(reactor.components.isReactor.maxOutput, input.output),
+					),
+				});
+
+				pubsub.publish.systemsMonitor.reactors.get({
+					shipId: reactor.components.isShipSystem?.shipId || -1,
 				});
 			}),
 		ambiance: t.procedure
@@ -104,7 +120,6 @@ export const systemsMonitor = t.router({
 				return batteries.map((b) => ({
 					id: b.id,
 					name: b.components.identity!.name,
-					desiredOutput: getPowerSupplierPowerNeeded(b),
 					capacity: b.components.isBattery!.capacity,
 					storage: b.components.isBattery!.storage,
 					chargeAmount: b.components.isBattery!.chargeAmount,
@@ -134,7 +149,7 @@ export const systemsMonitor = t.router({
 					id: number;
 					name: string;
 					type: ShipSystemTypes;
-					power?: { powerLevels: number[]; batterySource: number | null };
+					power?: { powerLevels: number[]; batterySource: number | null; activated: boolean };
 					heat?: {
 						heat: number;
 						maxHeat: number;
@@ -161,6 +176,7 @@ export const systemsMonitor = t.router({
 							? {
 									powerLevels: system.components.power.powerLevels,
 									batterySource: system.components.power.batterySource,
+									activated: system.components.power.powerActivated,
 								}
 							: undefined,
 
@@ -177,6 +193,26 @@ export const systemsMonitor = t.router({
 				}
 
 				return systems;
+			}),
+		setBatterySource: t.procedure
+			.input(z.object({ systemId: z.number(), batterySource: z.number().nullable() }))
+			.send(({ ctx, input }) => {
+				const system = ctx.ecs.getEntityById(input.systemId);
+				if (!system) throw new Error("System not found.");
+				system.updateComponent("power", { batterySource: input.batterySource });
+				pubsub.publish.systemsMonitor.systems.get({
+					shipId: system.components.isShipSystem?.shipId || -1,
+				});
+			}),
+		setActivated: t.procedure
+			.input(z.object({ systemId: z.number(), activated: z.boolean() }))
+			.send(({ ctx, input }) => {
+				const system = ctx.ecs.getEntityById(input.systemId);
+				if (!system) throw new Error("System not found.");
+				system.updateComponent("power", { powerActivated: input.activated });
+				pubsub.publish.systemsMonitor.systems.get({
+					shipId: system.components.isShipSystem?.shipId || -1,
+				});
 			}),
 	}),
 	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {

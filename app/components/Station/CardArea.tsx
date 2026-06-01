@@ -36,13 +36,13 @@ export const CardArea: React.FC<{
 		<div className="fade-in">
 			<Transition
 				isOpen={!client.loginName && station.name !== "Viewscreen"}
-				className="card-transition absolute h-full w-full"
+				className="card-transition absolute top-0 left-0 h-full w-full"
 			>
 				<Login />
 			</Transition>
 			<Transition
 				isOpen={Boolean(client.offlineState)}
-				className="card-transition absolute h-full w-full"
+				className="card-transition absolute top-0 left-0 h-full w-full"
 			>
 				<Offline />
 			</Transition>
@@ -85,7 +85,7 @@ const CardRenderer = ({
 				beforeEnter={useCallback(() => {
 					setCardLoaded(true);
 				}, [])}
-				className="card-transition @container absolute h-full w-full"
+				className="card-transition @container absolute top-0 left-0 h-full w-full"
 			>
 				<Suspense fallback={<LoadingSpinner />}>
 					<ErrorBoundary fallback={<CardError />}>

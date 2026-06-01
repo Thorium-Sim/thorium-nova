@@ -18,7 +18,7 @@ export class PickShipEvent extends Event {
 export class PickShipDoneEvent extends Event {
 	static name = "pick-ship-done-event";
 	constructor(public object: number | null) {
-		super(PickShipEvent.name);
+		super(PickShipDoneEvent.name);
 	}
 }
 

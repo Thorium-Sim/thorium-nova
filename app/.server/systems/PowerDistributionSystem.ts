@@ -1,28 +1,6 @@
-import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
+import { pubsub } from "@thorium/.server/init/pubsub";
+import { systemPowerPriority } from "@thorium/cards/DamageReports/systemCategories";
 import { type Entity, System } from "@thorium/utils/ecs";
-
-// Order that systems will be auto-deactivated, highest number is lowest priority
-const systemPowerPriority: Record<ShipSystemTypes, number> = {
-	// Life support will go here someday
-	mainComputer: 2,
-	longRangeComm: 3,
-	sensors: 4,
-	shortRangeComm: 5,
-	shields: 6,
-	inertialDampeners: 7,
-	thrusters: 8,
-	impulseEngines: 9,
-	navigation: 10,
-	coolantTank: 11,
-	exocomps: 12,
-	targeting: 13,
-	warpEngines: 14,
-	phasers: 15,
-	torpedoLauncher: 16,
-	generic: 17,
-	battery: 1000,
-	reactor: 1000,
-};
 
 export class PowerDistributionSystem extends System {
 	static flightMode = ["nova"];
@@ -48,6 +26,7 @@ export class PowerDistributionSystem extends System {
 		const reactors = new Map<number, Entity>();
 		const batteries = new Map<number, Entity>();
 		const batterySystems = new Map<number, Entity[]>();
+		let wasSystemDeactivated = false;
 
 		let individualReactorOutput = 0; // Calculate the power output of each reactor
 		let powerBalanced = true;
@@ -141,6 +120,7 @@ export class PowerDistributionSystem extends System {
 			const ejectedSystem = poweredSystemsByPriority.pop();
 			if (!ejectedSystem) break;
 			ejectedSystem.updateComponent("power", { powerActivated: false });
+			wasSystemDeactivated = true;
 			poweredSystems.delete(ejectedSystem.id);
 		}
 
@@ -186,6 +166,10 @@ export class PowerDistributionSystem extends System {
 				),
 				chargeAmount: storageInput,
 			});
+		}
+
+		if (wasSystemDeactivated) {
+			pubsub.publish.systemsMonitor.systems.get({ shipId: entity.id });
 		}
 	}
 }

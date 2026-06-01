@@ -75,6 +75,8 @@ export function dataStreamEntity(e: Entity) {
 			y: e.components.power?.currentPower,
 		};
 	}
+
+	// This needs to go below all the other ship systems
 	if (e.components.power) {
 		return {
 			id: e.id.toString(),
@@ -82,7 +84,6 @@ export function dataStreamEntity(e: Entity) {
 			z: e.components.heat?.heat || 0,
 		};
 	}
-
 	if (e.components.isCoolantTank) {
 		return {
 			id: e.id.toString(),
@@ -101,6 +102,7 @@ export function dataStreamEntity(e: Entity) {
 			s: shouldSnap,
 		};
 	}
+
 	if (e.components.damageControlAssignment) {
 		return {
 			id: e.id.toString(),
