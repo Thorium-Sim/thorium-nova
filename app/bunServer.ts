@@ -19,6 +19,7 @@ import type { ProcedureCallOptions } from "@thorium/utils/live-query/.server/pro
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { websocket, upgradeWebSocket } from "hono/bun";
+import { cors } from "hono/cors";
 import { getMimeType } from "hono/utils/mime";
 
 import { isObject } from "./typeguards/isObject";
@@ -41,6 +42,13 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 			}
 
 			const app = new Hono();
+			app.use(
+				cors({
+					origin: "*",
+					allowMethods: ["POST", "GET", "OPTIONS"],
+					allowHeaders: ["*"],
+				}),
+			);
 			const database = await buildDatabase(loadPlugins);
 			const middleware = await liveQueryPlugin({
 				createContext,

@@ -293,7 +293,7 @@ function PhaserControl({
 					});
 				}}
 			/>
-			<div className="btn-container col-span-2 flex gap-1" ref={buttonContainerRef}>
+			<div className="btn-container phaser-output col-span-2 flex gap-1" ref={buttonContainerRef}>
 				<Button className="btn-xs btn-warning mt-2" onPointerDown={getFirePhasers(0.25)}>
 					25%
 				</Button>

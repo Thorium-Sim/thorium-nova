@@ -122,6 +122,8 @@ export const targeting = t.router({
 					torpedoId: z.string().nullable(),
 				}),
 			)
+			.output(z.object({ shipId: z.number() }))
+			.meta({ event: true })
 			.send(({ input, ctx }) => {
 				const launcher = ctx.ecs.getEntityById(input.launcherId);
 				if (!launcher?.components.isTorpedoLauncher)
@@ -156,6 +158,7 @@ export const targeting = t.router({
 						playShipSound(launcher, ship, "unload");
 					}
 				}
+				return { shipId: ship?.id || -1 };
 			}),
 		fire: t.procedure
 			.input(
@@ -163,6 +166,8 @@ export const targeting = t.router({
 					launcherId: z.number(),
 				}),
 			)
+			.output(z.object({ shipId: z.number(), targetId: z.number() }))
+			.meta({ event: true })
 			.send(({ input, ctx }) => {
 				const launcher = ctx.ecs.getEntityById(input.launcherId);
 
@@ -214,6 +219,7 @@ export const targeting = t.router({
 
 					playShipSound(launcher, ship, "fire");
 				}
+				return { shipId: ship?.id || -1, targetId: torpedo.components.isTorpedo?.targetId || -1 };
 			}),
 	}),
 	hull: t.procedure
@@ -267,15 +273,18 @@ export const targeting = t.router({
 				z.union([
 					z.object({
 						shieldId: z.number(),
-						state: z.union([z.literal("up"), z.literal("down")]),
+						state: z.enum(["up", "down"]),
 					}),
 					z.object({
 						shipId: z.number(),
-						state: z.union([z.literal("up"), z.literal("down")]),
+						state: z.enum(["up", "down"]),
 					}),
 				]),
 			)
+			.output(z.object({ shipId: z.number(), state: z.enum(["up", "down"]) }))
+			.meta({ event: true })
 			.send(({ input, ctx }) => {
+				let shipId: number;
 				if ("shieldId" in input) {
 					const shield = getShipSystem(ctx.ecs, {
 						systemId: input.shieldId,
@@ -284,13 +293,13 @@ export const targeting = t.router({
 					shield.updateComponent("isShields", {
 						state: input.state,
 					});
+					shipId = shield.components.isShipSystem?.shipId || -1;
 					pubsub.publish.targeting.shields.get({
-						shipId: shield.components.isShipSystem?.shipId || -1,
+						shipId,
 					});
 				} else {
-					const shipId = input.shipId;
-					if (!ctx.flight) return;
-					const shields = getShipSystems(ctx.flight.ecs, {
+					shipId = input.shipId;
+					const shields = getShipSystems(ctx.ecs, {
 						systemType: "Shields",
 						shipId,
 					}).filter((system) => system.components.isShipSystem?.shipId === shipId);
@@ -303,6 +312,7 @@ export const targeting = t.router({
 						shipId,
 					});
 				}
+				return { shipId, state: input.state };
 			}),
 	}),
 	phasers: t.router({
@@ -415,6 +425,8 @@ export const targeting = t.router({
 					arc: z.number(),
 				}),
 			)
+			.output(z.object({ phaserId: z.number(), arc: z.number(), shipId: z.number() }))
+			.meta({ event: true })
 			.send(({ input, ctx }) => {
 				const phaser = getShipSystem(ctx.ecs, {
 					systemId: input.phaserId,
@@ -429,6 +441,7 @@ export const targeting = t.router({
 				pubsub.publish.targeting.phasers.list({
 					shipId: phaser.components.isShipSystem?.shipId || -1,
 				});
+				return { ...input, shipId: phaser.components.isShipSystem?.shipId || -1 };
 			}),
 		fire: t.procedure
 			.input(
@@ -437,6 +450,8 @@ export const targeting = t.router({
 					firePercent: z.number(),
 				}),
 			)
+			.output(z.object({ shipId: z.number(), phaserId: z.number(), firePercent: z.number() }))
+			.meta({ event: true })
 			.send(({ input, ctx }) => {
 				const phaser = getShipSystem(ctx.ecs, {
 					systemId: input.phaserId,
@@ -469,6 +484,7 @@ export const targeting = t.router({
 				pubsub.publish.targeting.phasers.firing({
 					systemId: ship?.components.position?.parentId || null,
 				});
+				return { shipId: ship?.id || -1, ...input };
 			}),
 	}),
 	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ ctx, input }) => {

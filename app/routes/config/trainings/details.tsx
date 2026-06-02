@@ -9,7 +9,7 @@ import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
 import { useState } from "react";
 import { Button } from "react-aria-components";
-import { useNavigate, useParams } from "react-router";
+import { href, useNavigate, useParams } from "react-router";
 
 export default function TrainingDetails() {
 	const { pluginId, timelineId } = useParams() as {
@@ -50,7 +50,12 @@ export default function TrainingDetails() {
 									timelineType: "trainings",
 									name: e.target.value,
 								});
-								void navigate(`/config/${pluginId}/timelines/${result.timelineId}`);
+								void navigate(
+									href("/config/:pluginId/trainings/:timelineId/details", {
+										pluginId,
+										timelineId: result.timelineId,
+									}),
+								);
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({

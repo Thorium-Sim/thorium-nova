@@ -8,7 +8,7 @@ import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
 import { Button } from "react-aria-components";
-import { Outlet, useParams } from "react-router";
+import { href, Outlet, useParams } from "react-router";
 
 export default function TrainingStep() {
 	const { pluginId, timelineId, stepId } = useParams() as {
@@ -24,7 +24,10 @@ export default function TrainingStep() {
 
 	const step = timeline.steps.find((s) => s.id === stepId);
 
-	if (!step) return <Navigate to={`/config/${pluginId}/timelines/${timelineId}`} />;
+	if (!step)
+		return (
+			<Navigate to={href("/config/:pluginId/trainings/:timelineId", { pluginId, timelineId })} />
+		);
 
 	return (
 		<div className="flex flex-1 flex-col">

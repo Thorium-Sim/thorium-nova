@@ -33,7 +33,7 @@ export function Targeting({ cardLoaded }: CardProps) {
 				{/* Padding is protection from the bottom of the card container */}
 				<div className="flex flex-col justify-between pb-4">
 					<Shields />
-					<div>Hull: {hull}</div>
+					<div className="hull-monitor">Hull: {hull}</div>
 					<Phasers />
 				</div>
 				<div className="targeting-radar col-span-2 aspect-square w-full self-center">

@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { q, clientId } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
@@ -20,12 +20,19 @@ export function Torpedoes() {
 
 	return (
 		<>
-			<ul className="panel panel-alert relative min-h-16 overflow-y-auto">
+			<ul className="panel panel-alert torpedoes-list relative min-h-16 overflow-y-auto">
 				{Object.entries(torpedoList ?? {}).map(([id, { count, yield: torpedoYield, speed }]) => (
 					<li
 						key={id}
 						className={cn("list-group-item", selectedTorpedo === id ? "selected" : "")}
-						onClick={() => setSelectedTorpedo(id)}
+						onClick={() => {
+							setSelectedTorpedo(id);
+							q.thorium.genericEvent.netSend({
+								clientId,
+								eventName: "torpedo-pick",
+								properties: "",
+							});
+						}}
 					>
 						<div className="flex items-center justify-between">
 							<div className="flex flex-1 flex-col">
@@ -39,7 +46,7 @@ export function Torpedoes() {
 					</li>
 				))}
 			</ul>
-			<div className="flex flex-1 flex-col gap-4 overflow-y-auto">
+			<div className="torpedoes-launchers flex flex-1 flex-col gap-4 overflow-y-auto">
 				{torpedoLaunchers?.map((launcher) => (
 					<Launcher
 						launcherId={launcher.id}

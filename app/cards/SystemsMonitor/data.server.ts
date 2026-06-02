@@ -128,6 +128,20 @@ export const systemsMonitor = t.router({
 					outputRate: b.components.isBattery!.outputRate,
 				}));
 			}),
+		setStorage: t.procedure
+			.input(z.object({ batteryId: z.number(), storagePercent: z.number() }))
+			.meta({ action: true })
+			.send(({ ctx, input }) => {
+				const battery = ctx.ecs.getEntityById(input.batteryId);
+				battery?.updateComponent("isBattery", {
+					storage:
+						(battery.components.isBattery?.capacity || 0) *
+						Math.min(1, Math.max(0, input.storagePercent)),
+				});
+				pubsub.publish.systemsMonitor.batteries.get({
+					shipId: battery?.components.isShipSystem?.shipId || -1,
+				});
+			}),
 	}),
 
 	systems: t.router({

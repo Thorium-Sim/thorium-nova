@@ -9,7 +9,7 @@ import TagInput from "@thorium/ui/TagInput";
 import UploadWell from "@thorium/ui/UploadWell";
 import { useState } from "react";
 import { Button } from "react-aria-components";
-import { useNavigate, useParams } from "react-router";
+import { href, useNavigate, useParams } from "react-router";
 
 export default function MissionDetails() {
 	const { pluginId, timelineId } = useParams() as {
@@ -50,7 +50,12 @@ export default function MissionDetails() {
 									timelineType: "missions",
 									name: e.target.value,
 								});
-								navigate(`/config/${pluginId}/timelines/${result.timelineId}`);
+								navigate(
+									href("/config/:pluginId/missions/:timelineId/details", {
+										pluginId,
+										timelineId: result.timelineId,
+									}),
+								);
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({
