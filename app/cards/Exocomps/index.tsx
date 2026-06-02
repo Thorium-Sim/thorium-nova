@@ -578,7 +578,7 @@ function Logs() {
 	return (
 		<>
 			<p className="-mb-2">Logs</p>
-			<div className="panel flex-auto">
+			<div className="panel flex-auto min-h-0">
 				<div className="faded-scroll-y flex flex-col-reverse overflow-y-auto p-4">
 					{selectedExocomp?.logs
 						.sort((a, b) => b.timestamp - a.timestamp)

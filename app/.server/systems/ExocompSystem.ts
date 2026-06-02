@@ -45,7 +45,7 @@ export class ExocompSystem extends System {
 			// Traveling to a room
 			case "goTo": {
 				// Check if we've arrived at the room
-				if (this.checkIfAtRoom(entity, currentInstruction.roomId)) {
+				if (checkIfAtRoom(entity, currentInstruction.roomId)) {
 					this.advanceInstruction(entity);
 					return;
 				}
@@ -61,7 +61,7 @@ export class ExocompSystem extends System {
 				)
 					return;
 				// If the container is en-route anywhere, just let it keep going
-				if (!this.checkIfAtRoom(entity)) return;
+				if (!checkIfAtRoom(entity)) return;
 
 				const { cargo: requestedCargo } = currentInstruction;
 				const { contents } = entity.components.cargoContainer;
@@ -347,17 +347,7 @@ export class ExocompSystem extends System {
 		}
 		pubsub.publish.exocomps.exocomps({ shipId });
 	}
-	checkIfAtRoom(entity: Entity, roomId?: number): boolean {
-		if (
-			!entity.components.exocomp ||
-			!entity.components.passengerMovement ||
-			!entity.components.position
-		)
-			return false;
 
-		if (roomId && entity.components.passengerMovement.destinationNode !== roomId) return false;
-		return entity.components.passengerMovement.nodePath.length === 0;
-	}
 	goToRoom(entity: Entity, roomId: number) {
 		if (
 			!entity.components.exocomp ||
@@ -482,9 +472,11 @@ export class ExocompPowerSystem extends System {
 					});
 				}
 			}
+			const inExocompRoom = exocompRooms.some((room) => checkIfAtRoom(exocomp, room));
 			if (
 				exocomp.components.exocomp.currentCharge === 0 &&
-				(!currentInstruction || currentInstruction.type !== "goTo")
+				(!currentInstruction || currentInstruction.type !== "goTo") &&
+				!inExocompRoom
 			) {
 				// The exocomp is out of power and needs to return home.
 				exocomp.updateComponent("passengerMovement", { movementVelocityMultiplier: 0.7 });
@@ -520,4 +512,16 @@ export class ExocompPowerSystem extends System {
 			}
 		}
 	}
+}
+
+function checkIfAtRoom(entity: Entity, roomId?: number): boolean {
+	if (
+		!entity.components.exocomp ||
+		!entity.components.passengerMovement ||
+		!entity.components.position
+	)
+		return false;
+
+	if (roomId && entity.components.passengerMovement.destinationNode !== roomId) return false;
+	return entity.components.passengerMovement.nodePath.length === 0;
 }
