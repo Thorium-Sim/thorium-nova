@@ -4,7 +4,9 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useQueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { clientId, q } from "@thorium/context/AppContext";
+import useEventListener from "@thorium/hooks/useEventListener";
 import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
+import { RadarZoomEvent } from "@thorium/routes/station/Effects";
 import { StationContext, useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { LiveQueryContext, useLiveQuery } from "@thorium/utils/live-query/client/liveQueryContext";
@@ -50,6 +52,9 @@ const CameraEffects = () => {
 		camera.zoom = zoom;
 		camera.updateProjectionMatrix();
 	}, [camera, zoom]);
+	useEventListener(RadarZoomEvent.name, (event: RadarZoomEvent) => {
+		store.setState({ zoom: event.zoom });
+	});
 	return null;
 };
 

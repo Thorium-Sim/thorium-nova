@@ -268,27 +268,39 @@ export async function executeBlocks(
 				break;
 			}
 			case "Action": {
-				const step = ecs.getEntityById(stepId || -1);
-				const values = {
-					...(step?.components.isTimelineStep?.timelineId
-						? { timelineId: step?.components.isTimelineStep?.timelineId }
-						: {}),
-					...Object.fromEntries(
-						Object.entries(block.values).map(([key, value]) => {
-							let val = getValueReference(value, localVariables, ecs);
-							// Special handling for certain keys we know are entity id references or numbers
-							if (key === "shipId" || key === "entityId" || key === "requiredPartCount") {
-								val = Number(val);
-							} else if (typeof val === "string") {
-								// Other values get interpolated automatically
-								val = interpolateText(val, localVariables, ecs.rng);
-							}
+				try {
+					const step = ecs.getEntityById(stepId || -1);
+					const values = {
+						...(step?.components.isTimelineStep?.timelineId
+							? { timelineId: step?.components.isTimelineStep?.timelineId }
+							: {}),
+						...Object.fromEntries(
+							Object.entries(block.values).map(([key, value]) => {
+								if (Array.isArray(value)) {
+									return [key, value.map((v) => processValues(v, key))];
+								}
+								return [key, processValues(value, key)];
+							}),
+						),
+					};
 
-							return [key, val];
-						}),
-					),
-				};
-				theResult = await triggerAction(block.action as AllSends, values);
+					theResult = await triggerAction(block.action as AllSends, values);
+
+					function processValues(value: any, key: string) {
+						let val = getValueReference(value, localVariables, ecs);
+						// Special handling for certain keys we know are entity id references or numbers
+						if (typeof val === "boolean" || typeof val === "number") {
+						} else if (value !== "" && !Number.isNaN(Number(val)) && key !== "alertLevel") {
+							val = Number(val);
+						} else if (typeof val === "string") {
+							// Other values get interpolated automatically
+							val = interpolateText(val, localVariables, ecs.rng);
+						}
+						return val;
+					}
+				} catch (error) {
+					console.error("Failed to execute Action block", block.action, error);
+				}
 				break;
 			}
 			case "RandomIntoVariable": {
@@ -480,6 +492,18 @@ function getEntitiesReference(ref: string, variables: Record<string, any>, ecs: 
 			}
 			entityIds.push(entity.id);
 		}
+	}
+
+	if (ref.startsWith("$")) {
+		const varVal = variables[ref.replace("$", "")];
+		if (Array.isArray(varVal)) {
+			return varVal.flatMap((v) => (typeof v === "number" ? v : "id" in v ? v.id : []));
+		}
+		if (typeof varVal === "number") {
+			return [varVal];
+		}
+		if ("id" in varVal) return [varVal.id];
+		return [];
 	}
 
 	// Entity Names

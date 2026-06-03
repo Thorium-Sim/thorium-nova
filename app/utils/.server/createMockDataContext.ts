@@ -89,10 +89,6 @@ class MockFlightDataModel {
 	};
 	initEcs(server: ServerDataModel) {
 		this.ecs = new ECS(server);
-		// systems.forEach((Sys) => {
-		// 	console.log({ Sys });
-		// 	this.ecs.addSystem(new Sys());
-		// });
 		this.initEntities.forEach(({ id, components }) => {
 			const e = new Entity(id, components);
 			this.ecs.addEntity(e);

@@ -66,7 +66,7 @@ export function Shields() {
 	if (!ship) return null;
 	if (shields.length === 0) return null;
 	return (
-		<div>
+		<div className="shields-container">
 			<div className="mb-4 flex w-full gap-8">
 				<ShieldView />
 			</div>

@@ -71,6 +71,15 @@ export function useEscapeHotkey() {
 	}, [navigate]);
 }
 
+export class RadarZoomEvent extends Event {
+	static name = "radarZoomEvent";
+	zoom: number;
+	constructor(payload: string) {
+		super(RadarZoomEvent.name);
+		this.zoom = Number(payload);
+	}
+}
+
 const Effects = () => {
 	const { flash, doFlash } = useFlash();
 	const { doSpark, sparks } = useSpark();
@@ -139,6 +148,14 @@ const Effects = () => {
 
 	q.effects.sub.useNetSubscribe({ clientId }, doEffect);
 
+	const doEvent = useCallback((payload: { name: string; payload: string }) => {
+		switch (payload.name) {
+			case RadarZoomEvent.name:
+				window.dispatchEvent(new RadarZoomEvent(payload.payload));
+		}
+	}, []);
+
+	q.effects.events.useNetSubscribe({ clientId }, doEvent);
 	return (
 		<div className={`actionsContainer ${flash ? "flash" : ""}`}>
 			{sparks.map((s) => (

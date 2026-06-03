@@ -74,8 +74,10 @@ export function Targeting({ cardLoaded }: CardProps) {
 							<h3 className="p-2 text-center text-2xl">No Object Targeted</h3>
 						)}
 					</div>
-					<div>
+					<div className="targeting-slider">
 						<PilotZoomSlider />
+					</div>
+					<div className="targeting-tilt">
 						<CircleGridTiltButton />
 					</div>
 				</div>

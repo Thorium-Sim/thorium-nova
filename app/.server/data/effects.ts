@@ -68,6 +68,25 @@ export const effects = t.router({
 			if (!publish) return null;
 			return { effect: publish.effect };
 		}),
+	events: t.procedure
+		.input(z.object({ clientId: z.string() }))
+		// This request can only be triggered by a publish.
+		.autoPublish([], () => null)
+		.filter(
+			(
+				payload: { clientId: string; name: string; payload: any } | null,
+				{ ctx, input: { clientId } },
+			) => {
+				if (!payload) return true;
+				const client = ctx.getClient(clientId);
+
+				return payload.clientId === clientId || payload.clientId === client?.name;
+			},
+		)
+		.request(({ publish }) => {
+			if (!publish) return null;
+			return { name: publish.name, payload: publish.payload };
+		}),
 	sounds: t.procedure
 		.input(z.object({ clientId: z.string() }))
 		// This request can only be triggered by a publish.
@@ -252,6 +271,12 @@ export const effects = t.router({
 					clientId: input.clientId,
 				});
 			}
+		}),
+	sendClientEvent: t.procedure
+		.input(z.object({ clientId: z.string(), name: z.string(), payload: z.coerce.string() }))
+		.meta({ action: true })
+		.send(({ input }) => {
+			pubsub.publish.effects.events(input);
 		}),
 	notify: t.procedure
 		.meta({ action: true })

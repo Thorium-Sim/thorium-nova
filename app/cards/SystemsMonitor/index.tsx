@@ -352,13 +352,13 @@ function ReactorSummary() {
 	return (
 		<div>
 			<p className="text-right whitespace-nowrap tabular-nums">
-				Total Output: <span ref={outputRef} className="inline-block w-[3ch] text-right" /> MW
+				Total Output: <span ref={outputRef} className="inline-block w-[4ch] text-right" /> MW
 			</p>
 			<p className="text-right whitespace-nowrap tabular-nums">
-				Net Output: <span ref={netOutputRef} className="inline-block w-[3ch] text-right" /> MW
+				Net Output: <span ref={netOutputRef} className="inline-block w-[4ch] text-right" /> MW
 			</p>
 			<p className="text-right whitespace-nowrap tabular-nums">
-				Total Used: <span ref={usedRef} className="inline-block w-[3ch] text-right" /> MW
+				Total Used: <span ref={usedRef} className="inline-block w-[4ch] text-right" /> MW
 			</p>
 		</div>
 	);
