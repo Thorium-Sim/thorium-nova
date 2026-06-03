@@ -144,7 +144,7 @@ export function LegacySensorScansCore() {
 				<Button
 					className="btn-xs btn-warning flex-1"
 					onClick={() =>
-						q.legacy.sensorScans.sendProcessedData.netSend({
+						q.sensors.sendProcessedData.netSend({
 							shipId,
 							data: inputRef.current?.value || "",
 							flash: true,
@@ -156,7 +156,7 @@ export function LegacySensorScansCore() {
 				<Button
 					className="btn-xs btn-success flex-1"
 					onClick={() =>
-						q.legacy.sensorScans.sendProcessedData.netSend({
+						q.sensors.sendProcessedData.netSend({
 							shipId,
 							data: inputRef.current?.value || "",
 						})

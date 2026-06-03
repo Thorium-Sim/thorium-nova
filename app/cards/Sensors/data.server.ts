@@ -6,6 +6,7 @@ import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { Entity } from "@thorium/utils/ecs";
 import { type scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
 import { fromDate } from "dot-beat-time";
+import { produce } from "immer";
 import z from "zod";
 
 export const sensors = t.router({
@@ -35,6 +36,9 @@ export const sensors = t.router({
 				passiveRange: sensors.components.isSensors?.passiveRange || 10_000,
 				activeRange: sensors.components.isSensors?.activeRange || 100_000,
 				selectedContact: sensors.components.isSensors?.selectedContact || null,
+				processedData: produce(sensors.components.isSensors?.processedData || [], (draft) => {
+					draft.reverse();
+				}),
 			};
 		}),
 	scanResult: t.procedure
@@ -155,7 +159,79 @@ export const sensors = t.router({
 				systemId: sensors.id,
 			});
 		}),
-	// scanRepeat: t.procedure,
+
+	sendProcessedData: t.procedure
+		.input(
+			z.object({
+				shipId: z.number(),
+				data: z.string(),
+				flash: z.boolean().optional(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			if (!input.data) return;
+			const sensorsSys = getShipSystem(ctx.ecs, {
+				systemType: "sensors",
+				shipId: input.shipId,
+			});
+			const sensors = sensorsSys.components.isSensors;
+
+			if (!sensors) throw new Error("Sensors not found");
+
+			sensorsSys.updateComponent("isSensors", {
+				processedData: sensors.processedData.concat({
+					timestamp: Date.now(),
+					data: input.data,
+				}),
+			});
+
+			if (input.flash) {
+				// Get all stations that have the sensor scans or sensor grid card
+				const stations =
+					ctx.ecs
+						.getEntityById(input.shipId)
+						?.components.stationComplement?.stations.filter((s) =>
+							s.cards.some(
+								(c) => c.component === "LegacySensorScans" || c.component === "LegacySensorGrid",
+							),
+						) || [];
+
+				for (const station of stations) {
+					pubsub.publish.effects.sub({
+						effect: { type: "flash" },
+						shipId: input.shipId,
+						station: station.name,
+					});
+				}
+			}
+
+			pubsub.publish.sensors.get({
+				shipId: input.shipId,
+				systemId: sensorsSys.id,
+			});
+		}),
+
+	removeProcessedData: t.procedure
+		.input(z.object({ shipId: z.number(), timestamp: z.number() }))
+		.send(({ ctx, input }) => {
+			const sensorsSys = getShipSystem(ctx.ecs, {
+				systemType: "sensors",
+				shipId: input.shipId,
+			});
+			const sensors = sensorsSys.components.isSensors;
+
+			if (!sensors) throw new Error("Sensors not found");
+
+			sensorsSys.updateComponent("isSensors", {
+				processedData: sensors.processedData.filter((p) => p.timestamp !== input.timestamp),
+			});
+
+			pubsub.publish.sensors.get({
+				shipId: input.shipId,
+				systemId: sensorsSys.id,
+			});
+		}),
+
 	stream: t.procedure
 		.input(z.object({ systemId: z.number().nullable(), shipId: z.number() }))
 		.dataStream(({ ctx, input }) => {

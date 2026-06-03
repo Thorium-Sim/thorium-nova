@@ -10,7 +10,7 @@ export function ProcessedData(
 ) {
 	const { shipId, station } = useStation();
 	const isCore = station.name === "Flight Director";
-	const [sensors] = q.legacy.sensorScans.sensors.useNetRequest({ shipId });
+	const [sensors] = q.sensors.get.useNetRequest({ shipId });
 	return (
 		<div {...props}>
 			{sensors.processedData.map(({ data, timestamp }, i, arr) => (
@@ -20,7 +20,7 @@ export function ProcessedData(
 						{isCore ? (
 							<button
 								onClick={() =>
-									q.legacy.sensorScans.removeProcessedData.netSend({
+									q.sensors.removeProcessedData.netSend({
 										shipId,
 										timestamp,
 									})

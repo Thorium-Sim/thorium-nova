@@ -311,16 +311,19 @@ export function generateScanResults(object: Entity, ecs: ECS, scanType: z.infer<
 			break;
 		}
 		case "communications": {
-			const shortRangeSystem = getShipSystem(ecs, {
-				shipId: object.id,
-				systemType: "shortRangeComm",
-			});
+			let shortRangeSystem;
+			try {
+				shortRangeSystem = getShipSystem(ecs, {
+					shipId: object.id,
+					systemType: "shortRangeComm",
+				});
+			} catch {}
 			currentResults.communications = {
 				scanTime: Date.now(),
-				status: shortRangeSystem.components.isShortRangeComm
+				status: shortRangeSystem?.components.isShortRangeComm
 					? shortRangeStateMap[shortRangeSystem.components.isShortRangeComm.state]
 					: "Unknown",
-				frequency: shortRangeSystem.components.isShortRangeComm
+				frequency: shortRangeSystem?.components.isShortRangeComm
 					? `${shortRangeSystem.components.isShortRangeComm.antennaFrequency} MHz`
 					: "N/A",
 			};

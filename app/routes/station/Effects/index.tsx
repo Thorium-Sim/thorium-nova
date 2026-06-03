@@ -149,9 +149,11 @@ const Effects = () => {
 	q.effects.sub.useNetSubscribe({ clientId }, doEffect);
 
 	const doEvent = useCallback((payload: { name: string; payload: string }) => {
-		switch (payload.name) {
-			case RadarZoomEvent.name:
-				window.dispatchEvent(new RadarZoomEvent(payload.payload));
+		if (payload && "name" in payload) {
+			switch (payload.name) {
+				case RadarZoomEvent.name:
+					window.dispatchEvent(new RadarZoomEvent(payload.payload));
+			}
 		}
 	}, []);
 

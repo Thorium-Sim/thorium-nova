@@ -3,7 +3,6 @@ import { t } from "@thorium/.server/init/t";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { Entity } from "@thorium/utils/ecs";
-import { produce } from "immer";
 import z from "zod";
 
 export const sensorScans = t.router({
@@ -21,7 +20,6 @@ export const sensorScans = t.router({
 				shipId: input.shipId,
 			});
 			const sensors = sensorsSys.components.isLegacySensorScanning;
-
 			if (!sensors) throw new Error("Sensors not found");
 
 			return {
@@ -29,9 +27,6 @@ export const sensorScans = t.router({
 				presetAnswers: sensors.scanAnswers,
 				presetInfo: sensors.presetInfo,
 				scanHistory: sensors.scanHistory,
-				processedData: produce(sensors.processedData, (draft) => {
-					draft.reverse();
-				}),
 			};
 		}),
 	setScanHistory: t.procedure
@@ -87,71 +82,6 @@ export const sensorScans = t.router({
 				return scans.slice(0, 1);
 			}
 			return scans;
-		}),
-	sendProcessedData: t.procedure
-		.input(
-			z.object({
-				shipId: z.number(),
-				data: z.string(),
-				flash: z.boolean().optional(),
-			}),
-		)
-		.send(({ ctx, input }) => {
-			if (!input.data) return;
-			const sensorsSys = getShipSystem(ctx.ecs, {
-				systemType: "sensors",
-				shipId: input.shipId,
-			});
-			const sensors = sensorsSys.components.isLegacySensorScanning;
-
-			if (!sensors) throw new Error("Sensors not found");
-
-			sensorsSys.updateComponent("isLegacySensorScanning", {
-				processedData: sensors.processedData.concat({
-					timestamp: Date.now(),
-					data: input.data,
-				}),
-			});
-
-			if (input.flash) {
-				// Get all stations that have the sensor scans or sensor grid card
-				const stations =
-					ctx.ecs
-						.getEntityById(input.shipId)
-						?.components.stationComplement?.stations.filter((s) =>
-							s.cards.some(
-								(c) => c.component === "LegacySensorScans" || c.component === "LegacySensorGrid",
-							),
-						) || [];
-
-				for (const station of stations) {
-					pubsub.publish.effects.sub({
-						effect: { type: "flash" },
-						shipId: input.shipId,
-						station: station.name,
-					});
-				}
-			}
-
-			pubsub.publish.legacy.sensorScans.sensors({ shipId: input.shipId });
-		}),
-
-	removeProcessedData: t.procedure
-		.input(z.object({ shipId: z.number(), timestamp: z.number() }))
-		.send(({ ctx, input }) => {
-			const sensorsSys = getShipSystem(ctx.ecs, {
-				systemType: "sensors",
-				shipId: input.shipId,
-			});
-			const sensors = sensorsSys.components.isLegacySensorScanning;
-
-			if (!sensors) throw new Error("Sensors not found");
-
-			sensorsSys.updateComponent("isLegacySensorScanning", {
-				processedData: sensors.processedData.filter((p) => p.timestamp !== input.timestamp),
-			});
-
-			pubsub.publish.legacy.sensorScans.sensors({ shipId: input.shipId });
 		}),
 
 	beginScan: t.procedure

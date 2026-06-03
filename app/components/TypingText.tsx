@@ -15,8 +15,9 @@ export function TypingText({ children, keyDelay = 20 }: { keyDelay?: number; chi
 		}
 	}, [children]);
 	useAnimationFrame(() => {
-		if (ref.current) {
+		if (ref.current && ref.current.children[0]) {
 			for (let i = 0; i < Math.round((Date.now() - renderTime.current) / keyDelay); i++) {
+				if (i > ref.current.children.length - 1) break;
 				(ref.current.children[i] as HTMLElement).style.opacity = "1";
 			}
 		}

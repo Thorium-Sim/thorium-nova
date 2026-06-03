@@ -1,0 +1,14 @@
+.objects-list:has(.hidden) + .no-objects-in-range,
+.objects-list:empty + .no-objects-in-range {
+	display: block;
+}
+.objects-list:has(.block) + .no-objects-in-range {
+	display: none;
+}
+.objects-list:has(.hidden),
+.objects-list:empty {
+	display: none;
+}
+.objects-list:has(.block) {
+	display: block;
+}

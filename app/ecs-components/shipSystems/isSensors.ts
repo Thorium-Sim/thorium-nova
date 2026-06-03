@@ -19,5 +19,13 @@ export const isSensors = z
 			.default([])
 			.transform((val) => (val instanceof Map ? val : new Map(val))),
 		selectedContact: z.number().nullable().default(null),
+		/** Processed data sent to the sensors card for narrative purposes */
+		processedData: z
+			.object({
+				data: z.string(),
+				timestamp: z.number(),
+			})
+			.array()
+			.default([]),
 	})
 	.default({});
