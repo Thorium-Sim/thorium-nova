@@ -195,7 +195,12 @@ export const planet = t.router({
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const system = getSolarSystem(ctx, input.pluginId, input.solarSystemId);
-			const planet = system.planets.find((s) => s.name === input.planetId);
+			const planet = system.planets.reduce((prev: PlanetPlugin | null, next) => {
+				if (prev) return prev;
+				if (next.name === input.planetId) return next;
+				return next.satellites.find((moon) => moon.name === input.planetId) || null;
+			}, null);
+
 			if (!planet) {
 				throw new Error(`No planet found with id ${input.planetId}`);
 			}

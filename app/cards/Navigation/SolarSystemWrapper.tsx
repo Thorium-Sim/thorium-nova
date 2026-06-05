@@ -1,6 +1,5 @@
 import { useFrame } from "@react-three/fiber";
 import { keepPreviousData } from "@tanstack/react-query";
-import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
 import OrbitContainer, { OrbitLine } from "@thorium/components/Starmap/OrbitContainer";
 import { planetSpriteScale } from "@thorium/components/Starmap/Planet";
 import { PlanetSprite } from "@thorium/components/Starmap/Planet";
@@ -14,11 +13,11 @@ import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import { setCursor } from "@thorium/utils/setCursor";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
-import { degToRad, solarRadiusToKilometers } from "@thorium/utils/unitTypes";
-import { useEffect, useRef } from "react";
+import { Coordinates, degToRad, solarRadiusToKilometers } from "@thorium/utils/unitTypes";
+import { useEffect, useMemo, useRef } from "react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { Color, type Group, type Vector3 } from "three";
+import { Color, type Group } from "three";
 
 export function SolarSystemWrapper() {
 	const { shipId } = useStation();
@@ -89,23 +88,13 @@ export function SolarSystemWrapper() {
 				}
 				if (entity.components.isPlanet) {
 					if (!entity.components.satellite) return null;
-					const position = getOrbitPosition(entity.components.satellite);
-					const size = entity.components.isPlanet?.radius;
-					const satellites: PlanetPlugin[] = [];
-					const { semiMajorAxis, eccentricity, inclination } = entity.components.satellite;
-					const radiusY = semiMajorAxis - semiMajorAxis * eccentricity;
 
 					return (
 						<PlanetRenderer
 							key={entity.id}
 							name={entity.components.identity?.name}
-							position={position}
-							semiMajorAxis={semiMajorAxis}
-							size={size}
-							satellites={satellites}
-							inclination={inclination}
-							radiusY={radiusY}
-							onClick={() => {
+							satellite={entity.components.satellite}
+							onClick={(position: Coordinates<number>) => {
 								useStarmapStore.setState({ selectedObjectIds: [entity.id] });
 								useStarmapStore.getState().setCameraFocus(position);
 							}}
@@ -139,22 +128,37 @@ export function SolarSystemWrapper() {
 
 function PlanetRenderer({
 	name,
-	position,
-	semiMajorAxis,
-	inclination,
-	radiusY,
+	satellite,
 	onClick,
 }: {
 	name?: string;
-	position: Vector3;
-	semiMajorAxis: number;
-	size: number;
-	satellites: PlanetPlugin[];
-	inclination: number;
-	radiusY: number;
-	onClick: () => void;
+	satellite: {
+		axialTilt: number;
+		semiMajorAxis: number;
+		eccentricity: number;
+		inclination: number;
+		orbitalArc: number;
+		parentId: number | null;
+	};
+	onClick: (position: Coordinates<number>) => void;
 }) {
+	const useStarmapStore = useGetStarmapStore();
+	const currentSystem = useStarmapStore((store) => store.currentSystem);
+
+	const [starmapEntities] = q.starmapCore.entities.useNetRequest({
+		systemId: currentSystem,
+	});
+
 	const labelRef = useRef<Group>(null);
+
+	const origin = useMemo(() => {
+		const parent = starmapEntities.find((s) => s.id === satellite.parentId)?.components.satellite;
+		if (!parent) return undefined;
+		return getOrbitPosition(parent);
+	}, [starmapEntities, satellite.parentId]);
+	const position = getOrbitPosition({ ...satellite, origin });
+	const { semiMajorAxis, eccentricity, inclination } = satellite;
+	const radiusY = semiMajorAxis - semiMajorAxis * eccentricity;
 
 	useFrame(({ camera }) => {
 		if (labelRef.current) {
@@ -167,7 +171,7 @@ function PlanetRenderer({
 
 	return (
 		<group>
-			<group rotation={[0, 0, degToRad(inclination)]}>
+			<group position={origin} rotation={[0, 0, degToRad(inclination)]}>
 				<OrbitLine radiusX={semiMajorAxis} radiusY={radiusY} />
 			</group>
 			<group position={position}>
@@ -196,15 +200,6 @@ function PlanetRenderer({
 					</group>
 				)}
 			</group>
-			{/* TODO June 20, 2022 - Figure out all of the stuff around moons */}
-			{/* {satellites?.map((s, i) => (
-                <Planet
-                  key={`orbit-${s.name}`}
-                  isSatellite
-                  origin={position}
-                  planet={s}
-                />
-              ))} */}
 		</group>
 	);
 }

@@ -66,6 +66,7 @@
 		"@use-gesture/react": "^10.3.1",
 		"change-case": "^5.4.4",
 		"chroma-js": "^3.2.0",
+		"csv-simple-parser": "^2.0.2",
 		"dot-beat-time": "^1.2.1",
 		"electrobun": "^1.18.1",
 		"eventemitter3": "^5.0.4",

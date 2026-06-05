@@ -2,7 +2,7 @@ import { type ElementProps, useFrame } from "@react-three/fiber";
 import { setCursor } from "@thorium/utils/setCursor";
 import { lightYearToLightMinute } from "@thorium/utils/unitTypes";
 import React from "react";
-import { Group, type Mesh, Vector3 } from "three";
+import { Group, type Mesh } from "three";
 
 import { useGetStarmapStore } from "../starmapStore";
 import SystemCircle from "./SystemCircle";
@@ -31,7 +31,6 @@ const SystemMarker: React.FC<SystemMarkerProps> = ({
 	const useStarmapStore = useGetStarmapStore();
 
 	const direction = React.useRef(0);
-	const cameraView = useStarmapStore((state) => state.cameraView);
 	const showSatelliteRange = useStarmapStore((state) => state.showSatelliteRange);
 
 	useFrame(({ camera }) => {
@@ -42,13 +41,11 @@ const SystemMarker: React.FC<SystemMarkerProps> = ({
 		group.current?.scale.set(zoomedScale, zoomedScale, zoomedScale);
 		group.current?.quaternion.copy(camera.quaternion);
 	});
-	const positionVector = new Vector3(...position);
-	if (cameraView === "2d") positionVector.setY(0);
 	return (
 		<>
 			{showSatelliteRange && commSatelliteRadius ? (
 				<mesh
-					position={positionVector}
+					position={position}
 					scale={[commSatelliteRadius, commSatelliteRadius, commSatelliteRadius]}
 				>
 					<sphereGeometry args={[lightYearToLightMinute(1), 16, 16]} />
@@ -60,7 +57,7 @@ const SystemMarker: React.FC<SystemMarkerProps> = ({
 					/>
 				</mesh>
 			) : null}
-			<group position={positionVector} ref={group}>
+			<group position={position} ref={group}>
 				{/* {draggable ? (
 					<DraggableSystemCircle
 						systemId={systemId}

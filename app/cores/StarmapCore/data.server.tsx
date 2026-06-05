@@ -72,18 +72,17 @@ export const starmapCore = t.router({
 				...(ctx.ecs.componentCache.get("position") || []),
 				...(ctx.ecs.componentCache.get("satellite") || []),
 			];
-			const data = checkEntities.reduce(
-				(prev: Pick<Entity, "components" | "id">[], { components, id }) => {
-					if (components.isShip || components.isTorpedo) return prev;
-					if (
-						components.position?.parentId === input.systemId ||
-						components.satellite?.parentId === input.systemId
-					)
-						prev.push({ components, id });
+			const data = checkEntities.reduce((prev: Pick<Entity, "components" | "id">[], entity) => {
+				if (entity.components.isShip || entity.components.isTorpedo || entity.components.isWaypoint)
 					return prev;
-				},
-				[],
-			);
+				if (
+					entity.components.position?.parentId === input.systemId ||
+					entity.components.satellite?.parentId === input.systemId ||
+					getObjectSystem(entity)?.id === input.systemId
+				)
+					prev.push({ components: entity.components, id: entity.id });
+				return prev;
+			}, []);
 			return data;
 		}),
 	/** Includes all the ship in a system or interstellar space */

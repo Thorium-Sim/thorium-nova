@@ -1,5 +1,5 @@
 import { type Entity, System } from "@thorium/utils/ecs";
-import { getCompletePositionFromOrbit } from "@thorium/utils/starmap/position";
+import { getCompletePositionFromOrbit, getObjectSystem } from "@thorium/utils/starmap/position";
 import { solarRadiusToKilometers } from "@thorium/utils/unitTypes";
 import { Vector3 } from "three";
 
@@ -21,7 +21,9 @@ export class SolarSystemPositionSystem extends System {
 	update(entity: Entity) {
 		// TODO January 2025: This will explode when moons become a thing
 		const solarSystemId =
-			entity.components.position?.parentId || entity.components.satellite?.parentId;
+			getObjectSystem(entity)?.id ||
+			entity.components.position?.parentId ||
+			entity.components.satellite?.parentId;
 		if (!solarSystemId || objectSystem.get(entity.id) !== solarSystemId) {
 			// Remove the object from the system it is a part of, if any
 			const solarSystemId = objectSystem.get(entity.id) || -1;

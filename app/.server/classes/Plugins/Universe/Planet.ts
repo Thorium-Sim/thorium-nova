@@ -12,6 +12,7 @@ export default class PlanetPlugin {
 	isPlanet: z.infer<typeof isPlanet>;
 	population: number;
 	temperature: number;
+	satellites: PlanetPlugin[];
 	constructor(
 		params: { name: string } & Partial<
 			Omit<PlanetPlugin, "satellite"> & {
@@ -54,5 +55,7 @@ export default class PlanetPlugin {
 		this.population = params.population || 0;
 
 		this.temperature = params.temperature || 5800;
+
+		this.satellites ??= params.satellites?.map((planet) => new PlanetPlugin(planet)) ?? [];
 	}
 }

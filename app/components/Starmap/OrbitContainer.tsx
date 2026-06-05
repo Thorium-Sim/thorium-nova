@@ -34,23 +34,21 @@ export const OrbitLine: React.FC<{ radiusX: number; radiusY: number }> = ({ radi
 	);
 };
 
-interface OrbitContainerProps {
-	children: React.ReactNode;
-	semiMajorAxis: number;
-	eccentricity: number;
-	orbitalArc: number;
-	inclination: number;
-	showOrbit: boolean;
-}
-
-const OrbitContainer: React.FC<OrbitContainerProps> = ({
+function OrbitContainer({
 	semiMajorAxis,
 	eccentricity,
 	orbitalArc,
 	inclination,
 	showOrbit,
 	children,
-}) => {
+}: {
+	children: React.ReactNode;
+	semiMajorAxis: number;
+	eccentricity: number;
+	orbitalArc: number;
+	inclination: number;
+	showOrbit: boolean;
+}) {
 	const radiusY = semiMajorAxis - semiMajorAxis * eccentricity;
 	const X = semiMajorAxis * Math.cos(MathUtils.DEG2RAD * orbitalArc);
 	const Z = radiusY * Math.sin(MathUtils.DEG2RAD * orbitalArc);
@@ -69,6 +67,6 @@ const OrbitContainer: React.FC<OrbitContainerProps> = ({
 			{childrenWithProps}
 		</group>
 	);
-};
+}
 
 export default OrbitContainer;

@@ -16,7 +16,7 @@ import { Icon } from "@thorium/ui/Icon";
 import { cn } from "@thorium/utils/cn";
 import type { scanTypes } from "@thorium/utils/flags/scanTypes";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { getCompletePositionFromOrbitClient } from "@thorium/utils/starmap/getOrbitPosition";
 import { capitalCase } from "change-case";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Button, Disclosure, DisclosureGroup, DisclosurePanel } from "react-aria-components";
@@ -235,13 +235,14 @@ function SensorsShipList({
 
 	const [ships] = q.starmapCore.ships.useNetRequest({ systemId });
 	const [orbs] = q.starmapCore.entities.useNetRequest({ systemId });
+
 	const scannableObjects = [
 		...ships.map((ship) => ({ ...ship, type: "ship" })),
 		...orbs.map((orb) => ({
 			id: orb.id,
 			position:
 				orb.components.position ||
-				(orb.components.satellite ? getOrbitPosition(orb.components.satellite) : undefined),
+				(orb.components.satellite ? getCompletePositionFromOrbitClient(orb, orbs) : undefined),
 			type: orb.components.isPlanet ? "planet" : orb.components.isStar ? "star" : "unknown",
 		})),
 	];
@@ -330,23 +331,24 @@ function SensorsScannableObject({
 	});
 	const [waypoints] = q.waypoints.all.useNetRequest({
 		shipId,
-		active: true,
+		active: false,
 		systemId: currentSystem,
 	});
 	const hasWaypoint = waypoints.some((w) => w.objectId === id);
 
+	console.log(hasWaypoint, waypoints, id);
 	return (
 		<Disclosure id={id} className={cn("group", inRange ? "block" : "hidden")}>
 			<Button
 				slot="trigger"
-				className="w-full border-white/50 px-2 outline-none group-data-[expanded]:mb-2 group-data-[expanded]:border-b focus-within:bg-white/20"
+				className="w-full border-white/50 px-2 outline-none group-data-expanded:mb-2 group-data-expanded:border-b focus-within:bg-white/20"
 			>
 				<div className="flex justify-between tabular-nums">
 					{results.identification?.name || `Unknown ${id}`}
 					<span ref={distanceRef} />
 				</div>
 			</Button>
-			<DisclosurePanel className="px-2 group-data-[expanded]:pb-2">
+			<DisclosurePanel className="px-2 group-data-expanded:pb-2">
 				<ScanResults objectId={id} type={type} />
 				{hasWaypoint ? null : (
 					<Button

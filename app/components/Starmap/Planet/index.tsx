@@ -4,7 +4,7 @@ import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
 import { setCursor } from "@thorium/utils/setCursor";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { degToRad } from "@thorium/utils/unitTypes";
-import { Suspense, useRef } from "react";
+import { Suspense, useMemo, useRef } from "react";
 import type { Group, Vector3 } from "three";
 
 import { OrbitLine } from "../OrbitContainer";
@@ -56,6 +56,7 @@ export function Planet({
 	isSatellite,
 	showSprite,
 	showMesh = true,
+	entities,
 	onClick,
 }: {
 	planet: {
@@ -73,6 +74,7 @@ export function Planet({
 			eccentricity: number;
 			orbitalArc: number;
 			inclination: number;
+			parentId: string | number | undefined | null;
 			showOrbit: boolean;
 		};
 	};
@@ -80,6 +82,17 @@ export function Planet({
 	origin?: Vector3;
 	showSprite?: boolean;
 	showMesh?: boolean;
+	entities?: {
+		id: number | string;
+		satellite: {
+			axialTilt: number;
+			semiMajorAxis: number;
+			eccentricity: number;
+			orbitalArc: number;
+			inclination: number;
+			showOrbit: boolean;
+		};
+	}[];
 	onClick?: () => void;
 }) {
 	const useStarmapStore = useGetStarmapStore();
@@ -94,13 +107,16 @@ export function Planet({
 	const { axialTilt, inclination, semiMajorAxis, eccentricity } = planet.satellite;
 	const viewingMode = useStarmapStore((state) => state.viewingMode);
 
-	const position = getOrbitPosition(planet.satellite);
+	const origin = useMemo(() => {
+		const parent = entities?.find((s) => s.id === planet.satellite.parentId)?.satellite;
+		if (!parent) return undefined;
+		return getOrbitPosition(parent);
+	}, [entities, planet.satellite.parentId]);
+
+	const position = getOrbitPosition({ ...planet.satellite, origin });
 
 	// TODO - April 7, 2022 - Figure out how to make the scales nice for solar system editing
 	const size = radius;
-
-	// TODO - April 7, 2022 - Add moons
-	// const satellites: PlanetPlugin[] = [];
 
 	const wireframe = false;
 
@@ -179,7 +195,7 @@ export function Planet({
 	return (
 		<group>
 			{viewingMode !== "viewscreen" && planet.satellite.showOrbit && (
-				<group rotation={[0, 0, degToRad(inclination)]}>
+				<group position={origin} rotation={[0, 0, degToRad(inclination)]}>
 					<OrbitLine radiusX={semiMajorAxis} radiusY={radiusY} />
 				</group>
 			)}

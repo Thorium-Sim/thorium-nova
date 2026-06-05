@@ -9,6 +9,7 @@ export const spectralTypes = z.union([
 	z.literal("K"),
 	z.literal("A"),
 	z.literal("MG"),
+	z.literal("F"),
 	z.literal("M"),
 	z.literal("D"),
 ]);

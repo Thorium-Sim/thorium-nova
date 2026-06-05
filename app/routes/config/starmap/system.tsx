@@ -3,6 +3,7 @@ import { SolarSystemMap } from "@thorium/components/Starmap/SolarSystemMap";
 import StarEntity from "@thorium/components/Starmap/Star";
 import { useSystemIds } from "@thorium/components/Starmap/useSystemIds";
 import { q } from "@thorium/context/AppContext";
+import { useMemo, Fragment } from "react";
 
 export default function SolarSystemWrapper({
 	systemId,
@@ -23,6 +24,11 @@ export default function SolarSystemWrapper({
 		{ enabled: !!solarSystemId, placeholderData: { stars: [], planets: [] } },
 	);
 
+	const entities = useMemo(
+		() => systemData?.planets.map((p) => ({ id: p.name, satellite: p.satellite })),
+		[systemData?.planets],
+	);
+
 	if (!systemData) return null;
 	return (
 		<SolarSystemMap skyboxKey={systemData.skyboxKey} systemId={solarSystemId}>
@@ -30,15 +36,30 @@ export default function SolarSystemWrapper({
 				<StarEntity key={star.name} star={{ id: star.name, ...star }} />
 			))}
 			{systemData.planets.map((planet) => (
-				<Planet
-					key={planet.name}
-					planet={{
-						id: planet.name,
-						name: planet.name,
-						isPlanet: planet.isPlanet,
-						satellite: planet.satellite,
-					}}
-				/>
+				<Fragment key={planet.name}>
+					<Planet
+						key={planet.name}
+						planet={{
+							id: planet.name,
+							name: planet.name,
+							isPlanet: planet.isPlanet,
+							satellite: planet.satellite,
+						}}
+						entities={entities}
+					/>
+					{planet.satellites?.map((s) => (
+						<Planet
+							key={s.name}
+							planet={{
+								id: s.name,
+								name: s.name,
+								isPlanet: s.isPlanet,
+								satellite: s.satellite,
+							}}
+							entities={entities}
+						/>
+					))}
+				</Fragment>
 			))}
 			{children}
 		</SolarSystemMap>

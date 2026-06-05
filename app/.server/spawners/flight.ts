@@ -85,12 +85,9 @@ export async function startFlight(
 			plugin.aspects.solarSystems.forEach((solarSystem) => {
 				const entities = spawnSolarSystem(solarSystem);
 				entities.forEach((object) => {
-					const { entity } = object;
+					const { entity, key } = object;
 					ctx.flight?.ecs.addEntity(entity);
-					let key = `${object.pluginId}-${object.pluginSystemId}`;
-					if (object.type === "planet" || object.type === "star") {
-						key += `-${object.objectId}`;
-					}
+
 					map[key] = entity;
 				});
 			});

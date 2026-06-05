@@ -434,14 +434,39 @@ export const PlanetaryEntity = memo(
 		const { shipId } = useStation();
 		const { interpolate } = useLiveQuery();
 
+		const useStarmapStore = useGetStarmapStore();
+		const systemId = useStarmapStore((store) => store.currentSystem);
+		const [orbs] = q.starmapCore.entities.useNetRequest({
+			systemId,
+		});
+		const parentEntity = useMemo(
+			() => orbs.find((o) => o.id === satellite.parentId),
+			[orbs, satellite.parentId],
+		);
+
 		const bracket = useRef<Group>(null);
 		const size = isPlanet ? isPlanet.radius : isStar ? solarRadiusToKilometers(isStar.radius) : 0;
-		const position = getOrbitPosition({
-			semiMajorAxis: satellite.semiMajorAxis,
-			eccentricity: satellite.eccentricity,
-			orbitalArc: satellite.orbitalArc,
-			inclination: satellite.inclination,
-		});
+		const position = useMemo(
+			() =>
+				getOrbitPosition({
+					semiMajorAxis: satellite.semiMajorAxis,
+					eccentricity: satellite.eccentricity,
+					orbitalArc: satellite.orbitalArc,
+					inclination: satellite.inclination,
+					origin: parentEntity
+						? parentEntity.components.satellite
+							? getOrbitPosition(parentEntity.components.satellite)
+							: parentEntity.components.position
+								? new Vector3(
+										parentEntity.components.position.x,
+										parentEntity.components.position.y,
+										parentEntity.components.position.z,
+									)
+								: undefined
+						: undefined,
+				}),
+			[satellite, parentEntity],
+		);
 
 		const store = useCircleGridStore();
 
@@ -519,11 +544,25 @@ function OcclusionCone({
 	satellite: z.infer<typeof satellite>;
 }) {
 	const { cardLoaded } = useCardContext();
+	const useStarmapStore = useGetStarmapStore();
+	const currentSystem = useStarmapStore((store) => store.currentSystem);
+
+	const [starmapEntities] = q.starmapCore.entities.useNetRequest({
+		systemId: currentSystem,
+	});
+
+	const origin = useMemo(() => {
+		const parent = starmapEntities.find((s) => s.id === sat.parentId)?.components.satellite;
+		if (!parent) return undefined;
+		return getOrbitPosition(parent);
+	}, [starmapEntities, sat.parentId]);
+
 	const position = getOrbitPosition({
 		semiMajorAxis: sat.semiMajorAxis,
 		eccentricity: sat.eccentricity,
 		orbitalArc: sat.orbitalArc,
 		inclination: sat.inclination,
+		origin,
 	});
 
 	const { shipId } = useStation();

@@ -3,7 +3,9 @@ import type SolarSystemPlugin from "@thorium/.server/classes/Plugins/Universe/So
 import type StarPlugin from "@thorium/.server/classes/Plugins/Universe/Star";
 import { Entity } from "@thorium/utils/ecs";
 
-export function spawnSolarSystem(systemPlugin: SolarSystemPlugin) {
+export function spawnSolarSystem(
+	systemPlugin: SolarSystemPlugin,
+): { entity: Entity; key: string }[] {
 	const system = new Entity();
 	system.addComponent("identity", {
 		name: systemPlugin.name,
@@ -20,28 +22,29 @@ export function spawnSolarSystem(systemPlugin: SolarSystemPlugin) {
 	// Spawn all the stars and planets
 	const stars = systemPlugin.stars.map((star) => {
 		return {
-			pluginId: systemPlugin.pluginName,
-			pluginSystemId: systemPlugin.name,
-			objectId: star.name,
-			type: "star" as const,
+			key: `${systemPlugin.pluginName}-${systemPlugin.name}-${star.name}`,
 			entity: spawnStar(star, system.id),
 		};
 	});
-	const planets = systemPlugin.planets.map((planet) => {
-		return {
-			pluginId: systemPlugin.pluginName,
-			pluginSystemId: systemPlugin.name,
-			objectId: planet.name,
-			type: "planet" as const,
-			entity: spawnPlanet(planet, system.id),
-		};
+	const planets = systemPlugin.planets.flatMap((planet) => {
+		const entity = spawnPlanet(planet, system.id);
+		const moons =
+			planet.satellites?.map((moon) => ({
+				key: `${systemPlugin.pluginName}-${systemPlugin.name}-${moon.name}`,
+				entity: spawnPlanet(moon, entity.id),
+			})) || [];
+		return [
+			{
+				key: `${systemPlugin.pluginName}-${systemPlugin.name}-${planet.name}`,
+				entity,
+			},
+			...moons,
+		];
 	});
 
 	return [
 		{
-			pluginSystemId: systemPlugin.name,
-			pluginId: systemPlugin.pluginName,
-			type: "system" as const,
+			key: `${systemPlugin.pluginName}-${systemPlugin.name}`,
 			entity: system,
 		},
 		...stars,
@@ -66,7 +69,7 @@ function spawnStar(star: StarPlugin, systemId: number) {
 	return starEntity;
 }
 
-function spawnPlanet(planet: PlanetPlugin, systemId: number) {
+function spawnPlanet(planet: PlanetPlugin, parentId: number) {
 	const planetEntity = new Entity();
 	planetEntity.addComponent("identity", {
 		name: planet.name,
@@ -76,7 +79,7 @@ function spawnPlanet(planet: PlanetPlugin, systemId: number) {
 	planetEntity.addComponent("isPlanet", { ...planet.isPlanet });
 	planetEntity.addComponent("satellite", {
 		...planet.satellite,
-		parentId: systemId,
+		parentId: parentId,
 	});
 
 	planetEntity.addComponent("temperature", { temperature: planet.temperature });
