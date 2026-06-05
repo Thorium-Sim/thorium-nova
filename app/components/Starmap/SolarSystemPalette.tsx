@@ -44,7 +44,7 @@ function useSelectedObject() {
 
 	const moon = systemData?.planets.reduce((prev: PlanetPlugin | null, next) => {
 		if (prev) return prev;
-		return next.satellites.find((moon) => selectedObjectIds.includes(moon.name)) || null;
+		return next.satellites?.find((moon) => selectedObjectIds.includes(moon.name)) || null;
 	}, null);
 	if (moon) {
 		return { type: "planet" as const, object: moon };

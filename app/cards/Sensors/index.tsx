@@ -336,7 +336,6 @@ function SensorsScannableObject({
 	});
 	const hasWaypoint = waypoints.some((w) => w.objectId === id);
 
-	console.log(hasWaypoint, waypoints, id);
 	return (
 		<Disclosure id={id} className={cn("group", inRange ? "block" : "hidden")}>
 			<Button

@@ -16,7 +16,6 @@ import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import { randomFromRange } from "@thorium/utils/operations/randomFromRange";
 import getHabitableZone from "@thorium/utils/starmap/getHabitableZone";
 import type { Kelvin, Kilometer, SolarRadius } from "@thorium/utils/unitTypes";
-import romanNumerals from "roman-numerals";
 import z from "zod";
 
 import { getSolarSystem } from "../utils";
@@ -82,7 +81,7 @@ export const planet = t.router({
 				throw new Error(`Invalid planet type: ${input.planetType}`);
 			}
 			const name = generateIncrementedName(
-				`${system.name} ${romanNumerals.toRoman(childrenPlanets.length + 1)}`,
+				`${system.name} ${childrenPlanets.length + 1}`,
 				system.planets
 					.map((p) => p.name)
 					.concat(system.stars.map((star) => star.name))
@@ -127,6 +126,104 @@ export const planet = t.router({
 				temperature: randomFromRange(planetType.temperatureRange),
 			});
 			system.planets.push(planet);
+
+			pubsub.publish.plugin.starmap.all({
+				pluginId: input.pluginId,
+			});
+			pubsub.publish.plugin.starmap.get({
+				pluginId: input.pluginId,
+				solarSystemId: system.name,
+			});
+
+			return planet;
+		}),
+	addMoon: t.procedure
+		.input(
+			z.object({
+				pluginId: z.string(),
+				solarSystemId: z.string(),
+				planetId: z.string(),
+				planetType: planetClasses,
+			}),
+		)
+		.send(({ ctx, input }) => {
+			inputAuth(ctx);
+			const system = getSolarSystem(ctx, input.pluginId, input.solarSystemId);
+
+			const planet = system.planets.reduce((prev: PlanetPlugin | null, next) => {
+				if (prev) return prev;
+				if (next.name === input.planetId) return next;
+				return next.satellites?.find((moon) => moon.name === input.planetId) || null;
+			}, null);
+
+			if (!planet) {
+				throw new Error(`No planet found with id ${input.planetId}`);
+			}
+
+			const planetType = planetTypes.find((p) => p.classification === input.planetType);
+			if (!planetType) {
+				throw new Error(`Invalid planet type: ${input.planetType}`);
+			}
+			const name = generateIncrementedName(
+				`${planet.name}${["a", "b", "c", "d", "e", "f", "g", "h", "i"][planet.satellites?.length ?? 0]}`,
+				system.planets
+					.map((p) => p.name)
+					.concat(system.stars.map((star) => star.name))
+					.concat(system.name),
+			);
+
+			const distanceToRadiusRatioRange = [250, 500] as const;
+			const planetToMoonRadiusRatioRange = [0.05, 0.25] as const;
+
+			const [min, max] = planetToMoonRadiusRatioRange;
+			const radius = planet.isPlanet.radius * (Math.random() * (max - min) + min);
+
+			const orbitalArc = Math.random() * 360;
+			const semiMajorAxis =
+				radius *
+				(Math.random() * (distanceToRadiusRatioRange[1] - distanceToRadiusRatioRange[0]) +
+					distanceToRadiusRatioRange[0]);
+
+			const moon: PlanetPlugin = {
+				name,
+				description: "",
+				tags: [],
+				isPlanet: {
+					age: randomFromRange(planetType.ageRange),
+					classification: planetType.classification,
+					radius: radius,
+					terranMass: randomFromRange(planetType.terranMassRange),
+					isHabitable: planetType.habitable,
+					lifeforms: planetType.lifeforms,
+					atmosphericComposition: planetType.atmosphericComposition,
+					textureMapAsset: randomFromList(planetType.possibleTextureMaps),
+					cloudMapAsset:
+						planetType.hasClouds <= Math.random()
+							? randomFromList(planetType.possibleCloudMaps)
+							: null,
+					ringMapAsset: null,
+				},
+				satellite: {
+					orbitalArc,
+					semiMajorAxis,
+					showOrbit: true,
+					parentId: input.planetId,
+					axialTilt: Math.round(Math.random() * 40 * 100) / 100,
+					eccentricity: Math.round(Math.random() * 0.02 * 100) / 100,
+					inclination: Math.round(Math.random() * 2 * 100) / 100,
+				},
+				population:
+					typeof planetType.population === "number"
+						? planetType.population
+						: randomFromRange(planetType.population),
+				temperature: randomFromRange(planetType.temperatureRange),
+				satellites: [],
+			};
+			if (!planet.satellites) {
+				planet.satellites = [moon];
+			} else {
+				planet.satellites.push(moon);
+			}
 
 			pubsub.publish.plugin.starmap.all({
 				pluginId: input.pluginId,
@@ -198,7 +295,7 @@ export const planet = t.router({
 			const planet = system.planets.reduce((prev: PlanetPlugin | null, next) => {
 				if (prev) return prev;
 				if (next.name === input.planetId) return next;
-				return next.satellites.find((moon) => moon.name === input.planetId) || null;
+				return next.satellites?.find((moon) => moon.name === input.planetId) || null;
 			}, null);
 
 			if (!planet) {

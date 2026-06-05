@@ -9,7 +9,7 @@ import { CanvasTexture, type Group, type Mesh, Vector3 } from "three";
 import { useGetStarmapStore } from "../starmapStore";
 
 const size = 50;
-const lineWidth = 0.1;
+const lineWidth = 0.2;
 export const DraggableSystemCircle: React.FC<
 	{
 		hoveringDirection: React.RefObject<number>;
@@ -169,7 +169,7 @@ const SystemCircle: React.FC<
 
 	return (
 		<mesh {...props}>
-			<planeGeometry args={[4, 4, 4]} attach="geometry" />
+			<planeGeometry args={[3, 3, 3]} attach="geometry" />
 			<meshBasicMaterial attach="material" map={texture} transparent />
 		</mesh>
 	);

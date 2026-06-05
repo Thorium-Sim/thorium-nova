@@ -43,6 +43,7 @@ const possibleRingMaps = [
 
 interface PlanetType {
 	name: string;
+	canBeMoon?: boolean;
 	classification: PlanetClasses;
 	temperatureRange: Range<Kelvin>;
 	zone: Zone;
@@ -67,6 +68,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "A",
 		name: "Geothermal",
+		canBeMoon: true,
 		ageRange: { min: 1000000, max: 2000000000 },
 		atmosphericComposition: [],
 		habitable: false,
@@ -89,6 +91,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "B",
 		name: "Geomorteus",
+		canBeMoon: true,
 		ageRange: { min: 1000000, max: 10000000000 },
 		atmosphericComposition: [],
 		habitable: false,
@@ -111,6 +114,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "C",
 		name: "Geoinactive",
+		canBeMoon: true,
 		ageRange: { min: 20000000, max: 1000000000 },
 		atmosphericComposition: [],
 		habitable: false,
@@ -133,6 +137,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "D",
 		name: "Planetoid/Moon",
+		canBeMoon: true,
 		ageRange: { min: 20000000, max: 1000000000 },
 		atmosphericComposition: [],
 		habitable: false,
@@ -155,6 +160,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "E",
 		name: "Geoplastic",
+		canBeMoon: true,
 		ageRange: { min: 1000000, max: 2000000000 },
 		atmosphericComposition: [],
 		habitable: false,
@@ -177,6 +183,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "F",
 		name: "Geometallic",
+		canBeMoon: true,
 		ageRange: { min: 1000000000, max: 3000000000 },
 		atmosphericComposition: [],
 		habitable: false,
@@ -198,6 +205,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "G",
 		name: "Geocrystalline",
+		canBeMoon: true,
 		ageRange: { min: 3000000000, max: 4000000000 },
 		atmosphericComposition: [],
 		habitable: false,
@@ -219,6 +227,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "H",
 		name: "Desert",
+		canBeMoon: true,
 		ageRange: { min: 4000000000, max: 10000000000 },
 		atmosphericComposition: [],
 		habitable: false,
@@ -301,6 +310,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "K",
 		name: "Adaptable",
+		canBeMoon: true,
 		ageRange: { min: 4000000000, max: 10000000000 },
 		atmosphericComposition: [],
 		habitable: true,
@@ -325,6 +335,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "L",
 		name: "Martian",
+		canBeMoon: true,
 		ageRange: { min: 4000000000, max: 10000000000 },
 		atmosphericComposition: [],
 		habitable: true,
@@ -346,6 +357,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "M",
 		name: "Terrestrial",
+		canBeMoon: true,
 		ageRange: { min: 3000000000, max: 10000000000 },
 		atmosphericComposition: [],
 		habitable: true,
@@ -375,6 +387,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "N",
 		name: "Venusian",
+		canBeMoon: true,
 		ageRange: { min: 3000000000, max: 10000000000 },
 		atmosphericComposition: [],
 		habitable: true,
@@ -402,6 +415,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "O",
 		name: "Oceanic",
+		canBeMoon: true,
 		ageRange: { min: 3000000000, max: 10000000000 },
 		atmosphericComposition: [],
 		habitable: true,
@@ -429,6 +443,7 @@ export const planetTypes: PlanetType[] = [
 	{
 		classification: "P",
 		name: "Glaciated",
+		canBeMoon: true,
 		ageRange: { min: 3000000000, max: 10000000000 },
 		atmosphericComposition: [],
 		habitable: true,

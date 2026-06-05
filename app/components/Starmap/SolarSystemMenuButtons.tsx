@@ -53,7 +53,7 @@ export function SolarSystemMenuButtons() {
 			</Button>
 			<AddStarMenu />
 			<AddPlanetMenu />
-
+			<AddMoonMenu />
 			<Button
 				className="btn-error btn-outline btn-xs"
 				disabled={!selectedObjectIds}
@@ -148,6 +148,50 @@ function AddPlanetMenu() {
 							{planetType.classification} - {planetType.name}
 						</MenuItem>
 					))}
+				</Menu>
+			</Popover>
+		</MenuTrigger>
+	);
+}
+function AddMoonMenu() {
+	const [pluginId, solarSystemId] = useSystemIds();
+	const useStarmapStore = useGetStarmapStore();
+	if (useStarmapStore.getState().selectedObjectIds.length !== 1) return null;
+	return (
+		<MenuTrigger>
+			<div>
+				<RAButton className="btn btn-warning btn-outline btn-xs">
+					Add Moon
+					<Icon name="chevron-down" className="-mr-1 ml-2 h-5 w-5" aria-hidden="true" />
+				</RAButton>
+			</div>
+			<Popover className={popoverTransitionClasses}>
+				<Menu className="mt-2 w-56 origin-top-right divide-y divide-gray-800 rounded-md bg-gray-900 shadow-lg ring-1 ring-white/5 focus:outline-none">
+					{planetTypes
+						.filter((p) => p.canBeMoon)
+						.map((planetType) => (
+							<MenuItem
+								key={planetType.classification}
+								className={({ isFocused }) =>
+									`${
+										isFocused ? "bg-violet-900 text-white" : "text-gray-200"
+									} group flex w-full items-center px-2 py-2 text-sm`
+								}
+								onAction={async () => {
+									const result = await q.plugin.starmap.planet.addMoon.netSend({
+										pluginId,
+										solarSystemId,
+										planetId: useStarmapStore.getState().selectedObjectIds[0] as string,
+										planetType: planetType.classification,
+									});
+									useStarmapStore.setState({
+										selectedObjectIds: [result.name],
+									});
+								}}
+							>
+								{planetType.classification} - {planetType.name}
+							</MenuItem>
+						))}
 				</Menu>
 			</Popover>
 		</MenuTrigger>

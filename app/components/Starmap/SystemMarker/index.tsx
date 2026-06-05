@@ -58,25 +58,6 @@ const SystemMarker: React.FC<SystemMarkerProps> = ({
 				</mesh>
 			) : null}
 			<group position={position} ref={group}>
-				{/* {draggable ? (
-					<DraggableSystemCircle
-						systemId={systemId}
-						hoveringDirection={direction}
-						parentObject={group}
-						position={position}
-						{...props}
-						onPointerOver={(e) => {
-							props?.onPointerOver?.(e);
-							direction.current = 1;
-							setCursor("pointer");
-						}}
-						onPointerOut={(e) => {
-							props?.onPointerOut?.(e);
-							direction.current = -1;
-							setCursor("auto");
-						}}
-					/>
-				) : ( */}
 				<SystemCircle
 					systemId={systemId}
 					hoveringDirection={direction}
@@ -92,9 +73,8 @@ const SystemMarker: React.FC<SystemMarkerProps> = ({
 						setCursor("auto");
 					}}
 				/>
-				{/* )} */}
 				<SystemLabel systemId={systemId} hoveringDirection={direction} name={name} />
-			</group>{" "}
+			</group>
 		</>
 	);
 };

@@ -26,7 +26,7 @@ const SystemLabel: React.FC<{
 		const texture = new TextTexture({
 			color,
 			fontFamily: 'Electrolize, "Outfit Variable", sans-serif',
-			fontSize: 128,
+			fontSize: 72,
 			alignment: "right",
 			text: name,
 		});
@@ -62,7 +62,7 @@ const SystemLabel: React.FC<{
 	return (
 		<mesh
 			scale={[scale, scale, scale]}
-			position={[-spriteWidth * (115 * scale) - 2, 0, 0]}
+			position={[-spriteWidth * (58 * scale) - 2, 0, 0]}
 			ref={text}
 			renderOrder={1000}
 		>
