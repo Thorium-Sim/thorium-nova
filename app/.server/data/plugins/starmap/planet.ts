@@ -186,6 +186,7 @@ export const planet = t.router({
 
 			const moon: PlanetPlugin = {
 				name,
+				keyLocation: false,
 				description: "",
 				tags: [],
 				isPlanet: {
@@ -281,6 +282,7 @@ export const planet = t.router({
 				ringMapAsset: z.instanceof(File).nullish(),
 				population: z.number().optional(),
 				temperature: z.number().optional(),
+				keyLocation: z.boolean().optional(),
 				satellite: z
 					.intersection(
 						satellite.removeDefault().deepPartial(),
@@ -375,6 +377,9 @@ export const planet = t.router({
 			}
 			if (typeof input.temperature === "number") {
 				planet.temperature = input.temperature;
+			}
+			if (typeof input.keyLocation === "boolean") {
+				planet.keyLocation = input.keyLocation;
 			}
 
 			pubsub.publish.plugin.starmap.all({

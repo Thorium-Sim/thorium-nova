@@ -12,6 +12,19 @@ export function PlanetDisclosure({ object }: { object: PlanetPlugin }) {
 
 	return (
 		<PaletteDisclosure title="Planet">
+			<Checkbox
+				label="Key Location"
+				helperText="Whether this object should be available as a mission starting point."
+				defaultChecked={object.keyLocation}
+				onChange={(e) => {
+					q.plugin.starmap.planet.update.netSend({
+						pluginId,
+						solarSystemId,
+						planetId: object.name,
+						keyLocation: e.target.checked,
+					});
+				}}
+			/>
 			<Input
 				label="Age"
 				helperText="The age of the planet in years."

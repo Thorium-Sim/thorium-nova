@@ -123,6 +123,7 @@ export function Planet({
 	const labelRef = useRef<Group>(null);
 	const planetSpriteRef = useRef<Group>(null);
 	const planetMeshRef = useRef<Group>(null);
+	const groupRef = useRef<Group>(null);
 
 	useFrame(({ camera }) => {
 		if (labelRef.current) {
@@ -145,6 +146,13 @@ export function Planet({
 			} else if (showMesh) {
 				planetSpriteRef.current.visible = false;
 				planetMeshRef.current.visible = true;
+			}
+		}
+		if (groupRef.current && isSatellite) {
+			if (distance / semiMajorAxis > 20 && (viewingMode === "core" || viewingMode === "editor")) {
+				groupRef.current.visible = false;
+			} else {
+				groupRef.current.visible = true;
 			}
 		}
 	});
@@ -183,7 +191,7 @@ export function Planet({
 	onClick =
 		onClick ||
 		(() => {
-			if (viewingMode === "viewscreen") return;
+			if (viewingMode === "viewscreen" || groupRef.current?.visible === false) return;
 			useStarmapStore.getState().setCameraFocus(position);
 			useStarmapStore.setState({
 				selectedObjectIds: [planet.id],
@@ -199,7 +207,7 @@ export function Planet({
 					<OrbitLine radiusX={semiMajorAxis} radiusY={radiusY} />
 				</group>
 			)}
-			<group position={position}>
+			<group position={position} ref={groupRef}>
 				<group onPointerOver={onPointerOver} onPointerOut={onPointerOut} onClick={onClick}>
 					<Suspense fallback={null}>
 						<group
@@ -227,7 +235,7 @@ export function Planet({
 						</group>
 					</Suspense>
 				</group>
-				{viewingMode !== "viewscreen" && !isSatellite && (
+				{viewingMode !== "viewscreen" && (
 					<group ref={labelRef}>
 						<SystemLabel
 							systemId=""
@@ -237,15 +245,6 @@ export function Planet({
 						/>
 					</group>
 				)}
-				{/* TODO June 20, 2022 - Figure out all of the stuff around moons */}
-				{/* {satellites?.map((s, i) => (
-          <Planet
-            key={`orbit-${s.name}`}
-            isSatellite
-            origin={position}
-            planet={s}
-          />
-        ))} */}
 			</group>
 		</group>
 	);

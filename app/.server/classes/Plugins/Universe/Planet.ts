@@ -5,6 +5,7 @@ import type z from "zod";
 export default class PlanetPlugin {
 	name: string;
 	description: string;
+	keyLocation: boolean;
 	tags: string[];
 	satellite: Omit<z.infer<typeof satellite>, "parentId"> & {
 		parentId: string | null;
@@ -24,6 +25,7 @@ export default class PlanetPlugin {
 			}
 		>,
 	) {
+		this.keyLocation = params.keyLocation || false;
 		this.name = params.name;
 		this.description = params.description || "";
 		this.tags = params.tags || [];

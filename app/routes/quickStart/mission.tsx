@@ -26,7 +26,12 @@ const ShipConfig = () => {
 	}, [state.startingPointId, startingPoint, dispatch]);
 
 	if (!startingPoints || startingPoints.length === 0)
-		return <div>No starting points are present in the active plugins.</div>;
+		return (
+			<div className="max-w-sm">
+				No starting points are present in the active plugins. Make sure at least one planet has the{" "}
+				<code>keyLocation</code> flag set to true.
+			</div>
+		);
 
 	const allowedMissions = missions.filter(
 		({ flightMode, pluginId, name }) =>

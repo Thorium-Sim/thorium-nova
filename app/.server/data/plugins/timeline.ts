@@ -872,12 +872,28 @@ export const timeline = t.router({
 
 			return points.concat(
 				plugin.aspects.solarSystems.flatMap((solarSystem) => {
-					const planets = solarSystem.planets.map((planet) => ({
-						pluginId: plugin.id,
-						solarSystemId: solarSystem.name,
-						objectId: planet.name,
-						type: "planet" as const,
-					}));
+					const planets = solarSystem.planets.flatMap((planet) => [
+						...(planet.keyLocation
+							? [
+									{
+										pluginId: plugin.id,
+										solarSystemId: solarSystem.name,
+										objectId: planet.name,
+										type: "planet" as const,
+									},
+								]
+							: []),
+						...(planet.satellites?.flatMap((s) =>
+							s.keyLocation
+								? {
+										pluginId: plugin.id,
+										solarSystemId: solarSystem.name,
+										objectId: s.name,
+										type: "planet" as const,
+									}
+								: [],
+						) || []),
+					]);
 					// TODO May 17, 2022 - Make permanent ships available as starting points.
 					return planets;
 				}),

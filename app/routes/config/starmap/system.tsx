@@ -57,6 +57,7 @@ export default function SolarSystemWrapper({
 								satellite: s.satellite,
 							}}
 							entities={entities}
+							isSatellite
 						/>
 					))}
 				</Fragment>
