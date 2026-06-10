@@ -1,4 +1,4 @@
-import { useSortableListener } from "@thorium/components/timelineBuilder/SortableListenerContext";
+import { useSortableHandle } from "@thorium/components/timelineBuilder/SortableHandleContext";
 import { Icon } from "@thorium/ui/Icon";
 import { cn } from "@thorium/utils/cn";
 import type { ReactNode } from "react";
@@ -13,7 +13,7 @@ export function BlockWrapper({
 	onRemove: () => void;
 	className?: string;
 }) {
-	const listeners = useSortableListener();
+	const handle = useSortableHandle();
 	return (
 		<div
 			className={cn(
@@ -26,7 +26,7 @@ export function BlockWrapper({
 				<div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100">
 					<button
 						aria-label="Rearrange"
-						{...listeners}
+						ref={handle}
 						className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full border border-white/50 bg-black/20 hover:bg-white/20 hover:backdrop-brightness-200 hover:backdrop-saturate-200"
 					>
 						<Icon name="grip-vertical" size="xs" />

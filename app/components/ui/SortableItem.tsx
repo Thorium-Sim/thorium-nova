@@ -1,69 +1,43 @@
-import {
-	DndContext,
-	closestCenter,
-	KeyboardSensor,
-	PointerSensor,
-	useSensor,
-	useSensors,
-	type DragEndEvent,
-} from "@dnd-kit/core";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { useSortable } from "@dnd-kit/sortable";
-import {
-	SortableContext,
-	sortableKeyboardCoordinates,
-	verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
+import { DragDropProvider } from "@dnd-kit/react";
+import { useSortable } from "@dnd-kit/react/sortable";
 import { cn } from "@thorium/utils/cn";
-import { type ReactNode } from "react";
-import { Link } from "react-router";
+import { type ComponentProps, type ReactNode } from "react";
+import { useNavigate } from "react-router";
 
 export function SortableItem({
 	id,
+	index,
 	children,
 	className,
 	onClick,
 }: {
 	id: string;
+	index: number;
 	children: ReactNode;
 	className?: string;
 	onClick?: () => void;
 }) {
-	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-		id: id,
+	const sortable = useSortable({
+		id,
+		index,
+		modifiers: [RestrictToVerticalAxis],
 	});
-
-	const style = {
-		transform: CSS.Transform.toString(transform),
-		transition,
-	};
-
+	const navigate = useNavigate();
 	return (
 		<li
-			ref={setNodeRef}
-			style={style}
-			{...attributes}
-			{...listeners}
+			ref={sortable.ref}
 			className={cn(
 				`list-group-item touch-none transition-[border-radius] ${
-					isDragging ? "isolate !rounded !border" : ""
+					sortable.isDragging ? "dragging isolate rounded! border!" : ""
 				}`,
 				className,
 			)}
-			onClick={onClick}
+			onClick={onClick || (() => navigate(id || "#"))}
 		>
-			{onClick ? (
-				<span className={`block ${isDragging ? "pointer-events-none" : ""}`}>{children}</span>
-			) : (
-				<Link
-					to={id || "#"}
-					// Pointer-events-none is necessary to avoid navigating when the sorting is done
-					className={`block ${isDragging ? "pointer-events-none" : ""}`}
-				>
-					{children}
-				</Link>
-			)}
+			<span className={`block ${sortable.isDragging ? "pointer-events-none" : ""}`}>
+				{children}
+			</span>
 		</li>
 	);
 }
@@ -78,64 +52,27 @@ export function SortableList({
 }: {
 	items: { id: string; children: ReactNode; className?: string }[];
 	selectedItem?: string | null;
-	onDragEnd: (params: {
-		active: DragEndEvent["active"];
-		over: DragEndEvent["over"];
-		activeIndex: number;
-		overIndex: number;
-	}) => void;
+	onDragEnd: ComponentProps<typeof DragDropProvider>["onDragEnd"];
 	className?: string;
 	outerClassName?: string;
 	onClick?: (id: string, index: number) => void;
 }) {
-	const sensors = useSensors(
-		useSensor(PointerSensor, {
-			activationConstraint: { distance: 5 },
-		}),
-		useSensor(KeyboardSensor, {
-			coordinateGetter: sortableKeyboardCoordinates,
-		}),
-	);
-
-	async function handleDragEnd(event: DragEndEvent) {
-		const { active, over } = event;
-		const activeIndex = active.data.current?.sortable.index;
-		const overIndex = over?.data.current?.sortable.index;
-
-		if (typeof overIndex !== "number") return;
-		if (activeIndex !== overIndex) {
-			onDragEnd({ active, over, activeIndex, overIndex });
-		}
-	}
-
 	return (
 		<div className={cn("relative overflow-y-auto overflow-x-hidden", outerClassName)}>
 			<ul className={cn("relative", className)}>
-				<DndContext
-					sensors={sensors}
-					collisionDetection={closestCenter}
-					modifiers={[restrictToVerticalAxis]}
-					onDragEnd={handleDragEnd}
-				>
-					<SortableContext
-						items={items.map((item, index) => ({
-							...item,
-							index,
-						}))}
-						strategy={verticalListSortingStrategy}
-					>
-						{items.map((item, index) => (
-							<SortableItem
-								key={item.id}
-								id={item.id}
-								className={cn(item.className, selectedItem === item.id ? "selected" : "")}
-								onClick={onClick ? () => onClick?.(item.id, index) : undefined}
-							>
-								{item.children}
-							</SortableItem>
-						))}
-					</SortableContext>
-				</DndContext>
+				<DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragEnd={onDragEnd}>
+					{items.map((item, index) => (
+						<SortableItem
+							key={item.id}
+							id={item.id}
+							index={index}
+							className={cn(item.className, selectedItem === item.id ? "selected" : "")}
+							onClick={onClick ? () => onClick?.(item.id, index) : undefined}
+						>
+							{item.children}
+						</SortableItem>
+					))}
+				</DragDropProvider>
 			</ul>
 		</div>
 	);

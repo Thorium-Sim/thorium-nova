@@ -1,4 +1,4 @@
-import type { DragEndEvent } from "@dnd-kit/core";
+import { isSortable } from "@dnd-kit/react/sortable";
 import { useQueryClient } from "@tanstack/react-query";
 import { SortableList } from "@thorium/components/ui/SortableItem";
 import { q } from "@thorium/context/AppContext";
@@ -68,29 +68,24 @@ function DecksList({
 	const [data] = q.plugin.ship.get.useNetRequest({ pluginId, shipId });
 	const queryClient = useQueryClient();
 
-	async function handleDragEnd({
-		active,
-		overIndex,
-	}: {
-		active: DragEndEvent["active"];
-		overIndex: number;
-	}) {
-		const result = await q.plugin.ship.deck.update.netSend({
-			pluginId,
-			shipId,
-			deckId: active.id as string,
-			newIndex: Number(overIndex),
-		});
-		if (result) {
-			navigate(result.name);
-		}
-	}
-
 	return (
 		<>
 			<SortableList
 				items={data.decks.map((d) => ({ id: d.name, children: d.name }))}
-				onDragEnd={handleDragEnd}
+				onDragEnd={async (event) => {
+					if (event.canceled || !event.operation.source || !isSortable(event.operation.source))
+						return;
+
+					const result = await q.plugin.ship.deck.update.netSend({
+						pluginId,
+						shipId,
+						deckId: event.operation.source.id as string,
+						newIndex: event.operation.source.index,
+					});
+					if (result) {
+						navigate(result.name);
+					}
+				}}
 				selectedItem={deckName}
 				className="mb-2"
 			/>

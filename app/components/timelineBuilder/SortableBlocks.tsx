@@ -1,26 +1,11 @@
-import {
-	DndContext,
-	closestCenter,
-	KeyboardSensor,
-	PointerSensor,
-	useSensor,
-	useSensors,
-	type DragEndEvent,
-	type Over,
-} from "@dnd-kit/core";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { useSortable } from "@dnd-kit/sortable";
-import {
-	SortableContext,
-	sortableKeyboardCoordinates,
-	verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
+import { DragDropProvider } from "@dnd-kit/react";
+import { useSortable } from "@dnd-kit/react/sortable";
 import { RenderBlock } from "@thorium/components/timelineBuilder/blocks";
-import { SortableListenerContext } from "@thorium/components/timelineBuilder/SortableListenerContext";
+import { SortableHandleContext } from "@thorium/components/timelineBuilder/SortableHandleContext";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { cn } from "@thorium/utils/cn";
-import { Suspense, type ReactNode } from "react";
+import { Suspense, type ComponentProps, type ReactNode } from "react";
 
 export function SortableBlocks({
 	parentBlock,
@@ -35,15 +20,7 @@ export function SortableBlocks({
 }: {
 	parentBlock?: TimelineBlock;
 	blocks: TimelineBlock[];
-	onDragEnd: ({
-		active,
-		overIndex,
-	}: {
-		active: DragEndEvent["active"];
-		overIndex: number;
-		over: Over | null;
-		activeIndex: number;
-	}) => void;
+	onDragEnd: ComponentProps<typeof DragDropProvider>["onDragEnd"];
 	onUpdate: (block: TimelineBlock, property: any, value: any) => void;
 	onReplace: (id: string, blocks: TimelineBlock[]) => void;
 	onRemove: (id: string) => void;
@@ -51,93 +28,62 @@ export function SortableBlocks({
 	macro?: boolean;
 	availableVariableNames?: string[] | readonly string[];
 }) {
-	const sensors = useSensors(
-		useSensor(PointerSensor, {
-			activationConstraint: { distance: 5 },
-		}),
-		useSensor(KeyboardSensor, {
-			coordinateGetter: sortableKeyboardCoordinates,
-		}),
-	);
-
-	async function handleDragEnd(event: DragEndEvent) {
-		const { active, over } = event;
-		const activeIndex = active.data.current?.sortable.index;
-		const overIndex = over?.data.current?.sortable.index;
-
-		if (typeof overIndex !== "number") return;
-		if (activeIndex !== overIndex) {
-			onDragEnd({ active, over, activeIndex, overIndex });
-		}
-	}
-
 	return (
 		<div className="relative flex flex-1 flex-col gap-2 py-2 pr-2">
-			<DndContext
-				sensors={sensors}
-				collisionDetection={closestCenter}
-				modifiers={[restrictToVerticalAxis]}
-				onDragEnd={handleDragEnd}
-			>
-				<SortableContext
-					items={blocks.map((item, index) => ({
-						...item,
-						index,
-					}))}
-					strategy={verticalListSortingStrategy}
-				>
-					{blocks.map((block, index) => (
-						<SortableBlock id={block.id} key={block.id}>
-							<Suspense>
-								<RenderBlock
-									{...block}
-									executionType={executionType}
-									definedVariables={blocks.reduce(
-										(prev: string[], next, i) => {
-											if (i >= index) return prev;
-											if ("variable" in next) prev.push(next.variable);
-											return prev;
-										},
-										[...availableVariableNames],
-									)}
-									replace={(blocks) => onReplace(block.id, blocks)}
-									update={(property, value) => onUpdate(block, property, value)}
-									onRemove={onRemove}
-									macro={macro}
-									previousActionBlock={
-										blocks.reduceRight((prev: TimelineBlock | undefined, next, i) => {
-											if (prev) return prev;
-											if (i < index && next.type === "Action") return next;
-											return prev;
-										}, undefined) || parentBlock
-									}
-								/>
-							</Suspense>
-						</SortableBlock>
-					))}
-				</SortableContext>
-			</DndContext>
+			<DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragEnd={onDragEnd}>
+				{blocks.map((block, index) => (
+					<SortableBlock id={block.id} index={index} key={block.id}>
+						<Suspense>
+							<RenderBlock
+								{...block}
+								executionType={executionType}
+								definedVariables={blocks.reduce(
+									(prev: string[], next, i) => {
+										if (i >= index) return prev;
+										if ("variable" in next) prev.push(next.variable);
+										return prev;
+									},
+									[...availableVariableNames],
+								)}
+								replace={(blocks) => onReplace(block.id, blocks)}
+								update={(property, value) => onUpdate(block, property, value)}
+								onRemove={onRemove}
+								macro={macro}
+								previousActionBlock={
+									blocks.reduceRight((prev: TimelineBlock | undefined, next, i) => {
+										if (prev) return prev;
+										if (i < index && next.type === "Action") return next;
+										return prev;
+									}, undefined) || parentBlock
+								}
+							/>
+						</Suspense>
+					</SortableBlock>
+				))}
+			</DragDropProvider>
 		</div>
 	);
 }
 
-function SortableBlock({ id, children }: { id: string; children: ReactNode }) {
-	const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-		id: id,
+function SortableBlock({
+	id,
+	index,
+	children,
+}: {
+	id: string;
+	index: number;
+	children: ReactNode;
+}) {
+	const sortable = useSortable({
+		id,
+		index,
+		modifiers: [RestrictToVerticalAxis],
 	});
-	const style = {
-		transform: CSS.Transform.toString(transform),
-		transition,
-	};
+
 	return (
-		<div
-			ref={setNodeRef}
-			style={style}
-			{...attributes}
-			className={cn(isDragging ? "isolate" : "", "w-fit relative")}
-		>
-			<div className={`block ${isDragging ? "pointer-events-none" : ""}`}>
-				<SortableListenerContext value={listeners}>{children}</SortableListenerContext>
+		<div ref={sortable.ref} className={cn(sortable.isDragging ? "isolate" : "", "w-fit relative")}>
+			<div className={`block ${sortable.isDragging ? "pointer-events-none" : ""}`}>
+				<SortableHandleContext value={sortable.handleRef}>{children}</SortableHandleContext>
 			</div>
 		</div>
 	);

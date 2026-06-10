@@ -1,11 +1,9 @@
-import type { DragEndEvent } from "@dnd-kit/core";
 import { Navigate } from "@thorium/components/Navigate";
-import { StepButtons } from "@thorium/components/StepEditor";
+import { StepButtons, StepList } from "@thorium/components/StepEditor";
 import { q } from "@thorium/context/AppContext";
 import { useConfirm } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import { useMenubar } from "@thorium/ui/Menubar";
-import { SortableList } from "@thorium/ui/SortableItem";
 import { href, Link, Outlet, useLocation, useMatch, useNavigate, useParams } from "react-router";
 
 export default function TrainingLayout() {
@@ -35,27 +33,6 @@ export default function TrainingLayout() {
 
 	if (!timelineId || !item) return <Navigate to={`/config/${pluginId}/trainings`} />;
 
-	const steps = item.steps.map((s) => ({ id: s.id, children: s.name }));
-
-	async function handleDragEnd({
-		active,
-		overIndex,
-	}: {
-		active: DragEndEvent["active"];
-		overIndex: number;
-	}) {
-		const result = await q.plugin.timeline.step.reorder.netSend({
-			pluginId,
-			timelineId,
-			timelineType: "trainings",
-			stepId: active.id as string,
-			newIndex: Number(overIndex),
-		});
-		if (result) {
-			void navigate(result.stepId);
-		}
-	}
-
 	if (!pathname.endsWith(timelineId)) {
 		return (
 			<div className="flex h-[calc(100%-2rem)] gap-8 p-8">
@@ -65,11 +42,14 @@ export default function TrainingLayout() {
 						Training Details
 					</Link>
 					<hr className="my-2" />
-					<SortableList
-						items={steps}
-						onDragEnd={handleDragEnd}
-						selectedItem={stepId}
-						className="mb-2"
+					<StepList
+						pluginId={pluginId}
+						timelineId={timelineId}
+						timelineType="trainings"
+						stepId={stepId}
+						setStep={(stepId) => {
+							navigate(stepId);
+						}}
 					/>
 					<StepButtons
 						pluginId={pluginId}

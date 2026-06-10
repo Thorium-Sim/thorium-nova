@@ -1,3 +1,4 @@
+import { isSortable } from "@dnd-kit/react/sortable";
 import { Navigate } from "@thorium/components/Navigate";
 import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
@@ -125,14 +126,16 @@ export default function MacroLayout() {
 						executionType={["main", "prerequisite"]}
 						blocks={macro?.blocks || []}
 						macro
-						onDragEnd={({ active, overIndex }) =>
-							q.plugin.macro.block.reorder.netSend({
+						onDragEnd={(event) => {
+							if (event.canceled || !event.operation.source || !isSortable(event.operation.source))
+								return;
+							void q.plugin.macro.block.reorder.netSend({
 								pluginId,
 								macroId,
-								blockId: active.id as string,
-								newIndex: Number(overIndex),
-							})
-						}
+								blockId: event.operation.source.id as string,
+								newIndex: event.operation.source.index,
+							});
+						}}
 						onUpdate={(block, property, value) => {
 							const { id: _, type: __, ...properties } = block;
 							void q.plugin.macro.block.update.netSend({

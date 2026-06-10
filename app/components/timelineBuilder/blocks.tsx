@@ -5,7 +5,7 @@
  * can then be used throughout the entire timeline.
  */
 
-import { arrayMove } from "@dnd-kit/sortable";
+import { move } from "@dnd-kit/helpers";
 import { ActionBlock } from "@thorium/components/timelineBuilder/ActionBlock";
 import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { BlockWrapper } from "@thorium/components/timelineBuilder/BlockWrapper";
@@ -124,11 +124,8 @@ export function RenderBlock({
 									block.triggerBlocks.filter((t) => t.id !== id),
 								)
 							}
-							onDragEnd={({ activeIndex, overIndex }) => {
-								(update as any)(
-									"triggerBlocks",
-									arrayMove(block.triggerBlocks, activeIndex, overIndex),
-								);
+							onDragEnd={(event) => {
+								(update as any)("triggerBlocks", move(block.triggerBlocks, event));
 							}}
 							onUpdate={(innerBlock, property, value) => {
 								const { id, type: _, ...properties } = innerBlock;

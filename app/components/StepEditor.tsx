@@ -1,3 +1,4 @@
+import { isSortable } from "@dnd-kit/react/sortable";
 import type { TimelineStep } from "@thorium/.server/classes/Plugins/TimelineStep";
 import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
@@ -10,6 +11,7 @@ import { usePrompt } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
+import { SortableList } from "@thorium/ui/SortableItem";
 import TagInput from "@thorium/ui/TagInput";
 import { Suspense } from "react";
 import { Button as RAButton } from "react-aria-components";
@@ -170,16 +172,22 @@ export function TimelineStepEditor({
 							executionType={["main"]}
 							blocks={step?.blocks || []}
 							availableVariableNames={variables}
-							onDragEnd={({ active, overIndex }) =>
+							onDragEnd={(event) => {
+								if (
+									event.canceled ||
+									!event.operation.source ||
+									!isSortable(event.operation.source)
+								)
+									return;
 								q.plugin.timeline.step.block.reorder.netSend({
 									pluginId,
 									timelineId,
 									timelineType,
 									stepId,
-									blockId: active.id as string,
-									newIndex: Number(overIndex),
-								})
-							}
+									blockId: event.operation.source.id as string,
+									newIndex: event.operation.source.index,
+								});
+							}}
 							onUpdate={(block, property, value) => {
 								const { id: _, type: __, ...properties } = block;
 								q.plugin.timeline.step.block.update.netSend({
@@ -319,5 +327,51 @@ export function StepButtons({
 				Delete
 			</Button>
 		</div>
+	);
+}
+
+export function StepList({
+	pluginId,
+	timelineId,
+	timelineType,
+	stepId,
+	setStep,
+}: {
+	pluginId: string;
+	timelineId: string;
+	timelineType: "reports" | "missions" | "trainings";
+
+	stepId?: string | null;
+	setStep: (id: string) => void;
+}) {
+	const [item] = q.plugin.timeline.get.useNetRequest({
+		pluginId,
+		timelineId,
+		timelineType,
+	});
+
+	const steps = item.steps.map((s) => ({ id: s.id, children: s.name }));
+
+	return (
+		<SortableList
+			items={steps}
+			onDragEnd={async (event) => {
+				if (event.canceled || !event.operation.source || !isSortable(event.operation.source))
+					return;
+
+				const result = await q.plugin.timeline.step.reorder.netSend({
+					pluginId,
+					timelineId,
+					timelineType,
+					stepId: event.operation.source.id as string,
+					newIndex: event.operation.source.index,
+				});
+				if (result) {
+					setStep(result.stepId);
+				}
+			}}
+			selectedItem={stepId}
+			className="mb-2"
+		/>
 	);
 }

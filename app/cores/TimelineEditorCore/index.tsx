@@ -1,11 +1,10 @@
-import type { DragEndEvent } from "@dnd-kit/core";
+import { isSortable } from "@dnd-kit/react/sortable";
 import { StepButtons, TimelineStepEditor } from "@thorium/components/StepEditor";
 import { q } from "@thorium/context/AppContext";
 import Button from "@thorium/ui/Button";
 import Select from "@thorium/ui/Select";
 import { SortableList } from "@thorium/ui/SortableItem";
-import { cn } from "@thorium/utils/cn";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 
 export function TimelineEditorCore() {
 	const [flight] = q.flight.active.useNetRequest();
@@ -40,25 +39,6 @@ export function TimelineEditorCore() {
 			className: "list-group-item-xs",
 		})) || [];
 
-	async function handleDragEnd({
-		active,
-		overIndex,
-	}: {
-		active: DragEndEvent["active"];
-		overIndex: number;
-	}) {
-		if (!selectedTimeline) return;
-		const result = await q.plugin.timeline.step.reorder.netSend({
-			pluginId: selectedTimeline.pluginName,
-			timelineId: selectedTimeline.name,
-			timelineType: selectedTimeline.kind,
-			stepId: active.id as string,
-			newIndex: Number(overIndex),
-		});
-		if (result) {
-			setSelectedStepId(result.stepId);
-		}
-	}
 	return (
 		<div className="flex h-full flex-col">
 			<div className="flex items-center gap-1">
@@ -109,7 +89,21 @@ export function TimelineEditorCore() {
 			/>
 			<SortableList
 				items={steps}
-				onDragEnd={handleDragEnd}
+				onDragEnd={async (event) => {
+					if (!selectedTimeline) return;
+					if (event.canceled || !event.operation.source || !isSortable(event.operation.source))
+						return;
+					const result = await q.plugin.timeline.step.reorder.netSend({
+						pluginId: selectedTimeline.pluginName,
+						timelineId: selectedTimeline.name,
+						timelineType: selectedTimeline.kind,
+						stepId: event.operation.source.id as string,
+						newIndex: event.operation.source.index,
+					});
+					if (result) {
+						setSelectedStepId(result.stepId);
+					}
+				}}
 				selectedItem={selectedStepId}
 				onClick={(id) => setSelectedStepId(id)}
 			/>

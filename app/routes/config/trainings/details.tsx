@@ -1,3 +1,4 @@
+import { isSortable } from "@dnd-kit/react/sortable";
 import { Navigate } from "@thorium/components/Navigate";
 import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
@@ -157,15 +158,21 @@ export default function TrainingDetails() {
 							executionType={["prerequisite"]}
 							blocks={prerequisiteBlocks}
 							availableVariableNames={trainingVariableNames}
-							onDragEnd={({ active, overIndex }) =>
-								q.plugin.timeline.prerequisiteBlock.reorder.netSend({
+							onDragEnd={(event) => {
+								if (
+									event.canceled ||
+									!event.operation.source ||
+									!isSortable(event.operation.source)
+								)
+									return;
+								void q.plugin.timeline.prerequisiteBlock.reorder.netSend({
 									pluginId,
 									timelineId,
 									timelineType: "trainings",
-									blockId: active.id as string,
-									newIndex: Number(overIndex),
-								})
-							}
+									blockId: event.operation.source.id as string,
+									newIndex: event.operation.source.index,
+								});
+							}}
 							onUpdate={(block, property, value) => {
 								const { id: _, type: __, ...properties } = block;
 								void q.plugin.timeline.prerequisiteBlock.update.netSend({
