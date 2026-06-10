@@ -291,4 +291,18 @@ export const thorium = t.router({
 		.send(({ input }) => {
 			console.debug(input.message);
 		}),
+	eventsSub: t.procedure
+		.filter((_: { name: string; values: any }) => true)
+		.autoPublish([], () => null)
+		.request(({ publish }) => {
+			if (!publish) return null;
+			return publish;
+		}),
+	actionsSub: t.procedure
+		.filter((_: { name: string; values: any }) => true)
+		.autoPublish([], () => null)
+		.request(({ publish }) => {
+			if (!publish) return null;
+			return publish;
+		}),
 });

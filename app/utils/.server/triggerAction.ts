@@ -1,6 +1,7 @@
 import { DataContext } from "@thorium/.server/DataContext";
 import { router, type AllSends, type SendInputs } from "@thorium/.server/init/router";
 import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
+import { notifyActions, notifyEvents } from "@thorium/utils/.server/notifyActions";
 import { callProcedure } from "@thorium/utils/live-query/.server/router";
 
 import { DataStore } from "./db-fs";
@@ -22,6 +23,11 @@ export async function triggerAction<A extends AllSends>(
 			const ecs = context?.flight?.ecs;
 			if (!ecs || opts.type !== "send") return;
 
+			void notifyActions(opts.path, opts.rawInput);
+			void notifyEvents(opts.path, {
+				...(opts.rawInput as any),
+				...(typeof result === "object" && !Array.isArray(result) ? result : {}),
+			});
 			processTriggers(ecs, {
 				event: opts.path,
 				values: {

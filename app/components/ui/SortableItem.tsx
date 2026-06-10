@@ -77,7 +77,7 @@ export function SortableList({
 	onClick,
 }: {
 	items: { id: string; children: ReactNode; className?: string }[];
-	selectedItem?: string;
+	selectedItem?: string | null;
 	onDragEnd: (params: {
 		active: DragEndEvent["active"];
 		over: DragEndEvent["over"];

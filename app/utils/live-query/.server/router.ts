@@ -201,6 +201,7 @@ export async function callProcedure(
 	}
 
 	const { procedures, ...procedureOpts } = opts;
+
 	const procedure = procedures[path] as AnyProcedure;
 	const result = await procedure(opts);
 	onCall?.(procedureOpts, result);

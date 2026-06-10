@@ -32,22 +32,20 @@ export function DistanceCondition({
 				/>
 				km apart.
 			</div>
-			<div className="flex self-end">
-				<Checkbox
-					checked={persist}
-					onChange={(e) => update("persist", e.currentTarget.checked)}
-					label={
-						<>
-							Persist{" "}
-							<InfoTip>
-								Whether this trigger condition will continue to exist after the timeline step has
-								proceeded. Set this to true if you want the trigger remain active. It will still
-								automatically deactivate once it has been triggered once.
-							</InfoTip>
-						</>
-					}
-				/>
-			</div>
+			<Checkbox
+				checked={persist}
+				onChange={(e) => update("persist", e.currentTarget.checked)}
+				label={
+					<>
+						Persist{" "}
+						<InfoTip>
+							Whether this trigger condition will continue to exist after the timeline step has
+							proceeded. Set this to true if you want the trigger remain active. It will still
+							automatically deactivate once it has been triggered once.
+						</InfoTip>
+					</>
+				}
+			/>
 		</>
 	);
 }

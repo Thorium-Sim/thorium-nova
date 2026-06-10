@@ -20,7 +20,7 @@ import { RenderBlock } from "@thorium/components/timelineBuilder/blocks";
 import { SortableListenerContext } from "@thorium/components/timelineBuilder/SortableListenerContext";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { cn } from "@thorium/utils/cn";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 
 export function SortableBlocks({
 	parentBlock,
@@ -88,29 +88,31 @@ export function SortableBlocks({
 				>
 					{blocks.map((block, index) => (
 						<SortableBlock id={block.id} key={block.id}>
-							<RenderBlock
-								{...block}
-								executionType={executionType}
-								definedVariables={blocks.reduce(
-									(prev: string[], next, i) => {
-										if (i >= index) return prev;
-										if ("variable" in next) prev.push(next.variable);
-										return prev;
-									},
-									[...availableVariableNames],
-								)}
-								replace={(blocks) => onReplace(block.id, blocks)}
-								update={(property, value) => onUpdate(block, property, value)}
-								onRemove={onRemove}
-								macro={macro}
-								previousActionBlock={
-									blocks.reduceRight((prev: TimelineBlock | undefined, next, i) => {
-										if (prev) return prev;
-										if (i < index && next.type === "Action") return next;
-										return prev;
-									}, undefined) || parentBlock
-								}
-							/>
+							<Suspense>
+								<RenderBlock
+									{...block}
+									executionType={executionType}
+									definedVariables={blocks.reduce(
+										(prev: string[], next, i) => {
+											if (i >= index) return prev;
+											if ("variable" in next) prev.push(next.variable);
+											return prev;
+										},
+										[...availableVariableNames],
+									)}
+									replace={(blocks) => onReplace(block.id, blocks)}
+									update={(property, value) => onUpdate(block, property, value)}
+									onRemove={onRemove}
+									macro={macro}
+									previousActionBlock={
+										blocks.reduceRight((prev: TimelineBlock | undefined, next, i) => {
+											if (prev) return prev;
+											if (i < index && next.type === "Action") return next;
+											return prev;
+										}, undefined) || parentBlock
+									}
+								/>
+							</Suspense>
 						</SortableBlock>
 					))}
 				</SortableContext>

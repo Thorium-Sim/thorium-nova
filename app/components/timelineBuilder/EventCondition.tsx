@@ -14,7 +14,7 @@ export function EventCondition({ event, multiple, persist, update }: BlockProps<
 				<EventCombobox value={eventObject} onChange={(value) => update("event", value.event)} /> is
 				triggered.
 			</div>
-			<div className="flex gap-2 self-end">
+			<div className="flex gap-2">
 				<Checkbox
 					checked={multiple}
 					onChange={(e) => update("multiple", e.currentTarget.checked)}

@@ -1,11 +1,12 @@
 import type { DragEndEvent } from "@dnd-kit/core";
 import { Navigate } from "@thorium/components/Navigate";
+import { StepButtons } from "@thorium/components/StepEditor";
 import { q } from "@thorium/context/AppContext";
-import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
+import { useConfirm } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import { useMenubar } from "@thorium/ui/Menubar";
 import { SortableList } from "@thorium/ui/SortableItem";
-import { Link, Outlet, useLocation, useMatch, useNavigate, useParams } from "react-router";
+import { href, Link, Outlet, useLocation, useMatch, useNavigate, useParams } from "react-router";
 
 export default function TrainingLayout() {
 	const { pathname } = useLocation();
@@ -21,7 +22,6 @@ export default function TrainingLayout() {
 
 	const navigate = useNavigate();
 	const confirm = useConfirm();
-	const prompt = usePrompt();
 
 	const [item] = q.plugin.timeline.get.useNetRequest({
 		pluginId,
@@ -71,78 +71,19 @@ export default function TrainingLayout() {
 						selectedItem={stepId}
 						className="mb-2"
 					/>
-					<div className="mb-2 flex">
-						<Button
-							className="btn-xs btn-success flex-grow"
-							onClick={async () => {
-								const name = await prompt("What is the new step name?");
-								if (!name) return;
-								const step = await q.plugin.timeline.step.add.netSend({
-									pluginId,
-									timelineId,
-									timelineType: "trainings",
-									name,
-								});
-								void navigate(`${step.stepId}`);
-							}}
-						>
-							Add Step
-						</Button>
-						<Button
-							className="btn-xs btn-warning flex-grow"
-							disabled={!stepId}
-							onClick={async () => {
-								const name = await prompt("What is the new step name?");
-								if (!name || !stepId) return;
-								const step = await q.plugin.timeline.step.insert.netSend({
-									pluginId,
-									timelineId,
-									timelineType: "trainings",
-									stepId,
-									name,
-								});
-								void navigate(`${step.stepId}`);
-							}}
-						>
-							Insert Step
-						</Button>
-						<Button
-							className="btn-xs btn-info flex-grow"
-							disabled={!stepId}
-							onClick={async () => {
-								if (!stepId) return;
-								const step = await q.plugin.timeline.step.duplicate.netSend({
-									pluginId,
-									timelineId,
-									timelineType: "trainings",
-									stepId,
-								});
-								void navigate(`${step.stepId}`);
-							}}
-						>
-							Duplicate
-						</Button>
-						<Button
-							className="btn-xs btn-error flex-grow"
-							disabled={!stepId}
-							onClick={async () => {
-								if (!stepId) return;
-								const { alternateStep } = await q.plugin.timeline.step.delete.netSend({
-									pluginId,
-									timelineId,
-									timelineType: "trainings",
-									stepId,
-								});
-								if (alternateStep) {
-									void navigate(alternateStep);
-								} else {
-									void navigate(`/config/${pluginId}/trainings/${timelineId}`);
-								}
-							}}
-						>
-							Delete
-						</Button>
-					</div>
+					<StepButtons
+						pluginId={pluginId}
+						timelineId={timelineId}
+						timelineType="trainings"
+						stepId={stepId}
+						setStep={(stepId) => {
+							if (stepId) {
+								navigate(stepId);
+							} else {
+								navigate(href("/config/:pluginId/trainings/:timelineId", { pluginId, timelineId }));
+							}
+						}}
+					/>
 					<Button
 						className="btn-outline btn-error w-full"
 						disabled={!timelineId}

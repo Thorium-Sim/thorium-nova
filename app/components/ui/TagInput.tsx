@@ -24,6 +24,7 @@ const TagInput: React.FC<{
 	onRemove: (t: string) => void;
 	onAdd: (t: string) => void;
 	className?: string;
+	inputClassName?: string;
 	omitChars?: string[];
 }> = ({
 	tags,
@@ -35,6 +36,7 @@ const TagInput: React.FC<{
 	placeholder = "Type and press return to add a tag",
 	omitChars = [".", ","],
 	className,
+	inputClassName,
 }) => {
 	const [tagInput, setTagInput] = React.useState("");
 	return (
@@ -43,7 +45,7 @@ const TagInput: React.FC<{
 				<span className={cn("label", { "sr-only": labelHidden })}>{label}</span>
 				<input
 					disabled={disabled}
-					className="input"
+					className={cn("input", inputClassName)}
 					placeholder={placeholder}
 					value={tagInput}
 					onChange={(e) => setTagInput(e.currentTarget.value)}

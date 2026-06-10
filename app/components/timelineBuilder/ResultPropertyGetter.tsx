@@ -39,8 +39,7 @@ export function ResultPropertyIntoVariable({
 
 	return (
 		<>
-			<div className="flex flex-wrap items-center gap-x-1 gap-y-5">
-				{/* TODO June 12, 2025 - Turn this into a combobox based on what the result type is, eg. action parameters, event parameters, etc. */}
+			<div className="flex flex-wrap items-center gap-x-1 gap-y-2">
 				Save property{" "}
 				<MadLibsCombobox
 					placeholder="Property"

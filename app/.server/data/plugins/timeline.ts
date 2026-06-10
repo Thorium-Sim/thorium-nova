@@ -1,5 +1,6 @@
 import path from "node:path";
 
+import type BasePlugin from "@thorium/.server/classes/Plugins";
 import ConversationPlugin from "@thorium/.server/classes/Plugins/Conversation";
 import MissionPlugin from "@thorium/.server/classes/Plugins/Mission";
 import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
@@ -62,6 +63,8 @@ const block = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
+
 			return { actionId: id };
 		}),
 	reorder: t.procedure
@@ -91,6 +94,8 @@ const block = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
+
 			return { actionId: input.blockId };
 		}),
 	delete: t.procedure
@@ -119,6 +124,8 @@ const block = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
+
 			return { actionId: input.blockId };
 		}),
 	update: t.procedure
@@ -149,6 +156,8 @@ const block = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
+
 			return { actionId: block.id };
 		}),
 	replace: t.procedure
@@ -184,6 +193,8 @@ const block = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
+
 			return {};
 		}),
 });
@@ -232,6 +243,8 @@ const prerequisiteBlock = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
+
 			return { actionId: id };
 		}),
 	reorder: t.procedure
@@ -259,6 +272,8 @@ const prerequisiteBlock = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
+
 			return { actionId: input.blockId };
 		}),
 	delete: t.procedure
@@ -285,6 +300,8 @@ const prerequisiteBlock = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
+
 			return { actionId: input.blockId };
 		}),
 	update: t.procedure
@@ -312,6 +329,8 @@ const prerequisiteBlock = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
+
 			return { actionId: block.id };
 		}),
 	replace: t.procedure
@@ -340,6 +359,8 @@ const prerequisiteBlock = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
+
 			return {};
 		}),
 });
@@ -374,6 +395,7 @@ const step = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
 
 			return { timelineId: timeline.name, stepId };
 		}),
@@ -400,7 +422,7 @@ const step = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
-
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
 			return { timelineId: timeline.name, stepId };
 		}),
 	duplicate: t.procedure
@@ -425,7 +447,7 @@ const step = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
-
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
 			return { timelineId: timeline.name, stepId };
 		}),
 	delete: t.procedure
@@ -454,6 +476,7 @@ const step = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
 			return { alternateStep: timeline.steps[alternateStep]?.id || null };
 		}),
 	reorder: t.procedure
@@ -479,6 +502,7 @@ const step = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
 			return { stepId: input.stepId };
 		}),
 	update: t.procedure
@@ -511,6 +535,7 @@ const step = t.router({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
 			});
+			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
 			return { stepId: step.id };
 		}),
 	block,
@@ -725,14 +750,39 @@ const conversations = t.router({
 
 export const timeline = t.router({
 	all: t.procedure
-		.input(z.object({ pluginId: z.string(), timelineType }))
+		.input(
+			z
+				.object({ pluginId: z.string().optional(), timelineType: timelineType.optional() })
+				.optional(),
+		)
 		.filter((publish: { pluginId: string } | null, { input }) => {
-			if (!publish || publish.pluginId === input.pluginId) return true;
+			if (!publish || !input?.pluginId || publish.pluginId === input.pluginId) return true;
 			return false;
 		})
 		.request(({ ctx, input }) => {
-			const plugin = getPlugin(ctx, input.pluginId);
-			return plugin.aspects[input.timelineType];
+			const pluginId = input?.pluginId;
+			const timelineType = input?.timelineType;
+			const timelines = [];
+			const plugins: BasePlugin[] = [];
+			if (pluginId) {
+				plugins.push(getPlugin(ctx, pluginId));
+			} else {
+				for (const plugin of ctx.server.plugins) {
+					if (plugin.active) plugins.push(plugin);
+				}
+			}
+
+			for (const plugin of plugins) {
+				if (timelineType) {
+					timelines.push(...plugin.aspects[timelineType]);
+				} else {
+					timelines.push(...plugin.aspects.missions);
+					timelines.push(...plugin.aspects.trainings);
+					timelines.push(...plugin.aspects.reports);
+				}
+			}
+
+			return timelines.map((t) => ({ ...t, pluginName: t.plugin.name }));
 		}),
 	get: t.procedure
 		.input(z.object({ pluginId: z.string(), timelineId: z.string(), timelineType }))

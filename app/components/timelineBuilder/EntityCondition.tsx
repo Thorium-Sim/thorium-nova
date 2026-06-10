@@ -63,7 +63,7 @@ export function EntityCondition({ checks, match, persist, update }: BlockProps<"
 							/>
 							{i === checks.length - 1 ? (
 								<Button
-									className="btn-circle btn-success btn-xs !p-0 !text-lg"
+									className="btn btn-circle btn-success btn-xs !p-0 !text-lg"
 									onPress={() =>
 										update(
 											"checks",
@@ -82,13 +82,15 @@ export function EntityCondition({ checks, match, persist, update }: BlockProps<"
 								<>
 									<div className="flex-1" />
 									<Button
-										className="btn-circle btn-error btn-xs !p-0 !text-lg"
-										onPress={() =>
+										className="btn btn-circle btn-error btn-xs !p-0 !text-lg"
+										onPress={() => {
 											update(
 												"checks",
-												produce(checks, (draft) => draft.splice(i, 1)),
-											)
-										}
+												produce(checks, (draft) => {
+													draft.splice(i, 1);
+												}),
+											);
+										}}
 									>
 										<Icon name="minus" />
 									</Button>
@@ -98,22 +100,20 @@ export function EntityCondition({ checks, match, persist, update }: BlockProps<"
 					))}
 				</div>
 			</div>
-			<div className="flex items-end gap-2 self-end">
-				<Checkbox
-					checked={persist}
-					onChange={(e) => update("persist", e.currentTarget.checked)}
-					label={
-						<>
-							Persist{" "}
-							<InfoTip>
-								Whether this trigger condition will continue to exist after the timeline step has
-								proceeded. Set this to true if you want the trigger remain active. It will still
-								automatically deactivate once it has been triggered once.
-							</InfoTip>
-						</>
-					}
-				/>
-			</div>
+			<Checkbox
+				checked={persist}
+				onChange={(e) => update("persist", e.currentTarget.checked)}
+				label={
+					<>
+						Persist{" "}
+						<InfoTip>
+							Whether this trigger condition will continue to exist after the timeline step has
+							proceeded. Set this to true if you want the trigger remain active. It will still
+							automatically deactivate once it has been triggered once.
+						</InfoTip>
+					</>
+				}
+			/>
 		</>
 	);
 }

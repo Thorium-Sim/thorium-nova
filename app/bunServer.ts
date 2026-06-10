@@ -12,6 +12,7 @@ import { DataStore } from "@thorium/utils/.server/db-fs";
 import { bunDataStoreProps, setBasePath } from "@thorium/utils/.server/db-fs/bunDataStoreProps";
 import { loadPlugins } from "@thorium/utils/.server/db-fs/loadPlugins";
 import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
+import { notifyActions, notifyEvents } from "@thorium/utils/.server/notifyActions";
 import { snapshot } from "@thorium/utils/.server/snapshot";
 import { vanity } from "@thorium/utils/.server/vanity";
 import { liveQueryPlugin } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
@@ -60,6 +61,12 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 					const ecs = database?.flight?.ecs;
 					if (!ecs || opts.type !== "send") return;
 					const rawInputObj = isObject(opts.rawInput) ? opts.rawInput : {};
+
+					void notifyActions(opts.path, rawInputObj);
+					void notifyEvents(opts.path, {
+						...rawInputObj,
+						...(typeof result === "object" && !Array.isArray(result) ? result : {}),
+					});
 					void processTriggers(ecs, {
 						event: opts.path,
 						values: {

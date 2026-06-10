@@ -23,3 +23,5 @@ export { ShortRangeCommCore } from "../cards/ShortRangeComm/core";
 export { ShipCore } from "./ShipCore";
 export { ReputationCore } from "./ReputationCore";
 export { SensorsDataCore } from "../cards/Sensors/core";
+export { EventsCore } from "./EventsCore";
+export { TimelineEditorCore } from "./TimelineEditorCore";
