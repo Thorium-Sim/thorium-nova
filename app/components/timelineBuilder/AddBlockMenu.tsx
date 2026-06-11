@@ -46,6 +46,7 @@ export function AddBlockButton({
 	omitBlocks?: boolean;
 	macro?: boolean;
 	executionType: ("main" | "prerequisite")[];
+	timelineType: "missions" | "reports" | "trainings";
 }) {
 	const [macros] = q.plugin.macro.all.useNetRequest({ type: "macro" });
 
@@ -173,6 +174,7 @@ export function AddBlockMenu({
 	onAddBlock,
 	macro,
 	executionType,
+	timelineType,
 }: {
 	onAddBlock: <T extends TimelineBlock["type"]>(
 		blockType: T,
@@ -180,10 +182,16 @@ export function AddBlockMenu({
 	) => void;
 	macro?: boolean;
 	executionType: ("main" | "prerequisite")[];
+	timelineType: "missions" | "reports" | "trainings";
 }) {
 	return (
 		<div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 translate-y-1/2 p-2">
-			<AddBlockButton onAddBlock={onAddBlock} macro={macro} executionType={executionType}>
+			<AddBlockButton
+				onAddBlock={onAddBlock}
+				macro={macro}
+				executionType={executionType}
+				timelineType={timelineType}
+			>
 				<Button
 					aria-label="Add block"
 					className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-white/50 bg-black/20 hover:bg-white/20 hover:backdrop-brightness-200 hover:backdrop-saturate-200"

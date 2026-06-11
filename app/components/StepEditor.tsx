@@ -2,6 +2,7 @@ import { isSortable } from "@dnd-kit/react/sortable";
 import type { TimelineStep } from "@thorium/.server/classes/Plugins/TimelineStep";
 import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { q } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
 import { InterpolateInfo } from "@thorium/routes/config/reports/InterpolateInfo";
@@ -153,6 +154,7 @@ export function TimelineStepEditor({
 							<p>No blocks added to step.</p>
 							<AddBlockButton
 								executionType={["main"]}
+								timelineType={timelineType}
 								onAddBlock={async (type, init) => {
 									await q.plugin.timeline.step.block.add.netSend({
 										pluginId,
@@ -222,23 +224,23 @@ export function TimelineStepEditor({
 					)}
 				</div>
 			</Suspense>
-			<Suspense>
-				<AddBlockButton
-					executionType={["main"]}
-					onAddBlock={async (type, init) => {
-						await q.plugin.timeline.step.block.add.netSend({
-							pluginId,
-							timelineId,
-							timelineType,
-							stepId,
-							blockType: type,
-							init,
-						});
-					}}
-				>
-					<RAButton className="btn btn-sm btn-outline btn-success">Add Block</RAButton>
-				</AddBlockButton>
-			</Suspense>
+
+			<AddBlockButton
+				timelineType={timelineType}
+				executionType={["main"]}
+				onAddBlock={async (type, init) => {
+					await q.plugin.timeline.step.block.add.netSend({
+						pluginId,
+						timelineId,
+						timelineType,
+						stepId,
+						blockType: type,
+						init,
+					});
+				}}
+			>
+				<RAButton className="btn btn-sm btn-outline btn-success">Add Block</RAButton>
+			</AddBlockButton>
 		</div>
 	);
 }
@@ -261,7 +263,7 @@ export function StepButtons({
 	return (
 		<div className="mb-2 flex">
 			<Button
-				className="btn-xs btn-success flex-grow"
+				className="btn-xs btn-success grow"
 				onClick={async () => {
 					const name = await prompt("What is the new step name?");
 					if (!name) return;
@@ -277,7 +279,7 @@ export function StepButtons({
 				Add Step
 			</Button>
 			<Button
-				className="btn-xs btn-warning flex-grow"
+				className="btn-xs btn-warning grow"
 				disabled={!stepId}
 				onClick={async () => {
 					const name = await prompt("What is the new step name?");
@@ -295,7 +297,7 @@ export function StepButtons({
 				Insert Step
 			</Button>
 			<Button
-				className="btn-xs btn-info flex-grow"
+				className="btn-xs btn-info grow"
 				disabled={!stepId}
 				onClick={async () => {
 					if (!stepId) return;
@@ -311,7 +313,7 @@ export function StepButtons({
 				Duplicate
 			</Button>
 			<Button
-				className="btn-xs btn-error flex-grow"
+				className="btn-xs btn-error grow"
 				disabled={!stepId}
 				onClick={async () => {
 					if (!stepId) return;
@@ -373,5 +375,117 @@ export function StepList({
 			selectedItem={stepId}
 			className="mb-2"
 		/>
+	);
+}
+
+export function PrerequisiteBlocks({
+	pluginId,
+	timelineId,
+	timelineType,
+	prerequisiteBlocks,
+}: {
+	pluginId: string;
+	timelineId: string;
+	timelineType: "reports" | "missions" | "trainings";
+	prerequisiteBlocks: TimelineBlock[];
+}) {
+	const variables =
+		timelineType === "reports"
+			? reportVariableNames
+			: timelineType === "trainings"
+				? trainingVariableNames
+				: [];
+
+	return (
+		<div className="col-span-2 flex flex-col">
+			<h3 className="flex items-center text-lg font-medium">
+				Prerequisites{" "}
+				<InfoTip>
+					These blocks will be executed immediately, including any checks, to evaluate if the
+					timeline is available to be used. Leave blank to always include this timeline.
+				</InfoTip>
+			</h3>
+			<div className="flex-1 overflow-x-hidden overflow-y-auto">
+				{prerequisiteBlocks.length === 0 ? (
+					<div>
+						<p>No prerequisite blocks.</p>
+						<AddBlockButton
+							timelineType={timelineType}
+							executionType={["prerequisite"]}
+							onAddBlock={async (type, init) => {
+								await q.plugin.timeline.prerequisiteBlock.add.netSend({
+									pluginId,
+									timelineId,
+									timelineType,
+									blockType: type,
+									init,
+								});
+							}}
+						>
+							<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
+						</AddBlockButton>
+					</div>
+				) : (
+					<SortableBlocks
+						executionType={["prerequisite"]}
+						blocks={prerequisiteBlocks}
+						availableVariableNames={variables}
+						onDragEnd={(event) => {
+							if (event.canceled || !event.operation.source || !isSortable(event.operation.source))
+								return;
+							void q.plugin.timeline.prerequisiteBlock.reorder.netSend({
+								pluginId,
+								timelineId,
+								timelineType,
+								blockId: event.operation.source.id as string,
+								newIndex: event.operation.source.index,
+							});
+						}}
+						onUpdate={(block, property, value) => {
+							const { id: _, type: __, ...properties } = block;
+							q.plugin.timeline.prerequisiteBlock.update.netSend({
+								pluginId,
+								timelineId,
+								timelineType,
+								blockId: block.id,
+								properties: { ...properties, [property]: value },
+							});
+						}}
+						onReplace={(id, blocks) => {
+							q.plugin.timeline.prerequisiteBlock.replace.netSend({
+								pluginId,
+								timelineId,
+								timelineType,
+								blockId: id,
+								blocks,
+							});
+						}}
+						onRemove={(id) =>
+							q.plugin.timeline.prerequisiteBlock.delete.netSend({
+								pluginId,
+								timelineId,
+								timelineType,
+								blockId: id,
+							})
+						}
+					/>
+				)}
+			</div>
+			<AddBlockButton
+				timelineType={timelineType}
+				executionType={["prerequisite"]}
+				onAddBlock={async (type, init) => {
+					await q.plugin.timeline.prerequisiteBlock.add.netSend({
+						pluginId,
+						timelineId,
+						timelineType,
+						blockType: type,
+						init,
+					});
+				}}
+			>
+				<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
+			</AddBlockButton>
+		</div>
 	);
 }

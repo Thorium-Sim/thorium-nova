@@ -46,7 +46,32 @@ export const flight = t.router({
 			);
 			return scannedFiles;
 		}),
-
+	timelines: t.procedure
+		.autoPublish(["isTimeline", "isTimelineStep"], () => null)
+		.request(({ ctx }) => {
+			const timelines = [];
+			for (const entity of ctx.ecs.componentCache.get("isTimeline") || []) {
+				if (!entity.components.isTimeline) continue;
+				timelines.push({
+					id: entity.id,
+					name: entity.components.identity?.name || "Unknown",
+					type: entity.components.isTimeline.type,
+					currentStep: entity.components.isTimeline.currentStep,
+					shipId: entity.components.isTimeline.shipId,
+					steps: entity.components.isTimeline.steps.flatMap((s) => {
+						const entity = ctx.ecs.getEntityById(s);
+						if (!entity?.components.isTimelineStep) return [];
+						return {
+							id: entity.id,
+							name: entity.components.identity?.name || "Unknown",
+							state: entity.components.isTimelineStep.state,
+							blocks: entity.components.isTimelineStep.blocks,
+						};
+					}),
+				});
+			}
+			return timelines;
+		}),
 	all: t.procedure
 		.autoPublish(["isFlight"], () => null)
 		.request(() => {

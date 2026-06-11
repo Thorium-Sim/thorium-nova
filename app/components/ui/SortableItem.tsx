@@ -14,7 +14,7 @@ export function SortableItem({
 }: {
 	id: string;
 	index: number;
-	children: ReactNode;
+	children: ReactNode | ((sortable: ReturnType<typeof useSortable>) => ReactNode);
 	className?: string;
 	onClick?: () => void;
 }) {
@@ -36,7 +36,7 @@ export function SortableItem({
 			onClick={onClick || (() => navigate(id || "#"))}
 		>
 			<span className={`block ${sortable.isDragging ? "pointer-events-none" : ""}`}>
-				{children}
+				{typeof children === "function" ? children(sortable) : children}
 			</span>
 		</li>
 	);
@@ -50,7 +50,11 @@ export function SortableList({
 	selectedItem,
 	onClick,
 }: {
-	items: { id: string; children: ReactNode; className?: string }[];
+	items: {
+		id: string;
+		children: ReactNode | ((sortable: ReturnType<typeof useSortable>) => ReactNode);
+		className?: string;
+	}[];
 	selectedItem?: string | null;
 	onDragEnd: ComponentProps<typeof DragDropProvider>["onDragEnd"];
 	className?: string;

@@ -36,7 +36,7 @@ export function Menu<T extends object>(props: MenuProps<T>) {
 		<AriaMenu
 			{...props}
 			className={cn(
-				"react-aria-Menu bg-black/60 backdrop-blur backdrop-brightness-200 text-white border-white border rounded",
+				"react-aria-Menu menu-dropdown bg-black/60 backdrop-blur backdrop-brightness-200 text-white border-white border rounded",
 				props.className,
 			)}
 		>

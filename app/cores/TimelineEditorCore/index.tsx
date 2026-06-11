@@ -17,28 +17,8 @@ export function TimelineEditorCore() {
 
 	const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
 	const selectedStep = selectedTimeline?.steps.find((s) => s.id === selectedStepId);
-
-	const steps =
-		selectedTimeline?.steps.map((s) => ({
-			id: s.id,
-			children: (
-				<div>
-					<div>{s.name}</div>
-					{selectedStep && selectedStepId === s.id ? (
-						<div className="bg-black">
-							<TimelineStepEditor
-								pluginId={selectedTimeline.pluginName}
-								timelineId={selectedTimeline.name}
-								timelineType={selectedTimeline.kind}
-								step={selectedStep}
-							/>
-						</div>
-					) : null}
-				</div>
-			),
-			className: "list-group-item-xs",
-		})) || [];
-
+	const [activeTimelines] = q.flight.timelines.useNetRequest();
+	console.log(activeTimelines);
 	return (
 		<div className="flex h-full flex-col">
 			<div className="flex items-center gap-1">
@@ -65,19 +45,28 @@ export function TimelineEditorCore() {
 						header: "Missions",
 						items: timelines
 							.filter((t) => t.kind === "missions")
-							.map((t) => ({ id: `${t.pluginName}-${t.name}`, label: t.name })),
+							.map((t) => ({
+								id: `${t.pluginName}-${t.name}`,
+								label: `${activeTimelines.some((a) => a.type === "mission" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
+							})),
 					},
 					{
 						header: "Trainings",
 						items: timelines
 							.filter((t) => t.kind === "trainings")
-							.map((t) => ({ id: `${t.pluginName}-${t.name}`, label: t.name })),
+							.map((t) => ({
+								id: `${t.pluginName}-${t.name}`,
+								label: `${activeTimelines.some((a) => a.type === "training" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
+							})),
 					},
 					{
 						header: "Reports",
 						items: timelines
 							.filter((t) => t.kind === "reports")
-							.map((t) => ({ id: `${t.pluginName}-${t.name}`, label: t.name })),
+							.map((t) => ({
+								id: `${t.pluginName}-${t.name}`,
+								label: `${activeTimelines.some((a) => a.type === "report" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
+							})),
 					},
 				]}
 				label="Mission"
@@ -88,7 +77,27 @@ export function TimelineEditorCore() {
 				className="w-full"
 			/>
 			<SortableList
-				items={steps}
+				items={
+					selectedTimeline?.steps.map((s) => ({
+						id: s.id,
+						children: (sortable) => (
+							<div>
+								<div ref={sortable.handleRef}>{s.name}</div>
+								{selectedStep && selectedStepId === s.id ? (
+									<div className="black/50">
+										<TimelineStepEditor
+											pluginId={selectedTimeline.pluginName}
+											timelineId={selectedTimeline.name}
+											timelineType={selectedTimeline.kind}
+											step={s}
+										/>
+									</div>
+								) : null}
+							</div>
+						),
+						className: "list-group-item-xs",
+					})) || []
+				}
 				onDragEnd={async (event) => {
 					if (!selectedTimeline) return;
 					if (event.canceled || !event.operation.source || !isSortable(event.operation.source))
@@ -107,6 +116,7 @@ export function TimelineEditorCore() {
 				selectedItem={selectedStepId}
 				onClick={(id) => setSelectedStepId(id)}
 			/>
+
 			{selectedTimeline && (
 				<StepButtons
 					pluginId={selectedTimeline.pluginName}
