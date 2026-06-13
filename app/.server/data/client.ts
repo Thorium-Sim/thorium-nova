@@ -202,7 +202,7 @@ export const client = t.router({
 			if (!ctx.flight) throw new Error("Flight has not started.");
 			const flightClient = ctx.getFlightClient(input.clientId);
 			if (!flightClient?.components.flightClient) throw new Error("Invalid flight client");
-			const { shipId, stationId, currentCard } = flightClient.components.flightClient;
+			const { shipId, stationId } = flightClient.components.flightClient;
 			if (!shipId) throw new Error("Invalid flight client");
 			const ship = ctx.ecs.getEntityById(shipId);
 
@@ -211,7 +211,6 @@ export const client = t.router({
 				clientId: input.clientId,
 				shipId,
 				station: stationId,
-				card: currentCard,
 				stationComplement: ship?.components.stationComplement?.name || "",
 			} satisfies TrainingVariables;
 
@@ -237,7 +236,6 @@ export const client = t.router({
 					{ name: "clientId", type: "any", value: trainingVariables.clientId },
 					{ name: "shipId", type: "any", value: trainingVariables.shipId },
 					{ name: "station", type: "any", value: trainingVariables.station },
-					{ name: "card", type: "any", value: trainingVariables.card },
 					{
 						name: "stationComplement",
 						type: "any",

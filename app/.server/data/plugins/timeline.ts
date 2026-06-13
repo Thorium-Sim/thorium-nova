@@ -6,6 +6,7 @@ import MissionPlugin from "@thorium/.server/classes/Plugins/Mission";
 import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
 import TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { router } from "@thorium/.server/init/router";
 import { t } from "@thorium/.server/init/t";
 import type { FlightStartingPoint } from "@thorium/.server/spawners/flight";
 import {
@@ -13,6 +14,8 @@ import {
 	timelineBlockTypes,
 	type TimelineBlock,
 } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+import { reportVariableNames } from "@thorium/routes/config/reports/reportAvailableVariables";
+import { trainingVariableNames } from "@thorium/routes/config/trainings/trainingAvailableVariables";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
 import uniqid from "@thorium/utils/uniqid";
@@ -53,6 +56,34 @@ const block = t.router({
 			const id = uniqid("blo-");
 			const blockDefault = timelineBlockDefaults[input.blockType] as any;
 			if (!step.blocks) step.blocks = [];
+			if (input.blockType === "Action") {
+				// Fill in the values with the current local variables that match the action's inputs, if they are present.
+				// Start with the variables inherent to the timeline type
+				const actionInputs = Object.keys(
+					// @ts-expect-error
+					router._def.procedures[input.init.action]._def.inputs[0]._def.shape(),
+				);
+				const timelineVariables =
+					input.timelineType === "reports"
+						? reportVariableNames
+						: input.timelineType === "trainings"
+							? trainingVariableNames
+							: [];
+				const localVariables = step.blocks.reduce(
+					(prev: string[], block) => {
+						if ("variable" in block && !prev.includes(block.variable)) {
+							prev.push(block.variable);
+						}
+						return prev;
+					},
+					[...timelineVariables],
+				);
+				for (const actionInput of actionInputs) {
+					if (localVariables.includes(actionInput)) {
+						input.init.values = { [actionInput]: `$${actionInput}`, ...input.init.values };
+					}
+				}
+			}
 			step.blocks.push({
 				...blockDefault,
 				...input.init,

@@ -3,16 +3,14 @@ import {
 	MadLibSelect,
 	type BlockProps,
 } from "@thorium/components/timelineBuilder/BlockInputs";
+import { useDefinedVariables } from "@thorium/components/timelineBuilder/DefinedVariableContext";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import InfoTip from "@thorium/ui/InfoTip";
 import { produce } from "immer";
 
-export function IfCondition({
-	conditions,
-	update,
-	definedVariables,
-}: BlockProps<"IfCondition"> & { definedVariables: string[] }) {
+export function IfCondition({ conditions, update }: BlockProps<"IfCondition">) {
+	const definedVariables = useDefinedVariables();
 	return (
 		<>
 			<div className="absolute top-0 left-0">

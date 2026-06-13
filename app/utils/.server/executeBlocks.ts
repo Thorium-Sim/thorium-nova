@@ -389,7 +389,6 @@ export async function executeBlocks(
 				break;
 			}
 			case "Debug": {
-				console.info(block.variable);
 				break;
 			}
 			default:

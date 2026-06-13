@@ -2,6 +2,7 @@ import { RestrictToVerticalAxis } from "@dnd-kit/abstract/modifiers";
 import { DragDropProvider } from "@dnd-kit/react";
 import { useSortable } from "@dnd-kit/react/sortable";
 import { RenderBlock } from "@thorium/components/timelineBuilder/blocks";
+import { DefinedVariableProvider } from "@thorium/components/timelineBuilder/DefinedVariableContext";
 import { SortableHandleContext } from "@thorium/components/timelineBuilder/SortableHandleContext";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { cn } from "@thorium/utils/cn";
@@ -17,6 +18,7 @@ export function SortableBlocks({
 	executionType,
 	macro,
 	availableVariableNames = [],
+	timelineType,
 }: {
 	parentBlock?: TimelineBlock;
 	blocks: TimelineBlock[];
@@ -27,6 +29,7 @@ export function SortableBlocks({
 	executionType: ("main" | "prerequisite")[];
 	macro?: boolean;
 	availableVariableNames?: string[] | readonly string[];
+	timelineType?: "missions" | "reports" | "trainings";
 }) {
 	return (
 		<div className="relative flex flex-1 flex-col gap-2 py-2 pr-2">
@@ -34,10 +37,8 @@ export function SortableBlocks({
 				{blocks.map((block, index) => (
 					<SortableBlock id={block.id} index={index} key={block.id}>
 						<Suspense>
-							<RenderBlock
-								{...block}
-								executionType={executionType}
-								definedVariables={blocks.reduce(
+							<DefinedVariableProvider
+								variables={blocks.reduce(
 									(prev: string[], next, i) => {
 										if (i >= index) return prev;
 										if ("variable" in next) prev.push(next.variable);
@@ -45,18 +46,24 @@ export function SortableBlocks({
 									},
 									[...availableVariableNames],
 								)}
-								replace={(blocks) => onReplace(block.id, blocks)}
-								update={(property, value) => onUpdate(block, property, value)}
-								onRemove={onRemove}
-								macro={macro}
-								previousActionBlock={
-									blocks.reduceRight((prev: TimelineBlock | undefined, next, i) => {
-										if (prev) return prev;
-										if (i < index && next.type === "Action") return next;
-										return prev;
-									}, undefined) || parentBlock
-								}
-							/>
+							>
+								<RenderBlock
+									{...block}
+									timelineType={timelineType}
+									executionType={executionType}
+									replace={(blocks) => onReplace(block.id, blocks)}
+									update={(property, value) => onUpdate(block, property, value)}
+									onRemove={onRemove}
+									macro={macro}
+									previousActionBlock={
+										blocks.reduceRight((prev: TimelineBlock | undefined, next, i) => {
+											if (prev) return prev;
+											if (i < index && next.type === "Action") return next;
+											return prev;
+										}, undefined) || parentBlock
+									}
+								/>
+							</DefinedVariableProvider>
 						</Suspense>
 					</SortableBlock>
 				))}

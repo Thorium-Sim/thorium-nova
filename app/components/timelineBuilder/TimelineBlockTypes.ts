@@ -135,7 +135,7 @@ export const timelineBlockDefaults: {
 	},
 	MacroSlot: {},
 	Debug: {
-		variable: "",
+		debugVariable: "",
 	},
 	Note: {
 		note: "",
@@ -278,7 +278,7 @@ interface MacroSlot extends BaseBlock {
 }
 interface DebugBlock extends BaseBlock {
 	type: "Debug";
-	variable: string;
+	debugVariable: string;
 }
 
 interface NoteBlock extends BaseBlock {

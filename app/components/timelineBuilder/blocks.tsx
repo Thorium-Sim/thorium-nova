@@ -10,6 +10,7 @@ import { ActionBlock } from "@thorium/components/timelineBuilder/ActionBlock";
 import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { BlockWrapper } from "@thorium/components/timelineBuilder/BlockWrapper";
 import { DebugBlock } from "@thorium/components/timelineBuilder/DebugBlock";
+import { useDefinedVariables } from "@thorium/components/timelineBuilder/DefinedVariableContext";
 import { DistanceCondition } from "@thorium/components/timelineBuilder/DistanceCondition";
 import { EntityCondition } from "@thorium/components/timelineBuilder/EntityCondition";
 import { EntityPropertyIntoVariable } from "@thorium/components/timelineBuilder/EntityPropertyIntoVariable";
@@ -32,28 +33,49 @@ import {
 import { VariableGetter } from "@thorium/components/timelineBuilder/VariableGetter";
 import { SetVariable } from "@thorium/components/timelineBuilder/VariableSetter";
 import { WaitBlock } from "@thorium/components/timelineBuilder/WaitBlock";
+import { q } from "@thorium/context/AppContext";
 import uniqid from "@thorium/utils/uniqid";
+import { parseSchema } from "@thorium/utils/zodAutoForm";
+import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
 import { Suspense } from "react";
 
 export function RenderBlock({
 	onRemove,
 	update,
 	previousActionBlock,
-	definedVariables,
 	replace,
 	executionType,
 	macro,
+	timelineType,
 	...block
 }: TimelineBlock & {
 	onRemove: (id: string) => void;
 	previousActionBlock?: TimelineBlock;
 	update: (property: string, value: any) => void;
-	definedVariables: string[];
 	/** Replace this block with some other blocks */
 	replace: (blocks: TimelineBlock[]) => void;
 	macro?: boolean;
 	executionType: ("main" | "prerequisite")[];
+	timelineType?: "missions" | "reports" | "trainings";
 }) {
+	const [actions] = q.thorium.actions.useNetRequest();
+	const localVariables = useDefinedVariables();
+
+	function getActionPresetValues(actionName: string, initValues = {}) {
+		const action = actions.find((a) => a.action === actionName);
+		const actionSchema = action
+			? // oxlint-disable-next-line no-eval
+				parseSchema(eval(parseJsonSchema(action.input)), {})
+			: [];
+		let values = initValues;
+		const actionInputs = actionSchema.map((a) => a.key);
+		for (const actionInput of actionInputs) {
+			if (localVariables.includes(actionInput)) {
+				values = { [actionInput]: `$${actionInput}`, ...values };
+			}
+		}
+		return values;
+	}
 	return (
 		<Suspense>
 			<BlockWrapper onRemove={() => onRemove(block.id)}>
@@ -66,7 +88,7 @@ export function RenderBlock({
 				) : block.type === "EventCondition" ? (
 					<EventCondition {...block} update={update} />
 				) : block.type === "IfCondition" ? (
-					<IfCondition {...block} definedVariables={definedVariables} update={update} />
+					<IfCondition {...block} update={update} />
 				) : block.type === "ShipSystemGetter" ? (
 					<ShipSystemGetter {...block} update={update} />
 				) : block.type === "ResultPropertyIntoVariable" ? (
@@ -90,13 +112,7 @@ export function RenderBlock({
 				) : block.type === "ForEachEntity" ? (
 					<ForEachEntity {...block} update={update} />
 				) : block.type === "Macro" ? (
-					<MacroBlock
-						{...block}
-						macro={macro}
-						update={update}
-						replace={replace}
-						definedVariables={definedVariables}
-					/>
+					<MacroBlock {...block} macro={macro} update={update} replace={replace} />
 				) : block.type === "TimelineAvailability" ? (
 					<TimelineAvailabilityBlock {...block} update={update} />
 				) : block.type === "MacroSlot" ? (
@@ -114,6 +130,7 @@ export function RenderBlock({
 					<div className="absolute left-2 h-[calc(100%-1rem)] w-4 rounded-bl-full border-b border-l border-white/50" />
 					<div className="pl-8">
 						<SortableBlocks
+							timelineType={timelineType}
 							executionType={executionType}
 							parentBlock={block}
 							blocks={block.triggerBlocks}
@@ -128,12 +145,18 @@ export function RenderBlock({
 								(update as any)("triggerBlocks", move(block.triggerBlocks, event));
 							}}
 							onUpdate={(innerBlock, property, value) => {
+								const isActionChange = innerBlock.type === "Action" && property === "action";
 								const { id, type: _, ...properties } = innerBlock;
 								(update as any)(
 									"triggerBlocks",
 									block.triggerBlocks.map((b) => {
 										if (b.id === id) {
-											return { ...b, ...properties, [property]: value };
+											return {
+												...b,
+												...properties,
+												[property]: value,
+												...(isActionChange ? { values: getActionPresetValues(value) } : {}),
+											};
 										}
 										return b;
 									}),
@@ -153,9 +176,19 @@ export function RenderBlock({
 						/>
 					</div>
 					<AddBlockMenu
+						timelineType={timelineType}
 						macro={macro}
 						executionType={executionType}
-						onAddBlock={(type, init) =>
+						onAddBlock={async (type, init) => {
+							if (
+								type === "Action" &&
+								init &&
+								"action" in init &&
+								typeof init.action === "string"
+							) {
+								// @ts-expect-error
+								init.values = getActionPresetValues(init.action, init.values);
+							}
 							(update as any)("triggerBlocks", [
 								...block.triggerBlocks,
 								{
@@ -164,8 +197,8 @@ export function RenderBlock({
 									...(timelineBlockDefaults[type] as any),
 									...init,
 								},
-							])
-						}
+							]);
+						}}
 					/>
 				</div>
 			) : null}

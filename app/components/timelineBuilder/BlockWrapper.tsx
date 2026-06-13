@@ -1,7 +1,7 @@
 import { useSortableHandle } from "@thorium/components/timelineBuilder/SortableHandleContext";
 import { Icon } from "@thorium/ui/Icon";
 import { cn } from "@thorium/utils/cn";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Button } from "react-aria-components";
 
 export function BlockWrapper({

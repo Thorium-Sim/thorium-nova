@@ -37,6 +37,7 @@ export function AddBlockButton({
 	omitBlocks,
 	executionType,
 	macro,
+	timelineType,
 }: {
 	onAddBlock: <T extends TimelineBlock["type"]>(
 		blockType: T,
@@ -46,7 +47,7 @@ export function AddBlockButton({
 	omitBlocks?: boolean;
 	macro?: boolean;
 	executionType: ("main" | "prerequisite")[];
-	timelineType: "missions" | "reports" | "trainings";
+	timelineType?: "missions" | "reports" | "trainings";
 }) {
 	const [macros] = q.plugin.macro.all.useNetRequest({ type: "macro" });
 
@@ -63,6 +64,15 @@ export function AddBlockButton({
 				<Menu>
 					{executionType.includes("main") ? (
 						<>
+							{timelineType === "trainings" ? (
+								<>
+									<StyledMenuItem
+										onAction={() => onAddBlock("Action", { action: "client.setTraining" })}
+									>
+										Set Training
+									</StyledMenuItem>
+								</>
+							) : null}
 							<StyledMenuItem onAction={() => onAddBlock("Action")}>Action</StyledMenuItem>
 							<StyledMenuItem onAction={() => onAddBlock("Action", { action: "timeline.advance" })}>
 								Advance Timeline
@@ -182,7 +192,7 @@ export function AddBlockMenu({
 	) => void;
 	macro?: boolean;
 	executionType: ("main" | "prerequisite")[];
-	timelineType: "missions" | "reports" | "trainings";
+	timelineType?: "missions" | "reports" | "trainings";
 }) {
 	return (
 		<div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 translate-y-1/2 p-2">

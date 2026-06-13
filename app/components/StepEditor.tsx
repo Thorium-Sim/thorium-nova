@@ -171,6 +171,7 @@ export function TimelineStepEditor({
 						</div>
 					) : (
 						<SortableBlocks
+							timelineType={timelineType}
 							executionType={["main"]}
 							blocks={step?.blocks || []}
 							availableVariableNames={variables}
@@ -427,6 +428,7 @@ export function PrerequisiteBlocks({
 					</div>
 				) : (
 					<SortableBlocks
+						timelineType={timelineType}
 						executionType={["prerequisite"]}
 						blocks={prerequisiteBlocks}
 						availableVariableNames={variables}

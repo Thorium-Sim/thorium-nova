@@ -2,7 +2,6 @@ export const trainingVariableNames = [
 	"clientId",
 	"shipId",
 	"station",
-	"card",
 	"stationComplement",
 ] as const;
 

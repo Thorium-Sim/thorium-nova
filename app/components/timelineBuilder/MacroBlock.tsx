@@ -1,4 +1,5 @@
 import { type BlockProps } from "@thorium/components/timelineBuilder/BlockInputs";
+import { useDefinedVariables } from "@thorium/components/timelineBuilder/DefinedVariableContext";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { q } from "@thorium/context/AppContext";
@@ -12,15 +13,13 @@ export function MacroBlock({
 	pluginId,
 	macroId,
 	replace,
-	definedVariables,
 	macro: isMacro,
 }: BlockProps<"Macro"> & {
 	replace: (blocks: TimelineBlock[]) => void;
-	definedVariables: string[];
 	macro?: boolean;
 }) {
 	const [macro] = q.plugin.macro.get.useNetRequest({ pluginId, macroId });
-
+	const definedVariables = useDefinedVariables();
 	const missingRequiredVariables = getRequiredVariables(macro.blocks, definedVariables);
 
 	return (

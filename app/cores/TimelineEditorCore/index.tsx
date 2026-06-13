@@ -18,7 +18,6 @@ export function TimelineEditorCore() {
 	const [selectedStepId, setSelectedStepId] = useState<string | null>(null);
 	const selectedStep = selectedTimeline?.steps.find((s) => s.id === selectedStepId);
 	const [activeTimelines] = q.flight.timelines.useNetRequest();
-	console.log(activeTimelines);
 	return (
 		<div className="flex h-full flex-col">
 			<div className="flex items-center gap-1">
