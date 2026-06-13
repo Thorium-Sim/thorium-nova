@@ -150,9 +150,9 @@ export default function TriggerLayout() {
 								newIndex: event.operation.source.index,
 							});
 						}}
-						onUpdate={(block, property, value) => {
+						onUpdate={async (block, property, value) => {
 							const { id: _, type: __, ...properties } = block;
-							void q.plugin.macro.block.update.netSend({
+							await q.plugin.macro.block.update.netSend({
 								pluginId,
 								macroId,
 								blockId: block.id,

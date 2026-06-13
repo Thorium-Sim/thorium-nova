@@ -8,7 +8,7 @@ import { Icon } from "@thorium/ui/Icon";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { Button, Dialog, DialogTrigger, Popover } from "react-aria-components";
 
-function noop() {}
+async function noop() {}
 export function MacroBlock({
 	pluginId,
 	macroId,

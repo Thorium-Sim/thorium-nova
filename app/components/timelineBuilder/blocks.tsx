@@ -51,7 +51,7 @@ export function RenderBlock({
 }: TimelineBlock & {
 	onRemove: (id: string) => void;
 	previousActionBlock?: TimelineBlock;
-	update: (property: string, value: any) => void;
+	update: (property: string, value: any) => Promise<void>;
 	/** Replace this block with some other blocks */
 	replace: (blocks: TimelineBlock[]) => void;
 	macro?: boolean;
@@ -144,10 +144,10 @@ export function RenderBlock({
 							onDragEnd={(event) => {
 								(update as any)("triggerBlocks", move(block.triggerBlocks, event));
 							}}
-							onUpdate={(innerBlock, property, value) => {
+							onUpdate={async (innerBlock, property, value) => {
 								const isActionChange = innerBlock.type === "Action" && property === "action";
 								const { id, type: _, ...properties } = innerBlock;
-								(update as any)(
+								await (update as any)(
 									"triggerBlocks",
 									block.triggerBlocks.map((b) => {
 										if (b.id === id) {

@@ -22,7 +22,7 @@ export type BlockProps<T extends TimelineBlock["type"]> = Extract<TimelineBlock,
 	update: <P extends keyof Extract<TimelineBlock, { type: T }>>(
 		property: P,
 		value: Extract<TimelineBlock, { type: T }>[P],
-	) => void;
+	) => Promise<void>;
 };
 
 const madLibInput = cn(

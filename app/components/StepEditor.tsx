@@ -35,6 +35,7 @@ export function TimelineStepEditor({
 			: timelineType === "trainings"
 				? trainingVariableNames
 				: [];
+
 	return (
 		<div className="flex flex-1 flex-col">
 			<div className="flex w-full justify-between gap-2">
@@ -191,9 +192,9 @@ export function TimelineStepEditor({
 									newIndex: event.operation.source.index,
 								});
 							}}
-							onUpdate={(block, property, value) => {
+							onUpdate={async (block, property, value) => {
 								const { id: _, type: __, ...properties } = block;
-								q.plugin.timeline.step.block.update.netSend({
+								await q.plugin.timeline.step.block.update.netSend({
 									pluginId,
 									timelineId,
 									timelineType,
@@ -443,9 +444,9 @@ export function PrerequisiteBlocks({
 								newIndex: event.operation.source.index,
 							});
 						}}
-						onUpdate={(block, property, value) => {
+						onUpdate={async (block, property, value) => {
 							const { id: _, type: __, ...properties } = block;
-							q.plugin.timeline.prerequisiteBlock.update.netSend({
+							await q.plugin.timeline.prerequisiteBlock.update.netSend({
 								pluginId,
 								timelineId,
 								timelineType,

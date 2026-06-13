@@ -23,7 +23,7 @@ export function SortableBlocks({
 	parentBlock?: TimelineBlock;
 	blocks: TimelineBlock[];
 	onDragEnd: ComponentProps<typeof DragDropProvider>["onDragEnd"];
-	onUpdate: (block: TimelineBlock, property: any, value: any) => void;
+	onUpdate: (block: TimelineBlock, property: any, value: any) => Promise<void>;
 	onReplace: (id: string, blocks: TimelineBlock[]) => void;
 	onRemove: (id: string) => void;
 	executionType: ("main" | "prerequisite")[];

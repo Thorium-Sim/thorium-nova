@@ -62,10 +62,11 @@ export const remoteAccess = t.router({
 	accept: t.procedure
 		.meta({ action: true, event: true })
 		.input(z.object({ remoteAccessCodeId: z.number() }))
+		.output(z.object({ remoteAccessCodeId: z.number() }))
 		.send(({ ctx, input }) => {
 			const { remoteAccessCodeId } = input;
 			const remoteAccessCode = ctx.flight?.ecs.getEntityById(remoteAccessCodeId);
-			if (!remoteAccessCode) return;
+			if (!remoteAccessCode) throw new Error("Invalid Remote Access Code");
 
 			remoteAccessCode.updateComponent("remoteAccessCode", {
 				state: "accepted",
@@ -76,6 +77,7 @@ export const remoteAccess = t.router({
 			});
 
 			// TODO: Add notification to the client
+			return input;
 		}),
 	deny: t.procedure
 		.meta({ action: true, event: true })
@@ -83,7 +85,7 @@ export const remoteAccess = t.router({
 		.send(({ ctx, input }) => {
 			const { remoteAccessCodeId } = input;
 			const remoteAccessCode = ctx.flight?.ecs.getEntityById(remoteAccessCodeId);
-			if (!remoteAccessCode) return;
+			if (!remoteAccessCode) throw new Error("Invalid Remote Access Code");
 
 			remoteAccessCode.updateComponent("remoteAccessCode", {
 				state: "denied",
@@ -94,5 +96,6 @@ export const remoteAccess = t.router({
 			});
 
 			// TODO: Add notification to the client
+			return input;
 		}),
 });
