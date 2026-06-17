@@ -67,10 +67,12 @@ function ErrorReset() {
 }
 
 export function useActiveCores() {
-	const { layoutModel } = useContext(CoreFlexLayoutContext);
+	const flexLayoutContext = useContext(CoreFlexLayoutContext);
+
+	if (!flexLayoutContext) return [];
 
 	const nodes: { component: string; activate: () => void }[] = [];
-	layoutModel.visitNodes((node) => {
+	flexLayoutContext.layoutModel.visitNodes((node) => {
 		const component = node.getAttr("component");
 		if (component) {
 			nodes.push({

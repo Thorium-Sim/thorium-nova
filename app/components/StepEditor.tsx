@@ -1,6 +1,7 @@
 import { isSortable } from "@dnd-kit/react/sortable";
 import type { TimelineStep } from "@thorium/.server/classes/Plugins/TimelineStep";
 import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
+import { useDefinedVariables } from "@thorium/components/timelineBuilder/DefinedVariableContext";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { q } from "@thorium/context/AppContext";
@@ -14,6 +15,8 @@ import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
 import { SortableList } from "@thorium/ui/SortableItem";
 import TagInput from "@thorium/ui/TagInput";
+import { parseSchema } from "@thorium/utils/zodAutoForm";
+import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
 import { Suspense } from "react";
 import { Button as RAButton } from "react-aria-components";
 
@@ -35,7 +38,7 @@ export function TimelineStepEditor({
 			: timelineType === "trainings"
 				? trainingVariableNames
 				: [];
-
+	const getActionPresetValues = useGetActionPresetValue(timelineType);
 	return (
 		<div className="flex flex-1 flex-col">
 			<div className="flex w-full justify-between gap-2">
@@ -156,7 +159,17 @@ export function TimelineStepEditor({
 							<AddBlockButton
 								executionType={["main"]}
 								timelineType={timelineType}
-								onAddBlock={async (type, init) => {
+								onAddBlock={async (type, init, initOverrides) => {
+									if (
+										type === "Action" &&
+										init &&
+										"action" in init &&
+										typeof init.action === "string"
+									) {
+										// @ts-expect-error
+										init.values = getActionPresetValues(init.action, init.values, initOverrides);
+									}
+
 									await q.plugin.timeline.step.block.add.netSend({
 										pluginId,
 										timelineId,
@@ -230,7 +243,11 @@ export function TimelineStepEditor({
 			<AddBlockButton
 				timelineType={timelineType}
 				executionType={["main"]}
-				onAddBlock={async (type, init) => {
+				onAddBlock={async (type, init, initOverrides) => {
+					if (type === "Action" && init && "action" in init && typeof init.action === "string") {
+						// @ts-expect-error
+						init.values = getActionPresetValues(init.action, init.values, initOverrides);
+					}
 					await q.plugin.timeline.step.block.add.netSend({
 						pluginId,
 						timelineId,
@@ -414,7 +431,16 @@ export function PrerequisiteBlocks({
 						<AddBlockButton
 							timelineType={timelineType}
 							executionType={["prerequisite"]}
-							onAddBlock={async (type, init) => {
+							onAddBlock={async (type, init, initOverrides) => {
+								if (
+									type === "Action" &&
+									init &&
+									"action" in init &&
+									typeof init.action === "string"
+								) {
+									// @ts-expect-error
+									init.values = getActionPresetValues(init.action, init.values, initOverrides);
+								}
 								await q.plugin.timeline.prerequisiteBlock.add.netSend({
 									pluginId,
 									timelineId,
@@ -477,7 +503,11 @@ export function PrerequisiteBlocks({
 			<AddBlockButton
 				timelineType={timelineType}
 				executionType={["prerequisite"]}
-				onAddBlock={async (type, init) => {
+				onAddBlock={async (type, init, initOverrides) => {
+					if (type === "Action" && init && "action" in init && typeof init.action === "string") {
+						// @ts-expect-error
+						init.values = getActionPresetValues(init.action, init.values, initOverrides);
+					}
 					await q.plugin.timeline.prerequisiteBlock.add.netSend({
 						pluginId,
 						timelineId,
@@ -491,4 +521,35 @@ export function PrerequisiteBlocks({
 			</AddBlockButton>
 		</div>
 	);
+}
+
+export function useGetActionPresetValue(timelineType: "reports" | "missions" | "trainings") {
+	const [actions] = q.thorium.actions.useNetRequest();
+	const variables =
+		timelineType === "reports"
+			? reportVariableNames
+			: timelineType === "trainings"
+				? trainingVariableNames
+				: [];
+	const localVariables = [...variables, ...useDefinedVariables()];
+
+	return function getActionPresetValues(actionName: string, initValues = {}, initOverrides = true) {
+		const action = actions.find((a) => a.action === actionName);
+		const actionSchema = action
+			? // oxlint-disable-next-line no-eval
+				parseSchema(eval(parseJsonSchema(action.input)), {})
+			: [];
+		let values = initValues;
+		const actionInputs = actionSchema.map((a) => a.key);
+		for (const actionInput of actionInputs) {
+			if (localVariables.includes(actionInput)) {
+				if (initOverrides) {
+					values = { [actionInput]: `$${actionInput}`, ...values };
+				} else {
+					values = { ...values, [actionInput]: `$${actionInput}` };
+				}
+			}
+		}
+		return values;
+	};
 }

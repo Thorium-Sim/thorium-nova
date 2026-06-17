@@ -4,7 +4,7 @@ import { q } from "@thorium/context/AppContext";
 import Button from "@thorium/ui/Button";
 import Select from "@thorium/ui/Select";
 import { SortableList } from "@thorium/ui/SortableItem";
-import { useState } from "react";
+import { startTransition, Suspense, useState } from "react";
 
 export function TimelineEditorCore() {
 	const [flight] = q.flight.active.useNetRequest();
@@ -84,12 +84,14 @@ export function TimelineEditorCore() {
 								<div ref={sortable.handleRef}>{s.name}</div>
 								{selectedStep && selectedStepId === s.id ? (
 									<div className="black/50">
-										<TimelineStepEditor
-											pluginId={selectedTimeline.pluginName}
-											timelineId={selectedTimeline.name}
-											timelineType={selectedTimeline.kind}
-											step={s}
-										/>
+										<Suspense>
+											<TimelineStepEditor
+												pluginId={selectedTimeline.pluginName}
+												timelineId={selectedTimeline.name}
+												timelineType={selectedTimeline.kind}
+												step={s}
+											/>
+										</Suspense>
 									</div>
 								) : null}
 							</div>
@@ -113,7 +115,7 @@ export function TimelineEditorCore() {
 					}
 				}}
 				selectedItem={selectedStepId}
-				onClick={(id) => setSelectedStepId(id)}
+				onClick={(id) => startTransition(() => setSelectedStepId(id))}
 			/>
 
 			{selectedTimeline && (

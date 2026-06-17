@@ -6,11 +6,11 @@
  */
 
 import { move } from "@dnd-kit/helpers";
+import { useGetActionPresetValue } from "@thorium/components/StepEditor";
 import { ActionBlock } from "@thorium/components/timelineBuilder/ActionBlock";
 import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { BlockWrapper } from "@thorium/components/timelineBuilder/BlockWrapper";
 import { DebugBlock } from "@thorium/components/timelineBuilder/DebugBlock";
-import { useDefinedVariables } from "@thorium/components/timelineBuilder/DefinedVariableContext";
 import { DistanceCondition } from "@thorium/components/timelineBuilder/DistanceCondition";
 import { EntityCondition } from "@thorium/components/timelineBuilder/EntityCondition";
 import { EntityPropertyIntoVariable } from "@thorium/components/timelineBuilder/EntityPropertyIntoVariable";
@@ -33,10 +33,7 @@ import {
 import { VariableGetter } from "@thorium/components/timelineBuilder/VariableGetter";
 import { SetVariable } from "@thorium/components/timelineBuilder/VariableSetter";
 import { WaitBlock } from "@thorium/components/timelineBuilder/WaitBlock";
-import { q } from "@thorium/context/AppContext";
 import uniqid from "@thorium/utils/uniqid";
-import { parseSchema } from "@thorium/utils/zodAutoForm";
-import { parseSchema as parseJsonSchema } from "json-schema-to-zod";
 import { Suspense } from "react";
 
 export function RenderBlock({
@@ -58,24 +55,7 @@ export function RenderBlock({
 	executionType: ("main" | "prerequisite")[];
 	timelineType?: "missions" | "reports" | "trainings";
 }) {
-	const [actions] = q.thorium.actions.useNetRequest();
-	const localVariables = useDefinedVariables();
-
-	function getActionPresetValues(actionName: string, initValues = {}) {
-		const action = actions.find((a) => a.action === actionName);
-		const actionSchema = action
-			? // oxlint-disable-next-line no-eval
-				parseSchema(eval(parseJsonSchema(action.input)), {})
-			: [];
-		let values = initValues;
-		const actionInputs = actionSchema.map((a) => a.key);
-		for (const actionInput of actionInputs) {
-			if (localVariables.includes(actionInput)) {
-				values = { [actionInput]: `$${actionInput}`, ...values };
-			}
-		}
-		return values;
-	}
+	const getActionPresetValues = useGetActionPresetValue(timelineType || "missions");
 	return (
 		<Suspense>
 			<BlockWrapper onRemove={() => onRemove(block.id)}>
@@ -179,7 +159,7 @@ export function RenderBlock({
 						timelineType={timelineType}
 						macro={macro}
 						executionType={executionType}
-						onAddBlock={async (type, init) => {
+						onAddBlock={async (type, init, initOverrides) => {
 							if (
 								type === "Action" &&
 								init &&
@@ -187,7 +167,7 @@ export function RenderBlock({
 								typeof init.action === "string"
 							) {
 								// @ts-expect-error
-								init.values = getActionPresetValues(init.action, init.values);
+								init.values = getActionPresetValues(init.action, init.values, initOverrides);
 							}
 							(update as any)("triggerBlocks", [
 								...block.triggerBlocks,

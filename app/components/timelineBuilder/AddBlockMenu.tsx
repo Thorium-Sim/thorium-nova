@@ -1,9 +1,12 @@
 import type { MacroPlugin } from "@thorium/.server/classes/Plugins/Macro";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { q } from "@thorium/context/AppContext";
+import { AddActionEvent, ChooseActionEvent } from "@thorium/cores/EventsCore";
+import useEventListener from "@thorium/hooks/useEventListener";
+import { useActiveCores } from "@thorium/routes/core/CoreFlexLayout";
 import { Icon } from "@thorium/ui/Icon";
 import { cn } from "@thorium/utils/cn";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import {
 	Popover,
 	Button,
@@ -42,6 +45,7 @@ export function AddBlockButton({
 	onAddBlock: <T extends TimelineBlock["type"]>(
 		blockType: T,
 		initParams?: Partial<Omit<Extract<TimelineBlock, { type: T }>, "id" | "type">>,
+		initOverrides?: boolean,
 	) => void;
 	children: ReactNode;
 	omitBlocks?: boolean;
@@ -49,6 +53,8 @@ export function AddBlockButton({
 	executionType: ("main" | "prerequisite")[];
 	timelineType?: "missions" | "reports" | "trainings";
 }) {
+	const id = useId();
+	const hasEvents = useActiveCores().some((c) => c.component === "EventsCore");
 	const [macros] = q.plugin.macro.all.useNetRequest({ type: "macro" });
 
 	const groupedMacros = macros.reduce((prev: Record<string, MacroPlugin[]>, next) => {
@@ -57,11 +63,25 @@ export function AddBlockButton({
 		return prev;
 	}, {});
 
+	useEventListener(AddActionEvent.name, (event: AddActionEvent) => {
+		if (id !== event.addBlockId) return;
+		if (event.type === "action") {
+			onAddBlock("Action", { action: event.blockName, values: event.values }, false);
+		} else {
+			onAddBlock("EventCondition", { event: event.blockName }, false);
+		}
+	});
+
 	return (
 		<MenuTrigger>
 			{children}
 			<Popover placement="bottom" className={popoverClass}>
 				<Menu>
+					{hasEvents ? (
+						<StyledMenuItem onAction={() => window.dispatchEvent(new ChooseActionEvent(id))}>
+							Choose Event or Action from Events Core
+						</StyledMenuItem>
+					) : null}
 					{executionType.includes("main") ? (
 						<>
 							{timelineType === "trainings" ? (
@@ -189,6 +209,7 @@ export function AddBlockMenu({
 	onAddBlock: <T extends TimelineBlock["type"]>(
 		blockType: T,
 		initParams?: Partial<Omit<Extract<TimelineBlock, { type: T }>, "id" | "type">>,
+		initOverrides?: boolean,
 	) => void;
 	macro?: boolean;
 	executionType: ("main" | "prerequisite")[];

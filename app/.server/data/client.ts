@@ -259,9 +259,9 @@ export const client = t.router({
 			pubsub.publish.client.get({
 				clientId: flightClient.components.flightClient?.clientId || "",
 			});
+			pubsub.publish.flight.timelines();
 		}),
 	setTraining: t.procedure
-
 		.input(
 			z.object({
 				clientId: z.string().optional(),
