@@ -1,4 +1,5 @@
 import type { MacroPlugin } from "@thorium/.server/classes/Plugins/Macro";
+import { useDefinedVariables } from "@thorium/components/timelineBuilder/DefinedVariableContext";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { q } from "@thorium/context/AppContext";
 import { AddActionEvent, ChooseActionEvent } from "@thorium/cores/EventsCore";
@@ -6,6 +7,8 @@ import useEventListener from "@thorium/hooks/useEventListener";
 import { useActiveCores } from "@thorium/routes/core/CoreFlexLayout";
 import { Icon } from "@thorium/ui/Icon";
 import { cn } from "@thorium/utils/cn";
+import uniqid from "@thorium/utils/uniqid";
+import { pascalCase } from "change-case";
 import { useId, type ReactNode } from "react";
 import {
 	Popover,
@@ -62,13 +65,36 @@ export function AddBlockButton({
 		prev[next.category].push(next);
 		return prev;
 	}, {});
+	const definedVariables = useDefinedVariables();
 
 	useEventListener(AddActionEvent.name, (event: AddActionEvent) => {
 		if (id !== event.addBlockId) return;
 		if (event.type === "action") {
 			onAddBlock("Action", { action: event.blockName, values: event.values }, false);
 		} else {
-			onAddBlock("EventCondition", { event: event.blockName }, false);
+			const triggerBlocks: TimelineBlock[] = Object.keys(event.values || {}).map((key) => ({
+				id: uniqid("blo-"),
+				type: "ResultPropertyIntoVariable",
+				property: key,
+				variable: `event${pascalCase(key)}`,
+			}));
+			// If there are no values, there's really no need to insert an if condition.
+			if (triggerBlocks.length > 0) {
+				triggerBlocks.push({
+					id: uniqid("blo-"),
+					type: "IfCondition",
+					conditions: Object.entries(event.values || {}).map(([key, value]) => ({
+						value1: `$event${pascalCase(key)}`,
+						value2: definedVariables.includes(key)
+							? `$${key}`
+							: // oxlint-disable-next-line typescript/restrict-template-expressions
+								`${value}`,
+						comparison: "=",
+					})),
+					triggerBlocks: [],
+				});
+			}
+			onAddBlock("EventCondition", { event: event.blockName, triggerBlocks }, false);
 		}
 	});
 

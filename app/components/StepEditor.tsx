@@ -1,7 +1,10 @@
 import { isSortable } from "@dnd-kit/react/sortable";
 import type { TimelineStep } from "@thorium/.server/classes/Plugins/TimelineStep";
 import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
-import { useDefinedVariables } from "@thorium/components/timelineBuilder/DefinedVariableContext";
+import {
+	DefinedVariableProvider,
+	useDefinedVariables,
+} from "@thorium/components/timelineBuilder/DefinedVariableContext";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { q } from "@thorium/context/AppContext";
@@ -151,115 +154,116 @@ export function TimelineStepEditor({
 					</ul>
 				</InfoTip>
 			</h3>
-			<Suspense>
-				<div className="flex-1 overflow-x-hidden overflow-y-auto text-sm">
-					{!step?.blocks || step?.blocks?.length === 0 ? (
-						<div>
-							<p>No blocks added to step.</p>
-							<AddBlockButton
-								executionType={["main"]}
-								timelineType={timelineType}
-								onAddBlock={async (type, init, initOverrides) => {
-									if (
-										type === "Action" &&
-										init &&
-										"action" in init &&
-										typeof init.action === "string"
-									) {
-										// @ts-expect-error
-										init.values = getActionPresetValues(init.action, init.values, initOverrides);
-									}
+			<DefinedVariableProvider variables={[...variables]}>
+				<Suspense>
+					<div className="flex-1 overflow-x-hidden overflow-y-auto text-sm">
+						{!step?.blocks || step?.blocks?.length === 0 ? (
+							<div>
+								<p>No blocks added to step.</p>
+								<AddBlockButton
+									executionType={["main"]}
+									timelineType={timelineType}
+									onAddBlock={async (type, init, initOverrides) => {
+										if (
+											type === "Action" &&
+											init &&
+											"action" in init &&
+											typeof init.action === "string"
+										) {
+											// @ts-expect-error
+											init.values = getActionPresetValues(init.action, init.values, initOverrides);
+										}
 
-									await q.plugin.timeline.step.block.add.netSend({
+										await q.plugin.timeline.step.block.add.netSend({
+											pluginId,
+											timelineId,
+											timelineType,
+											stepId,
+											blockType: type,
+											init,
+										});
+									}}
+								>
+									<RAButton className="btn btn-sm btn-outline btn-success">Add Block</RAButton>
+								</AddBlockButton>
+							</div>
+						) : (
+							<SortableBlocks
+								timelineType={timelineType}
+								executionType={["main"]}
+								blocks={step?.blocks || []}
+								onDragEnd={(event) => {
+									if (
+										event.canceled ||
+										!event.operation.source ||
+										!isSortable(event.operation.source)
+									)
+										return;
+									q.plugin.timeline.step.block.reorder.netSend({
 										pluginId,
 										timelineId,
 										timelineType,
 										stepId,
-										blockType: type,
-										init,
+										blockId: event.operation.source.id as string,
+										newIndex: event.operation.source.index,
 									});
 								}}
-							>
-								<RAButton className="btn btn-sm btn-outline btn-success">Add Block</RAButton>
-							</AddBlockButton>
-						</div>
-					) : (
-						<SortableBlocks
-							timelineType={timelineType}
-							executionType={["main"]}
-							blocks={step?.blocks || []}
-							availableVariableNames={variables}
-							onDragEnd={(event) => {
-								if (
-									event.canceled ||
-									!event.operation.source ||
-									!isSortable(event.operation.source)
-								)
-									return;
-								q.plugin.timeline.step.block.reorder.netSend({
-									pluginId,
-									timelineId,
-									timelineType,
-									stepId,
-									blockId: event.operation.source.id as string,
-									newIndex: event.operation.source.index,
-								});
-							}}
-							onUpdate={async (block, property, value) => {
-								const { id: _, type: __, ...properties } = block;
-								await q.plugin.timeline.step.block.update.netSend({
-									pluginId,
-									timelineId,
-									timelineType,
-									stepId,
-									blockId: block.id,
-									properties: { ...properties, [property]: value },
-								});
-							}}
-							onReplace={(id, blocks) => {
-								q.plugin.timeline.step.block.replace.netSend({
-									pluginId,
-									timelineId,
-									timelineType,
-									stepId,
-									blockId: id,
-									blocks,
-								});
-							}}
-							onRemove={(id) =>
-								q.plugin.timeline.step.block.delete.netSend({
-									pluginId,
-									timelineId,
-									timelineType,
-									stepId,
-									blockId: id,
-								})
-							}
-						/>
-					)}
-				</div>
-			</Suspense>
+								onUpdate={async (block, property, value) => {
+									const { id: _, type: __, ...properties } = block;
+									await q.plugin.timeline.step.block.update.netSend({
+										pluginId,
+										timelineId,
+										timelineType,
+										stepId,
+										blockId: block.id,
+										properties: { ...properties, [property]: value },
+									});
+								}}
+								onReplace={(id, blocks) => {
+									q.plugin.timeline.step.block.replace.netSend({
+										pluginId,
+										timelineId,
+										timelineType,
+										stepId,
+										blockId: id,
+										blocks,
+									});
+								}}
+								onRemove={(id) =>
+									q.plugin.timeline.step.block.delete.netSend({
+										pluginId,
+										timelineId,
+										timelineType,
+										stepId,
+										blockId: id,
+									})
+								}
+							/>
+						)}
+					</div>
+				</Suspense>
 
-			<AddBlockButton
-				timelineType={timelineType}
-				executionType={["main"]}
-				onAddBlock={async (type, init, initOverrides) => {
-					if (type === "Action" && init && "action" in init && typeof init.action === "string") {
-						// @ts-expect-error
-						init.values = getActionPresetValues(init.action, init.values, initOverrides);
-					}
-					await q.plugin.timeline.step.block.add.netSend({
-						pluginId,
-						timelineId,
-						timelineType,
-						stepId,
-						blockType: type,
-						init,
-					});
-				}}
-			>
-				<RAButton className="btn btn-sm btn-outline btn-success">Add Block</RAButton>
-			</AddBlockButton>
+				<AddBlockButton
+					timelineType={timelineType}
+					executionType={["main"]}
+					onAddBlock={async (type, init, initOverrides) => {
+						if (type === "Action" && init && "action" in init && typeof init.action === "string") {
+							// @ts-expect-error
+							init.values = getActionPresetValues(init.action, init.values, initOverrides);
+						}
+						await q.plugin.timeline.step.block.add.netSend({
+							pluginId,
+							timelineId,
+							timelineType,
+							stepId,
+							blockType: type,
+							init,
+						});
+					}}
+				>
+					<RAButton className="btn btn-sm btn-outline btn-success">Add Block</RAButton>
+				</AddBlockButton>
+			</DefinedVariableProvider>
 		</div>
 	);
 }
@@ -423,102 +427,107 @@ export function PrerequisiteBlocks({
 					These blocks will be executed immediately, including any checks, to evaluate if the
 					timeline is available to be used. Leave blank to always include this timeline.
 				</InfoTip>
-			</h3>
-			<div className="flex-1 overflow-x-hidden overflow-y-auto">
-				{prerequisiteBlocks.length === 0 ? (
-					<div>
-						<p>No prerequisite blocks.</p>
-						<AddBlockButton
+			</h3>{" "}
+			<DefinedVariableProvider variables={[...variables]}>
+				<div className="flex-1 overflow-x-hidden overflow-y-auto">
+					{prerequisiteBlocks.length === 0 ? (
+						<div>
+							<p>No prerequisite blocks.</p>
+							<AddBlockButton
+								timelineType={timelineType}
+								executionType={["prerequisite"]}
+								onAddBlock={async (type, init, initOverrides) => {
+									if (
+										type === "Action" &&
+										init &&
+										"action" in init &&
+										typeof init.action === "string"
+									) {
+										// @ts-expect-error
+										init.values = getActionPresetValues(init.action, init.values, initOverrides);
+									}
+									await q.plugin.timeline.prerequisiteBlock.add.netSend({
+										pluginId,
+										timelineId,
+										timelineType,
+										blockType: type,
+										init,
+									});
+								}}
+							>
+								<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
+							</AddBlockButton>
+						</div>
+					) : (
+						<SortableBlocks
 							timelineType={timelineType}
 							executionType={["prerequisite"]}
-							onAddBlock={async (type, init, initOverrides) => {
+							blocks={prerequisiteBlocks}
+							onDragEnd={(event) => {
 								if (
-									type === "Action" &&
-									init &&
-									"action" in init &&
-									typeof init.action === "string"
-								) {
-									// @ts-expect-error
-									init.values = getActionPresetValues(init.action, init.values, initOverrides);
-								}
-								await q.plugin.timeline.prerequisiteBlock.add.netSend({
+									event.canceled ||
+									!event.operation.source ||
+									!isSortable(event.operation.source)
+								)
+									return;
+								void q.plugin.timeline.prerequisiteBlock.reorder.netSend({
 									pluginId,
 									timelineId,
 									timelineType,
-									blockType: type,
-									init,
+									blockId: event.operation.source.id as string,
+									newIndex: event.operation.source.index,
 								});
 							}}
-						>
-							<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
-						</AddBlockButton>
-					</div>
-				) : (
-					<SortableBlocks
-						timelineType={timelineType}
-						executionType={["prerequisite"]}
-						blocks={prerequisiteBlocks}
-						availableVariableNames={variables}
-						onDragEnd={(event) => {
-							if (event.canceled || !event.operation.source || !isSortable(event.operation.source))
-								return;
-							void q.plugin.timeline.prerequisiteBlock.reorder.netSend({
-								pluginId,
-								timelineId,
-								timelineType,
-								blockId: event.operation.source.id as string,
-								newIndex: event.operation.source.index,
-							});
-						}}
-						onUpdate={async (block, property, value) => {
-							const { id: _, type: __, ...properties } = block;
-							await q.plugin.timeline.prerequisiteBlock.update.netSend({
-								pluginId,
-								timelineId,
-								timelineType,
-								blockId: block.id,
-								properties: { ...properties, [property]: value },
-							});
-						}}
-						onReplace={(id, blocks) => {
-							q.plugin.timeline.prerequisiteBlock.replace.netSend({
-								pluginId,
-								timelineId,
-								timelineType,
-								blockId: id,
-								blocks,
-							});
-						}}
-						onRemove={(id) =>
-							q.plugin.timeline.prerequisiteBlock.delete.netSend({
-								pluginId,
-								timelineId,
-								timelineType,
-								blockId: id,
-							})
+							onUpdate={async (block, property, value) => {
+								const { id: _, type: __, ...properties } = block;
+								await q.plugin.timeline.prerequisiteBlock.update.netSend({
+									pluginId,
+									timelineId,
+									timelineType,
+									blockId: block.id,
+									properties: { ...properties, [property]: value },
+								});
+							}}
+							onReplace={(id, blocks) => {
+								q.plugin.timeline.prerequisiteBlock.replace.netSend({
+									pluginId,
+									timelineId,
+									timelineType,
+									blockId: id,
+									blocks,
+								});
+							}}
+							onRemove={(id) =>
+								q.plugin.timeline.prerequisiteBlock.delete.netSend({
+									pluginId,
+									timelineId,
+									timelineType,
+									blockId: id,
+								})
+							}
+						/>
+					)}
+				</div>
+				<AddBlockButton
+					timelineType={timelineType}
+					executionType={["prerequisite"]}
+					onAddBlock={async (type, init, initOverrides) => {
+						if (type === "Action" && init && "action" in init && typeof init.action === "string") {
+							// @ts-expect-error
+							init.values = getActionPresetValues(init.action, init.values, initOverrides);
 						}
-					/>
-				)}
-			</div>
-			<AddBlockButton
-				timelineType={timelineType}
-				executionType={["prerequisite"]}
-				onAddBlock={async (type, init, initOverrides) => {
-					if (type === "Action" && init && "action" in init && typeof init.action === "string") {
-						// @ts-expect-error
-						init.values = getActionPresetValues(init.action, init.values, initOverrides);
-					}
-					await q.plugin.timeline.prerequisiteBlock.add.netSend({
-						pluginId,
-						timelineId,
-						timelineType,
-						blockType: type,
-						init,
-					});
-				}}
-			>
-				<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
-			</AddBlockButton>
+						await q.plugin.timeline.prerequisiteBlock.add.netSend({
+							pluginId,
+							timelineId,
+							timelineType,
+							blockType: type,
+							init,
+						});
+					}}
+				>
+					<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
+				</AddBlockButton>
+			</DefinedVariableProvider>
 		</div>
 	);
 }

@@ -17,7 +17,6 @@ export function SortableBlocks({
 	onRemove,
 	executionType,
 	macro,
-	availableVariableNames = [],
 	timelineType,
 }: {
 	parentBlock?: TimelineBlock;
@@ -28,7 +27,6 @@ export function SortableBlocks({
 	onRemove: (id: string) => void;
 	executionType: ("main" | "prerequisite")[];
 	macro?: boolean;
-	availableVariableNames?: string[] | readonly string[];
 	timelineType?: "missions" | "reports" | "trainings";
 }) {
 	return (
@@ -38,14 +36,11 @@ export function SortableBlocks({
 					<SortableBlock id={block.id} index={index} key={block.id}>
 						<Suspense>
 							<DefinedVariableProvider
-								variables={blocks.reduce(
-									(prev: string[], next, i) => {
-										if (i >= index) return prev;
-										if ("variable" in next) prev.push(next.variable);
-										return prev;
-									},
-									[...availableVariableNames],
-								)}
+								variables={blocks.reduce((prev: string[], next, i) => {
+									if (i >= index) return prev;
+									if ("variable" in next) prev.push(next.variable);
+									return prev;
+								}, [])}
 							>
 								<RenderBlock
 									{...block}
