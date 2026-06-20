@@ -79,6 +79,14 @@ export class RadarZoomEvent extends Event {
 		this.zoom = Number(payload);
 	}
 }
+export class RadarTiltEvent extends Event {
+	static name = "radarTiltEvent";
+	tilt: number;
+	constructor(payload: string) {
+		super(RadarTiltEvent.name);
+		this.tilt = Number(payload);
+	}
+}
 
 const Effects = () => {
 	const { flash, doFlash } = useFlash();

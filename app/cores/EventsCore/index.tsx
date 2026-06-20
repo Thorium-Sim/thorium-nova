@@ -42,7 +42,7 @@ export function EventsCore() {
 	return (
 		<div className="flex h-full flex-col text-sm">
 			<p>Events</p>
-			<div className="flex flex-auto flex-col-reverse overflow-y-auto">
+			<div className="flex min-h-0 flex-auto flex-col-reverse overflow-y-auto">
 				{events.map((e, i) => (
 					<p key={i} className="relative w-full overflow-x-auto whitespace-nowrap">
 						{e.name} - <code>{JSON.stringify(e.values)}</code>
@@ -61,7 +61,7 @@ export function EventsCore() {
 				))}
 			</div>
 			<p>Actions</p>
-			<div className="flex flex-auto flex-col-reverse overflow-y-auto">
+			<div className="flex min-h-0 flex-auto flex-col-reverse overflow-y-auto">
 				{actions.map((e, i) => (
 					<p key={i} className="relative overflow-x-auto whitespace-nowrap">
 						{e.name} - <code>{JSON.stringify(e.values)}</code>

@@ -14,7 +14,7 @@ import { Disconnected, Reconnecting } from "./ConnectionStatus";
 import { ThoriumAccountContextProvider } from "./ThoriumAccountContext";
 import ToastContainer from "./ToastContext";
 
-const PERSISTENT_ID_KEY = "thorium_clientPersistentId";
+const PERSISTENT_ID_KEY = "thoriumNova_clientPersistentId";
 const PING_TIMEOUT = 500;
 export let clientId =
 	typeof window !== "undefined"

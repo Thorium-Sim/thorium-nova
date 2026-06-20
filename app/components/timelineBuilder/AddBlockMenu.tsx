@@ -165,6 +165,7 @@ export function AddBlockButton({
 						<StyledMenuItem onAction={() => onAddBlock("MacroSlot")}>Macro Slot</StyledMenuItem>
 					)}
 					<StyledMenuItem onAction={() => onAddBlock("Note")}>Note</StyledMenuItem>
+					<StyledMenuItem onAction={() => onAddBlock("Debug")}>Debug</StyledMenuItem>
 					<MenuSection>
 						<Header className="pl-2 font-bold">Control Flow</Header>
 

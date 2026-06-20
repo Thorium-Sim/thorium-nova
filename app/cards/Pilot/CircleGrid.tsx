@@ -6,7 +6,7 @@ import { useGetStarmapStore } from "@thorium/components/Starmap/starmapStore";
 import { clientId, q } from "@thorium/context/AppContext";
 import useEventListener from "@thorium/hooks/useEventListener";
 import { useGamepadPress } from "@thorium/hooks/useGamepadStore";
-import { RadarZoomEvent } from "@thorium/routes/station/Effects";
+import { RadarTiltEvent, RadarZoomEvent } from "@thorium/routes/station/Effects";
 import { StationContext, useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { LiveQueryContext, useLiveQuery } from "@thorium/utils/live-query/client/liveQueryContext";
@@ -367,6 +367,10 @@ export function CircleGridTiltButton() {
 		onUp: () => {},
 	});
 
+	useEventListener(RadarTiltEvent.name, (event: RadarTiltEvent) => {
+		const tilt = event.tilt === 90 ? 1 : event.tilt === 45 ? 0.5 : event.tilt;
+		circleGridStore.setState({ tilt });
+	});
 	return (
 		<Button className="btn-primary w-full" onClick={() => handleTilt()}>
 			Tilt Sensor View

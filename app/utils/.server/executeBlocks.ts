@@ -287,7 +287,12 @@ export async function executeBlocks(
 					theResult = await triggerAction(block.action as AllSends, values);
 
 					function processValues(value: any, key: string) {
-						let val = getValueReference(value, localVariables, ecs);
+						// It grieves me to no end that this exists
+						// There is probably a more sophisticated way to do this, where
+						// the type of the value is matched with the expected type on the action, but
+						// we haven't reached the point where that's necessary
+						const entityExceptions = ["station"];
+						let val = getValueReference(value, localVariables, ecs, entityExceptions.includes(key));
 						// Special handling for certain keys we know are entity id references or numbers
 						if (typeof val === "boolean" || typeof val === "number") {
 						} else if (value !== "" && !Number.isNaN(Number(val)) && key !== "alertLevel") {
@@ -299,7 +304,13 @@ export async function executeBlocks(
 						return val;
 					}
 				} catch (error) {
-					console.error("Failed to execute Action block", block.action, error);
+					console.error(
+						"Failed to execute Action block",
+						block.action,
+						block.values,
+						localVariables,
+					);
+					console.dir(error);
 				}
 				break;
 			}
@@ -389,6 +400,12 @@ export async function executeBlocks(
 				break;
 			}
 			case "Debug": {
+				console.info("Local Variables:");
+				console.dir(localVariables);
+				if (theResult) {
+					console.info("Current Result:");
+					console.dir(theResult);
+				}
 				break;
 			}
 			default:
@@ -448,10 +465,11 @@ function evaluateCondition(
 			if (typeof val1 === "string" || Array.isArray(val1)) return val1.length > 0;
 			return true;
 		}
-		case "is empty":
+		case "is empty": {
 			if (typeof val1 === "undefined" || val1 === null) return true;
-			if (typeof val1 === "string" || Array.isArray(val1)) return val1.length < 0;
+			if (typeof val1 === "string" || Array.isArray(val1)) return val1.length <= 0;
 			return false;
+		}
 	}
 	return false;
 }
@@ -516,15 +534,22 @@ function getEntitiesReference(ref: string, variables: Record<string, any>, ecs: 
 	return entityIds;
 }
 
-export function getValueReference(ref: string, variables: Record<string, any>, ecs: ECS): any {
+export function getValueReference(
+	ref: string,
+	variables: Record<string, any>,
+	ecs: ECS,
+	notEntity?: boolean,
+): any {
 	if (typeof ref === "string") {
 		// Local variables
 		if (ref.startsWith("$")) {
-			return getValueReference(variables[ref.replace("$", "")], variables, ecs);
+			return getValueReference(variables[ref.replace("$", "")], variables, ecs, notEntity);
 		}
 
-		const entities = getEntitiesReference(ref, variables, ecs);
-		if (entities.length > 0) return entities[0];
+		if (!notEntity) {
+			const entities = getEntitiesReference(ref, variables, ecs);
+			if (entities.length > 0) return entities[0];
+		}
 
 		return interpolateText(ref, variables, ecs.rng);
 	}
@@ -582,6 +607,13 @@ function getEntityReference(
 		if (!Number.isNaN(Number(ref))) {
 			return ecs.getEntityById(Number(ref));
 		}
+
+		// Client ID
+		for (const entity of ecs.componentCache.get("flightClient") || []) {
+			if (entity.components.flightClient?.clientId === ref) return entity;
+		}
+
+		// Entity Name
 		for (const entity of ecs.componentCache.get("identity") || []) {
 			if (entity.components.identity?.name === ref) return entity;
 		}
