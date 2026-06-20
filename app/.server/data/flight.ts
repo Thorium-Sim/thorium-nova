@@ -56,6 +56,7 @@ export const flight = t.router({
 					id: entity.id,
 					name: entity.components.identity?.name || "Unknown",
 					type: entity.components.isTimeline.type,
+					pluginName: entity.components.isTimeline.pluginName,
 					currentStep: entity.components.isTimeline.currentStep,
 					shipId: entity.components.isTimeline.shipId,
 					steps: entity.components.isTimeline.steps.flatMap((s) => {
@@ -224,9 +225,19 @@ export const flight = t.router({
 		}),
 	reset: t.procedure.send(async ({ ctx }) => {
 		if (!ctx.flight) return;
-		const flightClients = ctx.flight.clients;
+		const flightClients = Object.values(ctx.flight.clients).flatMap((entity) => {
+			if (!entity?.components.flightClient) return [];
+			const client = entity.components.flightClient;
+			const ship = ctx.ecs.getEntityById(client.shipId || -1);
+
+			return {
+				clientId: client.clientId,
+				shipName: ship?.components.identity?.name,
+				stationId: client.stationId,
+			};
+		});
 		// Replace the flight with a new flight
-		await startFlight(ctx, {
+		const flight = await startFlight(ctx, {
 			flightName: ctx.flight.name,
 			hasFlightDirector: ctx.flight.hasFlightDirector,
 			mode: ctx.flight.mode,
@@ -237,12 +248,15 @@ export const flight = t.router({
 
 		// Reset all of the flight clients state
 		for (const client of Object.values(flightClients)) {
-			if (!client?.components.flightClient) return;
 			const entity = new Entity();
-			const { clientId, flightId, shipId, stationId } = client.components.flightClient;
+			const { clientId, shipName, stationId } = client;
+			const shipId = flight.ecs.componentCache
+				.get("isShip")
+				?.values()
+				.find((ship) => ship.components.identity?.name === shipName)?.id;
 			entity.addComponent("flightClient", {
 				clientId,
-				flightId,
+				flightId: flight.name,
 				shipId,
 				stationId,
 			});

@@ -5,6 +5,7 @@ import ConversationPlugin from "@thorium/.server/classes/Plugins/Conversation";
 import MissionPlugin from "@thorium/.server/classes/Plugins/Mission";
 import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
 import TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
+import type { DataContext } from "@thorium/.server/DataContext";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import type { FlightStartingPoint } from "@thorium/.server/spawners/flight";
@@ -14,6 +15,7 @@ import {
 	type TimelineBlock,
 } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import inputAuth from "@thorium/utils/.server/inputAuth";
+import { Entity } from "@thorium/utils/ecs";
 import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
 import uniqid from "@thorium/utils/uniqid";
 import z from "zod";
@@ -53,40 +55,13 @@ const block = t.router({
 			const id = uniqid("blo-");
 			const blockDefault = timelineBlockDefaults[input.blockType] as any;
 			if (!step.blocks) step.blocks = [];
-			// if (input.blockType === "Action") {
-			// 	// Fill in the values with the current local variables that match the action's inputs, if they are present.
-			// 	// Start with the variables inherent to the timeline type
-			// 	const actionInputs = Object.keys(
-			// 		// @ts-expect-error
-			// 		router._def.procedures[input.init.action]._def.inputs[0]._def.shape(),
-			// 	);
-			// 	const timelineVariables =
-			// 		input.timelineType === "reports"
-			// 			? reportVariableNames
-			// 			: input.timelineType === "trainings"
-			// 				? trainingVariableNames
-			// 				: [];
-			// 	const localVariables = step.blocks.reduce(
-			// 		(prev: string[], block) => {
-			// 			if ("variable" in block && !prev.includes(block.variable)) {
-			// 				prev.push(block.variable);
-			// 			}
-			// 			return prev;
-			// 		},
-			// 		[...timelineVariables],
-			// 	);
-			// 	for (const actionInput of actionInputs) {
-			// 		if (localVariables.includes(actionInput)) {
-			// 			input.init.values = { [actionInput]: `$${actionInput}`, ...input.init.values };
-			// 		}
-			// 	}
-			// }
 			step.blocks.push({
 				...blockDefault,
 				...input.init,
 				id,
 				type: input.blockType,
 			});
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -118,6 +93,7 @@ const block = t.router({
 			if (!step) throw new Error("Step not found");
 			const blockIndex = step.blocks.findIndex((action) => action.id === input.blockId);
 			moveArrayItem(step.blocks, blockIndex, input.newIndex);
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -148,6 +124,7 @@ const block = t.router({
 			if (!step) throw new Error("Step not found");
 			const blockIndex = step.blocks.findIndex((action) => action.id === input.blockId);
 			step.blocks.splice(blockIndex, 1);
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -180,6 +157,7 @@ const block = t.router({
 			const block = step.blocks.find((action) => action.id === input.blockId);
 			if (!block) throw new Error("Block not found");
 			Object.assign(block, input.properties);
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -217,6 +195,7 @@ const block = t.router({
 			}
 			// traverse the incoming blocks to put the slot block in.
 			step.blocks.splice(blockIndex, 1, ...input.blocks);
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -419,6 +398,7 @@ const step = t.router({
 					values: { clientId: "$clientId" },
 				},
 			]);
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -446,6 +426,7 @@ const step = t.router({
 			);
 			if (!timeline) throw new Error("Timeline not found");
 			const stepId = timeline.insertStep(input.name, input.stepId);
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -471,6 +452,7 @@ const step = t.router({
 			);
 			if (!timeline) throw new Error("Timeline not found");
 			const stepId = timeline.duplicateStep(input.stepId);
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -500,6 +482,7 @@ const step = t.router({
 			let alternateStep: number | null = stepIndex;
 			if (!timeline.steps[alternateStep]) alternateStep = stepIndex - 1;
 			if (!timeline.steps[alternateStep]) alternateStep = stepIndex + 1;
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -526,6 +509,7 @@ const step = t.router({
 			if (!timeline) throw new Error("Timeline not found");
 			const stepIndex = timeline.steps.findIndex((step) => step.id === input.stepId);
 			moveArrayItem(timeline.steps, stepIndex, input.newIndex);
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -559,6 +543,7 @@ const step = t.router({
 			if (input.name) step.name = input.name;
 			if (input.description) step.description = input.description;
 			if (input.tags) step.tags = input.tags;
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
 				timelineId: timeline.name,
@@ -902,6 +887,9 @@ export const timeline = t.router({
 			if (input.name !== timeline.name && input.name) {
 				await timeline?.rename(input.name);
 			}
+
+			syncTimelinePluginToFlightTimeline(ctx, timeline);
+
 			pubsub.publish.plugin.timeline.all({ pluginId: input.pluginId });
 			pubsub.publish.plugin.timeline.get({
 				pluginId: input.pluginId,
@@ -980,3 +968,66 @@ export const timeline = t.router({
 	}),
 	conversations,
 });
+
+function syncTimelinePluginToFlightTimeline(
+	ctx: DataContext,
+	timeline: MissionPlugin | ReportPlugin | TrainingPlugin,
+) {
+	// First find the flight timeline
+	let flightTimeline: Entity | undefined = undefined;
+	for (const entity of ctx.ecs?.componentCache.get("isTimeline") || []) {
+		if (
+			entity.components.isTimeline?.pluginName === timeline.pluginName &&
+			entity.components.identity?.name === timeline.name
+		) {
+			flightTimeline = entity;
+			break;
+		}
+	}
+	if (!flightTimeline?.components.isTimeline) return;
+
+	// Get the current timeline step so we can properly adjust if steps were rearranged
+	const currentStep = flightTimeline.components.isTimeline.currentStep;
+	const currentStepEntityId = flightTimeline.components.isTimeline.steps[currentStep];
+
+	// Make a little index of steps
+	const stepIndex = new Map<string, Entity>();
+	for (const entity of ctx.ecs.componentCache.get("isTimelineStep") || []) {
+		if (
+			!entity.components.isTimelineStep?.timelineStepId ||
+			entity.components.isTimelineStep.timelineId !== flightTimeline.id
+		)
+			continue;
+		stepIndex.set(entity.components.isTimelineStep.timelineStepId, entity);
+	}
+
+	// Update all of the timeline step entities
+	// We will leave zombie timeline steps if one was deleted
+	for (let i = 0; i < timeline.steps.length; i++) {
+		const stepItem = timeline.steps[i];
+		let stepEntity = stepIndex.get(stepItem.id);
+
+		if (!stepEntity) {
+			// It's a new step! Let's create the entity.
+			stepEntity = new Entity();
+			stepIndex.set(stepItem.id, stepEntity);
+			ctx.ecs.addEntity(stepEntity);
+		}
+		// Update the step
+		stepEntity.updateComponent("identity", {
+			name: stepItem.name,
+			description: stepItem.description,
+		});
+		stepEntity.updateComponent("tags", { tags: stepItem.tags });
+		stepEntity.updateComponent("isTimelineStep", {
+			blocks: JSON.parse(JSON.stringify(stepItem.blocks || [])),
+			timelineId: flightTimeline.id,
+			timelineStepId: stepItem.id,
+		});
+	}
+
+	// Update the step ID list
+	const steps = timeline.steps.flatMap((s) => stepIndex.get(s.id)?.id || []);
+	const newCurrentStep = steps.indexOf(currentStepEntityId || -1) || currentStep;
+	flightTimeline.updateComponent("isTimeline", { steps, currentStep: newCurrentStep });
+}

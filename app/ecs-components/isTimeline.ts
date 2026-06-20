@@ -3,6 +3,9 @@ import z from "zod";
 export const isTimeline = z
 	.object({
 		shipId: z.number().optional(),
+		/** The name of the plugin this timeline spawned from, useful for the Timeline Editor core */
+		pluginName: z.string().optional(),
+
 		type: z.enum(["mission", "training", "report"]).default("mission"),
 		/**
 		 * References to the isTimelineStep entities associated
@@ -23,6 +26,8 @@ export const isTimeline = z
 // TODO June 17, 2025 - Make a proper schema for blocks
 export const isTimelineStep = z
 	.object({
+		/** Reference to the ID of the permanent timeline step, useful for the Timeline Editor core */
+		timelineStepId: z.string().optional(),
 		/** Whether the timeline step has been executed */
 		state: z.enum(["pending", "executing", "executed"]).default("pending"),
 		/**

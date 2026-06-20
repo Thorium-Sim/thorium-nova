@@ -21,6 +21,7 @@ export function spawnTimeline(
 		step.addComponent("isTimelineStep", {
 			blocks: JSON.parse(JSON.stringify(stepItem.blocks || [])),
 			timelineId: timelineEntity.id,
+			timelineStepId: stepItem.id,
 		});
 		addEntity(step);
 		stepIds.push(step.id);
@@ -33,6 +34,7 @@ export function spawnTimeline(
 	timelineEntity.addComponent("tags", { tags: timeline.tags });
 	timelineEntity.addComponent("isTimeline", {
 		shipId,
+		pluginName: timeline.pluginName,
 		steps: stepIds,
 		type:
 			timeline.kind === "missions"

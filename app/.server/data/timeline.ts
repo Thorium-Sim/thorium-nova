@@ -28,6 +28,7 @@ export const timeline = t.router({
 			await triggerStep(
 				ctx.flight.ecs.getEntityById(timelineEntity.components.isTimeline?.steps[0] || -1)!,
 			);
+			pubsub.publish.flight.timelines();
 		}),
 	advance: t.procedure
 		.meta({
@@ -92,6 +93,7 @@ export const timeline = t.router({
 						clientId,
 					});
 				}
+				pubsub.publish.flight.timelines();
 				return;
 			} else {
 				const step = ctx.ecs.getEntityById(currentStep);
@@ -108,6 +110,7 @@ export const timeline = t.router({
 					trigger.updateComponent("isTrigger", { active: false });
 				}
 			}
+			pubsub.publish.flight.timelines();
 			// TODO: August 25, 2023 Send the necessary pubsub updates
 		}),
 	goToStep: t.procedure
@@ -139,6 +142,7 @@ export const timeline = t.router({
 			timeline.updateComponent("isTimeline", { currentStep: stepIndex });
 
 			await triggerStep(ctx.flight!.ecs.getEntityById(steps[stepIndex])!);
+			pubsub.publish.flight.timelines();
 			// TODO: August 25, 2023 Send the necessary pubsub updates
 		}),
 	complete: t.procedure
@@ -167,6 +171,7 @@ export const timeline = t.router({
 			if (timeline.components.damageReport?.autoApplyWhenCompleted) {
 				applyDamageReportMetrics(timeline);
 			}
+			pubsub.publish.flight.timelines();
 			return;
 		}),
 });
