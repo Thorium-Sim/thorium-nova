@@ -1,3 +1,4 @@
+import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -9,6 +10,7 @@ describe("TimerSystem", () => {
 	let timerSystem: TimerSystem;
 	beforeEach(() => {
 		ecs = new ECS(server);
+		ecs.executeBlocks = (blocks, blockMetadata) => executeBlocks(ecs, blocks, blockMetadata);
 		timerSystem = new TimerSystem();
 	});
 	it("should initialize properly", () => {

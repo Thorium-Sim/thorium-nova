@@ -1,8 +1,7 @@
 import * as client from "@thorium/.server/data";
+import { componentEntityMaps } from "@thorium/.server/init/componentEntityMaps";
 import * as cards from "@thorium/cards/data.server";
 import * as cores from "@thorium/cores/data.server";
-import type { ComponentIds } from "@thorium/ecs-components";
-import type { Entity } from "@thorium/utils/ecs";
 
 import { t } from "./t";
 
@@ -19,11 +18,6 @@ export const router = t.router({
 	...allCards,
 	...allCores,
 });
-
-export const componentEntityMaps = new Map<
-	ComponentIds,
-	Set<{ procedure: string; entityMap: (entity: Entity) => any }>
->();
 
 // Activate the auto-publish behavior
 for (const [name, route] of Object.entries(router._def.procedures) as any) {

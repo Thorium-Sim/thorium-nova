@@ -1,4 +1,3 @@
-import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { type Entity, System } from "@thorium/utils/ecs";
 
 export class TimerSystem extends System {
@@ -20,7 +19,7 @@ export class TimerSystem extends System {
 		const completeBlocks = entity.components.timer?.completeBlocks || [];
 		const blockMetadata = entity.components.timer?.blockMetadata || {};
 
-		executeBlocks(this.ecs, completeBlocks, blockMetadata);
+		this.ecs.executeBlocks(completeBlocks, blockMetadata);
 
 		this.ecs.removeEntityById(entity.id);
 	}

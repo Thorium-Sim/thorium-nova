@@ -37,11 +37,9 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 				await readdir(thoriumPath);
 				inited = true;
 			} catch {}
-
 			if (!inited) {
 				await initDefaultPlugin();
 			}
-
 			const app = new Hono();
 			app.use(
 				cors({
@@ -61,7 +59,6 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 					const ecs = database?.flight?.ecs;
 					if (!ecs || opts.type !== "send") return;
 					const rawInputObj = isObject(opts.rawInput) ? opts.rawInput : {};
-
 					void notifyActions(opts.path, rawInputObj);
 					void notifyEvents(opts.path, {
 						...rawInputObj,
@@ -76,9 +73,7 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 					});
 				},
 			});
-
 			app.use(middleware);
-
 			app.get(
 				"/healthcheck",
 				() =>
@@ -95,12 +90,10 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 						headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET" },
 					}),
 			);
-
 			app.post("/snapshot", async () => {
 				await snapshot(database);
 				return new Response("OK", { status: 200 });
 			});
-
 			app.use(
 				"/plugins/*",
 				serveStatic({
@@ -119,23 +112,21 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 					},
 				}),
 			);
-
 			app.get("/plugins/:pluginId/:systemId/cypher.css", ({ req }) => {
 				const plugin = database.server.plugins.find((p) => p.id === req.param("pluginId"));
 				const system = plugin?.aspects.shipSystems.find(
 					(p) => p.name === req.param("systemId"),
 				) as LongRangeCommPlugin;
-
 				if (!system) return new Response("Not found", { status: 404 });
 				return new Response(
 					system?.cyphers
 						.map(
 							({ font, name }) => `@font-face {
-  font-family: "${name}";
-	font-style: normal;
-	font-weight: 400;
-	src: url("${font}") format(${getFontFormat(font)})
-}\n`,
+			  font-family: "${name}";
+				font-style: normal;
+				font-weight: 400;
+				src: url("${font}") format(${getFontFormat(font)})
+			}\n`,
 						)
 						.join("") || "",
 					{
@@ -159,7 +150,6 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 				await testHttpServer?.stop(true);
 				await testHttpsServer?.stop(true);
 			}
-
 			const port =
 				Number(process.env.PORT) + (process.env.NODE_ENV === "test" ? 1 : 0) ||
 				(isProd ? Number(process.env.PORT) || (rootPortsAllowed ? 80 : 4444) : 3001);
@@ -170,17 +160,13 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 					: rootPortsAllowed
 						? 443
 						: port + 1;
-
 			exitHandler(dataStoreProps);
-
 			registerExitFunction(async () => {
 				const database = DataStore.operations.getStore()!.database;
 				await snapshot(database);
 			});
-
 			if (isProd) {
 				const certs = await loadOrCreateCerts();
-
 				app.get("/ca.crt", () => {
 					return new Response(certs.caPem, {
 						headers: {
@@ -189,12 +175,10 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 						},
 					});
 				});
-
 				const tls = {
 					cert: certs.serverCertPem,
 					key: certs.serverKeyPem,
 				};
-
 				const getClientBundleFile = (await import("./utils/.server/embeddedUtils"))
 					.getClientBundleFile;
 				app.use(async (c) => {
@@ -211,11 +195,9 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 						return new Response(bundle.file, { headers });
 					} catch (error) {
 						console.error("Error retrieving client bundle file", error);
-
 						return new Response("", { status: 404 });
 					}
 				});
-
 				const https = Bun.serve({
 					port: httpsPort,
 					fetch: app.fetch,
@@ -226,24 +208,20 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 				});
 				httpsRunning = https.url.href;
 			}
-
 			const server = Bun.serve({
 				port,
 				fetch: app.fetch,
 				websocket,
 				reusePort: true,
 			});
-
 			if (isProd) {
 				await advertiseMdns(server.port!);
 			}
-
 			vanity();
 			console.info(`Server running on ${server.url.href}`);
 			if (httpsRunning) {
 				console.info(`HTTPS running on ${httpsRunning}`);
 			}
-
 			return server.url.href;
 		});
 	} catch (error) {

@@ -3,6 +3,8 @@ import path from "node:path";
 import RAPIER from "@thorium-sim/rapier3d-node";
 import { initECS } from "@thorium/.server/classes/initECS";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
+import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
+import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { loadGltf } from "@thorium/utils/.server/loadGltf";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import randomWords from "@thorium/utils/random-words";
@@ -84,6 +86,8 @@ export class FlightDataModel extends DataStore {
 		await this.#getDataPromise;
 		this.ecs = new ECS(server);
 		initECS(this.ecs, this.entities, this.mode);
+		this.ecs.processTriggers = (event) => processTriggers(this.ecs, event);
+		this.ecs.executeBlocks = (blocks, metadata) => executeBlocks(this.ecs, blocks, metadata);
 		if (!this.flightEntity) {
 			const flight = new Entity();
 			flight.addComponent("isFlight", {

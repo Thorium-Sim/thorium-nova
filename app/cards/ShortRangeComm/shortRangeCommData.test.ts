@@ -8,6 +8,7 @@ import {
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
+import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { measureAudioDurationMs } from "@thorium/utils/.server/ink/measureAudioDuration";
 import { Entity } from "@thorium/utils/ecs";
 import { it, aroundEach, expect, vi } from "vitest";
@@ -330,6 +331,10 @@ it("should wait for an audio file to finish playing before continuing the story 
 
 function setUpTests() {
 	const dataContext = createMockDataContext();
+	dataContext.ecs.executeBlocks = (blocks, blockMetadata) =>
+		executeBlocks(dataContext.ecs, blocks, blockMetadata);
+	dataContext.ecs.processTriggers = (events) => processTriggers(dataContext.ecs, events);
+
 	const router = createMockRouter(dataContext, {
 		onCall: (opts, result) => {
 			const ecs = dataContext?.ecs;

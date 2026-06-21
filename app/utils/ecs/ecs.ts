@@ -5,7 +5,9 @@
 import type { ColliderDesc, World } from "@thorium-sim/rapier3d-node";
 import RAPIER from "@thorium-sim/rapier3d-node";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
+import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import type { ComponentIds } from "@thorium/ecs-components";
+import type { BlockMetadata } from "@thorium/utils/.server/executeBlocks";
 import { type RNG, createRNG } from "@thorium/utils/rng";
 
 import type Entity from "./entity";
@@ -200,6 +202,20 @@ class ECS {
 			this.worlds.set(key, new RAPIER.World({ x: 0, y: 0, z: 0 }));
 		}
 		return this.worlds.get(key)!;
+	}
+	// oxlint-disable-next-line no-unused-vars
+	executeBlocks(blocks: TimelineBlock[], blocksMetadata: BlockMetadata = {}) {
+		// We have to keep this blank and register it when we init ECS
+		// to prevent weird dependency loops when executing blocks from
+		// ECS systems
+		throw new Error("executeBlocks has not been properly registered. Have you run initEcs yet?");
+	}
+	// oxlint-disable-next-line no-unused-vars
+	processTriggers(event?: { event: string; values: any }) {
+		// We have to keep this blank and register it when we init ECS
+		// to prevent weird dependency loops when executing blocks from
+		// ECS systems
+		throw new Error("processTriggers has not been properly registered. Have you run initEcs yet?");
 	}
 }
 

@@ -39,7 +39,6 @@ export function bunDataStoreProps(env: string): DataStoreOperations {
 		},
 		async write(force = false, name?: string) {
 			let filePath = path.join(basePath, this.meta.filePath);
-
 			try {
 				if (this.safeMode && force === false) return;
 				if (
@@ -61,20 +60,17 @@ export function bunDataStoreProps(env: string): DataStoreOperations {
 				this.initialData = undefined;
 				const jsonData = this.toJSON();
 				jsonData.dataLoaded = undefined;
-
 				const data = dump(jsonData, {
 					skipInvalid: true,
 				});
 				await fs.writeFile(filePath, data, { mode: 0o0600 });
 			} catch (e: any) {
 				e.message = `db-fs: Error writing file:\n${e.message}`;
-
 				throw e;
 			}
 		},
 		async remove() {
 			const filePath = path.join(basePath, this.meta.filePath);
-
 			if (!filePath) return;
 			try {
 				await fs.rm(path.dirname(filePath), {
@@ -88,7 +84,6 @@ export function bunDataStoreProps(env: string): DataStoreOperations {
 				console.error("Error removing file: ", filePath, err);
 			}
 		},
-
 		async readAsset(assetUrl) {
 			return Bun.file(assetUrl).text();
 		},
@@ -119,25 +114,27 @@ export function bunDataStoreProps(env: string): DataStoreOperations {
 			const glob = new Bun.Glob(
 				path.join(thoriumPath, "plugins", this.id, "*", "**", "manifest.yml"),
 			);
-			for await (const filePath of glob.scan({ onlyFiles: true })) {
-				try {
-					const fileData = await Bun.file(filePath).text();
-					const aspectData = loadYml(fileData);
-					const kind = aspectData.kind as keyof AspectsMap;
-					const className = aspectData.kind === "shipSystems" ? aspectData.type : aspectData.kind;
-					// Ignore the plugins themselves
-					if (className === "plugins") continue;
-					const aspectClass = aspectClasses[className];
-					if (!aspectClass) {
-						throw new Error(`Invalid aspect class: ${className}`);
+			await Promise.all(
+				(await Array.fromAsync(glob.scan({ onlyFiles: true }))).map(async (filePath) => {
+					try {
+						const fileData = await Bun.file(filePath).text();
+						const aspectData = loadYml(fileData);
+						const kind = aspectData.kind as keyof AspectsMap;
+						const className = aspectData.kind === "shipSystems" ? aspectData.type : aspectData.kind;
+						// Ignore the plugins themselves
+						if (className === "plugins") return;
+						const aspectClass = aspectClasses[className];
+						if (!aspectClass) {
+							throw new Error(`Invalid aspect class: ${className}`);
+						}
+						if (!this.aspects[kind]) throw new Error(`Invalid aspect kind: ${kind}`);
+						// @ts-expect-error
+						this.aspects[kind].push(new aspectClass(aspectData, this));
+					} catch (error) {
+						console.error(error);
 					}
-					if (!this.aspects[kind]) throw new Error(`Invalid aspect kind: ${kind}`);
-					// @ts-expect-error
-					this.aspects[kind].push(new aspectClass(aspectData, this));
-				} catch (error) {
-					console.error(error);
-				}
-			}
+				}),
+			);
 		},
 		async rename(name, otherNames) {
 			if (!("name" in this) || typeof this.name !== "string") return;
@@ -151,7 +148,6 @@ export function bunDataStoreProps(env: string): DataStoreOperations {
 			}
 			this.name = newName;
 			this.meta.filePath = path.join(newPath, "manifest.yml");
-
 			await this.write(true);
 		},
 		async getFlights() {

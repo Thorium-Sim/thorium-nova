@@ -27,16 +27,7 @@ function Ship() {
 		"http://localhost:3000/plugins/Thorium%20Default/ships/Alotech%20Frigate/assets/model.glb?1740849292995",
 		false,
 	);
-	return (
-		<primitive
-			object={model.scene}
-			ref={(node: any) => {
-				if (node) {
-					console.timeEnd("Model");
-				}
-			}}
-		/>
-	);
+	return <primitive object={model.scene} />;
 }
 
 function Sprite() {

@@ -10,9 +10,9 @@ import {
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { getGraph } from "@thorium/utils/.server/ship/shipMapGraph";
 import { calculateShipMapPath } from "@thorium/utils/.server/ship/shipMapPathfinder";
-import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
+import uniqid from "@thorium/utils/uniqid";
 import { noCase } from "change-case";
 import { produce } from "immer";
 
@@ -258,9 +258,16 @@ export class ExocompSystem extends System {
 								text: `Completed ${noCase(currentInstruction.type)} on ${systemEntity.components.identity?.name || "system"}.`,
 							});
 							pubsub.publish.exocomps.exocomps({ shipId });
-							triggerAction("damageReports.completeDamageAssignment", {
-								damageAssignmentId: assignmentEntity.id,
-							});
+							this.ecs.executeBlocks([
+								{
+									id: uniqid("blo-"),
+									type: "Action",
+									action: "damageReports.completeDamageAssignment",
+									values: {
+										damageAssignmentId: assignmentEntity.id,
+									},
+								},
+							]);
 							this.advanceInstruction(entity);
 						} else {
 							// If we haven't logged about starting this work, then put the log in there

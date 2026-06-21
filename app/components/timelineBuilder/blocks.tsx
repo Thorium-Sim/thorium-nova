@@ -98,7 +98,7 @@ export function RenderBlock({
 				) : block.type === "MacroSlot" ? (
 					<MacroSlotBlock />
 				) : block.type === "Debug" ? (
-					<DebugBlock {...block} update={update} />
+					<DebugBlock />
 				) : block.type === "Note" ? (
 					<NoteBlock {...block} update={update} />
 				) : (

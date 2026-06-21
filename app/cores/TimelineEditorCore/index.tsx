@@ -22,7 +22,6 @@ export function TimelineEditorCore() {
 	const activeTimeline = activeTimelines.find(
 		(a) => a.name === selectedTimeline?.name && a.pluginName === selectedTimeline.pluginName,
 	);
-	console.log(activeTimeline);
 	return (
 		<div className="flex h-full flex-col">
 			<div className="flex items-center gap-1">

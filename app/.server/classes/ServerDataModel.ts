@@ -16,11 +16,6 @@ export class ServerDataModel extends DataStore {
 		private loadPluginsImpl: (this: ServerDataModel) => Promise<void>,
 	) {
 		super(params, options);
-		this.getData<ServerDataModel>().then((data) => {
-			this.activeFlightName = data.activeFlightName || null;
-			this.thoriumId = data.thoriumId || randomWords(3).join("-");
-			this.spawnClients(this.clients || data.clients || {});
-		});
 	}
 	spawnClients(clients: Record<string, Client<any>>) {
 		this.clients = Object.fromEntries(
@@ -31,6 +26,12 @@ export class ServerDataModel extends DataStore {
 				return [id, c];
 			}),
 		);
+	}
+	async getInitialData() {
+		const data = await this.getData<ServerDataModel>();
+		this.activeFlightName = data.activeFlightName || null;
+		this.thoriumId = data.thoriumId || randomWords(3).join("-");
+		this.spawnClients(this.clients || data.clients || {});
 	}
 	getClientByName(clientName: string) {
 		for (const client in this.clients) {

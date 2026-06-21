@@ -21,8 +21,10 @@ export async function buildDatabase(loadPlugins: (this: ServerDataModel) => Prom
 		{ meta: { filePath: databaseName } },
 		loadPlugins,
 	);
+	await serverModel.getInitialData();
+
 	// Wait for the plugins to load. Shouldn't take long.
-	await serverModel.loadPlugins();
+	const promises = [serverModel.loadPlugins()];
 
 	// If a flight is in progress, load it.
 	// This helps in situations where the server is shut
@@ -39,10 +41,12 @@ export async function buildDatabase(loadPlugins: (this: ServerDataModel) => Prom
 			},
 			{ meta: { filePath: `/flights/${flightName}/data.yml`, flightName } },
 		);
-
-		await flight.initEcs(serverModel);
-		await flight.initPhysics();
+		promises.push(flight.initEcs(serverModel));
+		promises.push(flight.initPhysics());
 	}
+
+	await Promise.all(promises);
+
 	DataStore.operations.getStore()!.database = { server: serverModel, flight };
 	return DataStore.operations.getStore()!.database;
 }
