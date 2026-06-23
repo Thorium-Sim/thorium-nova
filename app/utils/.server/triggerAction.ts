@@ -1,7 +1,7 @@
 import { DataContext } from "@thorium/.server/DataContext";
 import { router, type AllSends, type SendInputs } from "@thorium/.server/init/router";
-import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
 import { notifyActions, notifyEvents } from "@thorium/utils/.server/notifyActions";
+import { processTriggers } from "@thorium/utils/.server/processTriggers";
 import { callProcedure } from "@thorium/utils/live-query/.server/router";
 
 import { DataStore } from "./db-fs";

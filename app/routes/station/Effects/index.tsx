@@ -161,6 +161,10 @@ const Effects = () => {
 			switch (payload.name) {
 				case RadarZoomEvent.name:
 					window.dispatchEvent(new RadarZoomEvent(payload.payload));
+					break;
+				case RadarTiltEvent.name:
+					window.dispatchEvent(new RadarTiltEvent(payload.payload));
+					break;
 			}
 		}
 	}, []);

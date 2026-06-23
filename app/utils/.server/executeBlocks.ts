@@ -91,7 +91,6 @@ export async function executeBlocks(
 			}
 			case "IfCondition": {
 				let response = true;
-
 				for (const condition of block.conditions) {
 					if (!evaluateCondition(condition, localVariables, ecs)) {
 						response = false;

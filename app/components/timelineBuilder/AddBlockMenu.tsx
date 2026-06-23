@@ -94,7 +94,17 @@ export function AddBlockButton({
 					triggerBlocks: [],
 				});
 			}
-			onAddBlock("EventCondition", { event: event.blockName, triggerBlocks }, false);
+			onAddBlock(
+				"EventCondition",
+				{
+					event: event.blockName,
+					triggerBlocks,
+					// We add multiple because it's quite likely the event will happen without
+					// triggering the if condition before eventually triggering the if condition
+					multiple: true,
+				},
+				false,
+			);
 		}
 	});
 

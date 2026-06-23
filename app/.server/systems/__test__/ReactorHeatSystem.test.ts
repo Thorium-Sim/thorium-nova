@@ -2,8 +2,8 @@ import { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
-import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
+import { processTriggers } from "@thorium/utils/.server/processTriggers";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import { aroundEach, beforeEach, describe, expect, it } from "vitest";
 

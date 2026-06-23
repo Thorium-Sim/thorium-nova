@@ -32,52 +32,66 @@ export function EventsCore() {
 	const [actions, setActions] = useState<{ name: string; values: any }[]>([]);
 	q.thorium.eventsSub.useNetSubscribe(
 		undefined,
-		(event) => event && setEvents((e) => [...e, { name: event.name, values: event.values }]),
+		(event) => event && setEvents((e) => [{ name: event.name, values: event.values }, ...e]),
 	);
 	q.thorium.actionsSub.useNetSubscribe(
 		undefined,
-		(action) => action && setActions((e) => [...e, { name: action.name, values: action.values }]),
+		(action) => action && setActions((e) => [{ name: action.name, values: action.values }, ...e]),
 	);
 
 	return (
-		<div className="flex h-full flex-col text-sm">
-			<p>Events</p>
-			<div className="flex min-h-0 flex-auto flex-col-reverse overflow-y-auto">
-				{events.map((e, i) => (
-					<p key={i} className="relative w-full overflow-x-auto whitespace-nowrap">
-						{e.name} - <code>{JSON.stringify(e.values)}</code>
-						{choosing ? (
-							<Button
-								className="btn-success btn-xs absolute right-0"
-								onClick={() => {
-									window.dispatchEvent(new AddActionEvent(choosing, "event", e.name, e.values));
-									setChoosing(null);
-								}}
-							>
-								Add
-							</Button>
-						) : null}
-					</p>
-				))}
+		<div className="flex h-full text-sm">
+			<div className="flex h-full max-w-1/2 grow flex-col">
+				<p>Events</p>
+				<div className="relative flex min-h-0 flex-col overflow-y-auto">
+					{events.map((e, i) => (
+						<div key={i} className="relative border-b border-b-white/50 last-of-type:border-0">
+							<p className="text-sm font-bold">{e.name}</p>
+							{Object.entries(e.values).map(([key, value]) => (
+								<p key={key} className="text-xs">
+									<span className="font-medium">{key}:</span> {value}
+								</p>
+							))}
+							{choosing ? (
+								<Button
+									className="btn-success btn-xs absolute top-0 right-0"
+									onClick={() => {
+										window.dispatchEvent(new AddActionEvent(choosing, "event", e.name, e.values));
+										setChoosing(null);
+									}}
+								>
+									Add
+								</Button>
+							) : null}
+						</div>
+					))}
+				</div>
 			</div>
-			<p>Actions</p>
-			<div className="flex min-h-0 flex-auto flex-col-reverse overflow-y-auto">
-				{actions.map((e, i) => (
-					<p key={i} className="relative overflow-x-auto whitespace-nowrap">
-						{e.name} - <code>{JSON.stringify(e.values)}</code>
-						{choosing ? (
-							<Button
-								className="btn-success btn-xs"
-								onClick={() => {
-									window.dispatchEvent(new AddActionEvent(choosing, "action", e.name, e.values));
-									setChoosing(null);
-								}}
-							>
-								Add
-							</Button>
-						) : null}
-					</p>
-				))}
+			<div className="flex h-full max-w-1/2 grow flex-col">
+				<p>Actions</p>
+				<div className="relative flex min-h-0 flex-col-reverse overflow-y-auto">
+					{actions.map((e, i) => (
+						<div key={i} className="relative border-b border-b-white/50 last-of-type:border-0">
+							<p className="text-sm font-bold">{e.name}</p>
+							{Object.entries(e.values).map(([key, value]) => (
+								<p key={key} className="text-xs">
+									<span className="font-medium">{key}:</span> {value}
+								</p>
+							))}
+							{choosing ? (
+								<Button
+									className="btn-success btn-xs absolute top-0 right-0"
+									onClick={() => {
+										window.dispatchEvent(new AddActionEvent(choosing, "action", e.name, e.values));
+										setChoosing(null);
+									}}
+								>
+									Add
+								</Button>
+							) : null}
+						</div>
+					))}
+				</div>
 			</div>
 		</div>
 	);

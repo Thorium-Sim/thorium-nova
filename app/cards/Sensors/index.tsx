@@ -129,7 +129,7 @@ function Scans({ cardLoaded }: { cardLoaded: boolean }) {
 	const [scans] = q.sensors.scans.useNetRequest({ shipId });
 	if (scans.length === 0) return null;
 	return (
-		<div className="panel panel-alert max-h-full divide-y divide-white/50 overflow-y-auto">
+		<div className="panel panel-alert scans-panel max-h-full divide-y divide-white/50 overflow-y-auto">
 			{scans.map((s) => (
 				<Suspense key={s.id}>
 					<Scan {...s} cardLoaded={cardLoaded} />
@@ -347,7 +347,7 @@ function SensorsScannableObject({
 					<span ref={distanceRef} />
 				</div>
 			</Button>
-			<DisclosurePanel className="px-2 group-data-expanded:pb-2">
+			<DisclosurePanel className="scan-options px-2 group-data-expanded:pb-2">
 				<ScanResults objectId={id} type={type} />
 				{hasWaypoint ? null : (
 					<Button

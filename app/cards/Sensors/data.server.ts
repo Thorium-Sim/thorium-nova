@@ -106,6 +106,15 @@ export const sensors = t.router({
 				type: scanTypes,
 			}),
 		)
+		.output(
+			z.object({
+				scanId: z.number(),
+				shipId: z.number(),
+				target: z.number(),
+				type: scanTypes,
+			}),
+		)
+		.meta({ event: true })
 		.send(({ ctx, input }) => {
 			const sensorsSystem = getShipSystem(ctx.ecs, {
 				systemType: "sensors",
@@ -123,6 +132,7 @@ export const sensors = t.router({
 			});
 			ctx.flight?.ecs.addEntity(scanEntity);
 			pubsub.publish.sensors.scans({ shipId: input.shipId });
+			return { ...input, scanId: scanEntity.id };
 		}),
 	scanCancel: t.procedure
 		.input(
@@ -130,6 +140,13 @@ export const sensors = t.router({
 				scanId: z.number(),
 			}),
 		)
+		.output(
+			z.object({
+				scanId: z.number(),
+				shipId: z.number().optional(),
+			}),
+		)
+		.meta({ event: true })
 		.send(({ ctx, input }) => {
 			const shipId = ctx.ecs.getEntityById(input.scanId)?.components.scan?.parentId;
 			if (shipId) {
@@ -143,9 +160,12 @@ export const sensors = t.router({
 			if (shipId) {
 				pubsub.publish.sensors.scans({ shipId });
 			}
+			return { scanId: input.scanId, shipId };
 		}),
 	selectContact: t.procedure
 		.input(z.object({ shipId: z.number(), contactId: z.number().nullable() }))
+		.output(z.object({ shipId: z.number(), contactId: z.number().nullable() }))
+		.meta({ event: true })
 		.send(({ ctx, input }) => {
 			const sensors = getShipSystem(ctx.ecs, {
 				systemType: "sensors",
@@ -158,6 +178,7 @@ export const sensors = t.router({
 				shipId: input.shipId,
 				systemId: sensors.id,
 			});
+			return input;
 		}),
 
 	sendProcessedData: t.procedure
@@ -168,8 +189,16 @@ export const sensors = t.router({
 				flash: z.boolean().optional(),
 			}),
 		)
+		.output(
+			z.object({
+				shipId: z.number(),
+				data: z.string(),
+				flash: z.boolean().optional(),
+			}),
+		)
+		.meta({ event: true, action: true })
 		.send(({ ctx, input }) => {
-			if (!input.data) return;
+			if (!input.data.trim()) throw new Error("Data cannot be empty");
 			const sensorsSys = getShipSystem(ctx.ecs, {
 				systemType: "sensors",
 				shipId: input.shipId,
@@ -209,6 +238,7 @@ export const sensors = t.router({
 				shipId: input.shipId,
 				systemId: sensorsSys.id,
 			});
+			return input;
 		}),
 
 	removeProcessedData: t.procedure

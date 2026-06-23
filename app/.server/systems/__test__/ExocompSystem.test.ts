@@ -5,8 +5,8 @@ import { PassengerMovementSystem } from "@thorium/.server/systems/PassengerMovem
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
-import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
+import { processTriggers } from "@thorium/utils/.server/processTriggers";
 import { Entity } from "@thorium/utils/ecs";
 import ECS from "@thorium/utils/ecs/ecs";
 import { aroundEach, beforeEach, describe, expect, it } from "vitest";

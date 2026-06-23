@@ -7,9 +7,9 @@ import {
 } from "@thorium/utils/.server/createMockDataContext";
 import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
-import { processTriggers } from "@thorium/utils/.server/evaluateEntityQuery";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { measureAudioDurationMs } from "@thorium/utils/.server/ink/measureAudioDuration";
+import { processTriggers } from "@thorium/utils/.server/processTriggers";
 import { Entity } from "@thorium/utils/ecs";
 import { it, aroundEach, expect, vi } from "vitest";
 
