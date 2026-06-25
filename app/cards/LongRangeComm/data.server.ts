@@ -89,6 +89,8 @@ export const longRangeComm = t.router({
 		}),
 	setFrequency: t.procedure
 		.input(z.object({ shipId: z.number(), frequency: z.number() }))
+		.meta({ event: true })
+		.output(z.object({ shipId: z.number(), frequency: z.number() }))
 		.send(({ ctx, input }) => {
 			const lrcomm = getShipSystem(ctx.ecs, {
 				systemType: "longRangeComm",
@@ -99,9 +101,12 @@ export const longRangeComm = t.router({
 				antennaFrequency: input.frequency,
 			});
 			pubsub.publish.longRangeComm.get({ shipId: input.shipId });
+			return input;
 		}),
 	setGain: t.procedure
 		.input(z.object({ shipId: z.number(), gain: z.number() }))
+		.meta({ event: true })
+		.output(z.object({ shipId: z.number(), gain: z.number() }))
 		.send(({ ctx, input }) => {
 			const lrcomm = getShipSystem(ctx.ecs, {
 				systemType: "longRangeComm",
@@ -110,6 +115,7 @@ export const longRangeComm = t.router({
 			if (!lrcomm?.components.isLongRangeComm) throw new Error("No Long Range Comm System");
 			lrcomm.updateComponent("isLongRangeComm", { antennaGain: input.gain });
 			pubsub.publish.longRangeComm.get({ shipId: input.shipId });
+			return input;
 		}),
 
 	systemStream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ input, ctx }) => {
@@ -359,7 +365,16 @@ export const longRangeComm = t.router({
 				encoding: z.enum(["decoded", "waves", "replacement", "rotation"]).optional(),
 			}),
 		)
-		.send(({ ctx, input }) => {
+		.output(
+			z.object({
+				senderId: z.number(),
+				destinationId: z.number(),
+				state: z.string(),
+				messageId: z.number(),
+			}),
+		)
+		.meta({ action: true, event: true })
+		.send(async ({ ctx, input }) => {
 			const message = new Entity();
 
 			const encoding = getEncodingSettings(input.encoding, ctx.ecs.rng);
@@ -377,23 +392,14 @@ export const longRangeComm = t.router({
 				const ship = ctx.ecs.getEntityById(input.senderId);
 
 				if (!ship) throw new Error("Invalid Long Range Message");
-				const system = getObjectSystem(ship);
-				const position = system?.components.position || ship.components.position;
-				message.addComponent("position", { ...position });
-
 				try {
 					// Find the closest satellite to the position
 					const satellites = Array.from(ctx.ecs.componentCache.get("isCommSatellite") || []);
 					const satellite = findClosestSatellite(satellites, ship);
 					if (!satellite) throw new Error("First satellite not found");
-					const nextNodeId = pickNextLongRangeMessageNode(
-						ctx.ecs,
-						satellite.id,
-						input.destinationId,
-						[],
-					);
-					message.updateComponent("isLongRangeMessage", {
-						nextNodeId,
+					await ctx.ecs.triggerAction("longRangeComm.sendMessage", {
+						messageId: message.id,
+						satelliteId: satellite.id,
 					});
 				} catch (e) {
 					console.error(e);
@@ -406,6 +412,12 @@ export const longRangeComm = t.router({
 			}
 			ctx.ecs.addEntity(message);
 			pubsub.publish.longRangeComm.outgoingMessages({ shipId: input.senderId });
+			return {
+				senderId: input.senderId,
+				destinationId: input.destinationId,
+				messageId: message.id,
+				state: message.components.isLongRangeMessage?.state || input.state || "pending",
+			};
 		}),
 	setMessageEncoding: t.procedure
 		.input(
@@ -441,6 +453,15 @@ export const longRangeComm = t.router({
 				satelliteId: z.number(),
 			}),
 		)
+		.output(
+			z.object({
+				senderId: z.number(),
+				destinationId: z.number(),
+				state: z.string(),
+				messageId: z.number(),
+			}),
+		)
+		.meta({ action: true, event: true })
 		.send(({ ctx, input }) => {
 			const message = ctx.ecs.getEntityById(input.messageId);
 			if (!message?.components.isLongRangeMessage) throw new Error("Invalid Long Range Message");
@@ -473,6 +494,12 @@ export const longRangeComm = t.router({
 			} finally {
 				pubsub.publish.longRangeComm.outgoingMessages({ shipId });
 			}
+			return {
+				messageId: message.id,
+				destinationId: message.components.isLongRangeMessage.destinationId,
+				senderId: message.components.isLongRangeMessage.senderId,
+				state: message.components.isLongRangeMessage.state,
+			};
 		}),
 	updateMessageDecoding: t.procedure
 		.input(

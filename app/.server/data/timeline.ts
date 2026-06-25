@@ -10,18 +10,30 @@ export const timeline = t.router({
 	activate: t.procedure
 		.meta({ action: true })
 		.input(z.object({ pluginId: z.string(), timelineId: z.string() }))
+		.output(z.object({ timelineId: z.number(), stepId: z.number().optional() }))
 		.send(async ({ ctx, input }) => {
-			if (!ctx.flight) return;
+			if (!ctx.flight) throw new Error("Flight has not started.");
 			const timeline =
 				ctx.server.plugins
 					.find((plugin) => plugin.id === input.pluginId)
 					?.aspects.missions.find((timeline) => timeline.name === input.timelineId) ||
 				ctx.server.plugins
 					.find((plugin) => plugin.id === input.pluginId)
-					?.aspects.reports.find((timeline) => timeline.name === input.timelineId);
-			if (!timeline) return;
+					?.aspects.reports.find((timeline) => timeline.name === input.timelineId) ||
+				ctx.server.plugins
+					.find((plugin) => plugin.id === input.pluginId)
+					?.aspects.trainings.find((timeline) => timeline.name === input.timelineId);
+			if (!timeline) throw new Error(`Timeline not found: ${input.pluginId} — ${input.timelineId}`);
 			const timelineEntity = spawnTimeline(timeline, (entity: Entity) => {
 				ctx.flight?.ecs.addEntity(entity);
+			});
+			const variables = { ...ctx.localVariables, timelineId: timelineEntity.id };
+			timelineEntity.addComponent("variables", {
+				variables: Object.entries(variables).map(([name, value]) => ({
+					name,
+					value,
+					type: "any",
+				})),
 			});
 
 			// Trigger the first step
@@ -29,6 +41,10 @@ export const timeline = t.router({
 				ctx.flight.ecs.getEntityById(timelineEntity.components.isTimeline?.steps[0] || -1)!,
 			);
 			pubsub.publish.flight.timelines();
+			return {
+				timelineId: timelineEntity.id,
+				stepId: timelineEntity.components.isTimeline?.steps[0],
+			};
 		}),
 	advance: t.procedure
 		.meta({
@@ -74,25 +90,7 @@ export const timeline = t.router({
 
 			if (nextStep === undefined) {
 				// The timeline is advancing beyond its final step, which indicates it is completed.
-				timeline.updateComponent("isTimeline", { isComplete: true });
-
-				// Report timelines might apply their damage metrics upon completion
-				if (timeline.components.damageReport?.autoApplyWhenCompleted) {
-					applyDamageReportMetrics(timeline);
-				}
-				if (timeline.components.isTimeline?.type === "training") {
-					let clientId = "";
-					for (const client of ctx.ecs.componentCache.get("flightClient") || []) {
-						if (client.components.flightClient?.training?.timelineId === timeline.id) {
-							client.updateComponent("flightClient", { training: null });
-							clientId = client.components.flightClient.clientId;
-						}
-					}
-					pubsub.publish.client.all();
-					pubsub.publish.client.get({
-						clientId,
-					});
-				}
+				await ctx.ecs.triggerAction("timeline.complete", { timelineId: timeline.id }, ctx);
 				pubsub.publish.flight.timelines();
 				return;
 			} else {
@@ -156,8 +154,14 @@ export const timeline = t.router({
 					},
 				};
 			},
+			event: true,
 		})
 		.input(
+			z.object({
+				timelineId: z.number(),
+			}),
+		)
+		.output(
 			z.object({
 				timelineId: z.number(),
 			}),
@@ -171,7 +175,22 @@ export const timeline = t.router({
 			if (timeline.components.damageReport?.autoApplyWhenCompleted) {
 				applyDamageReportMetrics(timeline);
 			}
+
+			// Clear the training step for the client running this timeline
+			if (timeline.components.isTimeline?.type === "training") {
+				let clientId = "";
+				for (const client of ctx.ecs.componentCache.get("flightClient") || []) {
+					if (client.components.flightClient?.training?.timelineId === timeline.id) {
+						client.updateComponent("flightClient", { training: null });
+						clientId = client.components.flightClient.clientId;
+					}
+				}
+				pubsub.publish.client.all();
+				pubsub.publish.client.get({
+					clientId,
+				});
+			}
 			pubsub.publish.flight.timelines();
-			return;
+			return { timelineId: timeline.id };
 		}),
 });

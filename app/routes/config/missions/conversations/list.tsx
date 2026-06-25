@@ -5,15 +5,18 @@ import Button from "@thorium/ui/Button";
 import { useMenubar } from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import { Fragment } from "react";
-import { Outlet, useNavigate, href } from "react-router";
+import { Outlet, useNavigate, href, useLocation } from "react-router";
 
 import type { Route } from "./+types/list";
 
-export default function MissionsConfig({
+export default function ConversationsConfig({
 	params: { pluginId, timelineId, conversationId },
 }: Route.ComponentProps) {
+	const location = useLocation();
+	let type: "missions" | "trainings" = "missions";
+	if (location.pathname.includes("/trainings/")) type = "trainings";
 	useMenubar({
-		backTo: href("/config/:pluginId/missions/:timelineId/details", {
+		backTo: href(`/config/:pluginId/${type}/:timelineId/details`, {
 			pluginId,
 			timelineId,
 		}),
@@ -45,7 +48,7 @@ export default function MissionsConfig({
 									timelineId,
 								});
 								navigate(
-									href("/config/:pluginId/missions/:timelineId/conversations/:conversationId", {
+									href(`/config/:pluginId/${type}/:timelineId/conversations/:conversationId`, {
 										pluginId,
 										timelineId,
 										conversationId: result.conversationId,
@@ -54,7 +57,7 @@ export default function MissionsConfig({
 							} catch (err) {
 								if (err instanceof Error) {
 									toast({
-										title: "Error creating mission",
+										title: "Error creating conversation",
 										body: err.message,
 										color: "error",
 									});

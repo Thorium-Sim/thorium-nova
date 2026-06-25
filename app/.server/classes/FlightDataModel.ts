@@ -6,6 +6,7 @@ import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { loadGltf } from "@thorium/utils/.server/loadGltf";
 import { processTriggers } from "@thorium/utils/.server/processTriggers";
+import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { ECS, Entity } from "@thorium/utils/ecs";
 import randomWords from "@thorium/utils/random-words";
 import { ConvexHull } from "@thorium/utils/starmap/ConvexHull.js";
@@ -88,6 +89,7 @@ export class FlightDataModel extends DataStore {
 		initECS(this.ecs, this.entities, this.mode);
 		this.ecs.processTriggers = (event) => processTriggers(this.ecs, event);
 		this.ecs.executeBlocks = (blocks, metadata) => executeBlocks(this.ecs, blocks, metadata);
+		this.ecs.triggerAction = triggerAction;
 		if (!this.flightEntity) {
 			const flight = new Entity();
 			flight.addComponent("isFlight", {

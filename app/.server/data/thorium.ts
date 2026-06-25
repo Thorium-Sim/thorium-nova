@@ -6,7 +6,6 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { router, type AllSends } from "@thorium/.server/init/router";
 import { t } from "@thorium/.server/init/t";
 import { selectValueQuery } from "@thorium/utils/.server/evaluateEntityQuery";
-import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { Entity } from "@thorium/utils/ecs";
 import { actionItem } from "@thorium/utils/flags/actionSchema";
 import { capitalCase } from "change-case";
@@ -81,7 +80,9 @@ export const thorium = t.router({
 		.input(z.object({ actions: actionItem.array() }))
 		.send(async ({ input, ctx }) => {
 			await Promise.all(
-				input.actions.map((action) => triggerAction(action.action as AllSends, action.values, ctx)),
+				input.actions.map((action) =>
+					ctx.ecs.triggerAction(action.action as AllSends, action.values, ctx),
+				),
 			);
 		}),
 	note: t.procedure

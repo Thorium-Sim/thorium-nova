@@ -13,7 +13,7 @@ export function ECSComponentDocs() {
 			} = doc as any;
 			return (
 				<Fragment key={typedDoc.component}>
-					<h3>
+					<h3 id={typedDoc.component.toLowerCase()}>
 						<code>{typedDoc.component}</code>
 					</h3>
 					<p>{typedDoc.comment}</p>

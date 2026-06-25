@@ -1,5 +1,5 @@
 import type { AppRouter } from "@thorium/.server/init/router";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { cn } from "@thorium/utils/cn";
@@ -56,7 +56,7 @@ export function InboxPage() {
 
 	return (
 		<div className="grid h-full w-full grid-cols-[16rem_1fr] grid-rows-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-8 overflow-hidden">
-			<div className="row-span-3 flex h-full min-h-0 flex-col">
+			<div className="long-range-inbox-sidebar row-span-3 flex h-full min-h-0 flex-col">
 				<h3>Incoming Messages</h3>
 				<ul className="panel panel-alert flex-auto overflow-y-auto">
 					{incomingMessages.map((m) => {
@@ -78,6 +78,11 @@ export function InboxPage() {
 										messageId: m.id,
 										decoding: m.encoding,
 									});
+									q.thorium.genericEvent.netSend({
+										clientId,
+										eventName: "long-range-inbox-pick",
+										properties: `${m.id}`,
+									});
 								}}
 							>
 								{m.unread ? (
@@ -95,7 +100,7 @@ export function InboxPage() {
 					})}
 				</ul>
 			</div>
-			<div>
+			<div className="decoder-area">
 				{selectedMessage ? (
 					localDecoding?.type === "rotation" ? (
 						<RotationDecoder
@@ -143,9 +148,12 @@ export function InboxPage() {
 				) : null}
 			</div>
 			<div
-				className={cn("panel panel-alert w-full p-4 text-lg whitespace-pre-line overflow-y-auto", {
-					"row-span-2": !selectedIsIntercepted,
-				})}
+				className={cn(
+					"panel panel-alert w-full p-4 text-lg whitespace-pre-line overflow-y-auto message-area",
+					{
+						"row-span-2": !selectedIsIntercepted,
+					},
+				)}
 			>
 				{encodedMessage}
 			</div>

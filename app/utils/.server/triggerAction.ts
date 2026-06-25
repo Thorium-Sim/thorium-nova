@@ -9,9 +9,12 @@ import { DataStore } from "./db-fs";
 export async function triggerAction<A extends AllSends>(
 	path: A,
 	input: SendInputs<A>,
-	ctx?: DataContext,
+	ctx?: DataContext | Record<string, any>,
 ) {
-	const context = ctx || new DataContext("thorium", DataStore.operations.getStore()!.database);
+	const context =
+		ctx instanceof DataContext
+			? ctx
+			: new DataContext("thorium", DataStore.operations.getStore()!.database, ctx);
 
 	return await callProcedure({
 		procedures: router._def.procedures,

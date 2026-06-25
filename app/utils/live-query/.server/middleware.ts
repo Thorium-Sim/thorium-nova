@@ -119,13 +119,20 @@ function isPlainObject(obj: unknown) {
  * Please note, `trpc-openapi` uses this function.
  */
 export function createInputMiddleware<TInput>(parse: ParseFn<TInput>) {
-	const inputMiddleware: ProcedureBuilderMiddleware = async ({ next, rawInput, input }) => {
+	const inputMiddleware: ProcedureBuilderMiddleware = async ({
+		next,
+		rawInput,
+		input,
+		type,
+		path,
+	}) => {
 		let parsedInput: ReturnType<typeof parse>;
 		try {
 			parsedInput = await parse(rawInput);
 		} catch (cause) {
 			if (cause instanceof ZodError) {
-				throw cause;
+				console.error(rawInput);
+				throw new Error(`Error executing ${type} ${path}: ${cause.message}`);
 			}
 			throw new Error("Input Validation Error");
 		}

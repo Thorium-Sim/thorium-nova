@@ -195,7 +195,6 @@ export async function callProcedure(
 	opts: ProcedureCallOptions & { procedures: ProcedureRouterRecord },
 ) {
 	const { type, path, onCall } = opts;
-
 	if (!(path in opts.procedures) || !opts.procedures[path]?._def[type]) {
 		throw new Error(`No "${type}"-procedure on path "${path}"`);
 	}

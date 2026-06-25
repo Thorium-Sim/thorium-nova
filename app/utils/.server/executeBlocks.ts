@@ -1,4 +1,4 @@
-import type { AllSends } from "@thorium/.server/init/router";
+import { router, type AllSends } from "@thorium/.server/init/router";
 import { spawnTrigger } from "@thorium/.server/spawners/trigger";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import type { ComponentProperties } from "@thorium/ecs-components";
@@ -283,15 +283,18 @@ export async function executeBlocks(
 						),
 					};
 
-					theResult = await triggerAction(block.action as AllSends, values);
+					theResult = await triggerAction(block.action as AllSends, values, localVariables);
 
 					function processValues(value: any, key: string) {
-						// It grieves me to no end that this exists
-						// There is probably a more sophisticated way to do this, where
-						// the type of the value is matched with the expected type on the action, but
-						// we haven't reached the point where that's necessary
-						const entityExceptions = ["station"];
-						let val = getValueReference(value, localVariables, ecs, entityExceptions.includes(key));
+						const actionInputs =
+							// @ts-expect-error
+							router._def.procedures[block.action]._def.inputs?.[0]?._def.shape();
+						let val = getValueReference(
+							value,
+							localVariables,
+							ecs,
+							getBaseZodType(actionInputs[key]),
+						);
 						// Special handling for certain keys we know are entity id references or numbers
 						if (typeof val === "boolean" || typeof val === "number") {
 						} else if (value !== "" && !Number.isNaN(Number(val)) && key !== "alertLevel") {
@@ -413,6 +416,23 @@ export async function executeBlocks(
 		}
 		blockIndex++;
 	}
+}
+
+function getBaseZodType(schema: any) {
+	if (schema._def.typeName === "ZodString") return "string";
+	if (schema._def.typeName === "ZodNumber") return "number";
+	if (schema._def.typeName === "ZodBoolean") return "boolean";
+	if (schema._def.typeName === "ZodOptional" || schema._def.typeName === "ZodNullable")
+		return getBaseZodType(schema._def.innerType);
+	if (schema._def.typeName === "ZodUnion") {
+		const options = schema._def.options.flatMap((option: any) => getBaseZodType(option) || []);
+		if (options[0]) return options[0];
+	}
+	if (schema._def.typeName === "ZodArray") {
+		return getBaseZodType(schema._def.type);
+	}
+	console.error(schema);
+	throw new Error("Unable to determine zod type for schema");
 }
 
 function evaluateCondition(
@@ -537,15 +557,15 @@ export function getValueReference(
 	ref: string,
 	variables: Record<string, any>,
 	ecs: ECS,
-	notEntity?: boolean,
+	expectedType?: "string" | "number" | "boolean",
 ): any {
 	if (typeof ref === "string") {
 		// Local variables
 		if (ref.startsWith("$")) {
-			return getValueReference(variables[ref.replace("$", "")], variables, ecs, notEntity);
+			return getValueReference(variables[ref.replace("$", "")], variables, ecs, expectedType);
 		}
 
-		if (!notEntity) {
+		if (expectedType === "number") {
 			const entities = getEntitiesReference(ref, variables, ecs);
 			if (entities.length > 0) return entities[0];
 		}

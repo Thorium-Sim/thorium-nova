@@ -272,9 +272,9 @@ export const client = t.router({
 				selector: z.union([z.string().array(), z.string()]).optional(),
 				mediaUrl: z.string().optional(),
 				allowAdvance: z.boolean().optional(),
+				timelineId: z.number().optional(),
 			}),
 		)
-		// .meta({ action: true })
 		.meta({
 			action: () => ({
 				text: {
@@ -299,6 +299,9 @@ export const client = t.router({
 					type: "checkbox",
 					helper: "Whether the crew member can advance the training on their own.",
 				},
+				timelineId: {
+					helper: "The timeline that will be advanced if allow advance is active.",
+				},
 			}),
 		})
 		.send(({ ctx, input }) => {
@@ -315,6 +318,7 @@ export const client = t.router({
 								mediaUrl: input.mediaUrl,
 								selector,
 								allowAdvance: input.allowAdvance || false,
+								...(input.timelineId ? { timelineId: input.timelineId } : null),
 							},
 			});
 

@@ -41,6 +41,12 @@ export default function TrainingLayout() {
 					<Link to="details" className={`list-group-item ${match === "details" ? "selected" : ""}`}>
 						Training Details
 					</Link>
+					<Link
+						to="conversations"
+						className={`list-group-item ${match === "conversations" ? "selected" : ""}`}
+					>
+						Conversations
+					</Link>
 					<hr className="my-2" />
 					<StepList
 						pluginId={pluginId}

@@ -49,6 +49,7 @@ export function EventsCore() {
 							<p className="text-sm font-bold">{e.name}</p>
 							{Object.entries(e.values).map(([key, value]) => (
 								<p key={key} className="text-xs">
+									{/* @ts-expect-error */}
 									<span className="font-medium">{key}:</span> {value}
 								</p>
 							))}
@@ -75,6 +76,7 @@ export function EventsCore() {
 							<p className="text-sm font-bold">{e.name}</p>
 							{Object.entries(e.values).map(([key, value]) => (
 								<p key={key} className="text-xs">
+									{/* @ts-expect-error */}
 									<span className="font-medium">{key}:</span> {value}
 								</p>
 							))}

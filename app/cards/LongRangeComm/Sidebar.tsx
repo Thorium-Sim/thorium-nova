@@ -31,7 +31,7 @@ export function Sidebar({
 		<div className="flex flex-col items-center gap-4">
 			<Tooltip content="Inbox" placement="right">
 				<Button
-					className={cn("relative btn-round btn-alert", {
+					className={cn("relative btn-round btn-alert inbox-button", {
 						active: currentPage === "inbox",
 					})}
 					onClick={() => setCurrentPage("inbox")}
@@ -46,7 +46,7 @@ export function Sidebar({
 			</Tooltip>
 			<Tooltip content="Compose Message" placement="right">
 				<Button
-					className={cn("btn-round btn-alert", {
+					className={cn("btn-round btn-alert compose-button", {
 						active: currentPage === "compose",
 					})}
 					onClick={() => setCurrentPage("compose")}
@@ -56,7 +56,7 @@ export function Sidebar({
 			</Tooltip>
 			<Tooltip content="Outbox" placement="right">
 				<Button
-					className={cn("relative btn-round btn-alert", {
+					className={cn("relative btn-round btn-alert outbox-button", {
 						active: currentPage === "outbox",
 					})}
 					onClick={() => setCurrentPage("outbox")}
@@ -72,7 +72,7 @@ export function Sidebar({
 			</Tooltip>
 			<Tooltip content="Sent" placement="right">
 				<Button
-					className={cn("btn-round btn-alert", {
+					className={cn("btn-round btn-alert sent-button", {
 						active: currentPage === "sent",
 					})}
 					onClick={() => setCurrentPage("sent")}

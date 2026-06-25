@@ -11,7 +11,7 @@ export function TimelineEditorCore() {
 	const [flight] = q.flight.active.useNetRequest();
 
 	const [timelines] = q.plugin.timeline.all.useNetRequest({});
-	const [selectedId, setSelectedId] = useState<string | null>("Thorium Default-Sensors");
+	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const selectedTimeline = timelines.find(
 		(t) => selectedId?.startsWith(t.pluginName) && selectedId?.endsWith(t.name),
 	);
@@ -42,43 +42,52 @@ export function TimelineEditorCore() {
 					disabled={!flight?.snapshots || flight.snapshots.length === 0}
 				/>
 			</div>
-			<Select
-				items={[
-					{
-						header: "Missions",
-						items: timelines
-							.filter((t) => t.kind === "missions")
-							.map((t) => ({
-								id: `${t.pluginName}-${t.name}`,
-								label: `${activeTimelines.some((a) => a.type === "mission" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
-							})),
-					},
-					{
-						header: "Trainings",
-						items: timelines
-							.filter((t) => t.kind === "trainings")
-							.map((t) => ({
-								id: `${t.pluginName}-${t.name}`,
-								label: `${activeTimelines.some((a) => a.type === "training" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
-							})),
-					},
-					{
-						header: "Reports",
-						items: timelines
-							.filter((t) => t.kind === "reports")
-							.map((t) => ({
-								id: `${t.pluginName}-${t.name}`,
-								label: `${activeTimelines.some((a) => a.type === "report" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
-							})),
-					},
-				]}
-				label="Mission"
-				labelHidden
-				selected={selectedId}
-				setSelected={(value) => setSelectedId(value)}
-				size="xs"
-				className="w-full"
-			/>
+			<div className="flex items-center">
+				<Select
+					items={[
+						{
+							header: "Missions",
+							items: timelines
+								.filter((t) => t.kind === "missions")
+								.map((t) => ({
+									id: `${t.pluginName}-${t.name}`,
+									label: `${activeTimelines.some((a) => a.type === "mission" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
+								})),
+						},
+						{
+							header: "Trainings",
+							items: timelines
+								.filter((t) => t.kind === "trainings")
+								.map((t) => ({
+									id: `${t.pluginName}-${t.name}`,
+									label: `${activeTimelines.some((a) => a.type === "training" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
+								})),
+						},
+						{
+							header: "Reports",
+							items: timelines
+								.filter((t) => t.kind === "reports")
+								.map((t) => ({
+									id: `${t.pluginName}-${t.name}`,
+									label: `${activeTimelines.some((a) => a.type === "report" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
+								})),
+						},
+					]}
+					label="Timeline"
+					labelHidden
+					selected={selectedId}
+					setSelected={(value) => setSelectedId(value)}
+					size="xs"
+					className="w-full grow"
+				/>
+				{/* TODO June 23, 2026 — add an activate button here, but it needs to fill in the appropriate variables.
+							For trainings, choose a client from a list of assigned clients
+							For reports, choose a ship system with an associated ship
+							Missions don't have any variables necessarily */}
+				<Button className="btn-xs btn-success" disabled={!selectedId || !!activeTimeline}>
+					Activate
+				</Button>
+			</div>
 			<SortableList
 				items={
 					selectedTimeline?.steps.map((s, i) => ({

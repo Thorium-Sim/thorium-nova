@@ -75,30 +75,30 @@ export function ShortRangeComm() {
 	return (
 		<div className="grid h-full w-full grid-cols-4 grid-rows-[1fr_auto_auto] gap-8 overflow-hidden">
 			<Suspense>
-				{incomingHails.length > 0 ? (
-					<div className="col-span-3 self-center">
-						<h1 className="text-center text-4xl font-bold">
-							Status: Incoming{" "}
-							{pluralRules.select(incomingHails.length) === "one" ? "Hail" : "Hails"}
-						</h1>
-						{incomingHails.map((h) => (
-							<p key={h.id} className="text-center text-xl">
-								{h.hostName} — {h.frequency} MHz
-							</p>
-						))}
-					</div>
-				) : shortRangeComm.state === "connected" && shortRangeComm.conversationId ? (
-					<Conversation conversationId={shortRangeComm.conversationId} />
-				) : (
-					<div className="col-span-3 self-center">
+				<div className="conversation-area col-span-3 self-center">
+					{incomingHails.length > 0 ? (
+						<>
+							<h1 className="text-center text-4xl font-bold">
+								Status: Incoming{" "}
+								{pluralRules.select(incomingHails.length) === "one" ? "Hail" : "Hails"}
+							</h1>
+							{incomingHails.map((h) => (
+								<p key={h.id} className="text-center text-xl">
+									{h.hostName} — {h.frequency} MHz
+								</p>
+							))}
+						</>
+					) : shortRangeComm.state === "connected" && shortRangeComm.conversationId ? (
+						<Conversation conversationId={shortRangeComm.conversationId} />
+					) : (
 						<h1 className="text-center text-4xl font-bold">
 							Status: {shortRangeStateMap[shortRangeComm.state]}
 						</h1>
-					</div>
-				)}
+					)}
+				</div>
 			</Suspense>
 
-			<div className="col-span-3">
+			<div className="frequency-slider col-span-3">
 				<label htmlFor="frequency" className="block tabular-nums">
 					Frequency ({frequency.toFixed(2)} MHz)
 				</label>
@@ -155,7 +155,7 @@ export function ShortRangeComm() {
 					</div>
 				</div>
 			</div>
-			<div className="col-span-3">
+			<div className="gain-slider col-span-3">
 				<label htmlFor="amplitude" className="block tabular-nums">
 					Gain ({gainRadius.toLocaleString()} km)
 				</label>
@@ -189,61 +189,59 @@ export function ShortRangeComm() {
 					}}
 				/>
 			</div>
-			<div className="col-start-4 row-span-3 row-start-1 flex h-full flex-col gap-4">
-				<div className="panel panel-neutral panel-opaque w-full flex-auto">
-					<SineWave
-						className="faded-scroll-y"
-						shouldRender={cardLoaded}
-						waves={[
-							{
-								amplitude: gain * 0.15 + 0.02,
-								frequency: (350 - frequency + 100) / 20,
-								phase: Math.PI / 2,
-							},
-						]}
-						orientation="vertical"
-						strokeWidth={shortRangeComm.state === "idle" ? 1 : 2}
-						color={shortRangeComm.state === "idle" ? "red" : "blue"}
-						shouldProgress={shortRangeComm.state === "connected"}
-					/>
-				</div>
-				{shortRangeComm.state === "idle" ? (
-					hailFrequency ? (
-						<Button
-							className="btn-success w-full"
-							onClick={() =>
-								q.shortRangeComm.connect.netSend({
-									shipId,
-									conversationId: hailFrequency.id,
-								})
-							}
-						>
-							Connect
-						</Button>
-					) : (
-						<Button
-							className="btn-info w-full"
-							onClick={() => q.shortRangeComm.hail.netSend({ shipId })}
-						>
-							Hail
-						</Button>
-					)
-				) : shortRangeComm.state === "hailing" ? (
+			<div className="panel panel-neutral panel-opaque col-start-4 row-span-2 row-start-1">
+				<SineWave
+					className="faded-scroll-y"
+					shouldRender={cardLoaded}
+					waves={[
+						{
+							amplitude: gain * 0.15 + 0.02,
+							frequency: (350 - frequency + 100) / 20,
+							phase: Math.PI / 2,
+						},
+					]}
+					orientation="vertical"
+					strokeWidth={shortRangeComm.state === "idle" ? 1 : 2}
+					color={shortRangeComm.state === "idle" ? "red" : "blue"}
+					shouldProgress={shortRangeComm.state === "connected"}
+				/>
+			</div>
+			{shortRangeComm.state === "idle" ? (
+				hailFrequency ? (
 					<Button
-						className="btn-warning w-full"
-						onClick={() => q.shortRangeComm.disconnect.netSend({ shipId })}
+						className="btn-success connect-button w-full"
+						onClick={() =>
+							q.shortRangeComm.connect.netSend({
+								shipId,
+								conversationId: hailFrequency.id,
+							})
+						}
 					>
-						Cancel Hail
+						Connect
 					</Button>
 				) : (
 					<Button
-						className="btn-error w-full"
-						onClick={() => q.shortRangeComm.disconnect.netSend({ shipId })}
+						className="btn-info hail-button w-full"
+						onClick={() => q.shortRangeComm.hail.netSend({ shipId })}
 					>
-						Disconnect
+						Hail
 					</Button>
-				)}
-			</div>
+				)
+			) : shortRangeComm.state === "hailing" ? (
+				<Button
+					className="btn-warning w-full"
+					onClick={() => q.shortRangeComm.disconnect.netSend({ shipId })}
+				>
+					Cancel Hail
+				</Button>
+			) : (
+				<Button
+					className="btn-error disconnect-button w-full"
+					onClick={() => q.shortRangeComm.disconnect.netSend({ shipId })}
+				>
+					Disconnect
+				</Button>
+			)}
 		</div>
 	);
 }
@@ -257,7 +255,7 @@ function Conversation({ conversationId }: { conversationId: number }) {
 	const hasSelectedChoice = conversation.currentChoices.some((c) => c.selected);
 
 	return (
-		<div className="col-span-3 flex h-full flex-col gap-8 overflow-y-hidden py-8">
+		<div className="flex h-full flex-col gap-8 overflow-y-hidden py-8">
 			<div
 				className="faded-scroll-top flex max-h-3/4 flex-auto flex-col-reverse gap-8 overflow-y-auto pt-32"
 				// @ts-expect-error

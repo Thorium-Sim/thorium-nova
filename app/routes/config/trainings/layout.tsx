@@ -63,6 +63,7 @@ export default function TrainingsConfig() {
 							id: d.name,
 							name: d.name,
 							description: d.description,
+							category: d.category,
 						}))}
 						searchKeys={["name"]}
 						selectedItem={timelineId || null}

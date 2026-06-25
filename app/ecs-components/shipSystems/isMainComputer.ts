@@ -1,5 +1,6 @@
 import z from "zod";
 
+/** System for performing diagnostics for damage reports */
 export const isMainComputer = z
 	.object({
 		/** How much energy is required to perform an active scan when the target is right next to the ship, in kilowatt hours. */

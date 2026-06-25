@@ -209,14 +209,13 @@ export function TimelineStepEditor({
 									});
 								}}
 								onUpdate={async (block, property, value) => {
-									const { id: _, type: __, ...properties } = block;
 									await q.plugin.timeline.step.block.update.netSend({
 										pluginId,
 										timelineId,
 										timelineType,
 										stepId,
 										blockId: block.id,
-										properties: { ...properties, [property]: value },
+										properties: { [property]: value },
 									});
 								}}
 								onReplace={(id, blocks) => {
@@ -479,13 +478,12 @@ export function PrerequisiteBlocks({
 								});
 							}}
 							onUpdate={async (block, property, value) => {
-								const { id: _, type: __, ...properties } = block;
 								await q.plugin.timeline.prerequisiteBlock.update.netSend({
 									pluginId,
 									timelineId,
 									timelineType,
 									blockId: block.id,
-									properties: { ...properties, [property]: value },
+									properties: { [property]: value },
 								});
 							}}
 							onReplace={(id, blocks) => {

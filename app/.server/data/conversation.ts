@@ -82,6 +82,8 @@ export const conversation = t.router({
 				choice: z.string(),
 			}),
 		)
+		.meta({ event: true })
+		.output(z.object({ shipId: z.number(), conversationId: z.number(), choice: z.string() }))
 		.send(async ({ ctx, input }) => {
 			const conversation = ctx.ecs.getEntityById(input.conversationId)!;
 			const inkStory = await lazyLoadInkStory(conversation);
@@ -123,5 +125,6 @@ export const conversation = t.router({
 			pubsub.publish.conversation.conversation({
 				conversationId: conversation.id,
 			});
+			return input;
 		}),
 });

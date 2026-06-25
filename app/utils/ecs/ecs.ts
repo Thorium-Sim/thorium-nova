@@ -5,6 +5,8 @@
 import type { ColliderDesc, World } from "@thorium-sim/rapier3d-node";
 import RAPIER from "@thorium-sim/rapier3d-node";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
+import type { DataContext } from "@thorium/.server/DataContext";
+import type { AllSends, SendInputs } from "@thorium/.server/init/router";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import type { ComponentIds } from "@thorium/ecs-components";
 import type { BlockMetadata } from "@thorium/utils/.server/executeBlocks";
@@ -204,14 +206,27 @@ class ECS {
 		return this.worlds.get(key)!;
 	}
 	// oxlint-disable-next-line no-unused-vars
-	executeBlocks(blocks: TimelineBlock[], blocksMetadata: BlockMetadata = {}) {
+	async executeBlocks(blocks: TimelineBlock[], blocksMetadata: BlockMetadata = {}): Promise<void> {
 		// We have to keep this blank and register it when we init ECS
 		// to prevent weird dependency loops when executing blocks from
 		// ECS systems
 		throw new Error("executeBlocks has not been properly registered. Have you run initEcs yet?");
 	}
+	async triggerAction<A extends AllSends>(
+		// oxlint-disable-next-line no-unused-vars
+		path: A,
+		// oxlint-disable-next-line no-unused-vars
+		input: SendInputs<A>,
+		// oxlint-disable-next-line no-unused-vars
+		ctx?: DataContext | Record<string, any>,
+	): Promise<unknown> {
+		// We have to keep this blank and register it when we init ECS
+		// to prevent weird dependency loops when executing blocks from
+		// ECS systems
+		throw new Error("triggerAction has not been properly registered. Have you run initEcs yet?");
+	}
 	// oxlint-disable-next-line no-unused-vars
-	processTriggers(event?: { event: string; values: any }) {
+	async processTriggers(event?: { event: string; values: any }): Promise<void> {
 		// We have to keep this blank and register it when we init ECS
 		// to prevent weird dependency loops when executing blocks from
 		// ECS systems

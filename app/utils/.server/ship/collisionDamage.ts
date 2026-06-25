@@ -6,6 +6,7 @@ import type { Entity } from "@thorium/utils/ecs";
 import {
 	damageEffects,
 	getDamageMetricMultipliers,
+	type DamageEffects,
 	type damageTypes as damageType,
 } from "@thorium/utils/flags/damageTypes";
 import { gigaJouleToMegaWattHour, megaWattHourToGigaJoule } from "@thorium/utils/unitTypes";
@@ -232,7 +233,18 @@ export function applySystemDamage(
 		effectSplit.push(nextDamage);
 	}
 	effectSplit.sort((a, b) => b - a);
-
+	const damageClamps: Record<DamageEffects, { min?: number; max?: number }> = {
+		efficiency: { min: 0 },
+		heatMultiplier: { min: 0, max: 4 },
+		instability: { min: 0, max: 1 },
+		signature: {
+			min: system.components.damage?.minSignature,
+			max: system.components.damage?.maxSignature,
+		},
+		failureRisk: { min: 0, max: 1 },
+		cascadeRisk: { min: 0, max: 1 },
+		crewSafetyRating: { min: 0, max: 1 },
+	};
 	const damageAppliedToSystem: Record<string, number> = {};
 	for (let i = 0; i < effectSplit.length; i++) {
 		const effect = system.ecs.rng.nextFromList(damageEffects);
@@ -244,9 +256,17 @@ export function applySystemDamage(
 		if (!damageAppliedToSystem[effect]) {
 			damageAppliedToSystem[effect] = system.components.damage?.[effect] || 0;
 		}
-		damageAppliedToSystem[effect] += damageAppliedToEffect;
+		damageAppliedToSystem[effect] = clamp(
+			damageAppliedToSystem[effect] + damageAppliedToEffect,
+			damageClamps[effect].min,
+			damageClamps[effect].max,
+		);
 	}
 	system.updateComponent("damage", damageAppliedToSystem);
+}
+
+function clamp(value: number, min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY) {
+	return Math.min(max, Math.max(min, value));
 }
 
 function applyShieldDamage(

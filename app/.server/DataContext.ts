@@ -15,6 +15,7 @@ export class DataContext {
 	constructor(
 		public clientId: string,
 		public database: DatabaseContext,
+		public localVariables?: Record<string, any>,
 	) {}
 	get server() {
 		return this.database.server;

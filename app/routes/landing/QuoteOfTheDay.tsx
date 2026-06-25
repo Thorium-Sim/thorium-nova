@@ -386,6 +386,8 @@ const quotes = [
 	// Hank Green
 	"We have never uncovered any truth without first going through a period of uncertainty.",
 	"Everything we know is something we figured out.",
+	"No effort is wasted",
+	"Tonight, we feast on the labor of centuries",
 	// Turkish Saying
 	"The uncaught fish is always a big fish",
 	// Kohor
@@ -406,6 +408,8 @@ const quotes = [
 	"Something changes when you are in love. It's not just that a new person is added to your life, one person among many. It's that this new person changes for you what it means to be alive.",
 	// Clement Mok
 	"Remember, the music is not in the piano.",
+	// Herculeum Scroll 4
+	"We will inquire into something, but we will not grasp it, if in some way we depart from ourselves and from our own nature",
 ];
 
 const QuoteOfTheDay = () => {

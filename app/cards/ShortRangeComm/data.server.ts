@@ -10,7 +10,6 @@ import {
 import { cancelLoopingSound, playShipSound } from "@thorium/utils/.server/playRangedSound";
 import { scheduleAction } from "@thorium/utils/.server/scheduleAction";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { type ECS, Entity } from "@thorium/utils/ecs";
 import { getCompletePositionFromOrbit, getObjectSystem } from "@thorium/utils/starmap/position";
 import type { Story } from "inkjs";
@@ -195,6 +194,8 @@ export const shortRangeComm = t.router({
 		}),
 	setFrequency: t.procedure
 		.input(z.object({ shipId: z.number(), frequency: z.number() }))
+		.meta({ action: true, event: true })
+		.output(z.object({ shipId: z.number(), frequency: z.number() }))
 		.send(({ ctx, input }) => {
 			const srcomm = getShipSystem(ctx.ecs, {
 				systemType: "shortRangeComm",
@@ -209,9 +210,12 @@ export const shortRangeComm = t.router({
 				ship?.components.position?.parentId || ship?.components.satellite?.parentId || -1;
 			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
 			pubsub.publish.shortRangeComm.hailableEntities({ systemId });
+			return input;
 		}),
 	setGain: t.procedure
 		.input(z.object({ shipId: z.number(), gain: z.number() }))
+		.meta({ action: true, event: true })
+		.output(z.object({ shipId: z.number(), gain: z.number() }))
 		.send(({ ctx, input }) => {
 			const srcomm = getShipSystem(ctx.ecs, {
 				systemType: "shortRangeComm",
@@ -223,6 +227,7 @@ export const shortRangeComm = t.router({
 				antennaGain: Math.max(0, Math.min(1, input.gain)),
 			});
 			pubsub.publish.shortRangeComm.get({ shipId: input.shipId });
+			return input;
 		}),
 	/**
 	 * Defines the conversation that will happen when an NPC is hailed.
@@ -235,6 +240,7 @@ export const shortRangeComm = t.router({
 				templateConversationId: z.number().nullable(),
 			}),
 		)
+		.meta({ action: true })
 		.send(({ ctx, input }) => {
 			let srcomm: Entity;
 			try {
@@ -260,9 +266,11 @@ export const shortRangeComm = t.router({
 				targetId: z.number().optional(),
 				conversationTemplateId: z.number().nullable().optional(),
 				allowOtherParticipants: z.boolean().optional(),
+				frequency: z.number().optional(),
 			}),
 		)
-		.output(z.object({ conversationId: z.number() }))
+		.meta({ action: true, event: true })
+		.output(z.object({ shipId: z.number(), frequency: z.number(), conversationId: z.number() }))
 		.send(async ({ ctx, input }) => {
 			let srcomm: Entity;
 			try {
@@ -318,6 +326,25 @@ export const shortRangeComm = t.router({
 				}
 			}
 
+			// When hailing an NPC, if that NPC is already in a conversation, connect to the conversation
+			if (
+				targetSrComm?.components.isShortRangeComm?.conversationId &&
+				targetSrComm?.components.isShortRangeComm.state === "connected"
+			) {
+				const conversation = ctx.ecs.getEntityById(
+					targetSrComm.components.isShortRangeComm.conversationId,
+				);
+				await ctx.ecs.triggerAction("shortRangeComm.connect", {
+					shipId: input.shipId,
+					conversationId: targetSrComm?.components.isShortRangeComm?.conversationId,
+				});
+				return {
+					conversationId: targetSrComm.components.isShortRangeComm.conversationId,
+					shipId: input.shipId,
+					frequency: conversation!.components.isShortRangeCommConversation!.frequency,
+				};
+			}
+
 			const conversationTemplateId =
 				input.conversationTemplateId ||
 				targetSrComm?.components.isShortRangeComm?.templateConversationId;
@@ -327,7 +354,7 @@ export const shortRangeComm = t.router({
 			conversation.addComponent("isShortRangeCommConversation", {
 				hostId: input.shipId,
 				targetId,
-				frequency: srcomm.components.isShortRangeComm?.antennaFrequency,
+				frequency: input.frequency || srcomm.components.isShortRangeComm?.antennaFrequency,
 				conversationTemplateId: input.conversationTemplateId,
 				allowAdditionalParticipants: input.allowOtherParticipants || false,
 			});
@@ -340,19 +367,8 @@ export const shortRangeComm = t.router({
 			srcomm.updateComponent("isShortRangeComm", {
 				state: "hailing",
 				conversationId: conversation.id,
+				...(input.frequency ? { antennaFrequency: input.frequency } : {}),
 			});
-
-			// When hailing an NPC, if that NPC is already in a conversation, connect to the conversation
-			if (
-				targetSrComm?.components.isShortRangeComm?.conversationId &&
-				targetSrComm?.components.isShortRangeComm.state === "connected"
-			) {
-				await triggerAction("shortRangeComm.connect", {
-					shipId: input.shipId,
-					conversationId: conversation.id,
-				});
-				return { conversationId: conversation.id };
-			}
 
 			const hostShip = ctx.ecs.getEntityById(input.shipId || -1);
 			const targetShip = ctx.ecs.getEntityById(targetId || -1);
@@ -406,10 +422,22 @@ export const shortRangeComm = t.router({
 			pubsub.publish.shortRangeComm.incomingHailConversations({
 				shipId: targetId || -1,
 			});
-			return { conversationId: conversation.id };
+			return {
+				conversationId: conversation.id,
+				shipId: input.shipId,
+				frequency: conversation.components.isShortRangeCommConversation!.frequency,
+			};
 		}),
 	reject: t.procedure
 		.input(z.object({ shipId: z.number().optional(), conversationId: z.number() }))
+		.output(
+			z.object({
+				hostShipId: z.number().optional(),
+				targetShipId: z.number(),
+				conversationId: z.number(),
+			}),
+		)
+		.meta({ action: true, event: true })
 		.send(({ ctx, input }) => {
 			const conversation = ctx.ecs.getEntityById(input.conversationId);
 			const srConvo = conversation?.components.isShortRangeCommConversation;
@@ -463,9 +491,14 @@ export const shortRangeComm = t.router({
 			pubsub.publish.shortRangeComm.incomingHailConversations({
 				shipId,
 			});
+			return { conversationId: conversation.id, hostShipId: hostShip?.id, targetShipId: shipId };
 		}),
 	connect: t.procedure
 		.input(z.object({ shipId: z.number(), conversationId: z.number() }))
+		.output(
+			z.object({ hostShipId: z.number(), targetShipId: z.number(), conversationId: z.number() }),
+		)
+		.meta({ action: true, event: true })
 		.send(async ({ ctx, input }) => {
 			// Only connect if the conversation still exists
 			const conversation = ctx.ecs.getEntityById(input.conversationId);
@@ -550,6 +583,11 @@ export const shortRangeComm = t.router({
 			pubsub.publish.conversation.conversation({
 				conversationId: conversation.id,
 			});
+			return {
+				conversationId: conversation.id,
+				targetShipId: shipId,
+				hostShipId: conversation.components.isShortRangeCommConversation!.hostId,
+			};
 		}),
 	disconnect: t.procedure
 		.input(z.object({ shipId: z.number() }))

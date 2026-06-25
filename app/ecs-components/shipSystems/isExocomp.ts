@@ -15,6 +15,7 @@ export const exocomp = z
 			.object({
 				timestamp: z.number(),
 				text: z.string(),
+				/** The state of the logs */
 				state: z.enum(["normal", "warning", "error"]),
 			})
 			.array()

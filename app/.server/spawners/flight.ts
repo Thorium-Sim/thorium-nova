@@ -7,8 +7,6 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { spawnShip } from "@thorium/.server/spawners/ship";
 import { spawnSolarSystem } from "@thorium/.server/spawners/solarSystem";
 import type { position as positionComponent } from "@thorium/ecs-components/position";
-import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
-import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { type ECS, Entity } from "@thorium/utils/ecs";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { Vector3 } from "three";
@@ -180,7 +178,7 @@ export async function startFlight(
 	}
 	// Add the mission if it exists
 	if (missionId) {
-		triggerAction("timeline.activate", {
+		await ctx.ecs.triggerAction("timeline.activate", {
 			pluginId: missionId.pluginId,
 			timelineId: missionId.missionId,
 		});
@@ -191,7 +189,7 @@ export async function startFlight(
 		for (const macro of plugin.aspects.macros) {
 			if (!macro.active || macro.type !== "trigger") continue;
 			// Execute the trigger blocks
-			executeBlocks(ctx.flight.ecs, macro.blocks);
+			await ctx.ecs.executeBlocks(macro.blocks);
 		}
 	}
 

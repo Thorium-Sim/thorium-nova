@@ -107,6 +107,16 @@ export default [
 			route("trainings/:timelineId", "routes/config/trainings/training.tsx", [
 				route("details", "routes/config/trainings/details.tsx"),
 				route(":stepId", "routes/config/trainings/step.tsx"),
+				route(
+					"conversations",
+					"routes/config/missions/conversations/list.tsx",
+					{ id: "training-conversation-list" },
+					[
+						route(":conversationId", "routes/config/missions/conversations/conversation.tsx", {
+							id: "training-conversation",
+						}),
+					],
+				),
 			]),
 			route("macros", "routes/config/macros/layout.tsx", [
 				route(":macroId", "routes/config/macros/macro.tsx"),
