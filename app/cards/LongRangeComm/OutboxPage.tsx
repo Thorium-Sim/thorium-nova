@@ -1,13 +1,10 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
-import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import Select from "@thorium/ui/Select";
 import SineWave from "@thorium/ui/SineWave";
-import { Tooltip } from "@thorium/ui/Tooltip";
 import { cn } from "@thorium/utils/cn";
-import { useLiveQuery } from "@thorium/utils/live-query/client";
 import throttle from "lodash.throttle";
 import { useCallback, useRef, useState } from "react";
 
@@ -17,7 +14,6 @@ import { useRandomCharacterState } from "./useRandomCharacterState";
 export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 	const { shipId } = useStation();
 	const { cardLoaded } = useCardContext();
-	const { interpolate } = useLiveQuery();
 	const [longRangeComm] = q.longRangeComm.get.useNetRequest(
 		{ shipId },
 		{
@@ -39,11 +35,18 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 	const [selectedMessageId, setSelectedMessageId] = useState<number | null>(null);
 	const [selectedSatellite, setSelectedSatellite] = useState<number | null>(null);
 
+	function selectSatellite(id: number | null) {
+		setSelectedSatellite(id);
+		q.thorium.genericEvent.netSend({
+			clientId,
+			eventName: "long-range-comm-satellite-selected",
+			properties: `${id}`,
+		});
+	}
 	const selectedMessage = outgoingMessages.find((m) => m.id === selectedMessageId);
 
 	q.longRangeComm.systemStream.useDataStream({ shipId });
 
-	const powerBarRef = useRef<HTMLDivElement>(null);
 	const shadeCountRef = useRef(0);
 
 	const setFrequencyNetSend = useCallback(
@@ -67,13 +70,6 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 		setGainNetSend(value);
 	}
 
-	useAnimationFrame(() => {
-		const data = interpolate(longRangeComm.id);
-		if (!data || !powerBarRef.current) return;
-		const currentPower = data.y;
-		powerBarRef.current.style.width = `${(currentPower / longRangeComm.maxSafePower) * 100}%`;
-	}, cardLoaded && pageLoaded);
-
 	const scanningTextRef = useRef<HTMLDivElement>(null);
 	function updateSatelliteText(text: string) {
 		if (scanningTextRef.current) {
@@ -85,7 +81,7 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 
 	return (
 		<div className="grid h-full w-full grid-cols-[16rem_auto_1fr] gap-8 overflow-hidden">
-			<div className="row-span-2 flex h-full min-h-0 flex-col">
+			<div className="outgoing-message-list row-span-2 flex h-full min-h-0 flex-col">
 				<h3>Outgoing Messages</h3>
 				<ul className="panel panel-alert flex-auto overflow-y-auto">
 					{outgoingMessages.map((o) => (
@@ -97,6 +93,11 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 							onClick={() => {
 								setSelectedMessageId(o.id);
 								setEncodedMessage(o.encodedMessage, o.encodedMessage, true);
+								q.thorium.genericEvent.netSend({
+									clientId,
+									eventName: "pick-outgoing-message",
+									properties: `${o.id}`,
+								});
 							}}
 						>
 							{o.destinationShipName}
@@ -106,16 +107,16 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 				</ul>
 			</div>
 			<SatelliteMap
-				className="panel panel-black panel-opaque aspect-square w-full rounded-full"
+				className="panel panel-black panel-opaque satellite-map aspect-square w-full rounded-full"
 				radius={gain * longRangeComm.maxSatelliteRange}
 				shouldRender={cardLoaded && pageLoaded}
 				frequency={frequency}
 				updateSatelliteText={updateSatelliteText}
 				selectedSatellite={selectedSatellite}
-				setSelectedSatellite={setSelectedSatellite}
+				setSelectedSatellite={selectSatellite}
 			/>
 
-			<div className="row-span-2 flex max-h-full min-h-0 flex-col gap-4">
+			<div className="sliders-area row-span-2 flex max-h-full min-h-0 flex-col gap-4">
 				<div className="panel panel-neutral panel-opaque aspect-16/7 w-full">
 					<SineWave
 						className="faded-scroll-x"
@@ -212,43 +213,9 @@ export function OutboxPage({ pageLoaded }: { pageLoaded: boolean }) {
 							);
 						}}
 						onInput={(e) => {
-							setGain(
-								Math.min(
-									Number(e.currentTarget.value),
-									(longRangeComm.currentPower - longRangeComm.requiredPower) /
-										(longRangeComm.maxSafePower - longRangeComm.requiredPower),
-								),
-							);
+							setGain(Math.min(Number(e.currentTarget.value), 1));
 						}}
 					/>
-				</div>
-				<div>
-					<p className="whitespace-nowrap">Power Level</p>
-					<div className="flex h-4 gap-2">
-						<div className="panel panel-neutral relative w-full flex-auto overflow-hidden rounded-none">
-							<Tooltip content="Required Power">
-								<div
-									className="absolute z-10 h-full translate-x-1/2 border border-dashed border-green-400 transition-all"
-									style={{
-										left: `${(longRangeComm.requiredPower / longRangeComm.maxSafePower) * 100}%`,
-									}}
-								/>
-							</Tooltip>
-							<Tooltip content="Alloted Power">
-								<div
-									className="border-warning absolute z-10 h-full translate-x-1/2 border border-dashed transition-all"
-									style={{
-										left: `${(longRangeComm.currentPower / longRangeComm.maxSafePower) * 100}%`,
-									}}
-								/>
-							</Tooltip>
-
-							<div
-								className="striped-gradient-horizontal striped-gradient-yellow-300 absolute bottom-0 h-full w-1/2 transition-all"
-								ref={powerBarRef}
-							></div>
-						</div>
-					</div>
 				</div>
 
 				<div className="panel panel-alert flex-auto overflow-y-auto p-4 wrap-anywhere hyphens-auto whitespace-pre-line">

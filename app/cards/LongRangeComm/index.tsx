@@ -1,3 +1,4 @@
+import { clientId, q } from "@thorium/context/AppContext";
 import { Activity, useState } from "react";
 
 import { ComposePage } from "./ComposePage";
@@ -10,9 +11,17 @@ import { Sidebar } from "./Sidebar";
 export function LongRangeComm() {
 	const [currentPage, setCurrentPage] = useState<Pages>("inbox");
 
+	function setPage(page: Pages) {
+		setCurrentPage(page);
+		q.thorium.genericEvent.netSend({
+			clientId,
+			eventName: "longRangePageChange",
+			properties: page,
+		});
+	}
 	return (
 		<div className="flex h-full gap-4">
-			<Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+			<Sidebar currentPage={currentPage} setCurrentPage={setPage} />
 			<Activity mode={currentPage === "inbox" ? "visible" : "hidden"}>
 				<InboxPage />
 			</Activity>

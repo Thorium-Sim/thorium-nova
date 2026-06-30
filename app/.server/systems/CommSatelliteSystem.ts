@@ -3,6 +3,7 @@ import {
 	findClosestSatellite,
 	pickNextLongRangeMessageNode,
 } from "@thorium/cards/LongRangeComm/data.server";
+import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { getObjectSystem } from "@thorium/utils/starmap/position";
 import { lightYearToLightMinute } from "@thorium/utils/unitTypes";
@@ -19,7 +20,7 @@ export class CommSatelliteSystem extends System {
 		const { position, isLongRangeMessage } = entity.components;
 		if (!position || !isLongRangeMessage) return;
 		if (isLongRangeMessage.state !== "sending" && isLongRangeMessage.state !== "failing") return;
-		const shipId = isLongRangeMessage.senderId;
+		const senderId = isLongRangeMessage.senderId;
 
 		const { x, y, z } = position;
 
@@ -67,8 +68,8 @@ export class CommSatelliteSystem extends System {
 					interceptorId: currentNode.id,
 					state: "intercepted",
 				});
-				pubsub.publish.longRangeComm.outgoingMessages({ shipId });
-				pubsub.publish.longRangeComm.incomingMessages({ shipId });
+				pubsub.publish.longRangeComm.outgoingMessages({ shipId: senderId });
+				pubsub.publish.longRangeComm.incomingMessages({ shipId: senderId });
 				pubsub.publish.longRangeComm.incomingMessages({
 					shipId: currentNode.id,
 				});
@@ -131,8 +132,30 @@ export class CommSatelliteSystem extends System {
 					// Consider it sent!
 					entity.updateComponent("isLongRangeMessage", { state: "delivered" });
 					entity.removeComponent("position");
-					pubsub.publish.longRangeComm.outgoingMessages({ shipId });
-					pubsub.publish.longRangeComm.incomingMessages({ shipId });
+					pubsub.publish.longRangeComm.outgoingMessages({ shipId: senderId });
+					pubsub.publish.longRangeComm.incomingMessages({
+						shipId: isLongRangeMessage.destinationId,
+					});
+
+					// While we're at it, make sure the sender is in the address book for replies
+					const longRangeComm = getShipSystem(this.ecs, {
+						shipId: senderId,
+						systemType: "longRangeComm",
+					});
+					if (longRangeComm.components.isLongRangeComm) {
+						if (
+							!longRangeComm.components.isLongRangeComm.addressBook.find(
+								(c) => c.contactId === senderId,
+							)
+						) {
+							longRangeComm.components.isLongRangeComm.addressBook.push({
+								actions: [],
+								contactId: senderId,
+							});
+
+							pubsub.publish.longRangeComm.addressBook({ shipId: senderId });
+						}
+					}
 				}
 			} else {
 				// Recalculate the graph and try again
@@ -156,7 +179,7 @@ export class CommSatelliteSystem extends System {
 				failureReason: reason,
 			});
 			entity.removeComponent("position");
-			pubsub.publish.longRangeComm.outgoingMessages({ shipId });
+			pubsub.publish.longRangeComm.outgoingMessages({ shipId: senderId });
 		}
 	}
 }

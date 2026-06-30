@@ -87,6 +87,14 @@ export class RadarTiltEvent extends Event {
 		this.tilt = Number(payload);
 	}
 }
+export class LongRangeCommSelectEvent extends Event {
+	static name = "longRangeCommSelectEvent";
+	messageId: number;
+	constructor(payload: string) {
+		super(LongRangeCommSelectEvent.name);
+		this.messageId = Number(payload);
+	}
+}
 
 const Effects = () => {
 	const { flash, doFlash } = useFlash();
@@ -164,6 +172,9 @@ const Effects = () => {
 					break;
 				case RadarTiltEvent.name:
 					window.dispatchEvent(new RadarTiltEvent(payload.payload));
+					break;
+				case LongRangeCommSelectEvent.name:
+					window.dispatchEvent(new LongRangeCommSelectEvent(payload.payload));
 					break;
 			}
 		}

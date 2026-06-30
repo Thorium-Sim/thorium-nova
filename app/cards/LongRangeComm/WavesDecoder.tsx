@@ -65,6 +65,9 @@ export function WavesDecoder({
 					type="range"
 					className="range range-error"
 					value={selectedWave.frequency}
+					min={3}
+					max={20}
+					step={1}
 					onInput={(e) => {
 						updateMessageDecoding({
 							type: "waves",
@@ -81,7 +84,7 @@ export function WavesDecoder({
 					type="range"
 					className="range range-warning"
 					value={selectedWave.amplitude}
-					min={0}
+					min={0.01}
 					max={0.5}
 					step={0.01}
 					onInput={(e) => {

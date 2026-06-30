@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import SearchableInput, { DefaultResultLabel } from "@thorium/ui/SearchableInput";
@@ -13,7 +13,7 @@ export function ComposePage() {
 	const [message, setMessage] = useState("");
 	return (
 		<div className="mx-auto flex w-full max-w-xl flex-col">
-			<div className="flex w-full items-center gap-2">
+			<div className="address-book-entry flex w-full items-center gap-2">
 				<Label className="text-xl">To:</Label>
 				<SearchableInput
 					className="w-full"
@@ -32,6 +32,11 @@ export function ComposePage() {
 					setSelected={(value) => {
 						if (!value) return;
 						setContactId(value.id);
+						q.thorium.genericEvent.netSend({
+							clientId,
+							eventName: "longRangeComposerDestinationSet",
+							properties: `${value.id}`,
+						});
 					}}
 					displayValue={(item) => item?.name || ""}
 				/>
@@ -39,7 +44,7 @@ export function ComposePage() {
 
 			<Label className="mt-4 text-xl">Message:</Label>
 			<TextArea
-				className="textarea w-full flex-1 resize-none"
+				className="textarea message-area w-full flex-1 resize-none"
 				value={message}
 				onChange={(e) => setMessage(e.currentTarget.value)}
 			/>
@@ -56,7 +61,7 @@ export function ComposePage() {
 				{/* TODO February 18, 2026 - Make this work once we have the concept of files */}
 				{/* <Button className="flex-1 btn-info">Attach...</Button> */}
 				<Button
-					className="btn-success flex-1"
+					className="btn-success queue-button flex-1"
 					onClick={() => {
 						q.longRangeComm.composeMessage.netSend({
 							senderId: shipId,

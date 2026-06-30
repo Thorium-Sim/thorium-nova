@@ -1,5 +1,7 @@
 import type { AppRouter } from "@thorium/.server/init/router";
 import { clientId, q } from "@thorium/context/AppContext";
+import useEventListener from "@thorium/hooks/useEventListener";
+import { LongRangeCommSelectEvent } from "@thorium/routes/station/Effects";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { cn } from "@thorium/utils/cn";
@@ -54,6 +56,26 @@ export function InboxPage() {
 		[],
 	);
 
+	function selectMessage(id: number) {
+		setSelectedMessageId(id);
+		const selectedMessage = incomingMessages.find((s) => s.id === id);
+		const message = selectedMessage?.encodedMessage || "";
+		setEncodedMessage(message, message, true);
+		setLocalDecoding(selectedMessage?.encoding);
+		q.longRangeComm.updateMessageDecoding.netSend({
+			messageId: id,
+			decoding: selectedMessage!.encoding,
+		});
+		q.thorium.genericEvent.netSend({
+			clientId,
+			eventName: "long-range-inbox-pick",
+			properties: `${id}`,
+		});
+	}
+	useEventListener(LongRangeCommSelectEvent.name, (event: LongRangeCommSelectEvent) =>
+		selectMessage(event.messageId),
+	);
+
 	return (
 		<div className="grid h-full w-full grid-cols-[16rem_1fr] grid-rows-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-8 overflow-hidden">
 			<div className="long-range-inbox-sidebar row-span-3 flex h-full min-h-0 flex-col">
@@ -68,22 +90,7 @@ export function InboxPage() {
 									selected: selectedMessageId === m.id,
 									"border-error": isIntercepted,
 								})}
-								onClick={() => {
-									setSelectedMessageId(m.id);
-									const selectedMessage = incomingMessages.find((s) => s.id === m.id);
-									const message = selectedMessage?.encodedMessage || "";
-									setEncodedMessage(message, message, true);
-									setLocalDecoding(selectedMessage?.encoding);
-									q.longRangeComm.updateMessageDecoding.netSend({
-										messageId: m.id,
-										decoding: m.encoding,
-									});
-									q.thorium.genericEvent.netSend({
-										clientId,
-										eventName: "long-range-inbox-pick",
-										properties: `${m.id}`,
-									});
-								}}
+								onClick={() => selectMessage(m.id)}
 							>
 								{m.unread ? (
 									<span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-blue-500 p-0" />

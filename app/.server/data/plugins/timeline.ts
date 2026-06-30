@@ -969,7 +969,7 @@ export const timeline = t.router({
 	conversations,
 });
 
-function syncTimelinePluginToFlightTimeline(
+export function syncTimelinePluginToFlightTimeline(
 	ctx: DataContext,
 	timeline: MissionPlugin | ReportPlugin | TrainingPlugin,
 ) {

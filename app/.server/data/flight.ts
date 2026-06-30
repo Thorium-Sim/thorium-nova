@@ -212,15 +212,18 @@ export const flight = t.router({
 			// Replace the properties of the flight with the snapshot properties
 			ctx.flight.paused = true;
 			ctx.flight.ecs.dispose();
+
 			ctx.flight.ecs = new ECS(
 				ctx.server,
 				snapshot.rng?.seed || "thorium",
 				snapshot.rng?.skip || 0,
 			);
 			initECS(ctx.flight.ecs, snapshot.entities, snapshot.mode);
+			ctx.flight.setupEcsCallbacks();
 			ctx.flight.paused = snapshot.paused;
 			ctx.flight.state = snapshot.state;
 			ctx.flight.stateReason = snapshot.stateReason;
+
 			pubsub.publishAll();
 		}),
 	reset: t.procedure.send(async ({ ctx }) => {

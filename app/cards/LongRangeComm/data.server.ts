@@ -113,6 +113,7 @@ export const longRangeComm = t.router({
 				shipId: input.shipId,
 			});
 			if (!lrcomm?.components.isLongRangeComm) throw new Error("No Long Range Comm System");
+
 			lrcomm.updateComponent("isLongRangeComm", { antennaGain: input.gain });
 			pubsub.publish.longRangeComm.get({ shipId: input.shipId });
 			return input;
@@ -373,7 +374,7 @@ export const longRangeComm = t.router({
 				messageId: z.number(),
 			}),
 		)
-		.meta({ action: true, event: true })
+		.meta({ action: () => ({ message: { type: "textarea" } }), event: true })
 		.send(async ({ ctx, input }) => {
 			const message = new Entity();
 
@@ -388,6 +389,7 @@ export const longRangeComm = t.router({
 				senderStation: input.senderStation,
 				encoding: generateEncoding(encoding, ctx.ecs.rng),
 			});
+			ctx.ecs.addEntity(message);
 			if (input.state === "sending") {
 				const ship = ctx.ecs.getEntityById(input.senderId);
 
@@ -410,7 +412,6 @@ export const longRangeComm = t.router({
 					});
 				}
 			}
-			ctx.ecs.addEntity(message);
 			pubsub.publish.longRangeComm.outgoingMessages({ shipId: input.senderId });
 			return {
 				senderId: input.senderId,
@@ -643,8 +644,8 @@ function generateEncoding(
 					amplitude: 10,
 					frequency: 5,
 					phase: 0,
-					requiredAmplitude: rng.nextAsPercentage() * 18 + 2,
-					requiredFrequency: rng.nextAsPercentage() * 9 + 1,
+					requiredAmplitude: rng.nextAsPercentage() * (0.5 - 0.01) + 0.01,
+					requiredFrequency: rng.nextInt(3, 20),
 					requiredPhase: encoding.hasPhase ? rng.nextAsPercentage() * Math.PI : 0,
 				});
 			}

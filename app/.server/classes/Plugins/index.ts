@@ -131,6 +131,10 @@ export default class BasePlugin extends DataStore {
 			}
 		}
 	}
+	toJSON() {
+		const { id, name, kind, author, description, default: d, active, coverImage, tags } = this;
+		return { id, name, kind, author, description, default: d, active, coverImage, tags };
+	}
 	duplicate(name: string) {
 		const data = { ...this };
 		data.name = generateIncrementedName(

@@ -419,7 +419,7 @@ export async function executeBlocks(
 }
 
 function getBaseZodType(schema: any) {
-	if (schema._def.typeName === "ZodString") return "string";
+	if (schema._def.typeName === "ZodString" || schema._def.typeName === "ZodEnum") return "string";
 	if (schema._def.typeName === "ZodNumber") return "number";
 	if (schema._def.typeName === "ZodBoolean") return "boolean";
 	if (schema._def.typeName === "ZodOptional" || schema._def.typeName === "ZodNullable")
@@ -431,8 +431,11 @@ function getBaseZodType(schema: any) {
 	if (schema._def.typeName === "ZodArray") {
 		return getBaseZodType(schema._def.type);
 	}
-	console.error(schema);
-	throw new Error("Unable to determine zod type for schema");
+	if (schema._def.typeName === "ZodObject") {
+		return "object";
+	}
+	console.error("Unable to determine zod type for schema", schema);
+	return "unknown";
 }
 
 function evaluateCondition(

@@ -87,9 +87,7 @@ export class FlightDataModel extends DataStore {
 		await this.#getDataPromise;
 		this.ecs = new ECS(server);
 		initECS(this.ecs, this.entities, this.mode);
-		this.ecs.processTriggers = (event) => processTriggers(this.ecs, event);
-		this.ecs.executeBlocks = (blocks, metadata) => executeBlocks(this.ecs, blocks, metadata);
-		this.ecs.triggerAction = triggerAction;
+		this.setupEcsCallbacks();
 		if (!this.flightEntity) {
 			const flight = new Entity();
 			flight.addComponent("isFlight", {
@@ -100,6 +98,11 @@ export class FlightDataModel extends DataStore {
 		if (!this.interval) {
 			this.run();
 		}
+	}
+	setupEcsCallbacks() {
+		this.ecs.processTriggers = (event) => processTriggers(this.ecs, event);
+		this.ecs.executeBlocks = (blocks, metadata) => executeBlocks(this.ecs, blocks, metadata);
+		this.ecs.triggerAction = triggerAction;
 	}
 	async initPhysics() {
 		// Fetch and calculate all of the colliders for the ships in the plugins
