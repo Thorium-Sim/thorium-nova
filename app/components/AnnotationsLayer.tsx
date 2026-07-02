@@ -1,6 +1,7 @@
 import getStroke from "perfect-freehand";
 import { useRef, useState } from "react";
 
+const staticOffset = [0, -15];
 export function AnnotationsLayer({
 	points,
 	onNewAnnotation,
@@ -19,8 +20,8 @@ export function AnnotationsLayer({
 					event.currentTarget.setPointerCapture(event.pointerId);
 					setCurrentPoints([
 						[
-							((event.pageX - left) / width) * 1000,
-							((event.pageY - top) / height) * 1000 * (height / width) -
+							((event.pageX - left + staticOffset[0]) / width) * 1000,
+							((event.pageY - top + staticOffset[1]) / height) * 1000 * (height / width) -
 								(height - width) * (width / height),
 							event.pressure,
 						],
@@ -33,8 +34,8 @@ export function AnnotationsLayer({
 					setCurrentPoints([
 						...currentPoints,
 						[
-							((e.pageX - left) / width) * 1000,
-							((e.pageY - top) / height) * 1000 * (height / width) -
+							((e.pageX - left + staticOffset[0]) / width) * 1000,
+							((e.pageY - top + staticOffset[1]) / height) * 1000 * (height / width) -
 								(height - width) * (width / height),
 							e.pressure,
 						],

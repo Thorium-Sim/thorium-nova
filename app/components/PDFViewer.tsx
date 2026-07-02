@@ -20,11 +20,13 @@ export function PDFViewer({
 	annotations,
 	onNewAnnotation,
 	onClearAnnotations,
+	onUndoAnnotation,
 }: {
 	url: string;
 	annotations: [number, number, number][][][];
 	onNewAnnotation: (points: [number, number, number][], page: number) => Promise<void>;
 	onClearAnnotations: (page: number) => void;
+	onUndoAnnotation: (page: number) => void;
 }) {
 	const [numPages, setNumPages] = useState<number>();
 	const [pageNumber, setPageNumber] = useState<number>(1);
@@ -41,12 +43,19 @@ export function PDFViewer({
 	return (
 		<>
 			{annotations[pageNumber - 1] && annotations[pageNumber - 1].length > 0 ? (
-				<Button
-					className="btn-warning btn-sm absolute top-2 right-2 z-10"
-					onClick={() => onClearAnnotations(pageNumber - 1)}
-				>
-					Clear Annotations
-				</Button>
+				<>
+					<div className="absolute top-2 right-2 z-10 flex flex-col gap-2">
+						<Button
+							className="btn-warning btn-sm"
+							onClick={() => onClearAnnotations(pageNumber - 1)}
+						>
+							Clear Annotations
+						</Button>
+						<Button className="btn-info btn-sm" onClick={() => onUndoAnnotation(pageNumber - 1)}>
+							Undo Annotation
+						</Button>
+					</div>
+				</>
 			) : null}
 
 			<div className="pdf-viewer flex h-full min-h-0 flex-col items-center">

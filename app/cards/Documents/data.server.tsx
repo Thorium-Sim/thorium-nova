@@ -137,6 +137,20 @@ export const documents = t.router({
 
 			pubsub.publish.documents.get({ shipId });
 		}),
+	undoAnnotations: t.procedure
+		.input(z.object({ documentId: z.number(), page: z.number() }))
+		.send(({ input, ctx }) => {
+			const document = ctx.ecs.getEntityById(input.documentId);
+			if (!document) return;
+			const shipId = document.components.isDocument?.shipId || -1;
+
+			const annotations = produce(document.components.isDocument?.annotations || [], (draft) => {
+				draft[input.page].pop();
+			});
+			document.updateComponent("isDocument", { annotations });
+
+			pubsub.publish.documents.get({ shipId });
+		}),
 	renderPdf: t.procedure
 		.input(
 			z.object({

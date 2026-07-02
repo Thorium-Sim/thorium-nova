@@ -44,6 +44,7 @@ export function DocViewer({
 					onClearAnnotations={(page) =>
 						q.documents.clearAnnotations.netSend({ documentId: id, page })
 					}
+					onUndoAnnotation={(page) => q.documents.undoAnnotations.netSend({ documentId: id, page })}
 				/>
 			);
 		case "m4a":
@@ -83,12 +84,20 @@ function ImagePreview({
 	return (
 		<>
 			{annotations[0] && annotations[0].length > 0 ? (
-				<Button
-					className="btn-warning btn-sm absolute top-2 right-2"
-					onClick={() => q.documents.clearAnnotations.netSend({ documentId: id, page: 0 })}
-				>
-					Clear Annotations
-				</Button>
+				<div className="absolute top-2 right-2 z-10 flex flex-col gap-2">
+					<Button
+						className="btn-warning btn-sm"
+						onClick={() => q.documents.clearAnnotations.netSend({ documentId: id, page: 0 })}
+					>
+						Clear Annotations
+					</Button>
+					<Button
+						className="btn-info btn-sm"
+						onClick={() => q.documents.undoAnnotations.netSend({ documentId: id, page: 0 })}
+					>
+						Undo Annotation
+					</Button>
+				</div>
 			) : null}
 			<div className="relative mx-auto h-full w-fit">
 				<img src={filePath} draggable={false} className="h-full bg-blue-500 object-cover" alt="" />
