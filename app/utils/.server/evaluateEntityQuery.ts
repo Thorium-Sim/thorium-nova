@@ -393,7 +393,7 @@ export async function triggerStep(step: Entity) {
 	const blocks = step?.components.isTimelineStep?.blocks;
 	if (!blocks) return;
 	step.updateComponent("isTimelineStep", { state: "executing" });
-	await executeBlocks(step.ecs, blocks, { stepId: step.id, localVariables });
+	const { waiting } = await executeBlocks(step.ecs, blocks, { stepId: step.id, localVariables });
 	step.updateComponent("identity", {
 		description: interpolateText(
 			step.components.identity?.description || "",
@@ -414,7 +414,7 @@ export async function triggerStep(step: Entity) {
 		}
 	}
 
-	if (!hasTrigger) {
+	if (!hasTrigger && !waiting) {
 		step.updateComponent("isTimelineStep", { state: "executed" });
 	}
 

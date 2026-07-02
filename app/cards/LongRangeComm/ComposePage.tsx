@@ -38,13 +38,13 @@ export function ComposePage() {
 							properties: `${value.id}`,
 						});
 					}}
-					displayValue={(item) => item?.name || ""}
+					displayValue={(item) => item?.name || item?.entityName || ""}
 				/>
 			</div>
 
 			<Label className="mt-4 text-xl">Message:</Label>
 			<TextArea
-				className="textarea message-area w-full flex-1 resize-none"
+				className="textarea compose-message-area w-full flex-1 resize-none"
 				value={message}
 				onChange={(e) => setMessage(e.currentTarget.value)}
 			/>

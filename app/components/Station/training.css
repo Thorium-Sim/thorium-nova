@@ -26,7 +26,9 @@
 	height: 1px;
 	backdrop-filter: brightness(3);
 	pointer-events: none;
-	transition: all 0.3s ease;
+	transition-property: transform, top, bottom, left, right;
+	transition-duration: 0.3s;
+	transition-timing-function: ease;
 	transform-origin: top left;
 	padding: 1rem;
 	border-radius: 10px;

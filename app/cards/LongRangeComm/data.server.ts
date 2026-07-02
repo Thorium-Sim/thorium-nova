@@ -641,7 +641,7 @@ function generateEncoding(
 			>["waves"] = [];
 			for (let i = 0; i < (encoding.waveCount || 1); i++) {
 				waves.push({
-					amplitude: 10,
+					amplitude: 0.25,
 					frequency: 5,
 					phase: 0,
 					requiredAmplitude: rng.nextAsPercentage() * (0.5 - 0.01) + 0.01,

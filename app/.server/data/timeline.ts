@@ -80,6 +80,7 @@ export const timeline = t.router({
 				);
 			}
 
+			console.log(input, timeline?.components.identity);
 			if (!timeline) return;
 			const stepIndex = timeline?.components.isTimeline?.currentStep;
 			if (stepIndex === undefined) return;

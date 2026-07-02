@@ -99,9 +99,8 @@ export class CommSatelliteSystem extends System {
 				}
 
 				// But if the destination entity isn't in range, then we need to mark the message as failing
-				const destinationEntity = this.ecs.getEntityById(isLongRangeMessage.destinationId);
 				const finalNode = this.ecs.getEntityById(isLongRangeMessage.nextNodeId);
-				if (!finalNode || !destinationEntity) {
+				if (!finalNode || !destination) {
 					fail("Unable to find route to destination through communications network");
 					return;
 				}
@@ -110,8 +109,7 @@ export class CommSatelliteSystem extends System {
 				const nodePosition =
 					getObjectSystem(finalNode)?.components.position || finalNode.components.position;
 				const destinationPosition =
-					getObjectSystem(destinationEntity)?.components.position ||
-					destinationEntity?.components.position;
+					getObjectSystem(destination)?.components.position || destination?.components.position;
 				if (!nodePosition || !destinationPosition) {
 					fail("Unable to determine destination position");
 					return;
@@ -137,23 +135,25 @@ export class CommSatelliteSystem extends System {
 						shipId: isLongRangeMessage.destinationId,
 					});
 
-					// While we're at it, make sure the sender is in the address book for replies
+					// While we're at it, make sure the sender is in the address book of the recipient for replies
 					const longRangeComm = getShipSystem(this.ecs, {
-						shipId: senderId,
+						shipId: destination.id,
 						systemType: "longRangeComm",
 					});
+
 					if (longRangeComm.components.isLongRangeComm) {
 						if (
 							!longRangeComm.components.isLongRangeComm.addressBook.find(
 								(c) => c.contactId === senderId,
-							)
+							) &&
+							longRangeComm.components.isShipSystem?.shipId !== senderId
 						) {
 							longRangeComm.components.isLongRangeComm.addressBook.push({
 								actions: [],
 								contactId: senderId,
 							});
 
-							pubsub.publish.longRangeComm.addressBook({ shipId: senderId });
+							pubsub.publish.longRangeComm.addressBook({ shipId: destination.id });
 						}
 					}
 				}

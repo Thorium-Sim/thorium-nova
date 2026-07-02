@@ -28,7 +28,7 @@ export async function executeBlocks(
 	ecs: ECS,
 	blocks: TimelineBlock[],
 	blockMetadata: BlockMetadata = {},
-) {
+): Promise<{ waiting: boolean }> {
 	let {
 		stepId,
 		localVariables = {},
@@ -56,13 +56,13 @@ export async function executeBlocks(
 					timer,
 				);
 
-				return;
+				return { waiting: true };
 			}
 			case "WaitComplete": {
 				// If the timeline step is already marked as completed
 				// then we should skip executing the rest of the blocks
 				if (ecs.getEntityById(stepId || -1)?.components.isTimelineStep?.state === "executed") {
-					return;
+					return { waiting: false };
 				}
 				break;
 			}
@@ -135,7 +135,7 @@ export async function executeBlocks(
 			}
 			case "ShipSystemGetter": {
 				const entity = getEntityReference(block.entity, ecs, stepId, localVariables);
-				if (!entity) return;
+				if (!entity) break;
 				if (block.count === "one") {
 					localVariables[block.variable] = getShipSystem(ecs, {
 						systemType: block.systemType as any,
@@ -152,7 +152,7 @@ export async function executeBlocks(
 			case "DistanceCondition": {
 				const entityA = getEntityReference(block.entity1, ecs, stepId, localVariables);
 				const entityB = getEntityReference(block.entity2, ecs, stepId, localVariables);
-				if (!entityA || !entityB) return;
+				if (!entityA || !entityB) break;
 				const conditions = [
 					{
 						type: "distance" as const,
@@ -289,6 +289,7 @@ export async function executeBlocks(
 						const actionInputs =
 							// @ts-expect-error
 							router._def.procedures[block.action]._def.inputs?.[0]?._def.shape();
+
 						let val = getValueReference(
 							value,
 							localVariables,
@@ -416,6 +417,7 @@ export async function executeBlocks(
 		}
 		blockIndex++;
 	}
+	return { waiting: false };
 }
 
 function getBaseZodType(schema: any) {
@@ -569,6 +571,7 @@ export function getValueReference(
 		}
 
 		if (expectedType === "number") {
+			if (ref.trim() === "") return undefined;
 			const entities = getEntitiesReference(ref, variables, ecs);
 			if (entities.length > 0) return entities[0];
 		}

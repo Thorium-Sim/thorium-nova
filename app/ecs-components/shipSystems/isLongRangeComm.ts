@@ -72,12 +72,12 @@ export const isLongRangeMessage = z
 					type: z.literal("waves"),
 					waves: z
 						.object({
-							amplitude: z.number().default(10),
+							amplitude: z.number().default(0.25),
 							frequency: z.number().default(5),
-							phase: z.number().default(10),
-							requiredAmplitude: z.number().default(10),
+							phase: z.number().default(0),
+							requiredAmplitude: z.number().default(0.25),
 							requiredFrequency: z.number().default(10),
-							requiredPhase: z.number().default(10),
+							requiredPhase: z.number().default(0),
 						})
 						.array(),
 				}),

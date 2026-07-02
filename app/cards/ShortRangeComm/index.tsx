@@ -100,7 +100,7 @@ export function ShortRangeComm() {
 
 			<div className="frequency-slider col-span-3">
 				<label htmlFor="frequency" className="block tabular-nums">
-					Frequency ({frequency.toFixed(2)} MHz)
+					Frequency ({frequency} MHz)
 				</label>
 				<div className="relative">
 					<input
@@ -109,7 +109,7 @@ export function ShortRangeComm() {
 						className="range range-primary block w-full"
 						min={100}
 						max={350}
-						step={0.25}
+						step={1}
 						value={frequency}
 						disabled={shortRangeComm.state !== "idle"}
 						onPointerDown={() => {

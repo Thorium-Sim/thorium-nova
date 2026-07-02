@@ -147,6 +147,8 @@ export const documents = t.router({
 				message: z.string(),
 			}),
 		)
+		.meta({ action: () => ({ message: { type: "textarea" } }) })
+		.output(z.object({ documentId: z.number() }))
 		.send(async ({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("Flight has not started.");
 
@@ -157,7 +159,7 @@ export const documents = t.router({
 			const cypher = longRangeComm.components.isLongRangeComm?.cyphers.find(
 				(c) => c.name === input.fontName,
 			);
-			if (!cypher) return;
+			if (!cypher) throw new Error("Cypher font not found.");
 
 			const file = await new Promise<Blob>((resolve) => {
 				const doc = new PDFDocument({ size: "LETTER" });
@@ -192,5 +194,6 @@ export const documents = t.router({
 			ctx.ecs.addEntity(document);
 
 			pubsub.publish.documents.get({ shipId: input.shipId });
+			return { documentId: document.id };
 		}),
 });

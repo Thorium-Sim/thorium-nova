@@ -306,7 +306,11 @@ export const shortRangeComm = t.router({
 
 				// Find a target based on the frequency and gain of the ship that is doing the hailing
 				for (const potentialTargetSrComm of ctx.ecs.componentCache.get("isShortRangeComm") || []) {
-					if (potentialTargetSrComm.id === srcomm.id) continue;
+					if (
+						potentialTargetSrComm.id === srcomm.id ||
+						potentialTargetSrComm.components.isShipSystem?.shipId === hailingShip.id
+					)
+						continue;
 					if (
 						potentialTargetSrComm.components.isShortRangeComm &&
 						potentialTargetSrComm.components.isShortRangeComm?.antennaFrequency ===
@@ -389,7 +393,11 @@ export const shortRangeComm = t.router({
 			}
 
 			// Automatically have the NPC connect the hail
-			else if (!ctx.flight?.hasFlightDirector && !targetShip?.components.isPlayerShip && targetId) {
+			else if (
+				conversationTemplate?.components.isConversationTemplate &&
+				!targetShip?.components.isPlayerShip &&
+				targetId
+			) {
 				scheduleAction(
 					ctx.ecs,
 					"shortRangeComm.connect",

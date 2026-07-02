@@ -1,5 +1,5 @@
 import { DocViewer } from "@thorium/cards/Documents/DocViewer";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
@@ -19,10 +19,19 @@ export function Documents() {
 	const [selectedDoc, setSelectedDoc] = useState<number | null>(null);
 	const doc = documents.find((d) => d.id === selectedDoc);
 	const { isWidget } = useCardContext();
+
+	function selectDoc(docId: number) {
+		setSelectedDoc(docId);
+		q.thorium.genericEvent.netSend({
+			clientId,
+			eventName: "document-selected",
+			properties: `${docId}`,
+		});
+	}
 	return (
 		<div className="grid h-screen max-h-full grid-cols-5 overflow-hidden">
 			<div className="flex h-full min-h-0 flex-col">
-				<ul className="overflow-y flex-1">
+				<ul className="overflow-y documents-list flex-1">
 					{documents.map((doc) => (
 						<li
 							key={doc.id}
@@ -32,14 +41,14 @@ export function Documents() {
 									selected: selectedDoc === doc.id,
 								},
 							)}
-							onClick={() => setSelectedDoc(doc.id)}
+							onClick={() => selectDoc(doc.id)}
 						>
 							{doc.name}
 						</li>
 					))}
 				</ul>
 			</div>
-			<div className="relative col-span-4 overflow-hidden">
+			<div className="document-viewer relative col-span-4 overflow-hidden">
 				{doc ? (
 					<>
 						<DocViewer {...doc} />

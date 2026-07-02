@@ -1,18 +1,11 @@
+import { IssueTrackerContext } from "@thorium/components/useIssueTracker";
 import { toast } from "@thorium/context/ToastContext";
 import Button from "@thorium/ui/Button";
 import Input from "@thorium/ui/Input";
 import MarkdownInput from "@thorium/ui/MarkdownInput";
 import Modal from "@thorium/ui/Modal";
 import randomWords from "@thorium/utils/random-words";
-import {
-	createContext,
-	type Dispatch,
-	type ReactNode,
-	type SetStateAction,
-	useContext,
-	useEffect,
-	useState,
-} from "react";
+import { type Dispatch, type ReactNode, type SetStateAction, useEffect, useState } from "react";
 
 import packageJson from "../../package.json" with { type: "json" };
 import { useThoriumAccount } from "../context/ThoriumAccountContext";
@@ -20,10 +13,6 @@ import LoginButton from "./LoginButton";
 import { Icon } from "./ui/Icon";
 
 const availableLabels = ["Feature", "Bug", "Design", "Documentation", "Question", "Compliment"];
-const IssueTrackerContext = createContext<{
-	open: boolean;
-	setOpen: Dispatch<SetStateAction<boolean>>;
-}>(null!);
 
 export const IssueTrackerProvider = ({ children }: { children: ReactNode }) => {
 	const [open, setOpen] = useState(false);
@@ -34,12 +23,6 @@ export const IssueTrackerProvider = ({ children }: { children: ReactNode }) => {
 			<IssueTracker open={open} setOpen={setOpen} />
 		</IssueTrackerContext.Provider>
 	);
-};
-
-export const useIssueTracker = () => {
-	const value = useContext(IssueTrackerContext);
-	if (!value) throw new Error("useIssueTracker used outside of context provider");
-	return value;
 };
 
 function IssueTracker({

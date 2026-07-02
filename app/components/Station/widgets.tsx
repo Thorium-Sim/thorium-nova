@@ -76,7 +76,17 @@ export const Widget: FC<{
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<DialogTrigger>
+		<DialogTrigger
+			onOpenChange={(isOpen) => {
+				if (isOpen) {
+					q.thorium.genericEvent.netSend({
+						clientId,
+						eventName: "widget-open",
+						properties: pascalCase(name),
+					});
+				}
+			}}
+		>
 			<Button className={`widget widget-${pascalCase(name)}`}>
 				{typeof icon === "string" ? (
 					<Icon name={icon} className="widget-icon h-6 w-6 cursor-pointer" />

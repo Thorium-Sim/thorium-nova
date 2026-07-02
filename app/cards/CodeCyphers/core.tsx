@@ -30,7 +30,7 @@ export function CodeCyphersCore() {
 		selectedCypher: string | null;
 	}>("codeCypher-selectedCypher", { selectedCypher: null });
 	const [{ heading }, setHeading] = useLocalStorage("codeCypher-heading", {
-		heading: "==== Intercepted Message ====",
+		heading: "== Intercepted Message ==",
 	});
 	const [{ message }, setMessage] = useLocalStorage("codeCypher-message", {
 		message: "",

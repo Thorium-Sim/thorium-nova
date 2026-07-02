@@ -1,3 +1,4 @@
+import { useIssueTracker } from "@thorium/components/useIssueTracker";
 import Logo from "@thorium/images/logo.svg?url";
 import Button from "@thorium/ui/Button";
 import { popoverTransitionClasses } from "@thorium/ui/Dropdown";
@@ -5,7 +6,6 @@ import { useEffect, useRef, useState } from "react";
 import { Menu, MenuItem, MenuTrigger, Popover, Button as RAButton } from "react-aria-components";
 
 import { useThoriumAccount } from "../context/ThoriumAccountContext";
-import { useIssueTracker } from "./IssueTracker";
 import { Icon } from "./ui/Icon";
 
 // https://stackoverflow.com/a/16861050/4697675
