@@ -410,6 +410,8 @@ const quotes = [
 	"Remember, the music is not in the piano.",
 	// Herculeum Scroll 4
 	"We will inquire into something, but we will not grasp it, if in some way we depart from ourselves and from our own nature",
+	// Shirley Jackson
+	"If you don't like my peaches, don't shake my tree.",
 ];
 
 const QuoteOfTheDay = () => {

@@ -436,7 +436,8 @@ export class ExocompPowerSystem extends System {
 		const ship = this.ecs.getEntityById(entity.components.isShipSystem?.shipId || -1);
 		if (!ship) return;
 		const exocompRooms = getRoomBySystem(ship, "exocomps").map((i) => i.id);
-		if (exocompRooms.length === 0) return;
+		if (exocompRooms.length === 0 || (exocompRooms.length === 1 && exocompRooms[0] === ship.id))
+			return;
 		const chargingExocomps = new Set<Entity>();
 
 		// Charge any exocomps that are in the same room as the exocomp system

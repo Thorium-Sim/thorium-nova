@@ -1,5 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
+import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { Entity } from "@thorium/utils/ecs";
 import z from "zod";
 
@@ -39,7 +40,7 @@ export const remoteAccess = t.router({
 	send: t.procedure
 		.meta({ event: true })
 		.input(z.object({ clientId: z.string(), code: z.string().min(1) }))
-		.output(z.object({ remoteAccessCodeId: z.number() }))
+		.output(z.object({ remoteAccessCodeId: z.number(), code: z.string(), shipId: z.number() }))
 		.send(({ ctx, input: { clientId, code } }) => {
 			const remoteAccessCode = new Entity();
 			const client = ctx.getFlightClient(clientId)?.components.flightClient;
@@ -56,14 +57,14 @@ export const remoteAccess = t.router({
 			ctx.flight?.ecs.addEntity(remoteAccessCode);
 
 			pubsub.publish.remoteAccess.codes({ shipId });
-			return { remoteAccessCodeId: remoteAccessCode.id };
+			return { remoteAccessCodeId: remoteAccessCode.id, code, shipId };
 		}),
 
 	accept: t.procedure
 		.meta({ action: true, event: true })
 		.input(z.object({ remoteAccessCodeId: z.number() }))
 		.output(z.object({ remoteAccessCodeId: z.number() }))
-		.send(({ ctx, input }) => {
+		.send(async ({ ctx, input }) => {
 			const { remoteAccessCodeId } = input;
 			const remoteAccessCode = ctx.flight?.ecs.getEntityById(remoteAccessCodeId);
 			if (!remoteAccessCode) throw new Error("Invalid Remote Access Code");
@@ -76,13 +77,21 @@ export const remoteAccess = t.router({
 				shipId: remoteAccessCode.components.remoteAccessCode?.shipId,
 			});
 
-			// TODO: Add notification to the client
+			const code = remoteAccessCode.components.remoteAccessCode;
+			if (code) {
+				await triggerAction("effects.notify", {
+					clientName: code.clientId,
+					color: "success",
+					shipId: code.shipId,
+					title: `Remote Access Code ${code.code} Accepted`,
+				});
+			}
 			return input;
 		}),
 	deny: t.procedure
 		.meta({ action: true, event: true })
 		.input(z.object({ remoteAccessCodeId: z.number() }))
-		.send(({ ctx, input }) => {
+		.send(async ({ ctx, input }) => {
 			const { remoteAccessCodeId } = input;
 			const remoteAccessCode = ctx.flight?.ecs.getEntityById(remoteAccessCodeId);
 			if (!remoteAccessCode) throw new Error("Invalid Remote Access Code");
@@ -95,7 +104,15 @@ export const remoteAccess = t.router({
 				shipId: remoteAccessCode.components.remoteAccessCode?.shipId,
 			});
 
-			// TODO: Add notification to the client
+			const code = remoteAccessCode.components.remoteAccessCode;
+			if (code) {
+				await triggerAction("effects.notify", {
+					clientName: code.clientId,
+					color: "error",
+					shipId: code.shipId,
+					title: `Remote Access Code ${code.code} Denied`,
+				});
+			}
 			return input;
 		}),
 });

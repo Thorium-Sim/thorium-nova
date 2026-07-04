@@ -17,8 +17,8 @@ import {
 	useState,
 } from "react";
 import { Button as RAButton, Dialog, DialogTrigger, Popover } from "react-aria-components";
+import { flushSync } from "react-dom";
 import { useNavigate } from "react-router";
-
 type IconType = IconName | ReactElement;
 
 export const Widgets = () => {
@@ -77,10 +77,12 @@ export const Widget: FC<{
 }> = ({ name, icon, component: Component, size = "md" }) => {
 	const [isOpen, setIsOpen] = useState<"off" | "popover" | "modal">("off");
 	const modalRef = useRef<HTMLDivElement>(null);
+	const dialogRef = useRef<HTMLDivElement>(null);
 	const positionRef = useRef<[number, number]>([0, 0]);
 	const sizeClass = cn(
 		"max-w-md isolate max-h-96 !bg-black/70 border border-white/50 rounded p-2 relative w-screen @container overflow-hidden flex flex-col",
 		"panel backdrop-blur transition-none!",
+		`widget-body-${pascalCase(name)}`,
 		{
 			"max-w-sm": size === "sm",
 			"max-w-lg": size === "md",
@@ -102,6 +104,9 @@ export const Widget: FC<{
 			{isOpen === "modal" ? (
 				<div className={cn(sizeClass, "fixed top-0 left-0 z-150 pt-4")} ref={modalRef}>
 					<div className="absolute top-2 right-2 flex gap-2">
+						<Button className="btn btn-circle btn-xs btn-error" onClick={() => setIsOpen("off")}>
+							<Icon name="x" />
+						</Button>
 						<Button
 							className="btn btn-circle btn-xs"
 							onPointerDown={() => {
@@ -131,9 +136,6 @@ export const Widget: FC<{
 						>
 							<Icon name="grip" />
 						</Button>
-						<Button className="btn btn-circle btn-xs btn-error" onClick={() => setIsOpen("off")}>
-							<Icon name="x" />
-						</Button>
 					</div>
 					{card}
 				</div>
@@ -160,10 +162,19 @@ export const Widget: FC<{
 				</RAButton>
 				<Suspense>
 					<Popover className={cn("theme-container", popoverTransitionClasses)}>
-						<Dialog className={sizeClass}>
+						<Dialog className={sizeClass} ref={dialogRef}>
 							<Button
-								className="btn btn-circle btn-xs btn-accent absolute top-2 right-2"
-								onClick={() => setIsOpen("modal")}
+								className="btn btn-circle btn-xs btn-accent widget-break-out-button absolute top-2 right-2"
+								onClick={() => {
+									const bounds = dialogRef.current?.getBoundingClientRect();
+									flushSync(() => {
+										setIsOpen("modal");
+									});
+									if (bounds && modalRef.current) {
+										positionRef.current = [bounds.left, bounds.top];
+										modalRef.current.style.transform = `translate(${positionRef.current[0]}px, ${positionRef.current[1]}px)`;
+									}
+								}}
 							>
 								<Icon name="copy" />
 							</Button>

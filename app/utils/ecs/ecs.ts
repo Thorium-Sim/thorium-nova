@@ -205,8 +205,12 @@ class ECS {
 		}
 		return this.worlds.get(key)!;
 	}
-	// oxlint-disable-next-line no-unused-vars
-	async executeBlocks(blocks: TimelineBlock[], blocksMetadata: BlockMetadata = {}): Promise<void> {
+	async executeBlocks(
+		// oxlint-disable-next-line no-unused-vars
+		blocks: TimelineBlock[],
+		// oxlint-disable-next-line no-unused-vars
+		blocksMetadata: BlockMetadata = {},
+	): Promise<{ waiting: boolean }> {
 		// We have to keep this blank and register it when we init ECS
 		// to prevent weird dependency loops when executing blocks from
 		// ECS systems
