@@ -1,3 +1,4 @@
+import { useUNSAFE_PortalContext } from "@react-aria/overlays";
 import * as Cards from "@thorium/cards";
 import { q, clientId } from "@thorium/context/AppContext";
 import CardProvider from "@thorium/context/CardContext";
@@ -99,6 +100,7 @@ export const Widget: FC<{
 			/>
 		</CardProvider>
 	);
+	const container = useUNSAFE_PortalContext().getContainer?.();
 	return (
 		<>
 			{isOpen === "modal" ? (
@@ -161,7 +163,12 @@ export const Widget: FC<{
 					)}
 				</RAButton>
 				<Suspense>
-					<Popover className={cn("theme-container", popoverTransitionClasses)}>
+					<Popover
+						className={cn("theme-container", popoverTransitionClasses)}
+						// We have to use the deprecated prop because for some reason the provider isn't working
+						// and training doesn't get anchor positioned to widget elements due to DOM ordering
+						UNSTABLE_portalContainer={container || undefined}
+					>
 						<Dialog className={sizeClass} ref={dialogRef}>
 							<Button
 								className="btn btn-circle btn-xs btn-accent widget-break-out-button absolute top-2 right-2"
@@ -174,6 +181,11 @@ export const Widget: FC<{
 										positionRef.current = [bounds.left, bounds.top];
 										modalRef.current.style.transform = `translate(${positionRef.current[0]}px, ${positionRef.current[1]}px)`;
 									}
+									q.thorium.genericEvent.netSend({
+										clientId,
+										eventName: "widget-break-out",
+										properties: name,
+									});
 								}}
 							>
 								<Icon name="copy" />

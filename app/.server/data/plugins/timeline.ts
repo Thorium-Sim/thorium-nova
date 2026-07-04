@@ -975,6 +975,8 @@ export function syncTimelinePluginToFlightTimeline(
 ) {
 	// First find the flight timeline
 	let flightTimeline: Entity | undefined = undefined;
+	if (!ctx.flight) return;
+
 	for (const entity of ctx.ecs?.componentCache.get("isTimeline") || []) {
 		if (
 			entity.components.isTimeline?.pluginName === timeline.pluginName &&
@@ -984,6 +986,7 @@ export function syncTimelinePluginToFlightTimeline(
 			break;
 		}
 	}
+
 	if (!flightTimeline?.components.isTimeline) return;
 
 	// Get the current timeline step so we can properly adjust if steps were rearranged

@@ -41,9 +41,10 @@ export function ActionBlock({ action, values, update }: BlockProps<"Action">) {
 						action={{ ...chosenAction, values }}
 						dispatch={(params) => {
 							if (params.type === "value") {
+								const { [params.path]: _pathValue, ...rest } = values;
 								update("values", {
-									...values,
-									[params.path]: params.value,
+									...rest,
+									...(params.value === "" ? {} : { [params.path]: params.value }),
 								});
 							}
 						}}
@@ -91,7 +92,7 @@ function ActionValueInput({
 					id={id}
 					inputType="select"
 					inputValues={voices}
-					value={value}
+					defaultValue={value}
 					setValue={(value) =>
 						dispatch({
 							type: "value",

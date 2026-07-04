@@ -67,7 +67,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<UNSAFE_PortalProvider getContainer={() => container.current}>
 					<div className="absolute top-0 z-0 h-full w-full text-white">{children}</div>
 				</UNSAFE_PortalProvider>
-				<div ref={container} />
+				<div ref={container}>Portalled here!</div>
+				<div id="training-container" />
 				<Snapshot />
 				<ScrollRestoration />
 				<Scripts />

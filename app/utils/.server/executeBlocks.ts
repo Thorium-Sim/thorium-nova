@@ -270,9 +270,12 @@ export async function executeBlocks(
 				try {
 					const step = ecs.getEntityById(stepId || -1);
 					const values = {
+						// Automatically apply the current timeline step to this action for convenience
 						...(step?.components.isTimelineStep?.timelineId
 							? { timelineId: step?.components.isTimelineStep?.timelineId }
 							: {}),
+
+						// Process the rest of the values to interpolate variables in
 						...Object.fromEntries(
 							Object.entries(block.values).map(([key, value]) => {
 								if (Array.isArray(value)) {

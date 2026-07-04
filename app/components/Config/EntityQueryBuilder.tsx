@@ -526,7 +526,7 @@ export function PropertyInput({
 					label={label}
 					labelHidden={labelHidden}
 					onChange={(e) => setValue(e.target.value)}
-					value={value}
+					defaultValue={value}
 					{...inputProps}
 				/>
 			);

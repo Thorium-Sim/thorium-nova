@@ -6,14 +6,14 @@ import Button from "@thorium/ui/Button";
 import { Portal } from "@thorium/ui/Portal";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import { cn } from "@thorium/utils/cn";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { CardArea } from "./CardArea";
 import { CardSwitcher } from "./CardSwitcher";
 import { useManageCard } from "./useManageCard";
-import { Widgets } from "./widgets";
 
 import "./training.css";
+import { Widgets } from "./widgets";
 
 const StationLayout = () => {
 	const { client, station, ship } = useStation();
@@ -92,8 +92,13 @@ const StationLayout = () => {
 					<Widgets />
 				</div>
 				{client.training ? (
-					<Portal>
-						<div className="theme-container training z-40">
+					<Portal
+						target={
+							typeof document === "undefined" ? null : document.getElementById("training-container")
+						}
+					>
+						{/*  z 1 higher than the popover container for widgets */}
+						<div className="theme-container training z-100001">
 							<div className="training-overlay" />
 							{client.training?.selector?.map((selector, index) => (
 								<TrainingHighlight key={selector} selector={selector} index={index} />
@@ -128,7 +133,9 @@ const padding = 8;
 function TrainingHighlight({ selector, index }: { selector: string; index: number }) {
 	const ref = useRef<HTMLDivElement>(null);
 
+	const [selectorPresent, setSelectorPresent] = useState(false);
 	useEffect(() => {
+		if (!selectorPresent) return;
 		const el = document.querySelector(selector);
 		if (!el) return;
 		const observer = new ResizeObserver((entries) => {
@@ -145,7 +152,24 @@ function TrainingHighlight({ selector, index }: { selector: string; index: numbe
 		return () => {
 			observer.unobserve(el);
 		};
+	}, [selector, selectorPresent]);
+
+	useEffect(() => {
+		const observer = new MutationObserver(() => {
+			const el = document.body.querySelector(selector);
+			setSelectorPresent(!!el);
+		});
+		observer.observe(document.body, {
+			attributes: false,
+			characterData: false,
+			subtree: true,
+			childList: true,
+		});
+		return () => {
+			observer.disconnect();
+		};
 	}, [selector]);
+
 	return (
 		<>
 			<style>{`
@@ -153,6 +177,7 @@ ${selector} {
 anchor-name: --training-highlight-${index};
 }
 `}</style>
+
 			<div
 				ref={ref}
 				className={cn("training-highlight", {
@@ -173,7 +198,8 @@ function FlightStatus() {
 	return (
 		<div
 			className={cn(
-				"absolute z-500 inset-0 bg-black/50 backdrop-blur transition-all opacity-0 pointer-events-none flex items-center justify-center",
+				// z 1 higher than the popover container for widgets
+				"absolute z-100001 inset-0 bg-black/50 backdrop-blur transition-all opacity-0 pointer-events-none flex items-center justify-center",
 				{
 					"opacity-100 pointer-events-auto":
 						flight?.state !== "in-progress" || ship.isDestroyed || flight.paused,

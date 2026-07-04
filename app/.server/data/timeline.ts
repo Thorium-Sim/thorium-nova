@@ -27,7 +27,11 @@ export const timeline = t.router({
 			const timelineEntity = spawnTimeline(timeline, (entity: Entity) => {
 				ctx.flight?.ecs.addEntity(entity);
 			});
-			const variables = { ...ctx.localVariables, timelineId: timelineEntity.id };
+			const variables = {
+				...ctx.localVariables,
+				timelineId: timelineEntity.id,
+				parentTimelineId: ctx.localVariables?.timelineId,
+			};
 			timelineEntity.addComponent("variables", {
 				variables: Object.entries(variables).map(([name, value]) => ({
 					name,
@@ -79,8 +83,6 @@ export const timeline = t.router({
 					timeline.components.isTimeline?.steps.includes(input.stepId!),
 				);
 			}
-
-			console.log(input, timeline?.components.identity);
 			if (!timeline) return;
 			const stepIndex = timeline?.components.isTimeline?.currentStep;
 			if (stepIndex === undefined) return;
