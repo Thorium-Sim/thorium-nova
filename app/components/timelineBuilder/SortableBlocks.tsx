@@ -33,7 +33,12 @@ export function SortableBlocks({
 		<div className="relative flex flex-1 flex-col gap-2 py-2 pr-2">
 			<DragDropProvider modifiers={[RestrictToVerticalAxis]} onDragEnd={onDragEnd}>
 				{blocks.map((block, index) => (
-					<SortableBlock id={block.id} index={index} key={block.id}>
+					<SortableBlock
+						id={block.id}
+						index={index}
+						key={block.id}
+						fullWidth={block.type === "Code"}
+					>
 						<Suspense>
 							<DefinedVariableProvider
 								variables={blocks.reduce((prev: string[], next, i) => {
@@ -71,10 +76,12 @@ function SortableBlock({
 	id,
 	index,
 	children,
+	fullWidth,
 }: {
 	id: string;
 	index: number;
 	children: ReactNode;
+	fullWidth?: boolean;
 }) {
 	const sortable = useSortable({
 		id,
@@ -83,7 +90,13 @@ function SortableBlock({
 	});
 
 	return (
-		<div ref={sortable.ref} className={cn(sortable.isDragging ? "isolate" : "", "w-fit relative")}>
+		<div
+			ref={sortable.ref}
+			className={cn(sortable.isDragging ? "isolate" : "", "relative", {
+				"w-fit": !fullWidth,
+				"w-full": fullWidth,
+			})}
+		>
 			<div className={`block ${sortable.isDragging ? "pointer-events-none" : ""}`}>
 				<SortableHandleContext value={sortable.handleRef}>{children}</SortableHandleContext>
 			</div>

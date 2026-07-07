@@ -3,6 +3,7 @@ import { spawnTrigger } from "@thorium/.server/spawners/trigger";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import type { ComponentProperties } from "@thorium/ecs-components";
 import { evaluateTriggerCondition } from "@thorium/utils/.server/evaluateEntityQuery";
+import { runInSandbox } from "@thorium/utils/.server/runInSandbox";
 import { getShipSystem, getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { Entity, type ECS } from "@thorium/utils/ecs";
 import { interpolateText } from "@thorium/utils/interpolationEngine";
@@ -362,6 +363,15 @@ export async function executeBlocks(
 						executionType,
 						callReturnBlocks,
 					});
+				}
+				break;
+			}
+			case "Code": {
+				const output = await runInSandbox(`${block.code}\nreturn await run();`, localVariables);
+				if (typeof output === "object") {
+					Object.assign(localVariables, output);
+				} else {
+					Object.assign(localVariables, { output });
 				}
 				break;
 			}

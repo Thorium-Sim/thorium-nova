@@ -14,6 +14,7 @@ export const timelineBlockTypes = [
 	"RandomIntoVariable",
 	"MathIntoVariable",
 	"ForEachEntity",
+	"Code",
 	"Macro",
 	"TimelineAvailability",
 	"MacroSlot",
@@ -34,6 +35,7 @@ export const prerequisiteBlockTypes: BlockTypes[] = [
 	"SetVariable",
 	"RandomIntoVariable",
 	"MathIntoVariable",
+	"Code",
 	"Macro",
 	"TimelineAvailability",
 	"Debug",
@@ -50,6 +52,7 @@ export const mainBlockTypes: BlockTypes[] = [
 	"VariableIntoVariable",
 	"SetVariable",
 	"Action",
+	"Code",
 	"RandomIntoVariable",
 	"MathIntoVariable",
 	"Macro",
@@ -124,6 +127,11 @@ export const timelineBlockDefaults: {
 		entity: "",
 		variable: "entityId",
 		triggerBlocks: [],
+	},
+	Code: {
+		code: `async function run() {
+		
+}`,
 	},
 	Macro: {
 		pluginId: "",
@@ -261,6 +269,11 @@ interface ForEachEntityBlock extends BaseBlock {
 	triggerBlocks: TimelineBlock[];
 }
 
+interface CodeBlock extends BaseBlock {
+	type: "Code";
+	code: string;
+}
+
 interface MacroBlock extends BaseBlock {
 	type: "Macro";
 	pluginId: string;
@@ -303,6 +316,7 @@ export type TimelineBlock =
 	| MathIntoVariableBlock
 	| ForEachEntityBlock
 	| MacroBlock
+	| CodeBlock
 	| TimelineAvailabilityBlock
 	| MacroSlot
 	| DebugBlock

@@ -21,7 +21,12 @@ export function BlockWrapper({
 				className,
 			)}
 		>
-			<div className="group relative flex w-fit flex-col items-start rounded bg-black/80 px-2 py-1 backdrop-blur-md">
+			<div
+				className={cn(
+					"group relative flex w-fit flex-col items-start rounded bg-black/80 px-2 py-1 backdrop-blur-md",
+					className,
+				)}
+			>
 				{children}
 				<div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-focus-within:opacity-100 group-hover:opacity-100">
 					<button

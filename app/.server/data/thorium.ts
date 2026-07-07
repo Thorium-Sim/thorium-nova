@@ -6,6 +6,7 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { router, type AllSends } from "@thorium/.server/init/router";
 import { t } from "@thorium/.server/init/t";
 import { selectValueQuery } from "@thorium/utils/.server/evaluateEntityQuery";
+import { runInSandbox } from "@thorium/utils/.server/runInSandbox";
 import { Entity } from "@thorium/utils/ecs";
 import { actionItem } from "@thorium/utils/flags/actionSchema";
 import { capitalCase } from "change-case";
@@ -291,6 +292,12 @@ export const thorium = t.router({
 		.input(z.object({ message: z.string() }))
 		.send(({ input }) => {
 			console.debug(input.message);
+		}),
+	runCode: t.procedure
+		.meta({ action: () => ({ code: { type: "textarea" } }) })
+		.input(z.object({ code: z.string() }))
+		.send(({ input, ctx }) => {
+			return runInSandbox(input.code, ctx);
 		}),
 	eventsSub: t.procedure
 		.filter((_: { name: string; values: any }) => true)

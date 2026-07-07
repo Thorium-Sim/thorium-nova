@@ -1,3 +1,4 @@
+import { clientId, q } from "@thorium/context/AppContext";
 import { cn } from "@thorium/utils/cn";
 import { useEffect, useRef, type SVGProps } from "react";
 
@@ -14,6 +15,14 @@ export function RoomDot({
 	const selectedRoomId = useShipMapStore((state) => state.selectedRoomId);
 	const isSelected = selectedRoomId === id;
 
+	function click() {
+		useShipMapStore.setState({ selectedRoomId: id });
+		q.thorium.genericEvent.netSend({
+			clientId,
+			eventName: "room-dot-selected",
+			properties: `${id}`,
+		});
+	}
 	return (
 		<>
 			<circle
@@ -24,7 +33,7 @@ export function RoomDot({
 					"fill-sky-400": isSelected,
 				})}
 				style={{ anchorName: `--room-${id}` }}
-				onClick={() => useShipMapStore.setState({ selectedRoomId: id })}
+				onClick={click}
 				{...props}
 			/>
 			{isSelected && (
@@ -36,7 +45,7 @@ export function RoomDot({
 						"fill-sky-400 animate-ping": isSelected,
 					})}
 					style={{ transformOrigin: `${position.x}px ${position.y}px` }}
-					onClick={() => useShipMapStore.setState({ selectedRoomId: id })}
+					onClick={click}
 				/>
 			)}
 		</>

@@ -175,22 +175,17 @@ export function AddBlockButton({
 						<StyledMenuItem onAction={() => onAddBlock("MacroSlot")}>Macro Slot</StyledMenuItem>
 					)}
 					<StyledMenuItem onAction={() => onAddBlock("Note")}>Note</StyledMenuItem>
-					<StyledMenuItem onAction={() => onAddBlock("Debug")}>Debug</StyledMenuItem>
 					<MenuSection>
 						<Header className="pl-2 font-bold">Control Flow</Header>
 
 						{executionType.includes("main") ? (
 							<StyledMenuItem onAction={() => onAddBlock("Wait")}>Wait</StyledMenuItem>
 						) : null}
-						<StyledMenuItem onAction={() => onAddBlock("ForEachEntity")}>
-							For Each Entity
-						</StyledMenuItem>
+
 						<StyledMenuItem onAction={() => onAddBlock("ResultPropertyIntoVariable")}>
 							Save Property from Result as Variable
 						</StyledMenuItem>
-						<StyledMenuItem onAction={() => onAddBlock("EntityPropertyIntoVariable")}>
-							Save Property from Entity as Variable
-						</StyledMenuItem>
+
 						<StyledMenuItem onAction={() => onAddBlock("ShipSystemGetter")}>
 							Save Ship System from Entity as Variable
 						</StyledMenuItem>
@@ -199,12 +194,6 @@ export function AddBlockButton({
 						</StyledMenuItem>
 						<StyledMenuItem onAction={() => onAddBlock("SetVariable")}>
 							Set Entity Variable
-						</StyledMenuItem>
-						<StyledMenuItem onAction={() => onAddBlock("RandomIntoVariable")}>
-							Save Random Value as Variable
-						</StyledMenuItem>
-						<StyledMenuItem onAction={() => onAddBlock("MathIntoVariable")}>
-							Save Math Operation as Variable
 						</StyledMenuItem>
 					</MenuSection>
 					{omitBlocks ? (
@@ -232,6 +221,29 @@ export function AddBlockButton({
 							</StyledMenuItem>
 						</MenuSection>
 					)}
+					<SubmenuTrigger>
+						<StyledMenuItem className="flex justify-between">
+							Advanced <Icon name="chevron-right" />{" "}
+						</StyledMenuItem>
+						<Popover className={popoverClass}>
+							<Menu>
+								<StyledMenuItem onAction={() => onAddBlock("EntityPropertyIntoVariable")}>
+									Save Property from Entity as Variable
+								</StyledMenuItem>
+								<StyledMenuItem onAction={() => onAddBlock("RandomIntoVariable")}>
+									Save Random Value as Variable
+								</StyledMenuItem>
+								<StyledMenuItem onAction={() => onAddBlock("MathIntoVariable")}>
+									Save Math Operation as Variable
+								</StyledMenuItem>
+								<StyledMenuItem onAction={() => onAddBlock("ForEachEntity")}>
+									For Each Entity
+								</StyledMenuItem>
+								<StyledMenuItem onAction={() => onAddBlock("Code")}>Run Code</StyledMenuItem>
+								<StyledMenuItem onAction={() => onAddBlock("Debug")}>Debug</StyledMenuItem>
+							</Menu>
+						</Popover>
+					</SubmenuTrigger>
 				</Menu>
 			</Popover>
 		</MenuTrigger>

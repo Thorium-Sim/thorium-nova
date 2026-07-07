@@ -10,6 +10,7 @@ import { useGetActionPresetValue } from "@thorium/components/StepEditor";
 import { ActionBlock } from "@thorium/components/timelineBuilder/ActionBlock";
 import { AddBlockMenu } from "@thorium/components/timelineBuilder/AddBlockMenu";
 import { BlockWrapper } from "@thorium/components/timelineBuilder/BlockWrapper";
+import { CodeBlock } from "@thorium/components/timelineBuilder/CodeBlock";
 import { DebugBlock } from "@thorium/components/timelineBuilder/DebugBlock";
 import { DistanceCondition } from "@thorium/components/timelineBuilder/DistanceCondition";
 import { EntityCondition } from "@thorium/components/timelineBuilder/EntityCondition";
@@ -58,7 +59,10 @@ export function RenderBlock({
 	const getActionPresetValues = useGetActionPresetValue(timelineType || "missions");
 	return (
 		<Suspense>
-			<BlockWrapper onRemove={() => onRemove(block.id)}>
+			<BlockWrapper
+				onRemove={() => onRemove(block.id)}
+				className={block.type === "Code" ? "w-full" : ""}
+			>
 				{block.type === "Wait" ? (
 					<WaitBlock {...block} update={update} />
 				) : block.type === "WaitComplete" ? null : block.type === "DistanceCondition" ? (
@@ -91,6 +95,8 @@ export function RenderBlock({
 					<MathIntoVariable {...block} update={update} />
 				) : block.type === "ForEachEntity" ? (
 					<ForEachEntity {...block} update={update} />
+				) : block.type === "Code" ? (
+					<CodeBlock {...block} update={update} />
 				) : block.type === "Macro" ? (
 					<MacroBlock {...block} macro={macro} update={update} replace={replace} />
 				) : block.type === "TimelineAvailability" ? (

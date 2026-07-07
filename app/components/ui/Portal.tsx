@@ -8,5 +8,5 @@ export function Portal({
 	children: ReactNode;
 	target?: Element | DocumentFragment | null;
 }) {
-	return createPortal(children, target);
+	return createPortal(children, target || document.body);
 }

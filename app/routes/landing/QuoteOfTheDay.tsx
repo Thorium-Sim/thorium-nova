@@ -412,6 +412,9 @@ const quotes = [
 	"We will inquire into something, but we will not grasp it, if in some way we depart from ourselves and from our own nature",
 	// Shirley Jackson
 	"If you don't like my peaches, don't shake my tree.",
+	// John Archibald Wheeler
+	"We live on an island surrounded by a sea of ignorance. As our island of knowledge grows, so does the shore of our ignorance.",
+	"We will first understand how simple the universe is when we realize how strange it is.",
 ];
 
 const QuoteOfTheDay = () => {
