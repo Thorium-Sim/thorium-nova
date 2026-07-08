@@ -28,7 +28,7 @@ export function InterpolateInfo({ className }: { className?: string }) {
 					- Sets intermediate variables which can be used later in the text.
 				</li>
 				<li>
-					<Code>{`The code is ~{Alpha,Beta,Gamma,Delta}`}</Code> - randomly chooses from
+					<Code>{`The code is {~Alpha,Beta,Gamma,Delta}`}</Code> - randomly chooses from
 					comma-separated options
 				</li>
 				<li>

@@ -4,7 +4,7 @@ import Button from "@thorium/ui/Button";
 import { fromDate } from "dot-beat-time";
 import * as React from "react";
 
-export default function OfficersLog() {
+export function OfficersLog() {
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [officersLog] = q.officersLog.get.useNetRequest({ clientId });
 

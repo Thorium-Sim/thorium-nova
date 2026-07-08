@@ -77,6 +77,17 @@ test("it should randomly choose between listed strings", () => {
 			rng,
 		),
 	).toEqual("The code is Beta Foxtrot");
+	expect(
+		interpolateText(
+			`The code is {~{~Alpha,Bravo},{~Gamma,{~1,2,3,4}},{~Charlie,{~5,6,7}},{~Foxtrot,{~8,9}},{~1,2}}`,
+			{},
+			rng,
+		),
+	).toEqual("The code is Foxtrot");
+	const nameText = `{~Violet,Indigo,Lilac,Azure,Grey,Golden,Marigold,Lavender} {~Silhouette,Guardian,God,Tower,Pillar,Hero,Quest,Journey,Matrix,Palace,Pyramid,Goblet,Sunset,Sunrise}{~,,,,,,,,,,, I, II, III, IV}`;
+	expect(interpolateText(nameText, {}, rng)).toEqual("Violet Goblet III");
+	expect(interpolateText(nameText, {}, rng)).toEqual("Indigo Goblet");
+	expect(interpolateText(nameText, {}, rng)).toEqual("Lilac God IV");
 });
 test("it should work with a RANDOM function", () => {
 	const rng = createRNG("test");

@@ -1,5 +1,5 @@
 import * as Cards from "@thorium/cards";
-import Login from "@thorium/cards/Login";
+import { Login } from "@thorium/cards/Login";
 import Offline from "@thorium/cards/Offline";
 import { clientId, q } from "@thorium/context/AppContext";
 import CardProvider from "@thorium/context/CardContext";

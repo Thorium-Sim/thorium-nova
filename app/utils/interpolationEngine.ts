@@ -9,9 +9,12 @@ export function interpolateText(
 	const ctx = { ...vars };
 
 	// Random from list
-	template = template.replace(/\{\s*~([^}]+)\s*\}/g, (_, options: string) => {
-		return rng.nextFromList(options.split(",").map((o) => o.trim()));
-	});
+	while (template.includes("{~")) {
+		template = template.replace(/\{\s*~([^{}]+)\s*\}/g, (_, options: string) => {
+			console.log(options.split(","));
+			return rng.nextFromList(options.split(","));
+		});
+	}
 	// 1) evaluate all switches like {key|A:out;k=v|B:out2;...|default:...}
 	template = template.replace(/\[(\w+)\|([^\]]+)\]/g, (string, key, body: string) => {
 		const value = ctx[key] ?? "";

@@ -1,4 +1,4 @@
-import { Card, Widget } from "./Card";
+import type { Card, Widget } from "./Card";
 
 export default class Station {
 	apiVersion = "stations/v1" as const;
@@ -26,10 +26,8 @@ export default class Station {
 		this.tags = params.tags || [];
 		this.logo = params.logo || "";
 		this.theme = params.theme || "Default";
-		this.cards = [];
-		this.widgets = [];
+		this.cards = params.cards || [];
+		this.widgets = params.widgets || [];
 		this.messageGroups = params.messageGroups || [];
-		params.cards?.forEach((c) => this.cards.push(new Card(c)));
-		params.widgets?.forEach((w) => this.widgets.push(new Widget(w)));
 	}
 }

@@ -4,7 +4,7 @@ import Button from "@thorium/ui/Button";
 import Input from "@thorium/ui/Input";
 import { useState } from "react";
 
-const Login = () => {
+export function Login() {
 	const { ship } = useStation();
 	const [loginName, setLoginName] = useState("");
 	// TODO: Support logging in with a ThoriumSim account
@@ -49,5 +49,4 @@ const Login = () => {
 			</form>
 		</div>
 	);
-};
-export default Login;
+}
