@@ -60,6 +60,7 @@ export const iconNames = [
   "file-up",
   "file-video",
   "flame",
+  "ghost",
   "git-branch",
   "git-pull-request-create",
   "goTo",

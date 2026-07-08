@@ -3,6 +3,7 @@ import { useThoriumAccount } from "@thorium/context/ThoriumAccountContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
 import { Portal } from "@thorium/ui/Portal";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import { cn } from "@thorium/utils/cn";
@@ -10,9 +11,9 @@ import { useEffect, useRef, useState } from "react";
 
 import { CardArea } from "./CardArea";
 import { CardSwitcher } from "./CardSwitcher";
-import { useManageCard } from "./useManageCard";
 
 import "./training.css";
+import { useManageCard } from "./useManageCard";
 import { Widgets } from "./widgets";
 
 const StationLayout = () => {
@@ -103,23 +104,29 @@ const StationLayout = () => {
 							{client.training?.selector?.map((selector, index) => (
 								<TrainingHighlight key={selector} selector={selector} index={index} />
 							))}
-							<div className="training-infobox panel flex flex-col items-end gap-2 backdrop-blur">
-								<div
-									className="max-w-lg min-w-48 whitespace-pre-wrap"
-									dangerouslySetInnerHTML={{ __html: client.training?.text }}
-								/>
-								{client.training.allowAdvance ? (
-									<Button
-										className="btn-sm btn-primary pointer-events-auto"
-										onClick={() => {
-											q.timeline.advance.netSend({
-												timelineId: client.training?.timelineId,
-											});
-										}}
-									>
-										Next
-									</Button>
-								) : null}
+							<div className="training-infobox relative flex flex-col items-end gap-2">
+								<div className="panel backdrop-blur">
+									<div
+										className="mr-4 max-w-lg min-w-48 whitespace-pre-wrap"
+										dangerouslySetInnerHTML={{ __html: client.training?.text }}
+									/>
+
+									{client.training.allowAdvance ? (
+										<Button
+											className="btn-sm btn-primary pointer-events-auto"
+											onClick={() => {
+												q.timeline.advance.netSend({
+													timelineId: client.training?.timelineId,
+												});
+											}}
+										>
+											Next
+										</Button>
+									) : null}
+								</div>
+								<Button className="btn-info btn-xs btn-circle training-ghost-button absolute top-2 right-4">
+									<Icon name="ghost" />
+								</Button>
 							</div>
 						</div>
 					</Portal>

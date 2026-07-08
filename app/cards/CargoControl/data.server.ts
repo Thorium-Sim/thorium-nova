@@ -360,7 +360,7 @@ export const cargoControl = t.router({
 		.input(
 			z.object({
 				shipId: z.number(),
-				flags: nodeFlagsSchema.array().optional(),
+				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
 				systems: z.array(z.string()).optional(),
 			}),
 		)
@@ -410,7 +410,7 @@ export const cargoControl = t.router({
 		.input(
 			z.object({
 				shipId: z.number(),
-				flags: nodeFlagsSchema.array().optional(),
+				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
 				systems: z.array(z.string()).optional(),
 				item: z.string().optional(),
 				count: z.number(),
@@ -483,7 +483,7 @@ export const cargoControl = t.router({
 		.input(
 			z.object({
 				shipId: z.number(),
-				flags: nodeFlagsSchema.array().optional(),
+				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
 				systems: z.array(z.string()).optional(),
 				item: z.string().optional(),
 				count: z.number(),
@@ -554,7 +554,7 @@ export const cargoControl = t.router({
 		.input(
 			z.object({
 				shipId: z.number(),
-				flags: nodeFlagsSchema.array().optional(),
+				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
 				systems: z.array(z.string()).optional(),
 				item: z.string(),
 				count: z.number(),
@@ -608,7 +608,7 @@ export const cargoControl = t.router({
 		.input(
 			z.object({
 				shipId: z.number(),
-				flags: nodeFlagsSchema.array().optional(),
+				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
 				systems: z.array(z.string()).optional(),
 			}),
 		)
@@ -738,7 +738,7 @@ export function getRoomBySystem(ship: Entity | null, system: string) {
 
 function getRoomFromFlagsAndSystems(
 	ship: Entity,
-	flags?: NodeFlag[],
+	flags?: NodeFlag[] | NodeFlag,
 	systems?: string[],
 	avoidContainer?: boolean,
 ):
@@ -766,7 +766,7 @@ function getRoomFromFlagsAndSystems(
 	const rooms = getCargoRooms(ship).filter((room) => {
 		if (avoidContainer && containerRooms.includes(room.id)) return false;
 		if (flags) {
-			for (const flag of flags) {
+			for (const flag of Array.isArray(flags) ? flags : [flags]) {
 				if (!room.flags?.includes(flag)) return false;
 			}
 		}

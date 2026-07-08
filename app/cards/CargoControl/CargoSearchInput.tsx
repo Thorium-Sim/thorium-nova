@@ -19,6 +19,7 @@ export function CargoSearchInput() {
 			deckIndex: number;
 			roomId?: number;
 		}>
+			className="cargo-search"
 			queryKey="cargo"
 			placeholder="Search for rooms, cargo, and systems"
 			getOptions={async ({ queryKey, signal }) => {
