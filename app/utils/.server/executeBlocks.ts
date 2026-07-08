@@ -449,6 +449,9 @@ function getBaseZodType(schema: any) {
 	if (schema._def.typeName === "ZodObject") {
 		return "object";
 	}
+	if (schema._def.typeName === "ZodLiteral") {
+		return typeof schema._def.value;
+	}
 	console.error("Unable to determine zod type for schema", schema);
 	return "unknown";
 }

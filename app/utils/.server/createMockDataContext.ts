@@ -95,6 +95,7 @@ class MockFlightDataModel {
 		});
 		this.run();
 	}
+	setupEcsCallbacks() {}
 	get playerShips() {
 		return [...(this.ecs.componentCache.get("isPlayerShip") || [])];
 	}

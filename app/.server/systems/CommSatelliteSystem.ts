@@ -136,26 +136,28 @@ export class CommSatelliteSystem extends System {
 					});
 
 					// While we're at it, make sure the sender is in the address book of the recipient for replies
-					const longRangeComm = getShipSystem(this.ecs, {
-						shipId: destination.id,
-						systemType: "longRangeComm",
-					});
+					try {
+						const longRangeComm = getShipSystem(this.ecs, {
+							shipId: destination.id,
+							systemType: "longRangeComm",
+						});
 
-					if (longRangeComm.components.isLongRangeComm) {
-						if (
-							!longRangeComm.components.isLongRangeComm.addressBook.find(
-								(c) => c.contactId === senderId,
-							) &&
-							longRangeComm.components.isShipSystem?.shipId !== senderId
-						) {
-							longRangeComm.components.isLongRangeComm.addressBook.push({
-								actions: [],
-								contactId: senderId,
-							});
+						if (longRangeComm.components.isLongRangeComm) {
+							if (
+								!longRangeComm.components.isLongRangeComm.addressBook.find(
+									(c) => c.contactId === senderId,
+								) &&
+								longRangeComm.components.isShipSystem?.shipId !== senderId
+							) {
+								longRangeComm.components.isLongRangeComm.addressBook.push({
+									actions: [],
+									contactId: senderId,
+								});
 
-							pubsub.publish.longRangeComm.addressBook({ shipId: destination.id });
+								pubsub.publish.longRangeComm.addressBook({ shipId: destination.id });
+							}
 						}
-					}
+					} catch {}
 				}
 			} else {
 				// Recalculate the graph and try again
