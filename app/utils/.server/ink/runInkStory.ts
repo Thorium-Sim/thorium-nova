@@ -2,7 +2,7 @@ import path from "node:path";
 
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { spawnTrigger } from "@thorium/.server/spawners/trigger";
-import { DataStore } from "@thorium/utils/.server/db-fs";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { loadInkStory } from "@thorium/utils/.server/ink/loadInkStory";
 import type { ECS, Entity } from "@thorium/utils/ecs";
 import { interpolateText } from "@thorium/utils/interpolationEngine";
@@ -156,7 +156,7 @@ export async function runInkStory(conversation: Entity) {
 							hasDialoguePlayer = true;
 						});
 						if (hasDialoguePlayer) {
-							const thoriumPath = DataStore.operations.getStore()!.thoriumPath;
+							const thoriumPath = thoriumContext.getStore()!.thoriumPath;
 							// We stop evaluating the story here until the line of
 							// audio dialogue is delivered
 							const duration = await measureAudioDurationMs(path.join(thoriumPath, audioFilepath));

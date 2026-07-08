@@ -1,9 +1,6 @@
 /* istanbul ignore file */
 
-import { AsyncLocalStorage } from "node:async_hooks";
-
-import type BasePlugin from "@thorium/.server/classes/Plugins";
-import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import throttle from "lodash.throttle";
 
 const isProxy = Symbol("isProxy");
@@ -14,37 +11,7 @@ export interface DataStoreOptions {
 	meta?: any;
 }
 
-export interface DataStoreOperations {
-	database: DatabaseContext;
-	thoriumPath: string;
-	getData(this: DataStore): Promise<unknown>;
-	write(
-		this: Pick<DataStore, "safeMode" | "meta" | "initialData" | "toJSON">,
-		force?: boolean,
-		name?: string,
-	): Promise<void>;
-	remove(this: DataStore, force?: boolean): Promise<void>;
-	readAsset(asset: string): Promise<string>;
-	uploadAsset(this: DataStore, asset: File | Blob, fileName?: string): Promise<string>;
-	removeAsset(assetPath: string): Promise<void>;
-	loadAllAspects(
-		this: BasePlugin,
-		aspectClasses: Record<
-			string,
-			new (
-				manifest: {
-					name: string;
-				} & Record<string, any>,
-				plugin: BasePlugin,
-			) => unknown
-		>,
-	): Promise<void>;
-	rename: (this: DataStore, newName: string, otherNames: string[]) => Promise<void>;
-	getFlights: () => Promise<string[]>;
-	getFlightSnapshots: (flightName: string) => Promise<string[]>;
-}
 export abstract class DataStore {
-	static operations = new AsyncLocalStorage<DataStoreOperations>();
 	#throttle: number;
 	#safeMode: boolean;
 	#writeThrottle: (force?: boolean) => Promise<void>;
@@ -116,19 +83,19 @@ export abstract class DataStore {
 		return this;
 	}
 	async getData<T>(): Promise<T> {
-		const loadedData = (await DataStore.operations.getStore()!.getData.apply(this)) as Promise<T>;
+		const loadedData = (await thoriumContext.getStore()!.getData.apply(this)) as Promise<T>;
 		this.dataLoaded = true;
 		return loadedData;
 	}
 	async write(force?: boolean, name?: string): Promise<void> {
 		// Don't write if we haven't already loaded the data.
 		if (!this.dataLoaded) return;
-		return DataStore.operations.getStore()!.write.call(this, force, name);
+		return thoriumContext.getStore()!.write.call(this, force, name);
 	}
 	async remove(force?: boolean): Promise<void> {
-		return DataStore.operations.getStore()!.remove.call(this, force);
+		return thoriumContext.getStore()!.remove.call(this, force);
 	}
 	async getAssetUrl() {
-		return DataStore.operations.getStore()!.thoriumPath;
+		return thoriumContext.getStore()!.thoriumPath;
 	}
 }

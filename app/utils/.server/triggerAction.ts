@@ -1,10 +1,9 @@
 import { DataContext } from "@thorium/.server/DataContext";
 import { router, type AllSends, type SendInputs } from "@thorium/.server/init/router";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { notifyActions, notifyEvents } from "@thorium/utils/.server/notifyActions";
 import { processTriggers } from "@thorium/utils/.server/processTriggers";
 import { callProcedure } from "@thorium/utils/live-query/.server/router";
-
-import { DataStore } from "./db-fs";
 
 export async function triggerAction<A extends AllSends>(
 	path: A,
@@ -14,7 +13,7 @@ export async function triggerAction<A extends AllSends>(
 	const context =
 		ctx instanceof DataContext
 			? ctx
-			: new DataContext("thorium", DataStore.operations.getStore()!.database, ctx);
+			: new DataContext("thorium", thoriumContext.getStore()!.database, ctx);
 
 	return await callProcedure({
 		procedures: router._def.procedures,

@@ -1,15 +1,15 @@
+import { thoriumContext } from "@thorium/utils/.server/context";
 import {
 	createMockDataContext,
 	createMockRouter,
 } from "@thorium/utils/.server/createMockDataContext";
-import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { describe, expect, it } from "vitest";
 
 import { spawnShip } from "./ship";
 describe("Ship Spawner", () => {
 	it("should spawn a ship from a template", async () => {
-		await DataStore.operations.run(testDataStoreProps, async () => {
+		await thoriumContext.run(testDataStoreProps, async () => {
 			const dataContext = createMockDataContext();
 			const router = createMockRouter(dataContext);
 
@@ -39,7 +39,7 @@ describe("Ship Spawner", () => {
 	});
 
 	it("should spawn batteries and connect them to ship systems", async () => {
-		await DataStore.operations.run(testDataStoreProps, async () => {
+		await thoriumContext.run(testDataStoreProps, async () => {
 			const dataContext = createMockDataContext();
 			const router = createMockRouter(dataContext);
 

@@ -1,11 +1,11 @@
 import { ProcessTriggersSystem } from "@thorium/.server/systems/ProcessTriggersSystem";
 import { ShortRangeCommPowerSystem } from "@thorium/.server/systems/ShortRangeCommPowerSystem";
 import { TimerSystem } from "@thorium/.server/systems/TimerSystem";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import {
 	createMockDataContext,
 	createMockRouter,
 } from "@thorium/utils/.server/createMockDataContext";
-import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { measureAudioDurationMs } from "@thorium/utils/.server/ink/measureAudioDuration";
@@ -20,7 +20,7 @@ vi.mock("@thorium/utils/.server/ink/measureAudioDuration", async () => {
 });
 
 aroundEach(async (runTest) => {
-	await DataStore.operations.run(
+	await thoriumContext.run(
 		{
 			...testDataStoreProps,
 			async readAsset(asset) {

@@ -21,7 +21,7 @@
  */
 
 import { DataContext } from "@thorium/.server/DataContext";
-import { DataStore } from "@thorium/utils/.server/db-fs";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { Entity } from "@thorium/utils/ecs";
 
 // Globals deliberately left reachable: pure, no I/O, no way to reach the
@@ -164,7 +164,7 @@ export async function runInSandbox(
 	const context =
 		ctx instanceof DataContext
 			? ctx
-			: new DataContext("thorium", DataStore.operations.getStore()!.database, ctx);
+			: new DataContext("thorium", thoriumContext.getStore()!.database, ctx);
 
 	return await fn.call(
 		context,

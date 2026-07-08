@@ -1,15 +1,15 @@
 import ImpulseEnginesPlugin from "@thorium/.server/classes/Plugins/ShipSystems/ImpulseEngines";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import {
 	createMockDataContext,
 	createMockRouter,
 } from "@thorium/utils/.server/createMockDataContext";
-import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { describe, expect, it } from "vitest";
 
 describe("impulse engines plugin input", () => {
 	it("should create a new impulse engine system", async () => {
-		await DataStore.operations.run(testDataStoreProps, async () => {
+		await thoriumContext.run(testDataStoreProps, async () => {
 			const dataContext = createMockDataContext();
 			const router = createMockRouter(dataContext);
 			const created = await router.plugin.systems.create({
@@ -27,7 +27,7 @@ describe("impulse engines plugin input", () => {
 		});
 	});
 	it("should update an impulse engine system", async () => {
-		await DataStore.operations.run(testDataStoreProps, async () => {
+		await thoriumContext.run(testDataStoreProps, async () => {
 			const dataContext = createMockDataContext();
 			const router = createMockRouter(dataContext);
 			await router.plugin.systems.create({

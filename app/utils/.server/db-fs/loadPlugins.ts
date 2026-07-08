@@ -2,10 +2,10 @@ import path from "path";
 
 import BasePlugin from "@thorium/.server/classes/Plugins";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
-import { DataStore } from "@thorium/utils/.server/db-fs";
+import { thoriumContext } from "@thorium/utils/.server/context";
 
 export async function loadPlugins(this: ServerDataModel) {
-	const thoriumPath = DataStore.operations.getStore()!.thoriumPath;
+	const thoriumPath = thoriumContext.getStore()!.thoriumPath;
 	const plugins = new Bun.Glob(path.join(thoriumPath, "/plugins/*/manifest.yml")).scan({
 		onlyFiles: true,
 	});

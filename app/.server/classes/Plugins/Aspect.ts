@@ -1,3 +1,4 @@
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 
@@ -59,6 +60,6 @@ export abstract class Aspect extends DataStore {
 	}
 	async rename(name: string) {
 		const otherNames = this.plugin.aspects[this.kind].map((item) => item.name);
-		await DataStore.operations.getStore()!.rename.call(this, name, otherNames);
+		await thoriumContext.getStore()!.rename.call(this, name, otherNames);
 	}
 }

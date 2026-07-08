@@ -1,4 +1,4 @@
-import { DataStore, type DataStoreOperations } from "@thorium/utils/.server/db-fs";
+import { thoriumContext, type ThoriumContext } from "@thorium/utils/.server/context";
 
 const exitFunctions = new Set<() => Promise<void> | void>();
 
@@ -7,13 +7,13 @@ export function registerExitFunction(fn: () => Promise<void> | void) {
 	return () => exitFunctions.delete(fn);
 }
 
-export function exitHandler(operations: DataStoreOperations) {
+export function exitHandler(operations: ThoriumContext) {
 	if (process.env.NODE_ENV === "production") {
 		process.stdin.resume(); //so the program will not close instantly
 
 		async function exitHandler(options: { cleanup?: boolean; exit?: boolean }) {
 			if (options.cleanup) {
-				await DataStore.operations.run(operations, async () => {
+				await thoriumContext.run(operations, async () => {
 					for (const fn of exitFunctions) {
 						try {
 							await fn();

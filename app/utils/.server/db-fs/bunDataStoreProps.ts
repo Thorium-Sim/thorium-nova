@@ -4,7 +4,7 @@ import path from "node:path";
 import BasePlugin, { type AspectsMap } from "@thorium/.server/classes/Plugins";
 import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 import { getThoriumPath } from "@thorium/utils/.server/appPaths";
-import type { DataStoreOperations } from "@thorium/utils/.server/db-fs";
+import type { ThoriumContext } from "@thorium/utils/.server/context";
 import { loadYml } from "@thorium/utils/.server/db-fs/loadYml";
 import { moveFile } from "@thorium/utils/.server/moveFile";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
@@ -15,7 +15,7 @@ export function setBasePath(path: string) {
 	basePath = path;
 }
 
-export function bunDataStoreProps(env: string): DataStoreOperations {
+export function bunDataStoreProps(env: string): ThoriumContext {
 	const thoriumPath = getThoriumPath(env);
 	return {
 		database: {} as DatabaseContext,

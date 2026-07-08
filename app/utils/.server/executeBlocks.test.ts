@@ -1,7 +1,7 @@
 import { ProcessTriggersSystem } from "@thorium/.server/systems/ProcessTriggersSystem";
 import { TimerSystem } from "@thorium/.server/systems/TimerSystem";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
-import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { processTriggers } from "@thorium/utils/.server/processTriggers";
@@ -11,7 +11,7 @@ import { expect, it, aroundEach } from "vitest";
 import { scheduleAction } from "./scheduleAction";
 
 aroundEach(async (runTest) => {
-	await DataStore.operations.run(testDataStoreProps, async () => {
+	await thoriumContext.run(testDataStoreProps, async () => {
 		await runTest();
 	});
 });
@@ -21,11 +21,11 @@ aroundEach(async (runTest) => {
 // Sorry for the inconvenience
 it("should perform simple actions", async () => {
 	const dataContext = createMockDataContext();
-	DataStore.operations.getStore()!.database = {
+	thoriumContext.getStore()!.database = {
 		server: dataContext.server,
 		flight: dataContext.flight,
 	};
-	const database = DataStore.operations.getStore()!.database;
+	const database = thoriumContext.getStore()!.database;
 	const ecs = database.flight!.ecs;
 	ecs.executeBlocks = (blocks, blockMetadata) => executeBlocks(ecs, blocks, blockMetadata);
 	ecs.processTriggers = (events) => processTriggers(ecs, events);

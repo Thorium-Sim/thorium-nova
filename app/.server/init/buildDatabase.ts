@@ -1,6 +1,6 @@
 import { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
 import { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
-import { DataStore } from "@thorium/utils/.server/db-fs";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import randomWords from "@thorium/utils/random-words";
 
 export const databaseName =
@@ -47,6 +47,6 @@ export async function buildDatabase(loadPlugins: (this: ServerDataModel) => Prom
 
 	await Promise.all(promises);
 
-	DataStore.operations.getStore()!.database = { server: serverModel, flight };
-	return DataStore.operations.getStore()!.database;
+	thoriumContext.getStore()!.database = { server: serverModel, flight };
+	return thoriumContext.getStore()!.database;
 }

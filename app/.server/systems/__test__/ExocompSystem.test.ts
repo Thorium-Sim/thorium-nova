@@ -2,8 +2,8 @@ import { DeckEdge, DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import { ExocompPowerSystem, ExocompSystem } from "@thorium/.server/systems/ExocompSystem";
 import { FilterInventorySystem } from "@thorium/.server/systems/FilterInventorySystem";
 import { PassengerMovementSystem } from "@thorium/.server/systems/PassengerMovementSystem";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
-import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { processTriggers } from "@thorium/utils/.server/processTriggers";
@@ -12,7 +12,7 @@ import ECS from "@thorium/utils/ecs/ecs";
 import { aroundEach, beforeEach, describe, expect, it } from "vitest";
 
 aroundEach(async (runTest) => {
-	await DataStore.operations.run(testDataStoreProps, async () => {
+	await thoriumContext.run(testDataStoreProps, async () => {
 		await runTest();
 	});
 });

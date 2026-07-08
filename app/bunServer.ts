@@ -8,7 +8,7 @@ import { initDefaultPlugin } from "@thorium/.server/init/initDefaultPlugin";
 import { createContext, initWebsocket } from "@thorium/.server/init/liveQuery";
 import { advertiseMdns } from "@thorium/.server/init/mdns";
 import { router } from "@thorium/.server/init/router";
-import { DataStore } from "@thorium/utils/.server/db-fs";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { bunDataStoreProps, setBasePath } from "@thorium/utils/.server/db-fs/bunDataStoreProps";
 import { loadPlugins } from "@thorium/utils/.server/db-fs/loadPlugins";
 import { notifyActions, notifyEvents } from "@thorium/utils/.server/notifyActions";
@@ -29,8 +29,8 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 	try {
 		console.info(`Starting Thorium...`);
 		const dataStoreProps = bunDataStoreProps(isProd || isKiosk ? "production" : "development");
-		return await DataStore.operations.run(dataStoreProps, async () => {
-			const thoriumPath = DataStore.operations.getStore()!.thoriumPath;
+		return await thoriumContext.run(dataStoreProps, async () => {
+			const thoriumPath = thoriumContext.getStore()!.thoriumPath;
 			setBasePath(thoriumPath);
 			let inited = false;
 			try {
@@ -162,7 +162,7 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 						: port + 1;
 			exitHandler(dataStoreProps);
 			registerExitFunction(async () => {
-				const database = DataStore.operations.getStore()!.database;
+				const database = thoriumContext.getStore()!.database;
 				await snapshot(database);
 			});
 			if (isProd) {

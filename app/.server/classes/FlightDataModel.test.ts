@@ -1,15 +1,15 @@
 import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
+import { thoriumContext, type ThoriumContext } from "@thorium/utils/.server/context";
 import {
 	createMockDataContext,
 	createMockRouter,
 } from "@thorium/utils/.server/createMockDataContext";
-import { DataStore, type DataStoreOperations } from "@thorium/utils/.server/db-fs";
 import { Entity } from "@thorium/utils/ecs";
 import { dump } from "js-yaml";
 import { aroundEach, expect, test } from "vitest";
 
 const fileMap = new Map<string, string>();
-const testDataStoreProps: DataStoreOperations = {
+const testDataStoreProps: ThoriumContext = {
 	database: {} as DatabaseContext,
 	thoriumPath: "",
 	async getData() {
@@ -40,14 +40,14 @@ const testDataStoreProps: DataStoreOperations = {
 };
 
 aroundEach(async (runTest) => {
-	await DataStore.operations.run(testDataStoreProps, async () => {
+	await thoriumContext.run(testDataStoreProps, async () => {
 		await runTest();
 	});
 });
 
 test("snapshot", async () => {
 	const dataContext = createMockDataContext();
-	const database = DataStore.operations.getStore()!.database;
+	const database = thoriumContext.getStore()!.database;
 	const router = createMockRouter(dataContext);
 
 	expect(database.flight?.ecs.entities.size).toEqual(0);

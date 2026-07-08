@@ -1,6 +1,6 @@
 import { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
-import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
 import { ECS, Entity } from "@thorium/utils/ecs";
@@ -11,7 +11,7 @@ import { FilterShipsWithReactors } from "../FilterShipsWithReactors";
 import { ReactorFuelSystem } from "../ReactorFuelSystem";
 
 aroundEach(async (runTest) => {
-	await DataStore.operations.run(testDataStoreProps, async () => {
+	await thoriumContext.run(testDataStoreProps, async () => {
 		await runTest();
 	});
 });

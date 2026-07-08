@@ -1,4 +1,4 @@
-import { DataStore } from "@thorium/utils/.server/db-fs";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { describe, expect, it } from "vitest";
 
@@ -8,7 +8,7 @@ import StationComplementPlugin from "./StationComplement";
 
 describe("StationComplementPlugin", () => {
 	it("should instantiate correctly", async () => {
-		await DataStore.operations.run(testDataStoreProps, async () => {
+		await thoriumContext.run(testDataStoreProps, async () => {
 			const plugin = new Plugin(
 				{},
 				{

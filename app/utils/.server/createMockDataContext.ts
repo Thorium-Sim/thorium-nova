@@ -1,5 +1,3 @@
-import { AsyncLocalStorage } from "node:async_hooks";
-
 import type { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
 import type BasePlugin from "@thorium/.server/classes/Plugins";
 import ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
@@ -8,7 +6,7 @@ import type { DataContext } from "@thorium/.server/DataContext";
 import { Client } from "@thorium/.server/init/liveQuery";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { router } from "@thorium/.server/init/router";
-import { DataStore, type DataStoreOperations } from "@thorium/utils/.server/db-fs";
+import { thoriumContext } from "@thorium/utils/.server/context";
 
 import { ECS, Entity } from "../ecs";
 import type { ProcedureCallOptions } from "../live-query/.server/procedure";
@@ -52,8 +50,6 @@ class MockServerDataModel {
 	}
 }
 class MockFlightDataModel {
-	static operations = new AsyncLocalStorage<DataStoreOperations>();
-
 	static INTERVAL = 1000 / 60;
 	id = "Test Flight";
 	name = "Test Flight";
@@ -149,10 +145,10 @@ class MockFlightDataModel {
 	}
 	initialData = {};
 	write(force?: boolean, name?: string) {
-		return DataStore.operations.getStore()!.write.call(this, force, name);
+		return thoriumContext.getStore()!.write.call(this, force, name);
 	}
 	getSnapshots() {
-		return DataStore.operations.getStore()!.getFlightSnapshots.call(this, this.name);
+		return thoriumContext.getStore()!.getFlightSnapshots.call(this, this.name);
 	}
 	getAssetUrl = async () => "";
 }
@@ -213,14 +209,14 @@ export class MockDataContext {
 		}
 		return flightClientEntity!;
 	}
-	uploadFile = DataStore.operations.getStore()!.uploadAsset;
-	readFile = DataStore.operations.getStore()!.readAsset;
-	removeFile = DataStore.operations.getStore()!.removeAsset;
+	uploadFile = thoriumContext.getStore()!.uploadAsset;
+	readFile = thoriumContext.getStore()!.readAsset;
+	removeFile = thoriumContext.getStore()!.removeAsset;
 }
 
 export function createMockDataContext() {
 	const dataContext = new MockDataContext();
-	DataStore.operations.getStore()!.database = dataContext.database;
+	thoriumContext.getStore()!.database = dataContext.database;
 	return dataContext;
 }
 

@@ -1,5 +1,5 @@
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
-import { DataStore } from "@thorium/utils/.server/db-fs";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { applyDamage } from "@thorium/utils/.server/ship/collisionDamage";
 import { ECS, Entity } from "@thorium/utils/ecs";
@@ -9,7 +9,7 @@ import { aroundEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DamageCheckSystem } from "../DamageCheckSystem";
 
 aroundEach(async (runTest) => {
-	await DataStore.operations.run(testDataStoreProps, async () => {
+	await thoriumContext.run(testDataStoreProps, async () => {
 		await runTest();
 	});
 });

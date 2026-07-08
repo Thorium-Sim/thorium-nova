@@ -3,6 +3,7 @@ import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
 import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
 import TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 
 import { generateIncrementedName } from "../../../utils/generateIncrementedName";
@@ -77,7 +78,7 @@ export default class BasePlugin extends DataStore {
 			},
 			...options,
 		});
-		this.#loadAllAspects = DataStore.operations.getStore()!.loadAllAspects;
+		this.#loadAllAspects = thoriumContext.getStore()!.loadAllAspects;
 		this.#getDataPromise = this.getData<BasePlugin>().then((data) => {
 			this.id = data.id || params.id || name;
 			this.name = name;
@@ -119,7 +120,7 @@ export default class BasePlugin extends DataStore {
 	}
 	async rename(name: string) {
 		const otherNames = this.server.plugins.map((p) => p.name);
-		await DataStore.operations.getStore()!.rename.call(this, name, otherNames);
+		await thoriumContext.getStore()!.rename.call(this, name, otherNames);
 	}
 	async write(force = false) {
 		await super.write(force);

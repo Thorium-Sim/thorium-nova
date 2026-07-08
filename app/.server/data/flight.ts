@@ -6,7 +6,7 @@ import { traverseFiles } from "@thorium/.server/data/traverseFiles";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { flightStartInput, startFlight } from "@thorium/.server/spawners/flight";
-import { DataStore } from "@thorium/utils/.server/db-fs";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { loadYml } from "@thorium/utils/.server/db-fs/loadYml";
 import inputAuth from "@thorium/utils/.server/inputAuth";
 import { ECS, Entity } from "@thorium/utils/ecs";
@@ -76,12 +76,12 @@ export const flight = t.router({
 	all: t.procedure
 		.autoPublish(["isFlight"], () => null)
 		.request(() => {
-			return DataStore.operations.getStore()!.getFlights();
+			return thoriumContext.getStore()!.getFlights();
 		}),
 	start: t.procedure.input(flightStartInput).send(async ({ ctx, input }) => {
 		inputAuth(ctx);
 		if (ctx.flight) return ctx.flight;
-		const flightNames = await DataStore.operations.getStore()!.getFlights();
+		const flightNames = await thoriumContext.getStore()!.getFlights();
 		const flightName = generateIncrementedName(
 			input.flightName || randomWords(3).join("-"),
 			flightNames,

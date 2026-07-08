@@ -1,5 +1,5 @@
 import type { DatabaseContext } from "@thorium/typeguards/isDatabaseContext";
-import { DataStore } from "@thorium/utils/.server/db-fs";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { Entity } from "@thorium/utils/ecs";
 
 import type { FlightDataModel } from "./classes/FlightDataModel";
@@ -29,9 +29,9 @@ export class DataContext {
 	get ecs() {
 		return this.database.flight!.ecs;
 	}
-	readFile = DataStore.operations.getStore()!.readAsset;
-	uploadFile = DataStore.operations.getStore()!.uploadAsset;
-	removeFile = DataStore.operations.getStore()!.removeAsset;
+	readFile = thoriumContext.getStore()!.readAsset;
+	uploadFile = thoriumContext.getStore()!.uploadAsset;
+	removeFile = thoriumContext.getStore()!.removeAsset;
 	getPlayerShip(clientId: string) {
 		return this.flight?.playerShips.find(
 			(s) => s.id === this.getFlightClient(clientId)?.components.flightClient?.shipId,

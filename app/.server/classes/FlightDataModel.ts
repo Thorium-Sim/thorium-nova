@@ -2,6 +2,7 @@ import path from "node:path";
 
 import RAPIER from "@thorium-sim/rapier3d-node";
 import { initECS } from "@thorium/.server/classes/initECS";
+import { thoriumContext } from "@thorium/utils/.server/context";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
 import { loadGltf } from "@thorium/utils/.server/loadGltf";
@@ -147,7 +148,7 @@ export class FlightDataModel extends DataStore {
 		return [...(this.ecs.componentCache.get("isShip") || [])];
 	}
 	async getSnapshots() {
-		return DataStore.operations.getStore()!.getFlightSnapshots(this.name);
+		return thoriumContext.getStore()!.getFlightSnapshots(this.name);
 	}
 	get flightEntity() {
 		return this.ecs.componentCache.get("isFlight")?.values().next().value;

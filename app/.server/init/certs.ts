@@ -3,7 +3,7 @@ import path from "path";
 
 // src/pki.ts
 import * as x509 from "@peculiar/x509";
-import { DataStore } from "@thorium/utils/.server/db-fs";
+import { thoriumContext } from "@thorium/utils/.server/context";
 
 const HOSTNAME = "thorium.local";
 
@@ -86,7 +86,7 @@ async function exportPrivateKeyPem(key: CryptoKey): Promise<string> {
 }
 
 export async function loadOrCreateCerts() {
-	const thoriumPath = DataStore.operations.getStore()!.thoriumPath;
+	const thoriumPath = thoriumContext.getStore()!.thoriumPath;
 	const DATA_DIR = path.join(thoriumPath, "certs");
 	fs.mkdirSync(DATA_DIR, { recursive: true });
 
