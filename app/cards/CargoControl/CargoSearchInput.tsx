@@ -1,5 +1,6 @@
 import { q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
+import { Icon } from "@thorium/ui/Icon";
 import SearchableInput, { DefaultResultLabel } from "@thorium/ui/SearchableInput";
 
 import { useShipMapStore } from "./useShipMapStore";
@@ -19,7 +20,7 @@ export function CargoSearchInput() {
 			roomId?: number;
 		}>
 			queryKey="cargo"
-			placeholder="Search for rooms, cargo, and containers"
+			placeholder="Search for rooms, cargo, and systems"
 			getOptions={async ({ queryKey, signal }) => {
 				const result = await q.cargoControl.search.netRequest(
 					{ query: queryKey[1], shipId },
@@ -29,15 +30,29 @@ export function CargoSearchInput() {
 			}}
 			ResultLabel={({ active, result, selected }) => (
 				<DefaultResultLabel active={active} selected={selected}>
-					<p>
-						{result.name}
-						{result.count ? ` (${result.count})` : ""}
-					</p>
-					{result.type !== "deck" && (
-						<p>
-							<small>{[result.room, result.deck].filter(Boolean).join(", ")}</small>
-						</p>
-					)}
+					<div className="flex gap-2">
+						<Icon
+							className="size-6"
+							name={
+								result.type === "deck"
+									? "cuboid"
+									: result.type === "room"
+										? "warehouse"
+										: "package-open"
+							}
+						/>
+						<div>
+							<p>
+								{result.name}
+								{result.count ? ` (${result.count})` : ""}
+							</p>
+							{result.type !== "deck" && (
+								<p>
+									<small>{[result.room, result.deck].filter(Boolean).join(", ")}</small>
+								</p>
+							)}
+						</div>
+					</div>
 				</DefaultResultLabel>
 			)}
 			setSelected={(value) => {

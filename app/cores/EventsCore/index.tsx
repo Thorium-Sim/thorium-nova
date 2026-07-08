@@ -50,7 +50,12 @@ export function EventsCore() {
 							{Object.entries(e.values).map(([key, value]) => (
 								<p key={key} className="text-xs">
 									{/* @ts-expect-error */}
-									<span className="font-medium">{key}:</span> {value}
+									<span className="font-medium">{key}:</span>{" "}
+									{Array.isArray(value)
+										? value.join(", ")
+										: typeof value === "object"
+											? JSON.stringify(value)
+											: value}
 								</p>
 							))}
 							{choosing ? (

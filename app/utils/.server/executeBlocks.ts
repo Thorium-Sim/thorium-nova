@@ -494,8 +494,9 @@ function evaluateCondition(
 		case "<=": {
 			return val1 <= val2;
 		}
+		case "includes":
 		case "contains": {
-			return "contains" in val1 && val1.contains(val2);
+			return "includes" in val1 && val1.includes(val2);
 		}
 		case "is not empty": {
 			if (typeof val1 === "undefined" || val1 === null) return false;

@@ -51,7 +51,7 @@ export function IfCondition({ conditions, update }: BlockProps<"IfCondition">) {
 										}),
 									)
 								}
-								options={["=", "!=", ">", ">=", "<", "<=", "contains", "is empty", "is not empty"]}
+								options={["=", "!=", ">", ">=", "<", "<=", "includes", "is empty", "is not empty"]}
 							/>{" "}
 							{["is empty", "is not empty"].includes(comparison) ? null : (
 								<ValueInput

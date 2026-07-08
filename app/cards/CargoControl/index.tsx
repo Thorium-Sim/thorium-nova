@@ -49,7 +49,7 @@ export function CargoControl(props: CardProps) {
 		>
 			<DeckPicker decks={decks} />
 			<div className="row-span-2">
-				<div className="z-10 mx-auto w-1/3">
+				<div className="z-10 mx-auto max-w-1/2 min-w-fit">
 					<CargoSearchInput />
 				</div>
 				<ShipView
@@ -65,7 +65,7 @@ export function CargoControl(props: CardProps) {
 					)}
 				/>
 			</div>
-			<div className="flex h-full flex-col">
+			<div className="selected-room flex h-full flex-col">
 				<h3 className="text-xl">
 					{selectedRoom ? (
 						<span className="flex justify-between">
@@ -149,7 +149,7 @@ export function CargoControl(props: CardProps) {
 			</div>
 
 			<CargoContainerList />
-			<div className="flex h-full flex-col">
+			<div className="selected-container flex h-full flex-col">
 				<ContainerLabel />
 				<CargoList
 					className="panel panel-primary"

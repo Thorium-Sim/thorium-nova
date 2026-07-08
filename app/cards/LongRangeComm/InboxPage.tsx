@@ -1,7 +1,6 @@
 import type { AppRouter } from "@thorium/.server/init/router";
 import { clientId, q } from "@thorium/context/AppContext";
-import useEventListener from "@thorium/hooks/useEventListener";
-import { LongRangeCommSelectEvent } from "@thorium/routes/station/Effects";
+import useEventListener, { LongRangeCommSelectEvent } from "@thorium/hooks/useEventListener";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
 import { cn } from "@thorium/utils/cn";

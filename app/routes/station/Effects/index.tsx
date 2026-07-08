@@ -1,8 +1,9 @@
 import { clientId, q } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
-import { useStation } from "@thorium/routes/station/useStation";
+import { doEvent } from "@thorium/hooks/useEventListener";
 
 import "./effects.css";
+import { useStation } from "@thorium/routes/station/useStation";
 import type { EffectPayload } from "@thorium/utils/flags/effects";
 import { useAmbiance } from "@thorium/utils/sounds/Ambiance/useAmbiance";
 import { useDialogue } from "@thorium/utils/sounds/useDialogue";
@@ -69,31 +70,6 @@ export function useEscapeHotkey() {
 
 		return () => document.removeEventListener("keydown", handleKeydown);
 	}, [navigate]);
-}
-
-export class RadarZoomEvent extends Event {
-	static name = "radarZoomEvent";
-	zoom: number;
-	constructor(payload: string) {
-		super(RadarZoomEvent.name);
-		this.zoom = Number(payload);
-	}
-}
-export class RadarTiltEvent extends Event {
-	static name = "radarTiltEvent";
-	tilt: number;
-	constructor(payload: string) {
-		super(RadarTiltEvent.name);
-		this.tilt = Number(payload);
-	}
-}
-export class LongRangeCommSelectEvent extends Event {
-	static name = "longRangeCommSelectEvent";
-	messageId: number;
-	constructor(payload: string) {
-		super(LongRangeCommSelectEvent.name);
-		this.messageId = Number(payload);
-	}
 }
 
 const Effects = () => {
@@ -163,22 +139,6 @@ const Effects = () => {
 	);
 
 	q.effects.sub.useNetSubscribe({ clientId }, doEffect);
-
-	const doEvent = useCallback((payload: { name: string; payload: string }) => {
-		if (payload && "name" in payload) {
-			switch (payload.name) {
-				case RadarZoomEvent.name:
-					window.dispatchEvent(new RadarZoomEvent(payload.payload));
-					break;
-				case RadarTiltEvent.name:
-					window.dispatchEvent(new RadarTiltEvent(payload.payload));
-					break;
-				case LongRangeCommSelectEvent.name:
-					window.dispatchEvent(new LongRangeCommSelectEvent(payload.payload));
-					break;
-			}
-		}
-	}, []);
 
 	q.effects.events.useNetSubscribe({ clientId }, doEvent);
 	return (

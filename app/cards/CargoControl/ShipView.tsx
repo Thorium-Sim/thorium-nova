@@ -1,4 +1,8 @@
 import { q } from "@thorium/context/AppContext";
+import useEventListener, {
+	ShipMapDeckSelectEvent,
+	ShipMapRoomSelectEvent,
+} from "@thorium/hooks/useEventListener";
 import { useStation } from "@thorium/routes/station/useStation";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import { useCallback, useRef, type ReactNode, type RefObject } from "react";
@@ -24,6 +28,13 @@ export function ShipView({
 	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
 
 	const { decks } = cargoRooms;
+
+	useEventListener(ShipMapDeckSelectEvent.name, (event: ShipMapDeckSelectEvent) => {
+		useShipMapStore.setState({ deckIndex: event.deckIndex });
+	});
+	useEventListener(ShipMapRoomSelectEvent.name, (event: ShipMapRoomSelectEvent) => {
+		useShipMapStore.setState({ selectedRoomId: event.roomId });
+	});
 
 	return (
 		<div id="deck-container" className="relative h-full w-full justify-self-center select-none">

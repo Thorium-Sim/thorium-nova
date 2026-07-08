@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import { Icon } from "@thorium/ui/Icon";
 import { Tooltip } from "@thorium/ui/Tooltip";
@@ -12,7 +12,7 @@ export function CargoContainerList() {
 	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
 
 	return (
-		<div className="row-span-2 flex h-full cursor-pointer flex-col justify-center gap-4">
+		<div className="cargo-container-list row-span-2 flex h-full cursor-pointer flex-col justify-center gap-4">
 			{cargoContainers.map((container) => (
 				<CargoContainer key={container.id} container={container} />
 			))}
@@ -55,6 +55,11 @@ function CargoContainer({
 					deckIndex: Math.round(containerPosition.z || 0),
 				});
 				useShipMapStore.setState({ selectedContainerId: container.id });
+				q.thorium.genericEvent.netSend({
+					clientId,
+					eventName: "cargo-container-selected",
+					properties: `${container.id}`,
+				});
 			}}
 		>
 			<Icon name="package-open" />
