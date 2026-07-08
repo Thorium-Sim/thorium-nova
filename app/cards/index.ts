@@ -19,3 +19,4 @@ export * from "./Documents";
 export * from "./LongRangeComm";
 export * from "./ShortRangeComm";
 export * from "./Exocomps";
+export * from "./EngineeringPanels";

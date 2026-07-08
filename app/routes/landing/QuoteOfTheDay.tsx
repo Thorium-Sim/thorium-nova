@@ -415,6 +415,10 @@ const quotes = [
 	// John Archibald Wheeler
 	"We live on an island surrounded by a sea of ignorance. As our island of knowledge grows, so does the shore of our ignorance.",
 	"We will first understand how simple the universe is when we realize how strange it is.",
+	// Terry Pratchett
+	"The trouble with having an open mind, of course, is that people will insist on coming along and trying to put things in it.",
+	"In the beginning there was nothing, which exploded.",
+	"Sometimes the moon is light and sometimes it's in shadow, but you should always remember it's the same moon.",
 ];
 
 const QuoteOfTheDay = () => {

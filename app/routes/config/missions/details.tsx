@@ -7,13 +7,11 @@ import Input from "@thorium/ui/Input";
 import TagInput from "@thorium/ui/TagInput";
 import UploadWell from "@thorium/ui/UploadWell";
 import { useState } from "react";
-import { href, useNavigate, useParams } from "react-router";
+import { href, useNavigate } from "react-router";
 
-export default function MissionDetails() {
-	const { pluginId, timelineId } = useParams() as {
-		pluginId: string;
-		timelineId: string;
-	};
+import type { Route } from "./+types/details";
+
+export default function MissionDetails({ params: { pluginId, timelineId } }: Route.ComponentProps) {
 	const [mission] = q.plugin.timeline.get.useNetRequest({
 		pluginId,
 		timelineId,
@@ -49,7 +47,7 @@ export default function MissionDetails() {
 									name: e.target.value,
 								});
 								navigate(
-									href("/config/:pluginId/missions/:timelineId/details", {
+									href("/config/:pluginId/missions/:timelineId", {
 										pluginId,
 										timelineId: result.timelineId,
 									}),

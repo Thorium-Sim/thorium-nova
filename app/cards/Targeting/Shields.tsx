@@ -67,7 +67,7 @@ export function Shields() {
 	if (shields.length === 0) return null;
 	return (
 		<div className="shields-container">
-			<div className="mb-4 flex w-full gap-8">
+			<div className="my-4 flex w-full gap-8">
 				<ShieldView />
 			</div>
 			{shields[0].state === "down" ? (

@@ -1,0 +1,53 @@
+#cables {
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	width: 100vw;
+	height: 100vh;
+	z-index: 10;
+}
+
+.cable {
+	fill: none;
+	stroke-width: 3;
+	stroke-linecap: round;
+}
+.handle {
+	cursor: grab;
+	fill: white;
+	stroke-width: 2;
+	filter: none;
+	pointer-events: all;
+}
+.handle:active {
+	cursor: grabbing;
+}
+.handle-ring {
+	fill: none;
+	stroke-width: 1.5;
+	opacity: 0.35;
+}
+
+.cable-port {
+	width: 1.5rem;
+	height: 1.5rem;
+	border-radius: 50%;
+	background: conic-gradient(#eee, #999, #ddd, #888, #ddd, #888, #aaa, #eee);
+	box-shadow: 0.5rem 0.5rem 0.5rem rgb(0 0 0 / 0.5);
+	position: relative;
+}
+.cable-port:before {
+	content: "";
+	position: absolute;
+	top: 0.125rem;
+	left: 0.125rem;
+	width: 1.25rem;
+	height: 1.25rem;
+	border-radius: 50%;
+	background: radial-gradient(black, #222 40%, #f2f2ea 42%, #f8f8f1);
+}
+.port-holder {
+	display: flex;
+	justify-content: space-between;
+	gap: 0.5rem;
+}

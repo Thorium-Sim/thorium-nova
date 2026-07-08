@@ -1,0 +1,124 @@
+@keyframes spin {
+	from {
+		transform: rotate(60deg);
+	}
+	to {
+		transform: rotate(300deg);
+	}
+}
+
+.rotor-wrapper {
+	timeline-scope: --rotor-scroll;
+	font-size: 1em;
+	width: 6em;
+	height: 6em;
+	margin-top: 2em;
+	position: relative;
+}
+.rotor-reflection {
+	position: absolute;
+	top: 0;
+	left: 0;
+	border-radius: 50%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(-45deg, #444, #999);
+}
+.rotor-reflection:before {
+	background:
+		repeating-radial-gradient(
+			circle at center,
+			rgba(255, 255, 255, 0.08) 0px,
+			rgba(0, 0, 0, 0.08) 0.5px,
+			rgba(255, 255, 255, 0.08) 1px
+		),
+		conic-gradient(#eee, #888, #ccc, #777, #ccc, #777, #999, #eee);
+	content: "";
+	position: absolute;
+	width: 95%;
+	height: 95%;
+	left: 2.5%;
+	top: 2.5%;
+
+	pointer-events: none;
+	border-radius: 50%;
+	box-shadow: 0.5rem 0.5rem 0.5rem rgb(0 0 0 / 0.3);
+}
+.rotor {
+	border-radius: 50%;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.2 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.1'/></svg>");
+	transition: background-position var(--dur) linear;
+	animation: spin linear both;
+	animation-timeline: --rotor-scroll;
+	animation-range: 0% 100%;
+}
+.rotor:after {
+	content: "";
+	position: absolute;
+	width: 0.5rem;
+	height: 0.5rem;
+	background: linear-gradient(to bottom, #222, #999);
+	box-shadow: inset 1px 1px 2px hsl(0 0 100% / 0.5);
+	border-radius: 100%;
+	left: 50%;
+	top: 0.25rem;
+	transform: translate(-50%, 0);
+	cursor: pointer;
+}
+.segments-scroller {
+	position: absolute;
+	inset: 0;
+	overflow: scroll;
+	opacity: 0;
+	scroll-snap-type: both mandatory;
+	scroll-timeline-name: --rotor-scroll;
+	scroll-timeline-axis: block;
+	user-select: none;
+}
+.segment {
+	width: 100%;
+	height: 100%;
+	scroll-snap-align: start;
+}
+.rotor-labels {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	transform: translate(50%, 50%);
+	pointer-events: none;
+	--radius: 60%;
+}
+.rotor-label {
+	position: absolute;
+	transform: translate(-50%, -50%);
+	color: white;
+}
+.rotor-label:nth-child(1) {
+	top: calc(cos(60deg) * -1 * var(--radius));
+	left: calc(sin(60deg) * var(--radius));
+}
+.rotor-label:nth-child(2) {
+	top: calc(cos(110deg) * -1 * var(--radius));
+	left: calc(sin(110deg) * var(--radius));
+}
+.rotor-label:nth-child(3) {
+	top: calc(cos(160deg) * -1 * var(--radius));
+	left: calc(sin(160deg) * var(--radius));
+}
+.rotor-label:nth-child(4) {
+	top: calc(cos(210deg) * -1 * var(--radius));
+	left: calc(sin(210deg) * var(--radius));
+}
+.rotor-label:nth-child(5) {
+	top: calc(cos(260deg) * -1 * var(--radius));
+	left: calc(sin(260deg) * var(--radius));
+}
+.rotor-label:nth-child(6) {
+	top: calc(cos(310deg) * -1 * var(--radius));
+	left: calc(sin(310deg) * var(--radius));
+}

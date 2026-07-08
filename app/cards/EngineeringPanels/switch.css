@@ -1,0 +1,162 @@
+.panel-switch {
+	--color: #00ff00;
+	background-color: black;
+	aspect-ratio: 3/4;
+	box-shadow:
+		0 0 10px 2px rgba(0, 0, 0, 0.2),
+		inset 0 2px 2px -2px white,
+		inset 0 0 2px 15px #47434c,
+		inset 0 0 2px 22px black;
+	border-radius: 5px;
+	padding: 20px;
+	perspective: 1000px;
+	height: 100%;
+	pointer-events: none;
+
+	input {
+		display: none;
+	}
+	input:checked + .panel-button {
+		transform: translateZ(20px) rotateX(10deg);
+		box-shadow: 0 -5px 20px var(--color);
+	}
+	input:checked + .panel-button .panel-light {
+		animation: flicker 0.2s infinite 0.3s;
+	}
+	input:checked + .panel-button .panel-shine {
+		opacity: 1;
+	}
+	input:checked + .panel-button .panel-shadow {
+		opacity: 0;
+	}
+	.panel-button {
+		pointer-events: all;
+		transition: all 0.3s cubic-bezier(1, 0, 1, 1);
+		transform-origin: center center -30px;
+		transform: translateZ(20px) rotateX(-10deg);
+		transform-style: preserve-3d;
+		background-color: hsl(from var(--color) h s calc(l * 0.75));
+		width: 100%;
+		height: 100%;
+		position: relative;
+		background: linear-gradient(
+			hsl(from var(--color) h s calc(l * 0.5)) 0%,
+			hsl(from var(--color) h s calc(l * 0.3)) 30%,
+			hsl(from var(--color) h s calc(l * 0.3)) 70%,
+			hsl(from var(--color) h s calc(l * 0.5)) 100%
+		);
+		background-repeat: no-repeat;
+	}
+	.panel-button::before {
+		content: "";
+		background:
+			linear-gradient(
+					rgba(255, 255, 255, 0.8) 10%,
+					rgba(255, 255, 255, 0.3) 30%,
+					hsl(from var(--color) h s calc(l * 0.3)) 75%,
+					hsl(from var(--color) h s calc(l * 0.2))
+				)
+				50% 50%/97% 97%,
+			hsl(from var(--color) h s calc(l * 0.7));
+		background-repeat: no-repeat;
+		width: 100%;
+		height: 20px;
+		transform-origin: top;
+		transform: rotateX(-90deg);
+		position: absolute;
+		top: 0;
+	}
+	.panel-button::after {
+		content: "";
+		background-image: linear-gradient(
+			hsl(from var(--color) h s calc(l * 0.5)),
+			hsl(from var(--color) h s calc(l * 0.2))
+		);
+		width: 100%;
+		height: 20px;
+		transform-origin: top;
+		transform: translateY(20px) rotateX(-90deg);
+		position: absolute;
+		bottom: 0;
+		box-shadow:
+			0 20px 8px 0px black,
+			0 20px 20px 0px rgba(0, 0, 0, 0.5);
+	}
+	.panel-light {
+		opacity: 0;
+		animation: light-off 1s;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background-image: radial-gradient(
+			color-mix(in oklab, var(--color), yellow),
+			color-mix(in oklab, var(--color), yellow 20%) 40%,
+			transparent 70%
+		);
+	}
+	.panel-dots {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background-image: radial-gradient(
+			transparent 30%,
+			hsl(from var(--color) h s calc(l * 0.5) / 0.7) 70%
+		);
+		background-size: 10% 10%;
+	}
+	.panel-characters {
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background:
+			linear-gradient(white, white) 50% 20%/5% 20%,
+			radial-gradient(circle, transparent 50%, white 52%, white 70%, transparent 72%) 50% 80%/33%
+				25%;
+		background-repeat: no-repeat;
+	}
+	.panel-shine {
+		transition: all 0.3s cubic-bezier(1, 0, 1, 1);
+		opacity: 0.3;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background:
+			linear-gradient(white, transparent 3%) 50% 50%/97% 97%,
+			linear-gradient(
+					rgba(255, 255, 255, 0.5),
+					transparent 50%,
+					transparent 80%,
+					rgba(255, 255, 255, 0.5)
+				)
+				50% 50%/97% 97%;
+		background-repeat: no-repeat;
+	}
+	.panel-shadow {
+		transition: all 0.3s cubic-bezier(1, 0, 1, 1);
+		opacity: 1;
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(transparent 70%, rgba(0, 0, 0, 0.8));
+		background-repeat: no-repeat;
+	}
+}
+@keyframes flicker {
+	0% {
+		opacity: 1;
+	}
+	80% {
+		opacity: 0.8;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+@keyframes light-off {
+	0% {
+		opacity: 1;
+	}
+	80% {
+		opacity: 0;
+	}
+}

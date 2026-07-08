@@ -65,8 +65,8 @@ export default class ReportPlugin extends Aspect {
 	}
 	insertStep(name: string, selectedStepId: string) {
 		const id = uniqid("ms-");
-		const index = this.steps.findIndex((s) => s.id === selectedStepId);
-		this.steps.splice(index + 1, 0, {
+		const index = this.steps.findIndex((s) => s.id === selectedStepId) + 1;
+		this.steps.splice(index, 0, {
 			id,
 			name,
 			tags: [],
