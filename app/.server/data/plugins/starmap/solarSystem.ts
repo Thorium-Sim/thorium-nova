@@ -19,10 +19,10 @@ export const solarSystem = t.router({
 				}),
 			}),
 		)
-		.send(({ ctx, input }) => {
+		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const solarSystem = new SolarSystemPlugin({ position: input.position }, plugin);
+			const solarSystem = await SolarSystemPlugin.create({ position: input.position }, plugin);
 			plugin.aspects.solarSystems.push(solarSystem);
 
 			pubsub.publish.plugin.starmap.all({ pluginId: input.pluginId });

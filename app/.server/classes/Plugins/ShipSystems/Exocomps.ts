@@ -1,11 +1,27 @@
-import type { Sound } from "@thorium/ecs-components/sound";
+import { sound, type Sound } from "@thorium/ecs-components/sound";
 import type { Liter, MegaWatt, MegaWattHour, MetersPerSecond } from "@thorium/utils/unitTypes";
+import { z } from "zod";
 
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class ExocompsPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("exocomps"),
+		exocompName: z.string(),
+		exocompCount: z.number(),
+
+		exocompMaxCharge: z.number(),
+		exocompChargeRate: z.number(),
+		exocompIdleDischargeRate: z.number(),
+		exocompWorkingDischargeRate: z.number(),
+		exocompMovingDischargeRate: z.number(),
+
+		exocompMovementSpeed: z.number(),
+		exocompCargoVolume: z.number(),
+		soundEffects: z.object({ error: sound.array(), success: sound.array() }),
+	});
 	static flags: ShipSystemFlags[] = ["damage", "power", "sounds"];
 	type = "exocomps" as const;
 	exocompName: string;

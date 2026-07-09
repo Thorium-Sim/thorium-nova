@@ -1,10 +1,17 @@
 import type { MegaWatt, MegaWattHour } from "@thorium/utils/unitTypes";
+import { z } from "zod";
 
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class BatteryPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("battery"),
+		capacity: z.number(),
+		chargeRate: z.number(),
+		outputRate: z.number(),
+	});
 	static flags: ShipSystemFlags[] = ["damage"];
 	type = "battery" as const;
 	allowMultiple = true;

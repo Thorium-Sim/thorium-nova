@@ -51,10 +51,10 @@ export const ship = t.router({
 	}),
 	create: t.procedure
 		.input(z.object({ pluginId: z.string(), name: z.string() }))
-		.send(({ ctx, input }) => {
+		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const ship = new ShipPlugin({ name: input.name }, plugin);
+			const ship = await ShipPlugin.create({ name: input.name }, plugin);
 			plugin.aspects.ships.push(ship);
 
 			pubsub.publish.plugin.ship.all({ pluginId: input.pluginId });

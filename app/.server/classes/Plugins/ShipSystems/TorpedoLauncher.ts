@@ -1,11 +1,26 @@
-import type { Sound } from "@thorium/ecs-components/sound";
+import { sound, type Sound } from "@thorium/ecs-components/sound";
+import { z } from "zod";
 
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 // TODO March 16, 2022: Add the necessary sound effects
 export default class TorpedoLauncherPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("torpedoLauncher"),
+
+		loadTime: z.number(),
+		fireTime: z.number(),
+		headingDegree: z.number(),
+		pitchDegree: z.number(),
+
+		soundEffects: z.object({
+			load: sound.array().optional(),
+			unload: sound.array().optional(),
+			fire: sound.array().optional(),
+		}),
+	});
 	static flags: ShipSystemFlags[] = ["damage", "heat", "power", "sounds"];
 	type = "torpedoLauncher" as const;
 	allowMultiple = true;

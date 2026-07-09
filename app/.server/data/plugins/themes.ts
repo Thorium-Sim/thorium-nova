@@ -65,7 +65,7 @@ export const theme = t.router({
 		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const theme = new ThemePlugin({ name: input.name }, plugin);
+			const theme = await ThemePlugin.create({ name: input.name }, plugin);
 			plugin.aspects.themes.push(theme);
 
 			pubsub.publish.plugin.theme.all({ pluginId: input.pluginId });

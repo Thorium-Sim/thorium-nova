@@ -1,12 +1,20 @@
-import type { EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
+import { engineSpeeds, type EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
 import type { KilometerPerSecond } from "@thorium/utils/unitTypes";
+import { z } from "zod";
 
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 // TODO May 3, 2022: Add the necessary sound effects
 export default class WarpEnginesPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("warpEngines"),
+		interstellarCruisingSpeed: z.number(),
+		solarCruisingSpeed: z.number(),
+		minSpeedMultiplier: z.number(),
+		speeds: engineSpeeds,
+	});
 	static flags: ShipSystemFlags[] = ["damage", "heat", "power"];
 	type = "warpEngines" as const;
 	/** The cruising speed in interstellar space in km/s */

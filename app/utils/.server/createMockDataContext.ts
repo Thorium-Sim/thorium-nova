@@ -22,12 +22,7 @@ class MockServerDataModel {
 			active: true,
 			aspects: {
 				shipSystems: [],
-				ships: [
-					new ShipPlugin({ name: "Test Template" }, {
-						name: "Test Plugin",
-						aspects: { ships: [] },
-					} as unknown as BasePlugin),
-				],
+				ships: [],
 				solarSystems: [],
 				inventory: [],
 			},

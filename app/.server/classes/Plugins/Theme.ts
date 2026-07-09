@@ -1,8 +1,14 @@
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import { z } from "zod";
 
 import { Aspect } from "./Aspect";
 import type BasePlugin from "./index";
 export default class ThemePlugin extends Aspect {
+	static schema = z.object({
+		name: z.string(),
+		default: z.boolean().optional(),
+		assets: z.object({ rawCSS: z.string(), files: z.string().array() }),
+	});
 	apiVersion = "theme/v1" as const;
 	kind = "themes" as const;
 	name: string;
@@ -17,7 +23,7 @@ export default class ThemePlugin extends Aspect {
 			params.name || "New Theme",
 			plugin.aspects.ships.map((theme) => theme.name),
 		);
-		super({ name, ...params }, { kind: "themes" }, plugin, {});
+		super({ name, ...params }, { kind: "themes" }, plugin);
 		this.name = name;
 
 		this.assets = params.assets || {

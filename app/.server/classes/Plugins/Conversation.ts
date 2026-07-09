@@ -1,8 +1,16 @@
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import { z } from "zod";
 
 import { Aspect } from "./Aspect";
 import type BasePlugin from "./index";
 export default class ConversationPlugin extends Aspect {
+	static schema = z.object({
+		name: z.string(),
+		description: z.string(),
+		timelineId: z.string().optional(),
+		tags: z.string().array(),
+		assets: z.object({ conversation: z.string(), files: z.string().array() }),
+	});
 	apiVersion = "conversation/v1" as const;
 	kind = "conversations" as const;
 	name: string;
@@ -29,15 +37,10 @@ export default class ConversationPlugin extends Aspect {
 		}
 
 		const filePath = `/plugins/${plugin.id}/${timelineType}/${params.timelineId}/conversations/${name}`;
-		super({ name, ...params }, { kind: "conversations" }, plugin, {
-			// Nest the conversation in the same folder as the timeline that it is used with
-			// To prevent naming collisions between conversations from different timelines
-			meta: params.timelineId
-				? {
-						filePath: `${filePath}/manifest.yml`,
-					}
-				: undefined,
-		});
+		super({ name, ...params }, { kind: "conversations" }, plugin);
+		// Nest the conversation in the same folder as the timeline that it is used with
+		// To prevent naming collisions between conversations from different timelines
+		this.meta.filePath = `${filePath}/manifest.yml`;
 		this.name = name;
 
 		this.assets = params.assets || {

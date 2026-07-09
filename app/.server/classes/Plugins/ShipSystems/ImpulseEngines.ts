@@ -1,12 +1,25 @@
-import type { EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
-import type { Sound } from "@thorium/ecs-components/sound";
+import { engineSpeeds, type EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
+import { sound, type Sound } from "@thorium/ecs-components/sound";
 import type { KilometerPerSecond, KiloNewtons } from "@thorium/utils/unitTypes";
+import { z } from "zod";
 
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class ImpulseEnginesPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("impulseEngines"),
+		cruisingSpeed: z.number(),
+		emergencySpeed: z.number(),
+		thrust: z.number(),
+		speeds: engineSpeeds,
+		soundEffects: z.object({
+			powerUp: sound.array().optional(),
+			powerDown: sound.array().optional(),
+			ambiance: sound.array().optional(),
+		}),
+	});
 	static flags: ShipSystemFlags[] = ["damage", "heat", "power", "sounds"];
 	type = "impulseEngines" as const;
 	cruisingSpeed: KilometerPerSecond;

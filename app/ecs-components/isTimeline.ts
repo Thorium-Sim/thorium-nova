@@ -1,3 +1,4 @@
+import { timelineBlock } from "@thorium/ecs-components/timelineBlocks";
 import z from "zod";
 
 export const isTimeline = z
@@ -33,7 +34,7 @@ export const isTimelineStep = z
 		/**
 		 * What blocks will be executed when this timeline step activates
 		 */
-		blocks: z.any().array().default([]),
+		blocks: timelineBlock.array().default([]),
 		timelineId: z.number().optional(),
 	})
 	.default({});

@@ -1,11 +1,18 @@
+import { z } from "zod";
+
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export type ShieldDirections = "fore" | "aft" | "starboard" | "port" | "dorsal" | "ventral";
 
 // TODO March 16, 2022: Add the necessary sound effects
 export default class ShieldsPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("shields"),
+		maxStrength: z.number(),
+		shieldCount: z.union([z.literal(1), z.literal(4), z.literal(6)]),
+	});
 	static flags: ShipSystemFlags[] = ["damage", "heat", "power"];
 	type = "shields" as const;
 

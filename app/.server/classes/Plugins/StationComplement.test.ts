@@ -16,7 +16,7 @@ describe("StationComplementPlugin", () => {
 				} as unknown as ServerDataModel,
 				{},
 			);
-			const stationComplement = new StationComplementPlugin({}, plugin);
+			const stationComplement = await StationComplementPlugin.create({}, plugin);
 			expect(stationComplement).toBeInstanceOf(StationComplementPlugin);
 			expect(stationComplement.name).toBe("New Station Complement");
 			expect(stationComplement.stationCount).toBe(0);

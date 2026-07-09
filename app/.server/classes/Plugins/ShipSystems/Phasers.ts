@@ -1,10 +1,28 @@
-import type { Sound } from "@thorium/ecs-components/sound";
+import { sound, type Sound } from "@thorium/ecs-components/sound";
+import { z } from "zod";
 
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class PhasersPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("phasers"),
+		maxRange: z.number(),
+		maxArc: z.number(),
+		headingDegree: z.number(),
+		pitchDegree: z.number(),
+
+		fullChargeYield: z.number(),
+		yieldMultiplier: z.number(),
+
+		legacyPhaserBanks: z.number(),
+		legacyChargeSpeed: z.number(),
+
+		soundEffects: z.object({
+			fire: sound.array().optional(),
+		}),
+	});
 	static flags: ShipSystemFlags[] = ["damage", "heat", "power", "sounds"];
 	type = "phasers" as const;
 	allowMultiple = true;

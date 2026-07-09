@@ -1,16 +1,5 @@
+import { panelElementTypes } from "@thorium/ecs-components/engineeringPanelTypes";
 import { z } from "zod";
-
-const panelElementTypes = z.enum([
-	"toggleButton",
-	"pressButton",
-	"numberedButton",
-	"switch",
-	"numberedRotor",
-	"numberedSlider",
-	"cableSocket",
-	"triSwitch",
-	"numberPad",
-]);
 
 export const isPanel = z.object({}).default({});
 

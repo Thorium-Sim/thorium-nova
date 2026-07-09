@@ -1,11 +1,24 @@
-import type { InventoryFlags } from "@thorium/utils/flags/InventoryFlags";
+import { inventoryFlags, type InventoryFlags } from "@thorium/utils/flags/InventoryFlags";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import type { Liter } from "@thorium/utils/unitTypes";
+import { z } from "zod";
 
 import type BasePlugin from ".";
 import { Aspect } from "./Aspect";
 
 export default class InventoryPlugin extends Aspect {
+	static schema = z.object({
+		name: z.string(),
+		plural: z.string(),
+		description: z.string(),
+		volume: z.number(),
+		assets: z.object({ image: z.string().nullish().optional() }),
+		continuous: z.boolean(),
+		durability: z.number(),
+		abundance: z.number(),
+		tags: z.string().array(),
+		flags: inventoryFlags,
+	});
 	apiVersion = "inventory/v1" as const;
 	kind = "inventory" as const;
 	name!: string;
@@ -28,16 +41,16 @@ export default class InventoryPlugin extends Aspect {
 			params.name || "New Inventory",
 			plugin.aspects.inventory.map((inventory) => inventory.name),
 		);
-		super({ ...params, name }, { kind: "inventory" }, plugin, {});
-		this.name = this.name || name;
-		this.plural = this.plural || params.plural || name;
-		this.description = this.description || params.description || "";
-		this.volume = this.volume ?? params.volume ?? 1000;
-		this.assets = this.assets || params.assets || {};
-		this.continuous = this.continuous ?? params.continuous ?? false;
-		this.durability = this.durability ?? params.durability ?? 1;
-		this.abundance = this.abundance ?? params.abundance ?? 0;
-		this.flags = this.flags || params.flags || {};
-		this.tags = this.tags || params.tags || [];
+		super({ ...params, name }, { kind: "inventory" }, plugin);
+		this.name = name;
+		this.plural = params.plural || name;
+		this.description = params.description || "";
+		this.volume = params.volume ?? 1000;
+		this.assets = params.assets || {};
+		this.continuous = params.continuous ?? false;
+		this.durability = params.durability ?? 1;
+		this.abundance = params.abundance ?? 0;
+		this.flags = params.flags || {};
+		this.tags = params.tags || [];
 	}
 }

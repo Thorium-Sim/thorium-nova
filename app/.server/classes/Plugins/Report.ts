@@ -1,12 +1,33 @@
 import type { TimelineStep } from "@thorium/.server/classes/Plugins/TimelineStep";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+import { timelineBlock } from "@thorium/ecs-components/timelineBlocks";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import uniqid from "@thorium/utils/uniqid";
+import { z } from "zod";
 
 import { Aspect } from "./Aspect";
 import type BasePlugin from "./index";
 
 export default class ReportPlugin extends Aspect {
+	static schema = z.object({
+		name: z.string(),
+		description: z.string(),
+		category: z.string(),
+		tags: z.string().array(),
+		flightMode: z.enum(["nova", "legacy"]),
+		prerequisiteBlock: timelineBlock.array().optional(),
+		steps: z
+			.object({
+				id: z.string(),
+				name: z.string(),
+				description: z.string(),
+				tags: z.string().array(),
+				blocks: timelineBlock.array(),
+			})
+			.array(),
+		assets: z.object({}),
+		autoApplyWhenCompleted: z.boolean(),
+	});
 	apiVersion = "timeline/v1" as const;
 	kind = "reports" as const;
 	name: string;
@@ -28,7 +49,7 @@ export default class ReportPlugin extends Aspect {
 			params.name || "New Report",
 			plugin.aspects.reports.map((timeline) => timeline.name),
 		);
-		super({ name, ...params }, { kind: "reports" }, plugin, {});
+		super({ name, ...params }, { kind: "reports" }, plugin);
 		this.name = name;
 		this.description = params.description || "A report for repairing damaged systems.";
 

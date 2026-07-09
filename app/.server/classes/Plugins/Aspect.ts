@@ -1,6 +1,7 @@
 import { thoriumContext } from "@thorium/utils/.server/context";
-import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
+import { DataStore } from "@thorium/utils/.server/db-fs";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
+import { ZodError, type z } from "zod";
 
 import type BasePlugin from "./index";
 
@@ -15,12 +16,37 @@ export abstract class Aspect extends DataStore {
 	abstract kind: AspectKinds;
 	abstract name: string;
 	abstract assets?: AspectAsset;
+	static async create<T extends Aspect, ZT extends z.ZodType>(
+		this: (new (params: Partial<T>, plugin: BasePlugin) => T) & { schema?: ZT },
+		params: Partial<T>,
+		plugin: BasePlugin,
+		filePath?: string,
+	) {
+		const instance = new this(params, plugin);
+		if (filePath) {
+			instance.meta.filePath = filePath;
+		}
+		let data = await instance.getData();
+		if (this.schema) {
+			try {
+				data = this.schema.parse(data);
+			} catch (error) {
+				if (error instanceof ZodError) {
+					throw new Error(
+						`Error loading ${instance.kind} aspect ${instance.name}: ${error.message}`,
+					);
+				}
+				throw error;
+			}
+		}
+		Object.assign(instance, data);
+		return instance;
+	}
 	plugin: BasePlugin;
 	constructor(
 		params: { name: string },
 		aspectConfig: { kind: AspectKinds; subPath?: `/${string}` },
 		plugin: BasePlugin,
-		options: DataStoreOptions,
 	) {
 		const { kind, subPath = "/" } = aspectConfig;
 		const name = generateIncrementedName(
@@ -31,10 +57,8 @@ export abstract class Aspect extends DataStore {
 			meta: {
 				filePath: `/plugins/${plugin.id}/${kind}${subPath}${name}/manifest.yml`,
 			},
-			...options,
 		});
 		this.plugin = plugin;
-		this.getData().then((data) => Object.assign(this, data));
 	}
 
 	get pluginName() {

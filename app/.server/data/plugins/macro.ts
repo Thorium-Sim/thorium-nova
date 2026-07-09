@@ -176,10 +176,10 @@ export const macro = t.router({
 				type: z.enum(["macro", "trigger"]),
 			}),
 		)
-		.send(({ ctx, input }) => {
+		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const macro = new MacroPlugin({ name: input.name, type: input.type }, plugin);
+			const macro = await MacroPlugin.create({ name: input.name, type: input.type }, plugin);
 			plugin.aspects.macros.push(macro);
 
 			pubsub.publish.plugin.macro.all({ pluginId: input.pluginId });

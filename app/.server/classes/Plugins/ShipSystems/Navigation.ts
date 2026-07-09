@@ -1,8 +1,22 @@
+import { z } from "zod";
+
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class NavigationPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("navigation"),
+		calculate: z.boolean(),
+		thrusters: z.boolean(),
+		destinations: z.string().array(),
+		presets: z
+			.object({
+				name: z.string(),
+				course: z.object({ x: z.number(), y: z.number(), z: z.number() }),
+			})
+			.array(),
+	});
 	static flags: ShipSystemFlags[] = ["damage", "power"];
 	type = "navigation" as const;
 	calculate: boolean;

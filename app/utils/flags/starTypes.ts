@@ -2,17 +2,7 @@ import type { Range } from "@thorium/utils/operations/randomFromRange";
 import z from "zod";
 
 import type { Degree, Kelvin, SolarMass, SolarRadius, Year } from "../unitTypes";
-export const spectralTypes = z.union([
-	z.literal("O"),
-	z.literal("B"),
-	z.literal("G"),
-	z.literal("K"),
-	z.literal("A"),
-	z.literal("MG"),
-	z.literal("F"),
-	z.literal("M"),
-	z.literal("D"),
-]);
+export const spectralTypes = z.enum(["O", "B", "G", "K", "A", "MG", "F", "M", "D"]);
 export type SpectralTypes = z.infer<typeof spectralTypes>;
 
 interface StarType {

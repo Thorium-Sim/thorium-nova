@@ -1,12 +1,32 @@
 import type { TimelineStep } from "@thorium/.server/classes/Plugins/TimelineStep";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
+import { timelineBlock } from "@thorium/ecs-components/timelineBlocks";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import uniqid from "@thorium/utils/uniqid";
+import { z } from "zod";
 
 import { Aspect } from "./Aspect";
 import type BasePlugin from "./index";
 
 export default class TrainingPlugin extends Aspect {
+	static schema = z.object({
+		name: z.string(),
+		description: z.string(),
+		category: z.string(),
+		tags: z.string().array(),
+		flightMode: z.enum(["nova", "legacy"]),
+		prerequisiteBlock: timelineBlock.array().optional(),
+		steps: z
+			.object({
+				id: z.string(),
+				name: z.string(),
+				description: z.string(),
+				tags: z.string().array(),
+				blocks: timelineBlock.array(),
+			})
+			.array(),
+		assets: z.object({}),
+	});
 	apiVersion = "timeline/v1" as const;
 	kind = "trainings" as const;
 	name: string;
@@ -26,7 +46,7 @@ export default class TrainingPlugin extends Aspect {
 			params.name || "New Training",
 			plugin.aspects.reports.map((timeline) => timeline.name),
 		);
-		super({ name, ...params }, { kind: "trainings" }, plugin, {});
+		super({ name, ...params }, { kind: "trainings" }, plugin);
 		this.name = name;
 		this.description = params.description || "A training for learning how to use a station.";
 

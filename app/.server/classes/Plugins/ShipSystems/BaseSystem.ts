@@ -1,6 +1,7 @@
 import type { Sound } from "@thorium/ecs-components/sound";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import type { Kelvin, KelvinPerSecond, MegaWatt } from "@thorium/utils/unitTypes";
+import { z } from "zod";
 
 import type BasePlugin from "..";
 import { Aspect } from "../Aspect";
@@ -10,6 +11,31 @@ const systemPlugins: Record<string, typeof BaseShipSystemPlugin> = {};
 export function registerSystem(name: string, sys: typeof BaseShipSystemPlugin) {
 	systemPlugins[name] = sys;
 }
+
+export const baseShipSystemSchema = z.object({
+	name: z.string(),
+	description: z.string(),
+	tags: z.string().array(),
+	allowMultiple: z.boolean(),
+	powerLevels: z.number().array(),
+	powerActivated: z.boolean(),
+	connectedBatteryType: z.enum(["none", "capacity", "output", "median"]),
+	powerToHeat: z.number(),
+	heatDissipationRate: z.number(),
+	nominalHeat: z.number(),
+	maxSafeHeat: z.number(),
+	maxHeat: z.number(),
+	coolantTransferRate: z.number(),
+	coolantConsumptionRate: z.number(),
+	offlineEfficiency: z.number(),
+	onlineEfficiency: z.number(),
+	overloadDamageMultiplier: z.number(),
+	minSignature: z.number(),
+	maxSignature: z.number(),
+	signatureSpike: z.number(),
+	signatureSpikeDuration: z.number(),
+	entropyMultiplier: z.number(),
+});
 
 /**
  * The base class to use when creating system plugins
@@ -102,7 +128,7 @@ export default class BaseShipSystemPlugin extends Aspect {
 			params.name || `New ${params.type}`,
 			plugin.aspects.shipSystems.map((sys) => sys.name),
 		);
-		super({ name, ...params }, { kind: "shipSystems" }, plugin, {});
+		super({ name, ...params }, { kind: "shipSystems" }, plugin);
 		this.name = name || "";
 		this.type = params.type || "generic";
 		this.description = params.description || "";

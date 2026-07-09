@@ -1,10 +1,27 @@
-import type { Sound } from "@thorium/ecs-components/sound";
+import { sound, type Sound } from "@thorium/ecs-components/sound";
+import { z } from "zod";
 
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class ShortRangeCommPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("shortRangeComm"),
+
+		minRadius: z.number(),
+		maxRadius: z.number(),
+
+		soundEffects: z.object({
+			incomingHail: sound.array().optional(),
+			outgoingHail: sound.array().optional(),
+			connected: sound.array().optional(),
+			incomingConnection: sound.array().optional(),
+			disconnected: sound.array().optional(),
+			rejected: sound.array().optional(),
+			cancelled: sound.array().optional(),
+		}),
+	});
 	static flags: ShipSystemFlags[] = ["damage", "power", "sounds"];
 	type = "shortRangeComm" as const;
 

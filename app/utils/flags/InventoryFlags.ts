@@ -103,7 +103,7 @@ export const inventoryFlags = z
 		sparePart: z
 			.object({
 				/** Tags to indicate the systems the spare part is used to repair. If left blank it can be used with all systems */
-				systemTags: z.array(z.string()).default([]),
+				systemTags: z.array(z.string()).optional(),
 			})
 			.optional(),
 		water: z.object({}).optional(),

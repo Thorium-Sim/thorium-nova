@@ -1,10 +1,27 @@
-import type { Sound } from "@thorium/ecs-components/sound";
+import { sound, type Sound } from "@thorium/ecs-components/sound";
+import { z } from "zod";
 
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class SensorsPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("sensors"),
+		passiveRange: z.number(),
+		activeRange: z.number(),
+		minScanEnergyCost: z.number(),
+		maxScanEnergyCost: z.number(),
+		shieldPenaltyMultiplier: z.number(),
+		pingActive: z.boolean(),
+		autoTargeting: z.boolean(),
+		scanHistory: z.boolean(),
+		scanAnswers: z.object({ label: z.string(), value: z.string() }).array(),
+		soundEffects: z.object({
+			ambiance: sound.array().optional(),
+			scanComplete: sound.array().optional(),
+		}),
+	});
 	static flags: ShipSystemFlags[] = ["damage", "heat", "power", "sounds"];
 	type = "sensors" as const;
 

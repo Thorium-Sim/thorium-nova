@@ -1,7 +1,8 @@
-import type { Sound } from "@thorium/ecs-components/sound";
+import { sound, type Sound } from "@thorium/ecs-components/sound";
+import { z } from "zod";
 
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 type LegacySetting = {
@@ -53,6 +54,34 @@ const defaultLegacySettings: LegacySetting[] = [
 	},
 ];
 export default class ReactorPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("reactor"),
+		optimalOutputPercent: z.number(),
+		powerMultiplier: z.number(),
+		reactorCount: z.number(),
+		powerUpSpeed: z.number(),
+		balancedBonusMultiplier: z.number(),
+		legacySettings: z
+			.object({
+				name: z.string(),
+				efficiency: z.number().nullable(),
+				color: z.enum([
+					"primary",
+					"secondary",
+					"success",
+					"warning",
+					"error",
+					"accent",
+					"info",
+					"notice",
+				]),
+			})
+			.array(),
+		soundEffects: z.object({
+			ambiance: sound.array(),
+			overheatAlert: sound.array(),
+		}),
+	});
 	static flags: ShipSystemFlags[] = ["damage", "heat", "sounds"];
 	type = "reactor" as const;
 

@@ -49,10 +49,10 @@ export const inventory = t.router({
 		}),
 	create: t.procedure
 		.input(z.object({ pluginId: z.string(), name: z.string() }))
-		.send(({ ctx, input }) => {
+		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const inventory = new InventoryPlugin({ name: input.name }, plugin);
+			const inventory = await InventoryPlugin.create({ name: input.name }, plugin);
 			plugin.aspects.inventory.push(inventory);
 
 			pubsub.publish.plugin.inventory.all({ pluginId: input.pluginId });

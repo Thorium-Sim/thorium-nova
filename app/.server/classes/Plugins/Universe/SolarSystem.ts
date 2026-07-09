@@ -1,15 +1,63 @@
+import { isPlanet } from "@thorium/ecs-components/list";
+import { satellite } from "@thorium/ecs-components/satellite";
 import { UNIVERSE_RADIUS } from "@thorium/utils/constants";
+import { spectralTypes } from "@thorium/utils/flags/starTypes";
 import SystemNames from "@thorium/utils/flags/systemNames";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import type { AstronomicalUnit, LightMinute } from "@thorium/utils/unitTypes";
+import { z } from "zod";
 
 import type BasePlugin from "..";
 import { Aspect } from "../Aspect";
 import PlanetPlugin from "./Planet";
 import StarPlugin from "./Star";
 
+const basePlanetSchema = z.object({
+	name: z.string(),
+	description: z.string(),
+	tags: z.string().array(),
+	keyLocation: z.boolean().optional(),
+	satellite: satellite._def.innerType.extend({ parentId: z.string() }),
+	isPlanet,
+	population: z.number(),
+	temperature: z.number(),
+});
+const planetSchema = basePlanetSchema.extend({
+	satellites: z.lazy(() => basePlanetSchema.array()).optional(),
+});
 export default class SolarSystemPlugin extends Aspect {
+	static schema = z.object({
+		name: z.string(),
+		description: z.string(),
+		position: z.object({
+			x: z.number(),
+			y: z.number(),
+			z: z.number(),
+		}),
+		tags: z.string().array(),
+		habitableZoneInner: z.number(),
+		habitableZoneOuter: z.number(),
+		skyboxKey: z.string(),
+		stars: z
+			.object({
+				name: z.string(),
+				description: z.string(),
+				tags: z.string().array(),
+				solarMass: z.number(),
+				age: z.number(),
+				spectralType: spectralTypes,
+				hue: z.number(),
+				isWhite: z.boolean(),
+				radius: z.number(),
+				temperature: z.number(),
+				satellite: satellite._def.innerType.extend({ parentId: z.string() }),
+			})
+			.array(),
+		planets: planetSchema.array(),
+		commSatellite: z.object({ radius: z.number() }).nullable(),
+		assets: z.object({}),
+	});
 	apiVersion = "solarSystem/v1" as const;
 	kind = "solarSystems" as const;
 	name: string;
@@ -57,7 +105,7 @@ export default class SolarSystemPlugin extends Aspect {
 			plugin.aspects.solarSystems.map((solarSystem) => solarSystem.name),
 		);
 
-		super({ name, ...params }, { kind: "solarSystems" }, plugin, {});
+		super({ name, ...params }, { kind: "solarSystems" }, plugin);
 		this.name = name;
 		this.description = `A solar system named ${name}`;
 

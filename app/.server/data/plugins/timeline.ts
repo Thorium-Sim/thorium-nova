@@ -604,10 +604,10 @@ const conversations = t.router({
 				name: z.string(),
 			}),
 		)
-		.send(({ ctx, input }) => {
+		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
-			const conversation = new ConversationPlugin(
+			const conversation = await ConversationPlugin.create(
 				{ name: input.name, timelineId: input.timelineId },
 				plugin,
 			);

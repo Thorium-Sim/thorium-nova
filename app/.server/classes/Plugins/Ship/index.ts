@@ -1,3 +1,5 @@
+import { edgeFlagsSchema } from "@thorium/utils/flags/DeckEdge";
+import { nodeFlagsSchema } from "@thorium/utils/flags/DeckNode";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import type { Liter } from "@thorium/utils/unitTypes";
 import z from "zod";
@@ -6,15 +8,73 @@ import { Aspect } from "../Aspect";
 import type BasePlugin from "../index";
 import DeckPlugin, { DeckEdge } from "./Deck";
 
-export const shipCategories = z.union([
-	z.literal("Cruiser"),
-	z.literal("Frigate"),
-	z.literal("Scout"),
-	z.literal("Shuttle"),
-]);
+export const shipCategories = z.enum(["Cruiser", "Frigate", "Scout", "Shuttle"]);
 export type ShipCategories = z.infer<typeof shipCategories>;
 
 export default class ShipPlugin extends Aspect {
+	static schema = z.object({
+		name: z.string(),
+		description: z.string(),
+		category: shipCategories,
+		tags: z.string().array(),
+
+		mass: z.number(),
+		length: z.number(),
+		shipSystems: z
+			.object({
+				id: z.string(),
+				systemId: z.string(),
+				pluginId: z.string(),
+				overrides: z.record(z.any()).optional(),
+			})
+			.array(),
+		theme: z
+			.object({
+				pluginId: z.string(),
+				themeId: z.string(),
+			})
+			.optional(),
+		cargoContainers: z.number(),
+		cargoContainerVolume: z.number(),
+		decks: z
+			.object({
+				name: z.string(),
+				backgroundUrl: z.string(),
+				nodes: z
+					.object({
+						id: z.number(),
+						name: z.string(),
+						x: z.number(),
+						y: z.number(),
+						isRoom: z.boolean(),
+						icon: z.string().optional(),
+						radius: z.number(),
+						volume: z.number(),
+						flags: nodeFlagsSchema.array(),
+						systems: z.string().array(),
+						contents: z.record(z.object({ count: z.number(), temperature: z.number() })),
+					})
+					.array(),
+			})
+			.array(),
+		deckEdges: z
+			.object({
+				id: z.number(),
+				to: z.number(),
+				from: z.number(),
+				weight: z.number(),
+				isOpen: z.boolean(),
+				flags: edgeFlagsSchema.array(),
+			})
+			.array(),
+		assets: z.object({
+			logo: z.string().optional(),
+			model: z.string().optional(),
+			vanity: z.string().optional(),
+			topView: z.string().optional(),
+			sideView: z.string().optional(),
+		}),
+	});
 	apiVersion = "ships/v1" as const;
 	kind = "ships" as const;
 	name: string;
@@ -92,7 +152,7 @@ export default class ShipPlugin extends Aspect {
 			params.name || "New Ship",
 			plugin.aspects.ships.map((ship) => ship.name),
 		);
-		super({ name, ...params }, { kind: "ships" }, plugin, {});
+		super({ name, ...params }, { kind: "ships" }, plugin);
 		this.name = name;
 		this.description = params.description || "Boldly going where no one has gone before.";
 		this.category = params.category || "Cruiser";

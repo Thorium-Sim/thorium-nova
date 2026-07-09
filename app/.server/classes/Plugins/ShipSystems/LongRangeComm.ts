@@ -1,8 +1,16 @@
+import { z } from "zod";
+
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class LongRangeCommPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("longRangeComm"),
+		cyphers: z
+			.object({ code: z.string(), name: z.string(), font: z.string(), active: z.boolean() })
+			.array(),
+	});
 	static flags: ShipSystemFlags[] = ["damage", "power", "sounds"];
 	type = "longRangeComm" as const;
 

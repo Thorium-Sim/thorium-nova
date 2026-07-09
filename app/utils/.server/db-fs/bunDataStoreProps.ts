@@ -129,7 +129,7 @@ export function bunDataStoreProps(env: string): ThoriumContext {
 						}
 						if (!this.aspects[kind]) throw new Error(`Invalid aspect kind: ${kind}`);
 						// @ts-expect-error
-						this.aspects[kind].push(new aspectClass(aspectData, this));
+						this.aspects[kind].push(await aspectClass.create(aspectData, this));
 					} catch (error) {
 						console.error(error);
 					}

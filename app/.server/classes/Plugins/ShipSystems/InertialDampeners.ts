@@ -1,8 +1,14 @@
+import { z } from "zod";
+
 import type BasePlugin from "..";
-import BaseShipSystemPlugin, { registerSystem } from "./BaseSystem";
+import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";
 
 export default class InertialDampenersPlugin extends BaseShipSystemPlugin {
+	static schema = baseShipSystemSchema.extend({
+		type: z.literal("inertialDampeners"),
+		dampening: z.number(),
+	});
 	static flags: ShipSystemFlags[] = [];
 	static flightModes = ["nova"];
 	type = "inertialDampeners" as const;
