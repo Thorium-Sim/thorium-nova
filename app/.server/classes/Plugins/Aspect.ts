@@ -27,7 +27,7 @@ export abstract class Aspect extends DataStore {
 			instance.meta.filePath = filePath;
 		}
 		let data = await instance.getData();
-		if (this.schema) {
+		if (this.schema && data) {
 			try {
 				data = this.schema.parse(data);
 			} catch (error) {

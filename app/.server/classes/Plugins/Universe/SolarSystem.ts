@@ -6,7 +6,7 @@ import SystemNames from "@thorium/utils/flags/systemNames";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import type { AstronomicalUnit, LightMinute } from "@thorium/utils/unitTypes";
-import { z } from "zod";
+import z from "zod";
 
 import type BasePlugin from "..";
 import { Aspect } from "../Aspect";

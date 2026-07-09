@@ -40,7 +40,7 @@ Take a look at this example which includes both a request and a send:
 import { t } from "@thorium/.server/init/t";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import { z } from "zod";
+import z from "zod";
 
 export const pilot = t.router({
 	impulseEngines: t.router({

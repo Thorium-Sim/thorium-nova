@@ -1,5 +1,5 @@
 import type { MegaWatt, MegaWattHour } from "@thorium/utils/unitTypes";
-import { z } from "zod";
+import z from "zod";
 
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";

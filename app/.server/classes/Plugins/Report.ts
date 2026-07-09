@@ -3,7 +3,7 @@ import type { TimelineBlock } from "@thorium/components/timelineBuilder/Timeline
 import { timelineBlock } from "@thorium/ecs-components/timelineBlocks";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import uniqid from "@thorium/utils/uniqid";
-import { z } from "zod";
+import z from "zod";
 
 import { Aspect } from "./Aspect";
 import type BasePlugin from "./index";

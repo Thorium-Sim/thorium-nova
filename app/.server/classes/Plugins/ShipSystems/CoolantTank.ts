@@ -1,4 +1,4 @@
-import { z } from "zod";
+import z from "zod";
 
 import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
 import type { ShipSystemFlags } from "./shipSystemTypes";

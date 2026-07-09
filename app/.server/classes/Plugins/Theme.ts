@@ -1,5 +1,5 @@
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import { z } from "zod";
+import z from "zod";
 
 import { Aspect } from "./Aspect";
 import type BasePlugin from "./index";

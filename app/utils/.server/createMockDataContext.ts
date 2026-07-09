@@ -1,5 +1,4 @@
 import type { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
-import type BasePlugin from "@thorium/.server/classes/Plugins";
 import ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import type { DataContext } from "@thorium/.server/DataContext";

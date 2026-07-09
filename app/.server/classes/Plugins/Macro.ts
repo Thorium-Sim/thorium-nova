@@ -1,7 +1,7 @@
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { timelineBlock } from "@thorium/ecs-components/timelineBlocks";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import { z } from "zod";
+import z from "zod";
 
 import type BasePlugin from ".";
 import { Aspect } from "./Aspect";

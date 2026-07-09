@@ -1,7 +1,7 @@
 import { inventoryFlags, type InventoryFlags } from "@thorium/utils/flags/InventoryFlags";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import type { Liter } from "@thorium/utils/unitTypes";
-import { z } from "zod";
+import z from "zod";
 
 import type BasePlugin from ".";
 import { Aspect } from "./Aspect";

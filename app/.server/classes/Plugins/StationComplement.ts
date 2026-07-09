@@ -1,6 +1,6 @@
 import { panelElementTypes } from "@thorium/ecs-components/engineeringPanelTypes";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
-import { z } from "zod";
+import z from "zod";
 
 import type BasePlugin from ".";
 import type Station from "../Station";

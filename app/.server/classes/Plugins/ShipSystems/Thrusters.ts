@@ -1,6 +1,6 @@
 import { sound, type Sound } from "@thorium/ecs-components/sound";
 import type { KiloNewtons, MetersPerSecond, RotationsPerMinute } from "@thorium/utils/unitTypes";
-import { z } from "zod";
+import z from "zod";
 
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";

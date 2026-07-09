@@ -1,7 +1,7 @@
 import type { Sound } from "@thorium/ecs-components/sound";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import type { Kelvin, KelvinPerSecond, MegaWatt } from "@thorium/utils/unitTypes";
-import { z } from "zod";
+import z from "zod";
 
 import type BasePlugin from "..";
 import { Aspect } from "../Aspect";

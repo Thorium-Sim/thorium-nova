@@ -1,5 +1,5 @@
 import { sound, type Sound } from "@thorium/ecs-components/sound";
-import { z } from "zod";
+import z from "zod";
 
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";

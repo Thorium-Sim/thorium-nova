@@ -1,5 +1,5 @@
 import { panelElementTypes } from "@thorium/ecs-components/engineeringPanelTypes";
-import { z } from "zod";
+import z from "zod";
 
 export const isPanel = z.object({}).default({});
 

@@ -1,7 +1,7 @@
 import { engineSpeeds, type EngineSpeed } from "@thorium/ecs-components/shipSystems/engineSpeeds";
 import { sound, type Sound } from "@thorium/ecs-components/sound";
 import type { KilometerPerSecond, KiloNewtons } from "@thorium/utils/unitTypes";
-import { z } from "zod";
+import z from "zod";
 
 import type BasePlugin from "..";
 import BaseShipSystemPlugin, { baseShipSystemSchema, registerSystem } from "./BaseSystem";
