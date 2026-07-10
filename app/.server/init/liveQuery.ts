@@ -1,8 +1,10 @@
+import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import type { ClientSettings } from "@thorium/.server/data";
 import { router } from "@thorium/.server/init/router";
 import { isDatabaseContext } from "@thorium/typeguards/isDatabaseContext";
 import type { Entity } from "@thorium/utils/ecs";
-import type { inferAsyncReturnType } from "@thorium/utils/live-query/.server";
+import { getPluginTextPatterns, interpolateText } from "@thorium/utils/interpolationEngine";
+import type { inferAsyncReturnType, PubSub } from "@thorium/utils/live-query/.server";
 import type {
 	CreateContextOpts,
 	InitWebsocket,
@@ -10,7 +12,7 @@ import type {
 } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
 import { callProcedure, type AnyRouter } from "@thorium/utils/live-query/.server/router";
 import { ServerClient } from "@thorium/utils/live-query/.server/ServerClient";
-import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
+import { createRNG } from "@thorium/utils/rng";
 
 import { DataContext } from "../DataContext";
 import { dataStreamEntity } from "./dataStreamEntity";
@@ -31,7 +33,7 @@ export function createContext<TContext>({ clientId, context }: CreateContextOpts
 			// Let's generate a client if it doesn't already exist in the database
 			const client = context.server.clients[clientId];
 			if (!client) {
-				context.server.clients[clientId] = new Client(clientId, router, pubsub);
+				context.server.clients[clientId] = new Client(context.server, clientId, router, pubsub);
 			}
 			dataContext = new DataContext(clientId, context);
 			dataContextCache.set(clientId, dataContext);
@@ -60,13 +62,23 @@ export function initWebsocket<TContext>({
 export type Context = inferAsyncReturnType<typeof createContext>;
 
 export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
-	name: string = randomNameGenerator();
+	name: string;
 	settings: ClientSettings = {
 		soundPlayer: true,
 		ambiancePlayer: true,
 		musicPlayer: true,
 		dialoguePlayer: true,
 	};
+	constructor(server: ServerDataModel, id: string, router: TRouter, pubsub: PubSub<TRouter>) {
+		super(id, router, pubsub);
+
+		this.name = interpolateText(
+			server.clientNameTemplate,
+			{},
+			getPluginTextPatterns(server),
+			createRNG(Math.random() * 100),
+		);
+	}
 	public async sendDataStream() {
 		const context = getDataContext(this.id);
 		if (!context?.flight || !this.connected) return;

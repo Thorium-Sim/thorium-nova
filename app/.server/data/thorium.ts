@@ -28,6 +28,30 @@ export interface FileOrFolder {
 }
 
 export const thorium = t.router({
+	settings: t.procedure
+		.autoPublish([], () => null)
+		.request(({ ctx }) => {
+			return {
+				flightNameTemplate: ctx.server.flightNameTemplate,
+				clientNameTemplate: ctx.server.clientNameTemplate,
+			};
+		}),
+	setFlightNameTemplate: t.procedure
+		.input(z.object({ flightNameTemplate: z.string() }))
+		.send(({ ctx, input }) => {
+			if (input.flightNameTemplate.trim()) {
+				ctx.server.flightNameTemplate = input.flightNameTemplate;
+			}
+			pubsub.publish.thorium.settings();
+		}),
+	setClientNameTemplate: t.procedure
+		.input(z.object({ clientNameTemplate: z.string() }))
+		.send(({ ctx, input }) => {
+			if (input.clientNameTemplate.trim()) {
+				ctx.server.clientNameTemplate = input.clientNameTemplate;
+			}
+			pubsub.publish.thorium.settings();
+		}),
 	actions: t.procedure
 		.autoPublish([], () => null)
 		.request(function getActions({ ctx }) {

@@ -82,6 +82,7 @@ export const ship = t.router({
 				pluginId: z.string(),
 				shipId: z.string(),
 				name: z.string().optional(),
+				nameTemplate: z.string().optional(),
 				category: shipCategories.optional(),
 				description: z.string().optional(),
 				tags: z.string().array().optional(),
@@ -105,6 +106,7 @@ export const ship = t.router({
 			if (!ship) return { shipId: "" };
 			if (input.category) ship.category = input.category;
 			if (input.description) ship.description = input.description;
+			if (input.nameTemplate) ship.nameTemplate = input.nameTemplate;
 			if (input.tags) ship.tags = input.tags;
 			if (input.mass) {
 				if (Number.isNaN(input.mass) || input.mass <= 0) {

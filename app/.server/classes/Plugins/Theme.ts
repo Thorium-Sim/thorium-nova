@@ -21,7 +21,7 @@ export default class ThemePlugin extends Aspect {
 	constructor(params: Partial<ThemePlugin>, plugin: BasePlugin) {
 		const name = generateIncrementedName(
 			params.name || "New Theme",
-			plugin.aspects.ships.map((theme) => theme.name),
+			plugin.aspects.themes.map((theme) => theme.name),
 		);
 		super({ name, ...params }, { kind: "themes" }, plugin);
 		this.name = name;

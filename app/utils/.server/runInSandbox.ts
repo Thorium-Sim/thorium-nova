@@ -74,7 +74,7 @@ const ALLOWLIST = new Set([
 	"decodeURIComponent",
 	"encodeURI",
 	"decodeURI",
-	"console", // drop this if you don't even want console.log to work
+	"console",
 	"setTimeout",
 	"clearTimeout",
 	"setInterval",

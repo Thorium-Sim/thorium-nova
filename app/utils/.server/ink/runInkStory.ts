@@ -5,7 +5,7 @@ import { spawnTrigger } from "@thorium/.server/spawners/trigger";
 import { thoriumContext } from "@thorium/utils/.server/context";
 import { loadInkStory } from "@thorium/utils/.server/ink/loadInkStory";
 import type { ECS, Entity } from "@thorium/utils/ecs";
-import { interpolateText } from "@thorium/utils/interpolationEngine";
+import { getPluginTextPatterns, interpolateText } from "@thorium/utils/interpolationEngine";
 import uniqid from "@thorium/utils/uniqid";
 import type { Story } from "inkjs";
 
@@ -48,7 +48,12 @@ export async function runInkStory(conversation: Entity) {
 								val = null;
 							} else if (typeof val === "string") {
 								// Other values get interpolated automatically
-								val = interpolateText(val, localVariables, conversation.ecs.rng);
+								val = interpolateText(
+									val,
+									localVariables,
+									getPluginTextPatterns(conversation.ecs.server),
+									conversation.ecs.rng,
+								);
 							}
 
 							return [key, val];
@@ -85,7 +90,12 @@ export async function runInkStory(conversation: Entity) {
 							val = null;
 						} else if (typeof val === "string") {
 							// Other values get interpolated automatically
-							val = interpolateText(val, localVariables, conversation.ecs.rng);
+							val = interpolateText(
+								val,
+								localVariables,
+								getPluginTextPatterns(conversation.ecs.server),
+								conversation.ecs.rng,
+							);
 						}
 						return [key, val];
 					}),

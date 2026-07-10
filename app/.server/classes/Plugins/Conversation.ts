@@ -25,7 +25,7 @@ export default class ConversationPlugin extends Aspect {
 	constructor(params: Partial<ConversationPlugin>, plugin: BasePlugin) {
 		const name = generateIncrementedName(
 			params.name || "New Conversation",
-			plugin.aspects.ships.map((theme) => theme.name),
+			plugin.aspects.conversations.map((conversation) => conversation.name),
 		);
 		// Figure out what type of timeline we're dealing with
 		let timelineType = "missions";

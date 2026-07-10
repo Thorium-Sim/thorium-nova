@@ -2,6 +2,7 @@ import path from "node:path";
 
 import BasePlugin from "@thorium/.server/classes/Plugins";
 import { macro } from "@thorium/.server/data/plugins/macro";
+import { textPattern } from "@thorium/.server/data/plugins/textPattern";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
@@ -28,6 +29,7 @@ export const plugin = t.router({
 	systems,
 	starmap,
 	inventory,
+	textPattern,
 	all: t.procedure.request(({ ctx }) => {
 		return ctx.server.plugins;
 	}),

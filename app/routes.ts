@@ -31,6 +31,7 @@ export default [
 	route("flight/core", "routes/core/index.tsx"),
 	route("flight/core/preview/:component", "routes/core/Preview.tsx"),
 	route("config", "routes/config/layout.tsx", [
+		route("thorium", "routes/config/thorium.tsx"),
 		route(":pluginId?", "routes/config/index.tsx"),
 		...prefix(":pluginId", [
 			route("list", "routes/config/aspectList.tsx"),
@@ -129,6 +130,9 @@ export default [
 			]),
 			route("inventory", "routes/config/inventory/layout.tsx", [
 				route(":inventoryId", "routes/config/inventory/inventory.tsx"),
+			]),
+			route("textPatterns", "routes/config/textPatterns/layout.tsx", [
+				route(":textPatternId", "routes/config/textPatterns/textPattern.tsx"),
 			]),
 		]),
 	]),

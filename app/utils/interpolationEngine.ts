@@ -1,17 +1,25 @@
+import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import { createRNG } from "@thorium/utils/rng";
 import { capitalCase } from "change-case";
 
 export function interpolateText(
 	template: string,
 	vars: Record<string, any> = {},
-	rng = createRNG(Math.random()),
+	textPatterns: Record<string, string> = {},
+	rng = createRNG(Math.random() * 100),
 ) {
 	const ctx = { ...vars };
 
+	// Text Pattern Includes
+	while (template.match(/\{\s*#([^{}]+)\s*\}/g)) {
+		template = template.replace(/\{\s*#([^{}]+)\s*\}/g, (_, match: string) => {
+			return textPatterns[match] ?? match;
+		});
+	}
+
 	// Random from list
-	while (template.includes("{~")) {
+	while (template.match(/\{\s*~([^{}]+)\s*\}/g)) {
 		template = template.replace(/\{\s*~([^{}]+)\s*\}/g, (_, options: string) => {
-			console.log(options.split(","));
 			return rng.nextFromList(options.split(","));
 		});
 	}
@@ -115,4 +123,17 @@ function pluralize(count: number, singular: string, plural: string) {
 		default:
 			throw new Error(`Unknown: ${grammaticalNumber}`);
 	}
+}
+
+export function getPluginTextPatterns(server: ServerDataModel) {
+	return server.plugins
+		.sort((a, b) => (a.default ? -1 : b.default ? 1 : 0))
+		.reduce((prev: Record<string, string>, next) => {
+			if (!next.active) return prev;
+			for (const textPattern of next.aspects.textPatterns) {
+				prev[textPattern.name] = textPattern.textPattern;
+				prev[`${next.name}:${textPattern.name}`] = textPattern.textPattern;
+			}
+			return prev;
+		}, {});
 }

@@ -6,17 +6,25 @@ import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
+import { useMenubar } from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import TagInput from "@thorium/ui/TagInput";
 import UploadWell from "@thorium/ui/UploadWell";
 import { Suspense, useState } from "react";
-import { Link, NavLink, useNavigate, useParams } from "react-router";
+import { href, Link, NavLink, useNavigate, useParams } from "react-router";
 
 export default function PluginEdit() {
 	const { pluginId } = useParams() as { pluginId: string };
 	const [plugins] = q.plugin.all.useNetRequest();
 	const navigate = useNavigate();
 	const prompt = usePrompt();
+	useMenubar({
+		children: (
+			<Link to={href("/config/thorium")} className="btn btn-xs btn-outline btn-notice">
+				<Icon name="thorium" /> Thorium Settings
+			</Link>
+		),
+	});
 	return (
 		<div className="h-[calc(100%-2rem)] p-8">
 			<h1 className="mb-4 text-3xl font-bold text-white">Plugin Config</h1>

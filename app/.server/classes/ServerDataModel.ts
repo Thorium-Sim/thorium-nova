@@ -1,6 +1,7 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { router } from "@thorium/.server/init/router";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
+import { getPluginTextPatterns } from "@thorium/utils/interpolationEngine";
 import randomWords from "@thorium/utils/random-words";
 
 import { Client } from "../init/liveQuery";
@@ -10,6 +11,9 @@ export class ServerDataModel extends DataStore {
 	thoriumId!: string;
 	activeFlightName!: string | null;
 	plugins: BasePlugin[] = [];
+
+	flightNameTemplate!: string;
+	clientNameTemplate!: string;
 	constructor(
 		params: Partial<ServerDataModel>,
 		options: DataStoreOptions,
@@ -20,7 +24,7 @@ export class ServerDataModel extends DataStore {
 	spawnClients(clients: Record<string, Client<any>>) {
 		this.clients = Object.fromEntries(
 			Object.entries(clients).map(([id, client]: any) => {
-				const c = new Client(client.id, router, pubsub);
+				const c = new Client(this, client.id, router, pubsub);
 				c.name = client.name;
 				c.settings = client.settings || c.settings;
 				return [id, c];
@@ -31,6 +35,17 @@ export class ServerDataModel extends DataStore {
 		const data = await this.getData<ServerDataModel>();
 		this.activeFlightName = data.activeFlightName || null;
 		this.thoriumId = data.thoriumId || randomWords(3).join("-");
+
+		console.trace();
+		// Make sure we have a Flight Names in the plugins. It very unlikely that there wouldn't be
+		this.flightNameTemplate =
+			data.flightNameTemplate || getPluginTextPatterns(this)["Flight Names"]
+				? "{#Flight Names}"
+				: "{~Alpha,Bravo,Charlie,Delta,Echo} {~1,2,3,4,5,6,7,8}";
+		this.clientNameTemplate =
+			data.clientNameTemplate || getPluginTextPatterns(this)["Client Names"]
+				? "{#Client Names}"
+				: "{~Red,Orange,Yellow,Green,Blue,Purple,Violet,Gold,Silver,White,Black} {~1,2,3,4,5,6,7,8}";
 		this.spawnClients(this.clients || data.clients || {});
 	}
 	getClientByName(clientName: string) {

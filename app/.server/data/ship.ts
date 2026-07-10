@@ -4,7 +4,7 @@ import { spawnShip } from "@thorium/.server/spawners/ship";
 import { alertTypes } from "@thorium/ecs-components/shipAlerts";
 import { destroyShip } from "@thorium/utils/.server/ship/collisionDamage";
 import type { ECS, Entity } from "@thorium/utils/ecs";
-import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
+import { getPluginTextPatterns, interpolateText } from "@thorium/utils/interpolationEngine";
 import type { RNG } from "@thorium/utils/rng";
 import { getCompletePositionFromOrbit, getObjectSystem } from "@thorium/utils/starmap/position";
 import { Vector3 } from "three";
@@ -239,8 +239,12 @@ export const ship = t.router({
 			if (!shipTemplate) throw new Error("Ship template not found.");
 
 			const { ship: shipEntity, extraEntities } = await spawnShip(ctx, shipTemplate, {
-				// TODO: August 20, 2022 - Generate a name for this ship somehow
-				name: randomNameGenerator(),
+				name: interpolateText(
+					shipTemplate.nameTemplate,
+					{},
+					getPluginTextPatterns(ctx.server),
+					ctx.flight.ecs.rng,
+				),
 				tags: input.tags,
 				flightMode: ctx.flight.mode,
 			});

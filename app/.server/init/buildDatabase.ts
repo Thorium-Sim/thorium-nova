@@ -21,7 +21,6 @@ export async function buildDatabase(loadPlugins: (this: ServerDataModel) => Prom
 		{ meta: { filePath: databaseName } },
 		loadPlugins,
 	);
-	await serverModel.getInitialData();
 
 	// Wait for the plugins to load. Shouldn't take long.
 	const promises = [serverModel.loadPlugins()];
@@ -46,6 +45,8 @@ export async function buildDatabase(loadPlugins: (this: ServerDataModel) => Prom
 	}
 
 	await Promise.all(promises);
+
+	await serverModel.getInitialData();
 
 	thoriumContext.getStore()!.database = { server: serverModel, flight };
 	return thoriumContext.getStore()!.database;

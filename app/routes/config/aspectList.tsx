@@ -2,7 +2,7 @@ import { Icon } from "@thorium/ui/Icon";
 import { useMenubar } from "@thorium/ui/Menubar";
 import type React from "react";
 import type { ReactNode } from "react";
-import { NavLink, useParams } from "react-router";
+import { href, Link, NavLink, useParams } from "react-router";
 
 const ConfigIcon: React.FC<{
 	to: string;
@@ -12,7 +12,7 @@ const ConfigIcon: React.FC<{
 	return (
 		<NavLink
 			aria-disabled={props.disabled}
-			className={`h-64 w-64 rounded-lg shadow-inner transition-colors duration-300 ${
+			className={`aspect-square rounded-lg shadow-inner transition-colors duration-300 ${
 				props.disabled
 					? "cursor-not-allowed bg-black/30 text-gray-500"
 					: "cursor-pointer bg-white/30 hover:bg-white/50"
@@ -29,12 +29,19 @@ const ConfigIcon: React.FC<{
 
 const ConfigList = () => {
 	const { pluginId } = useParams();
-	useMenubar({ backTo: `/config/${pluginId}` });
+	useMenubar({
+		backTo: `/config/${pluginId}`,
+		children: (
+			<Link to={href("/config/thorium")} className="btn btn-xs btn-outline btn-notice">
+				<Icon name="thorium" /> Thorium Settings
+			</Link>
+		),
+	});
 	return (
 		<div className="h-[calc(100%-2rem)] overflow-y-auto p-8">
 			<h1 className="mb-4 text-3xl font-bold text-white">Plugin Aspects</h1>
 
-			<div className="grid grid-cols-4 gap-16 pb-16">
+			<div className="grid grid-cols-6 gap-16 pb-16">
 				<ConfigIcon to={`/config/${pluginId}/starmap`}>
 					<Icon name="star" className="mb-4 text-6xl" />
 					<p className="text-2xl font-bold">Universe</p>
@@ -74,6 +81,10 @@ const ConfigList = () => {
 				<ConfigIcon to={`/config/${pluginId}/inventory`}>
 					<Icon name="package-open" className="mb-4 text-6xl" />
 					<p className="text-2xl font-bold">Inventory</p>
+				</ConfigIcon>
+				<ConfigIcon to={`/config/${pluginId}/textPatterns`}>
+					<Icon name="square-dashed-text" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Text Patterns</p>
 				</ConfigIcon>
 			</div>
 		</div>

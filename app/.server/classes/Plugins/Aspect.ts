@@ -29,7 +29,7 @@ export abstract class Aspect extends DataStore {
 		let data = await instance.getData();
 		if (this.schema && data) {
 			try {
-				data = this.schema.parse(data);
+				data = this.schema.parse({ ...instance, ...data });
 			} catch (error) {
 				if (error instanceof ZodError) {
 					throw new Error(

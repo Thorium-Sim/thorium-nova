@@ -40,7 +40,19 @@ export default function FlightQuickStart() {
 					</Link>
 				)}
 				{step === "ship" && (
-					<Button className="btn-info" onClick={() => dispatch({ type: "addShip" })}>
+					<Button
+						className="btn-info"
+						onClick={async () => {
+							const shipId = (state.ships || []).at(-1)!.shipId;
+							const shipTemplate = await q.plugin.ship.get.netRequest(shipId);
+							dispatch({
+								type: "addShip",
+								name: (
+									await q.textPattern.interpolate.netRequest({ string: shipTemplate.nameTemplate })
+								).output,
+							});
+						}}
+					>
 						Add Player Ship
 					</Button>
 				)}

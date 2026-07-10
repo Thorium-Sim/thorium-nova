@@ -14,6 +14,7 @@ export type ShipCategories = z.infer<typeof shipCategories>;
 export default class ShipPlugin extends Aspect {
 	static schema = z.object({
 		name: z.string(),
+		nameTemplate: z.string(),
 		description: z.string(),
 		category: shipCategories,
 		tags: z.string().array(),
@@ -78,6 +79,7 @@ export default class ShipPlugin extends Aspect {
 	apiVersion = "ships/v1" as const;
 	kind = "ships" as const;
 	name: string;
+	nameTemplate: string;
 	description: string;
 	/**
 	 * A general category of the ship. Used to determine faction icons.
@@ -154,6 +156,8 @@ export default class ShipPlugin extends Aspect {
 		);
 		super({ name, ...params }, { kind: "ships" }, plugin);
 		this.name = name;
+		this.nameTemplate =
+			params.nameTemplate || "{~Alpha,Bravo,Charlie,Delta,Echo} {~1,2,3,4,5,6,7,8,9,10}";
 		this.description = params.description || "Boldly going where no one has gone before.";
 		this.category = params.category || "Cruiser";
 		this.tags = params.tags || [];

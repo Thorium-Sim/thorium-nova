@@ -10,7 +10,6 @@ import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
 import SearchableList from "@thorium/ui/SearchableList";
 import { cn } from "@thorium/utils/cn";
-import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import * as React from "react";
 import {
 	type Key,
@@ -32,7 +31,7 @@ interface Ship {
 const FleetConfig = () => {
 	const [state, dispatch] = useFlightQuickStart();
 	const [pluginShips] = q.plugin.ship.available.useNetRequest();
-
+	const [settings] = q.thorium.settings.useNetRequest();
 	if (!pluginShips) return <div>No ships are present in the active plugins.</div>;
 
 	const ships = state.ships || [];
@@ -46,7 +45,16 @@ const FleetConfig = () => {
 				inputButton={
 					<Button
 						className="btn-sm btn-outline btn-notice"
-						onClick={() => dispatch({ type: "flightName", name: randomNameGenerator() })}
+						onClick={async () =>
+							dispatch({
+								type: "flightName",
+								name: (
+									await q.textPattern.interpolate.netRequest({
+										string: settings.flightNameTemplate,
+									})
+								).output,
+							})
+						}
 					>
 						<Icon name="repeat-2" width="2rem" />
 					</Button>
@@ -138,11 +146,7 @@ function ShipsList({
 		<Tabs selectedKey={selectedKey} onSelectionChange={onSelectionChange}>
 			<TabList aria-label="Player Ships" className="flex flex-wrap gap-1">
 				{ships.map((ship) => (
-					<Tab
-						id={ship.id}
-						key={ship.id}
-						className="data-[selected]:bg-notice rounded-t bg-gray-700 px-2"
-					>
+					<Tab id={ship.id} key={ship.id} className="selected:bg-notice rounded-t bg-gray-700 px-2">
 						{ship.name}
 					</Tab>
 				))}

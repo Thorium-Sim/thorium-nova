@@ -29,7 +29,7 @@ class MockServerDataModel {
 	];
 	constructor() {
 		this.clients = {
-			test: new Client("test", router, pubsub),
+			test: new Client(this as any, "test", router, pubsub),
 		};
 	}
 	getClientByName(clientName: string) {

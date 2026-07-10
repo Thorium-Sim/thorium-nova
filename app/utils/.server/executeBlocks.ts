@@ -6,7 +6,7 @@ import { evaluateTriggerCondition } from "@thorium/utils/.server/evaluateEntityQ
 import { runInSandbox } from "@thorium/utils/.server/runInSandbox";
 import { getShipSystem, getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { Entity, type ECS } from "@thorium/utils/ecs";
-import { interpolateText } from "@thorium/utils/interpolationEngine";
+import { getPluginTextPatterns, interpolateText } from "@thorium/utils/interpolationEngine";
 import { produce } from "immer";
 
 import uniqid from "../uniqid";
@@ -306,7 +306,12 @@ export async function executeBlocks(
 							val = Number(val);
 						} else if (typeof val === "string") {
 							// Other values get interpolated automatically
-							val = interpolateText(val, localVariables, ecs.rng);
+							val = interpolateText(
+								val,
+								localVariables,
+								getPluginTextPatterns(ecs.server),
+								ecs.rng,
+							);
 						}
 						return val;
 					}
@@ -593,7 +598,7 @@ export function getValueReference(
 			if (entities.length > 0) return entities[0];
 		}
 
-		return interpolateText(ref, variables, ecs.rng);
+		return interpolateText(ref, variables, getPluginTextPatterns(ecs.server), ecs.rng);
 	}
 
 	return ref;

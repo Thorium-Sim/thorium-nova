@@ -68,11 +68,12 @@ test("it should set variables inside a variable switch", () => {
 test("it should randomly choose between listed strings", () => {
 	const rng = createRNG("test");
 	expect(
-		interpolateText(`The code is {~Alpha,Beta,Gamma,Delta,Zeta,Lambda,Omicron}`, {}, rng),
+		interpolateText(`The code is {~Alpha,Beta,Gamma,Delta,Zeta,Lambda,Omicron}`, {}, {}, rng),
 	).toEqual("The code is Lambda");
 	expect(
 		interpolateText(
 			`The code is {~Alpha,Beta,Gamma,Delta,Zeta,Lambda,Omicron} {~Alfa,Bravo,Charlie,Delta,Echo,Foxtrot}`,
+			{},
 			{},
 			rng,
 		),
@@ -81,19 +82,20 @@ test("it should randomly choose between listed strings", () => {
 		interpolateText(
 			`The code is {~{~Alpha,Bravo},{~Gamma,{~1,2,3,4}},{~Charlie,{~5,6,7}},{~Foxtrot,{~8,9}},{~1,2}}`,
 			{},
+			{},
 			rng,
 		),
 	).toEqual("The code is Foxtrot");
 	const nameText = `{~Violet,Indigo,Lilac,Azure,Grey,Golden,Marigold,Lavender} {~Silhouette,Guardian,God,Tower,Pillar,Hero,Quest,Journey,Matrix,Palace,Pyramid,Goblet,Sunset,Sunrise}{~,,,,,,,,,,, I, II, III, IV}`;
-	expect(interpolateText(nameText, {}, rng)).toEqual("Violet Goblet III");
-	expect(interpolateText(nameText, {}, rng)).toEqual("Indigo Goblet");
-	expect(interpolateText(nameText, {}, rng)).toEqual("Lilac God IV");
+	expect(interpolateText(nameText, {}, {}, rng)).toEqual("Violet Goblet III");
+	expect(interpolateText(nameText, {}, {}, rng)).toEqual("Indigo Goblet");
+	expect(interpolateText(nameText, {}, {}, rng)).toEqual("Lilac God IV");
 });
 test("it should work with a RANDOM function", () => {
 	const rng = createRNG("test");
 
-	expect(interpolateText(`The code is RANDOM(100,999)`, {}, rng)).toEqual("The code is 851");
-	expect(interpolateText(`The code is RANDOM(100,999)`, {}, rng)).toEqual("The code is 327");
+	expect(interpolateText(`The code is RANDOM(100,999)`, {}, {}, rng)).toEqual("The code is 851");
+	expect(interpolateText(`The code is RANDOM(100,999)`, {}, {}, rng)).toEqual("The code is 327");
 });
 test("it should work with a CAPITALIZE function", () => {
 	expect(
@@ -149,4 +151,24 @@ test("it should support nesting interpolation blocks inside each other", () => {
 			{ code: "Hi there" },
 		),
 	).toEqual("Hi there");
+});
+test("it should not be weird with incomplete interpolation blocks", () => {
+	expect(interpolateText(`{~Alpha,Beta,Gamma`, {})).toEqual(`{~Alpha,Beta,Gamma`);
+	expect(interpolateText(`{~Alpha,Beta,`, {})).toEqual(`{~Alpha,Beta,`);
+	expect(interpolateText(`{~Alpha,Beta,Gamma`, {})).toEqual(`{~Alpha,Beta,Gamma`);
+	expect(interpolateText(`{~`, {})).toEqual(`{~`);
+	expect(interpolateText(`{`, {})).toEqual(`{`);
+}, 500);
+test("it should support text pattern includes", () => {
+	expect(
+		interpolateText(
+			`[code|code|{#randomGreek}-{#randomNumber}-{#randomCoolWord}]`,
+			{},
+			{
+				randomGreek: `{~Alpha,Beta,Gamma,Delta,Zeta,Lambda,Omicron}`,
+				randomNumber: `RANDOM(100,999)`,
+				randomCoolWord: `{~Ansible,Cyber,Matrix,Naidon,Skadov,Memory,Faraday,Bernal,Dyson,Protocol,Vector,Analog,Digital,Buffer,Cache,Crypto,Fragment,System,Duplex,Threading,Hyper,Interlace,Progressive,Simplex,Multiplex,Syntax,Token}`,
+			},
+		),
+	).toEqual("Alpha-293-Matrix");
 });

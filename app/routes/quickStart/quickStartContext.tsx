@@ -1,6 +1,6 @@
 import type { FlightStartingPoint } from "@thorium/.server/spawners/flight";
+import { q } from "@thorium/context/AppContext";
 import { useLocalStorageReducer } from "@thorium/hooks/useLocalStorage";
-import { randomNameGenerator } from "@thorium/utils/operations/randomNameGenerator";
 import uniqid from "@thorium/utils/uniqid";
 import { produce } from "immer";
 import { createContext, useContext, useEffect, type ReactNode } from "react";
@@ -28,7 +28,7 @@ export type FlightConfigAction =
 	| { type: "shipName"; id: string; name: string }
 	| {
 			type: "addShip";
-			name?: string;
+			name: string;
 			shipId?: { pluginId: string; shipId: string };
 	  }
 	| { type: "removeShip"; id: string }
@@ -95,7 +95,7 @@ function quickStartReducer(
 					...(state.ships || []),
 					{
 						id: uniqid(),
-						name: action.name || randomNameGenerator(),
+						name: action.name,
 						shipId: action.shipId || (state.ships || []).at(-1)!.shipId,
 						crewCount: (state.ships || []).at(-1)?.crewCount || 1,
 					},
@@ -129,6 +129,10 @@ const QuickStartContext = createContext<[FlightConfigState, React.Dispatch<Fligh
 );
 
 export function FlightQuickStartProvider({ children }: { children: ReactNode }) {
+	const [settings] = q.thorium.settings.useNetRequest();
+	const [defaultFlightName] = q.textPattern.interpolate.useNetRequest({
+		string: settings.flightNameTemplate,
+	});
 	const value = useLocalStorageReducer<
 		typeof quickStartReducer,
 		FlightConfigState,
@@ -136,7 +140,7 @@ export function FlightQuickStartProvider({ children }: { children: ReactNode }) 
 	>(
 		quickStartReducer,
 		{
-			flightName: randomNameGenerator(),
+			flightName: defaultFlightName.output,
 			hasFlightDirector: true,
 			mode: "nova",
 			ships: [
@@ -153,12 +157,7 @@ export function FlightQuickStartProvider({ children }: { children: ReactNode }) 
 	);
 	const set = value[1];
 	const ships = value[0].ships || [];
-	useEffect(() => {
-		set({
-			type: "flightName",
-			name: randomNameGenerator(),
-		});
-	}, [set]);
+
 	useEffect(() => {
 		if (ships.length === 0) {
 			set({

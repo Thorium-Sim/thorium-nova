@@ -2,7 +2,7 @@ import InfoTip from "@thorium/ui/InfoTip";
 import { cn } from "@thorium/utils/cn";
 import type { DetailedHTMLProps, HTMLAttributes } from "react";
 
-export function InterpolateInfo({ className }: { className?: string }) {
+export function InterpolateInfo({ className, basic }: { className?: string; basic?: boolean }) {
 	return (
 		<InfoTip
 			className={cn("absolute -right-4 -bottom-4", className)}
@@ -10,23 +10,27 @@ export function InterpolateInfo({ className }: { className?: string }) {
 		>
 			Use the following rules to generate text:
 			<ul className="ml-4 list-disc">
-				<li>
-					<Code>{`{variableName}`}</Code> - interpolate variables into your text
-				</li>
-				<li>
-					<Code>{`[variableName|option if variable is truthy|option if variable is not truthy]`}</Code>{" "}
-					- interpolate based on the existence of a variable, or whether or not it is true. The
-					first option will be inserted if the variable exists. The second option will be inserted
-					if the variable does not exist or is false.
-				</li>
-				<li>
-					<Code>{`[damageType|Electrical:electrical subsystems|Radiation:protective coating|default:structure]`}</Code>{" "}
-					- picks between options based on a variable's value, falling back on the default case.
-				</li>
-				<li>
-					<Code>{`The [damageType|Electrical:electrical subsystems;verb=have|Radiation:radiation coating;verb=has|default:structure;verb=has] of the {systemName} {verb} sustained damage`}</Code>{" "}
-					- Sets intermediate variables which can be used later in the text.
-				</li>
+				{basic ? null : (
+					<>
+						<li>
+							<Code>{`{variableName}`}</Code> - interpolate variables into your text
+						</li>
+						<li>
+							<Code>{`[variableName|option if variable is truthy|option if variable is not truthy]`}</Code>{" "}
+							- interpolate based on the existence of a variable, or whether or not it is true. The
+							first option will be inserted if the variable exists. The second option will be
+							inserted if the variable does not exist or is false.
+						</li>
+						<li>
+							<Code>{`[damageType|Electrical:electrical subsystems|Radiation:protective coating|default:structure]`}</Code>{" "}
+							- picks between options based on a variable's value, falling back on the default case.
+						</li>
+						<li>
+							<Code>{`The [damageType|Electrical:electrical subsystems;verb=have|Radiation:radiation coating;verb=has|default:structure;verb=has] of the {systemName} {verb} sustained damage`}</Code>{" "}
+							- Sets intermediate variables which can be used later in the text.
+						</li>
+					</>
+				)}
 				<li>
 					<Code>{`The code is {~Alpha,Beta,Gamma,Delta}`}</Code> - randomly chooses from
 					comma-separated options
@@ -48,6 +52,10 @@ export function InterpolateInfo({ className }: { className?: string }) {
 				<li>
 					<Code>{`The PLURALIZE({count},{tool},{tool}s)`}</Code> - pluralizes text based on a count
 					value.
+				</li>
+				<li>
+					<Code>{`{#Thorium Default:Adjectives} {#Nouns}`}</Code> - includes a text pattern. Plugin
+					name is optional, but could result in using an unintended text pattern.
 				</li>
 			</ul>
 		</InfoTip>

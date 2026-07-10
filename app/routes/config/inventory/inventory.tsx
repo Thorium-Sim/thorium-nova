@@ -377,7 +377,7 @@ export default function InventoryLayout() {
 							}))
 						)
 							return;
-						await q.plugin.inventory.update.netSend({
+						await q.plugin.inventory.delete.netSend({
 							pluginId,
 							inventoryId,
 						});
@@ -386,29 +386,6 @@ export default function InventoryLayout() {
 				>
 					Delete Inventory Item
 				</Button>
-				{/* <Button
-                        className="w-full btn-outline btn-notice"
-                        disabled={true}
-                        onClick={async () => {
-                          if (!pluginId) return;
-                          const name = await prompt({
-                            header: "What is the name of the duplicated plugin?",
-                          });
-                          if (!name || typeof name !== "string") return;
-                          const result = await netSend("pluginShipDuplicate", {
-                            pluginId: pluginId,
-                            shipId
-                            name,
-                          });
-                          if ("error" in result) {
-                            toast({title:"Error duplicating plugin", body: result.error, color:"error"});
-                            return;
-                          }
-                          navigate(`/config/${result.shipId}`);
-                        }}
-                      >
-                        Duplicate Ship
-                      </Button> */}
 			</div>
 		</fieldset>
 	);

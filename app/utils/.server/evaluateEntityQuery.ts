@@ -6,7 +6,7 @@ import type {
 } from "@thorium/.server/classes/Plugins/TimelineStep";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { executeBlocks } from "@thorium/utils/.server/executeBlocks";
-import { interpolateText } from "@thorium/utils/interpolationEngine";
+import { getPluginTextPatterns, interpolateText } from "@thorium/utils/interpolationEngine";
 import type z from "zod";
 
 import type { ECS, Entity } from "../ecs";
@@ -398,6 +398,7 @@ export async function triggerStep(step: Entity) {
 		description: interpolateText(
 			step.components.identity?.description || "",
 			localVariables,
+			getPluginTextPatterns(step.ecs.server),
 			step.ecs.rng,
 		),
 	});
