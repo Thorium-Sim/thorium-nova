@@ -1,14 +1,36 @@
-import { useRef } from "react";
+import type { ElementProps } from "@thorium/cards/EngineeringPanels/elements/ElementProps";
 
 import "./rotor.css";
-export function Rotor({ max = 6 }: { max?: number }) {
+import { cn } from "@thorium/utils/cn";
+import debounce from "lodash.debounce";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
+function setRotation(scrollerRef: RefObject<HTMLDivElement | null>, val: number) {
+	const scrollPercent = val / 6;
+	if (scrollerRef.current) {
+		scrollerRef.current.scrollTop = scrollerRef.current.scrollHeight * scrollPercent;
+	}
+}
+
+export function Rotor({
+	max = 6,
+	className,
+	value,
+	update,
+}: { max?: number; className?: string } & ElementProps) {
 	const abortControllerRef = useRef(new AbortController());
+	const scrollerRef = useRef<HTMLDivElement>(null);
+	useEffect(() => {
+		setRotation(scrollerRef, value);
+	}, [value]);
+
+	const debouncedUpdate = useCallback(debounce(update, 200), [update]);
 	return (
-		<div className="rotor-wrapper">
+		<div className={cn("rotor-wrapper", className)}>
 			<div className="rotor-reflection"></div>
 			<div className="rotor"></div>
 			<div
 				className="segments-scroller"
+				ref={scrollerRef}
 				onPointerDown={(event) => {
 					const target = event.currentTarget;
 					const pointerId = event.pointerId;
@@ -24,6 +46,7 @@ export function Rotor({ max = 6 }: { max?: number }) {
 						(moveEvent) => {
 							if (moveEvent instanceof PointerEvent) {
 								target.scrollTop -= moveEvent.movementY;
+								debouncedUpdate(Math.round((target.scrollTop / target.scrollHeight) * 6) + 1);
 							}
 						},
 						{ signal: abortControllerRef.current.signal },
@@ -36,6 +59,7 @@ export function Rotor({ max = 6 }: { max?: number }) {
 							target.releasePointerCapture(pointerId);
 							target.style.pointerEvents = "all";
 							target.style.scrollSnapType = "y mandatory";
+							update(Math.round((target.scrollTop / target.scrollHeight) * 6) + 1);
 						},
 						{ once: true },
 					);

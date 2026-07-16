@@ -2,7 +2,7 @@ import * as Cards from "@thorium/cards";
 import { Login } from "@thorium/cards/Login";
 import Offline from "@thorium/cards/Offline";
 import { clientId, q } from "@thorium/context/AppContext";
-import CardProvider from "@thorium/context/CardContext";
+import CardProvider, { type Card } from "@thorium/context/CardContext";
 import { LoadingSpinner } from "@thorium/ui/LoadingSpinner";
 import { Transition } from "@thorium/ui/Transition";
 import { type ComponentType, Suspense, useCallback, useState } from "react";
@@ -46,12 +46,12 @@ export const CardArea: React.FC<{
 			>
 				<Offline />
 			</Transition>
-			{CardComponents.map(({ CardComponent, component, name }) => (
+			{CardComponents.map(({ CardComponent, ...rest }) => (
 				<CardRenderer
 					CardComponent={CardComponent}
-					id={component}
 					currentCardId={card.component}
-					key={name}
+					key={rest.component}
+					{...rest}
 				/>
 			))}
 		</div>
@@ -60,24 +60,23 @@ export const CardArea: React.FC<{
 
 const CardRenderer = ({
 	CardComponent,
-	id,
 	currentCardId,
+	...rest
 }: {
 	CardComponent: ComponentType<CardProps>;
-	id: string;
 	currentCardId: string;
-}) => {
+} & Card) => {
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [station] = q.station.get.useNetRequest({ clientId });
 	const allowCard =
 		(station.name === "Viewscreen" || Boolean(client.loginName)) && !client.offlineState;
-	const show = allowCard && currentCardId === id;
+	const show = allowCard && currentCardId === rest.component;
 	const [cardLoaded, setCardLoaded] = useState(show);
 	return (
-		<CardProvider cardName={id} cardLoaded={cardLoaded} isWidget={false}>
+		<CardProvider cardLoaded={cardLoaded} isWidget={false} {...rest}>
 			<Transition
-				key={id}
-				id={id}
+				key={rest.component}
+				id={rest.component}
 				isOpen={show}
 				afterLeave={useCallback(() => {
 					setCardLoaded(false);

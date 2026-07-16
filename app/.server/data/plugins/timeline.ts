@@ -819,11 +819,14 @@ export const timeline = t.router({
 				timelineType,
 			}),
 		)
-		.send(({ ctx, input }) => {
+		.send(async ({ ctx, input }) => {
 			inputAuth(ctx);
 			const plugin = getPlugin(ctx, input.pluginId);
 			let name = input.name;
-			const timeline = new timelineClasses[input.timelineType]({ name: input.name }, plugin);
+			const timeline = await timelineClasses[input.timelineType].create(
+				{ name: input.name },
+				plugin,
+			);
 			plugin.aspects[input.timelineType].push(timeline);
 			name = timeline.name;
 

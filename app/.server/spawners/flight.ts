@@ -6,8 +6,15 @@ import type { DataContext } from "@thorium/.server/DataContext";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { spawnShip } from "@thorium/.server/spawners/ship";
 import { spawnSolarSystem } from "@thorium/.server/spawners/solarSystem";
+import { isPanelElement } from "@thorium/ecs-components/engineeringPanel";
+import {
+	panelElementList,
+	type PanelElementTypes,
+} from "@thorium/ecs-components/engineeringPanelElementConfig";
 import type { position as positionComponent } from "@thorium/ecs-components/position";
 import { type ECS, Entity } from "@thorium/utils/ecs";
+import { getPluginTextPatterns, interpolateText } from "@thorium/utils/interpolationEngine";
+import { createRNG, type RNG } from "@thorium/utils/rng";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { Vector3 } from "three";
 import z from "zod";
@@ -174,6 +181,92 @@ export async function startFlight(
 			stations: stationComplement?.stations || [],
 		});
 
+		// Generate Engineering panels for any cards that need them
+		for (const station of shipEntity.components.stationComplement?.stations || []) {
+			for (const card of station.cards) {
+				if (card.component === "EngineeringPanels") {
+					const panel = new Entity();
+
+					panel.addComponent("isPanel", { shipId: shipEntity.id });
+					if (card.config?.tags) {
+						panel.addComponent("tags", { tags: card.config.tags });
+					}
+					ctx.flight.ecs.addEntity(panel);
+
+					// @ts-expect-error
+					card.config = { ...card.config, panelId: panel.id };
+					if ("config" in card && card.config && "elements" in card.config) {
+						for (const { name, ...element } of card.config.elements.slice(0, 24)) {
+							const elementEntity = new Entity();
+							elementEntity.addComponent("identity", { name });
+							elementEntity.addComponent("isPanelElement", {
+								panelId: panel.id,
+								shipId: shipEntity.id,
+								element,
+							});
+							ctx.flight.ecs.addEntity(elementEntity);
+						}
+					} else {
+						let config = Object.assign(
+							{
+								elementCount: 12,
+								elementNameTemplate: `{~A,B,C,D,E}{~A,B,C,D,E}-RANDOM(10,99)`,
+								randomSeed: ctx.flight.ecs.rng.nextString(),
+							},
+
+							card.config,
+						);
+						const rng = createRNG(config.randomSeed);
+						const filteredTypes: PanelElementTypes[] = [];
+						const includedTypes: PanelElementTypes[] = [];
+						const elementCount = Math.min(config.elementCount, 24);
+
+						function addElement(
+							type: PanelElementTypes = rng.nextFromList(
+								panelElementList.filter((v) => !filteredTypes.includes(v)),
+							),
+						) {
+							const elementEntity = new Entity();
+							elementEntity.addComponent("identity", {
+								name: interpolateText(
+									config.elementNameTemplate,
+									{},
+									getPluginTextPatterns(ctx.server),
+									rng,
+								),
+							});
+							elementEntity.addComponent("isPanelElement", {
+								panelId: panel.id,
+								shipId: shipEntity.id,
+								element: getPanelElement(type, rng),
+							});
+							ctx.flight!.ecs.addEntity(elementEntity);
+							includedTypes.push(type);
+							return type;
+						}
+						for (let i = 0; i < elementCount; i++) {
+							const type = addElement();
+							if (
+								i < elementCount - 1 &&
+								type === "cableSocket" &&
+								includedTypes.filter((i) => i === "cableSocket").length < 4
+							) {
+								// Add another cable socket, just to add more variety
+								addElement("cableSocket");
+							}
+
+							// Remove element types as necessary
+							// Only one keypad
+							if (type === "numberPad") filteredTypes.push(type);
+							// No more than 20% of the panel should be one type
+							if (includedTypes.filter((v) => v === type).length >= elementCount / 5)
+								filteredTypes.push(type);
+						}
+					}
+				}
+			}
+		}
+
 		ctx.flight.ecs.addEntity(shipEntity);
 	}
 	// Add the mission if it exists
@@ -199,6 +292,38 @@ export async function startFlight(
 	await ctx.flight.write(true);
 
 	return ctx.flight;
+}
+
+function getPanelElement(
+	type: z.infer<typeof isPanelElement>["element"]["type"],
+	rng: RNG,
+): z.infer<typeof isPanelElement>["element"] {
+	switch (type) {
+		case "triSwitch":
+		case "numberPad":
+			return { type };
+		case "pressButton":
+		case "switch":
+			return {
+				type,
+				color: rng.nextFromList([
+					"red",
+					"orange",
+					"yellow",
+					"#00ff00",
+					"cyan",
+					"blue",
+					"rebeccapurple",
+				]),
+			};
+		case "cableSocket":
+			// Even integer
+			return { type, ports: rng.nextInt(2, 5) * 2 };
+		case "numberedRotor":
+			return { type, max: 6 };
+		case "numberedSlider":
+			return { type, max: rng.nextInt(4, 8) };
+	}
 }
 
 function getStationComplement(

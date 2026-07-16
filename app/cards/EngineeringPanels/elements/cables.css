@@ -46,8 +46,3 @@
 	border-radius: 50%;
 	background: radial-gradient(black, #222 40%, #f2f2ea 42%, #f8f8f1);
 }
-.port-holder {
-	display: flex;
-	justify-content: space-between;
-	gap: 0.5rem;
-}

@@ -1,4 +1,5 @@
 .panel-slider input[type="range"] {
+	width: 100%;
 	appearance: none;
 	&::-webkit-slider-thumb {
 		position: relative;
@@ -38,6 +39,6 @@
 .panel-slider .labels {
 	display: flex;
 	justify-content: space-between;
-	padding: 0 4px;
+	padding: 0.5rem 4px;
 	color: white;
 }

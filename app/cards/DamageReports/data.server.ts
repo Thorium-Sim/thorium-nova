@@ -345,7 +345,7 @@ export const damageReports = t.router({
 			action: () => {
 				return {
 					timelineId: {
-						name: "Damage Report ID ID",
+						name: "Damage Report ID",
 						helper:
 							"If using in damage report timeline action trigger, leave blank to complete the current damage report.",
 					},

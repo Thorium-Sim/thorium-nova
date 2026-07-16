@@ -17,3 +17,4 @@ export { targeting } from "./Targeting/data.server";
 export { viewscreen } from "./Viewscreen/data.server";
 export { shortRangeComm } from "./ShortRangeComm/data.server";
 export { exocomps } from "./Exocomps/data.server";
+export { engineeringPanels } from "./EngineeringPanels/data.server";

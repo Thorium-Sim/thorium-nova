@@ -42,35 +42,33 @@ export function spawnShipSystem(
 
 		const flags = ShipSystemTypes[template.type].flags;
 
-		if (
-			flightMode === "legacy" &&
-			template.type === "phasers" &&
-			"legacyPhaserBanks" in template &&
-			typeof template.legacyPhaserBanks === "number"
-		) {
+		if (template.type === "phasers") {
 			const phaserBanks: number[] = [];
-			for (let i = 0; i < template.legacyPhaserBanks; i++) {
-				// Create phaser banks for each phaser system
-				const phaserBank = new Entity();
-				phaserBank.addComponent("isPhaserBank", {
-					// @ts-expect-error
-					chargeSpeed: template.legacyChargeSpeed,
-					phaserId: entity.id,
-					shipId,
-				});
-				phaserBank.addComponent("heat");
-				entities.push(phaserBank);
-				phaserBanks.push(phaserBank.id);
-			}
-			template.legacyPhaserBanks = phaserBanks;
-		}
 
-		if (flightMode === "legacy" && template.type === "sensors") {
+			if (
+				flightMode === "legacy" &&
+				"legacyPhaserBanks" in template &&
+				typeof template.legacyPhaserBanks === "number"
+			) {
+				for (let i = 0; i < template.legacyPhaserBanks; i++) {
+					// Create phaser banks for each phaser system
+					const phaserBank = new Entity();
+					phaserBank.addComponent("isPhaserBank", {
+						// @ts-expect-error
+						chargeSpeed: template.legacyChargeSpeed,
+						phaserId: entity.id,
+						shipId,
+					});
+					phaserBank.addComponent("heat");
+					entities.push(phaserBank);
+					phaserBanks.push(phaserBank.id);
+				}
+			}
+			entity.addComponent("isPhasers", { ...template, legacyPhaserBanks: phaserBanks });
+		} else if (flightMode === "legacy" && template.type === "sensors") {
 			entity.addComponent("isLegacySensors", template as any);
 			entity.addComponent("isLegacySensorScanning", template as any);
-		}
-
-		if (template.type !== "generic" && componentName in components)
+		} else if (template.type !== "generic" && componentName in components)
 			entity.addComponent(componentName as ComponentIds, template);
 
 		if (

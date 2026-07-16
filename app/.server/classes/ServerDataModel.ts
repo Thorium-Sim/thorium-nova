@@ -36,7 +36,6 @@ export class ServerDataModel extends DataStore {
 		this.activeFlightName = data.activeFlightName || null;
 		this.thoriumId = data.thoriumId || randomWords(3).join("-");
 
-		console.trace();
 		// Make sure we have a Flight Names in the plugins. It very unlikely that there wouldn't be
 		this.flightNameTemplate =
 			data.flightNameTemplate || getPluginTextPatterns(this)["Flight Names"]

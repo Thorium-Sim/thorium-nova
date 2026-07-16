@@ -419,6 +419,8 @@ const quotes = [
 	"The trouble with having an open mind, of course, is that people will insist on coming along and trying to put things in it.",
 	"In the beginning there was nothing, which exploded.",
 	"Sometimes the moon is light and sometimes it's in shadow, but you should always remember it's the same moon.",
+	// Buddhist proverb
+	"Great doubt, great awakening. Little doubt, little awakening. No doubt, no awakening.",
 ];
 
 const QuoteOfTheDay = () => {

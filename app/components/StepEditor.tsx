@@ -423,8 +423,16 @@ export function PrerequisiteBlocks({
 			<h3 className="flex items-center text-lg font-medium">
 				Prerequisites{" "}
 				<InfoTip>
-					These blocks will be executed immediately, including any checks, to evaluate if the
-					timeline is available to be used. Leave blank to always include this timeline.
+					<p>
+						These blocks will be executed immediately, including any checks, to evaluate if the
+						timeline is available to be used. Leave blank to always include this timeline.
+					</p>
+					<p>The following variables are available:</p>
+					<ul className="ml-4 list-disc">
+						{variables.map((a) => (
+							<li key={a}>{a}</li>
+						))}
+					</ul>
 				</InfoTip>
 			</h3>{" "}
 			<DefinedVariableProvider variables={[...variables]}>
@@ -454,7 +462,7 @@ export function PrerequisiteBlocks({
 									});
 								}}
 							>
-								<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
+								<RAButton className="btn btn-sm btn-outline btn-success">Add Block</RAButton>
 							</AddBlockButton>
 						</div>
 					) : (
@@ -523,7 +531,7 @@ export function PrerequisiteBlocks({
 						});
 					}}
 				>
-					<Button className="btn btn-sm btn-outline btn-success">Add Block</Button>
+					<RAButton className="btn btn-sm btn-outline btn-success">Add Block</RAButton>
 				</AddBlockButton>
 			</DefinedVariableProvider>
 		</div>

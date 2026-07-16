@@ -10,8 +10,10 @@
 .rotor-wrapper {
 	timeline-scope: --rotor-scroll;
 	font-size: 1em;
-	width: 6em;
-	height: 6em;
+	min-width: 6em;
+	min-height: 6em;
+	height: 80%;
+	aspect-ratio: 1;
 	margin-top: 2em;
 	position: relative;
 }

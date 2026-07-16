@@ -1,3 +1,10 @@
+@font-face {
+	font-family: "LiquidCrystal";
+	font-style: normal;
+	font-weight: 400;
+	src: url(/assets/fonts/LiquidCrystal-Normal.woff) format("woff");
+}
+
 .keypad {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
@@ -66,4 +73,9 @@ kbd[data-key]::after {
 	z-index: 1;
 	content: attr(data-key);
 	text-transform: capitalize;
+}
+
+.keypad-output {
+	font-family: LiquidCrystal, monospace;
+	font-size: 1.5rem;
 }
