@@ -1,6 +1,7 @@
 import { useRef } from "react";
 
 const quotes = [
+ "You can just do things",
 	"Not all who wander are lost",
 	"If you don’t know where your destination is, you don’t know how long you have to wander",
 	"Its origin and purpose are still a total mystery...",
