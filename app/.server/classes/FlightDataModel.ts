@@ -28,14 +28,36 @@ export class FlightDataModel extends DataStore {
 	defaultRespawnTimeMs!: null | number;
 	ecs!: ECS;
 	pluginIds!: string[];
-	private entities!: Entity[];
 	serverDataModel: ServerDataModel;
 	interval!: ReturnType<typeof setInterval>;
 	startInput!: { ships: any[]; missionId: any; startingPoint: any };
 	flightClientIndex: Map<string, number>;
 	mode!: "nova" | "legacy";
 
-	#getDataPromise: Promise<void>;
+	static async create(
+		params: Partial<FlightDataModel> & {
+			serverDataModel: ServerDataModel;
+			initialLoad?: boolean;
+			entities: Entity[];
+		},
+		storeOptions: DataStoreOptions,
+	) {
+		const instance = new this(params, storeOptions);
+		const data = await instance.getData<FlightDataModel & { entities: Entity[] }>();
+
+		instance.name ??= data.name || params.name || "New Flight";
+		instance.paused ??= data.paused ?? true;
+		instance.mode ??= data.mode ?? params.mode ?? "nova";
+		instance.hasFlightDirector ??= data.hasFlightDirector ?? params.hasFlightDirector ?? true;
+		instance.date ??= Number(data.date ? new Date(data.date) : new Date());
+		instance.pluginIds ??= data.pluginIds || [];
+		instance.state = data.state || "in-progress";
+		instance.stateReason = data.stateReason || "";
+		instance.startInput = data.startInput || {};
+		await instance.initEcs(params.serverDataModel, data.entities || []);
+
+		return instance;
+	}
 	constructor(
 		params: Partial<FlightDataModel> & {
 			serverDataModel: ServerDataModel;
@@ -56,19 +78,6 @@ export class FlightDataModel extends DataStore {
 		);
 		this.flightClientIndex = new Map();
 		this.serverDataModel = params.serverDataModel;
-
-		this.#getDataPromise = this.getData<FlightDataModel>().then((data) => {
-			this.name ??= flightName;
-			this.paused ??= data.paused ?? true;
-			this.mode ??= data.mode ?? params.mode ?? "nova";
-			this.hasFlightDirector ??= data.hasFlightDirector ?? params.hasFlightDirector ?? true;
-			this.date ??= Number(data.date ? new Date(data.date) : new Date());
-			this.pluginIds ??= data.pluginIds || [];
-			this.entities ??= data.entities || [];
-			this.state = data.state || "in-progress";
-			this.stateReason = data.stateReason || "";
-			this.startInput = data.startInput || {};
-		});
 	}
 	run = () => {
 		// Run all the systems
@@ -84,10 +93,9 @@ export class FlightDataModel extends DataStore {
 		this.ecs.dispose();
 		this.remove(true);
 	}
-	async initEcs(server: ServerDataModel) {
-		await this.#getDataPromise;
+	private async initEcs(server: ServerDataModel, entities: Entity[]) {
 		this.ecs = new ECS(server);
-		initECS(this.ecs, this.entities, this.mode);
+		initECS(this.ecs, entities, this.mode);
 		this.setupEcsCallbacks();
 		if (!this.flightEntity) {
 			const flight = new Entity();

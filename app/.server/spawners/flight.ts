@@ -61,7 +61,7 @@ export async function startFlight(
 		startingPoint,
 	}: z.infer<typeof flightStartInput>,
 ) {
-	ctx.flight = new FlightDataModel(
+	ctx.flight = await FlightDataModel.create(
 		{
 			name: flightName,
 			initialLoad: true,
@@ -76,7 +76,6 @@ export async function startFlight(
 
 	const activePlugins = ctx.server.plugins.filter((p) => p.active);
 	ctx.flight.pluginIds = activePlugins.map((p) => p.id);
-	await ctx.flight.initEcs(ctx.server);
 
 	let solarSystemMap: Record<string, Entity> | null = null;
 	if (mode === "nova") {
@@ -193,7 +192,6 @@ export async function startFlight(
 					}
 					ctx.flight.ecs.addEntity(panel);
 
-					// @ts-expect-error
 					card.config = { ...card.config, panelId: panel.id };
 					if ("config" in card && card.config && "elements" in card.config) {
 						for (const { name, ...element } of card.config.elements.slice(0, 24)) {
@@ -319,10 +317,14 @@ function getPanelElement(
 		case "cableSocket":
 			// Even integer
 			return { type, ports: rng.nextInt(2, 5) * 2 };
-		case "numberedRotor":
-			return { type, max: 6 };
+		// case "numberedRotor":
+		// 	return { type, max: 6 };
 		case "numberedSlider":
 			return { type, max: rng.nextInt(4, 8) };
+		default:
+			const typeName = type;
+			typeName satisfies never;
+			throw new Error("Invalid panel element type");
 	}
 }
 

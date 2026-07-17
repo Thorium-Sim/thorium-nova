@@ -19,13 +19,17 @@ export function Rotor({
 }: { max?: number; className?: string } & ElementProps) {
 	const abortControllerRef = useRef(new AbortController());
 	const scrollerRef = useRef<HTMLDivElement>(null);
+	const draggingRef = useRef(false);
 	useEffect(() => {
-		setRotation(scrollerRef, value);
+		if (!draggingRef.current) {
+			setRotation(scrollerRef, value);
+		}
 	}, [value]);
 
 	const debouncedUpdate = useCallback(debounce(update, 200), [update]);
 	return (
 		<div className={cn("rotor-wrapper", className)}>
+			<div className="absolute top-0 right-0">{value}</div>
 			<div className="rotor-reflection"></div>
 			<div className="rotor"></div>
 			<div
@@ -37,7 +41,7 @@ export function Rotor({
 					target.setPointerCapture(pointerId);
 					target.style.pointerEvents = "none";
 					target.style.scrollSnapType = "none";
-
+					draggingRef.current = true;
 					abortControllerRef.current = new AbortController();
 					// TODO May 23 2026 — Support more intuitive gestures, like
 					// moving the mouse around the circle or dragging left/right
@@ -60,6 +64,7 @@ export function Rotor({
 							target.style.pointerEvents = "all";
 							target.style.scrollSnapType = "y mandatory";
 							update(Math.round((target.scrollTop / target.scrollHeight) * 6) + 1);
+							draggingRef.current = false;
 						},
 						{ once: true },
 					);

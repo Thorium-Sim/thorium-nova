@@ -25,7 +25,12 @@ const PanelComponents = {
 };
 export function EngineeringPanels() {
 	const card = useCardContext();
-	if (card.component !== "EngineeringPanels" || !("config" in card) || !card.config?.panelId) {
+	if (
+		card.component !== "EngineeringPanels" ||
+		!("config" in card) ||
+		(card.config && !("panelId" in card.config)) ||
+		!card.config?.panelId
+	) {
 		console.error(card);
 		throw new Error("Invalid Panel Configuration");
 	}
@@ -54,7 +59,7 @@ export function EngineeringPanels() {
 						if (remainingCells > 0) {
 							switch (e.element.type) {
 								case "cableSocket":
-								case "numberedRotor":
+								// case "numberedRotor":
 								case "pressButton":
 									if (remainingCells - 2 >= 0) {
 										extraClass = "col-span-3 row-span-4!";
@@ -67,6 +72,13 @@ export function EngineeringPanels() {
 										extraClass = "col-span-3";
 										remainingCells -= 1;
 									}
+									break;
+								case "numberPad":
+								case "numberedSlider":
+								case "switch":
+									break;
+								default:
+									e.element satisfies never;
 							}
 						}
 						return (

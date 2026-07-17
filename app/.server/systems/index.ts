@@ -4,6 +4,7 @@ import { CommSatelliteSystem } from "@thorium/.server/systems/CommSatelliteSyste
  * of the systems and re-export them in an array
  */
 import { DamageCheckSystem } from "@thorium/.server/systems/DamageCheckSystem";
+import { EngineeringPanelAssignmentSystem } from "@thorium/.server/systems/EngineeringPanelAssignmentSystem";
 import { ExocompPowerSystem, ExocompSystem } from "@thorium/.server/systems/ExocompSystem";
 import { legacySystems } from "@thorium/.server/systems/Legacy";
 import { LongRangeCommPowerSystem } from "@thorium/.server/systems/LongRangeCommPowerSystem";
@@ -88,6 +89,7 @@ const systems = [
 	CollisionWarningSystem,
 	HeatToCoolantSystem,
 	HeatDispersionSystem,
+	EngineeringPanelAssignmentSystem,
 	DamageCheckSystem,
 	SpontaneousFailureSystem,
 	IsDestroyedSystem,

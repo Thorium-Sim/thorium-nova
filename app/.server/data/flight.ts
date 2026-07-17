@@ -110,7 +110,7 @@ export const flight = t.router({
 		inputAuth(ctx);
 		if (ctx.flight) return ctx.flight;
 
-		ctx.flight = new FlightDataModel(
+		ctx.flight = await FlightDataModel.create(
 			{
 				entities: [],
 				initialLoad: false,
@@ -123,7 +123,6 @@ export const flight = t.router({
 				},
 			},
 		);
-		await ctx.flight.initEcs(ctx.server);
 		await ctx.flight.initPhysics();
 
 		ctx.server.activeFlightName = input.flightName;

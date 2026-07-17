@@ -6,7 +6,7 @@ export const baseCard = z.object({
 	icon: z.string().nullish().optional(),
 	component: z.string(),
 	highlight: z.boolean().default(false).optional(),
-	config: z.object({ tags: z.string().array().optional() }).optional(),
+	config: z.any().optional(),
 });
 export const engineeringPanelsCard = baseCard.extend({
 	component: z.literal("EngineeringPanels"),

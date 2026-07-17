@@ -16,7 +16,7 @@ export const stationSchema = z.object({
 	widgets: z
 		.union([baseCard.extend(widgetProps), engineeringPanelsCard.extend(widgetProps)])
 		.array(),
-	messageGroups: z.string().array().optional(),
+	messageGroups: z.string().array().default([]),
 });
 
 export const stationComplementSchema = z.object({

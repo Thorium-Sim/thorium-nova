@@ -244,7 +244,15 @@ export const damageReports = t.router({
 				reportVariables,
 			);
 
-			const timeline = ctx.ecs.rng.nextFromList(timelines);
+			// Group the timelines by categories, so one category with a bunch of reports doesn't dominate
+			const categories = Object.entries(Object.groupBy(timelines, (t) => t.category))
+				.map(([_, value]) => {
+					return value!;
+				})
+				.filter((c) => c && c.length > 0);
+			const categoryList = ctx.ecs.rng.nextFromList(categories);
+
+			const timeline = ctx.ecs.rng.nextFromList(categoryList);
 			if (!timeline) throw new Error("No damage report available.");
 
 			// This automatically adds the timeline entity to ECS

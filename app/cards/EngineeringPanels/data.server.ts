@@ -266,15 +266,15 @@ export const engineeringPanels = t.router({
 							`Type "${requiredState}" into keypad ${name} and press the submit button.`,
 						);
 						break;
-					case "numberedRotor":
-						requiredState = ctx.ecs.rng.nextFromList(
-							Array.from({ length: element.max })
-								.map((_, i) => i)
-								.filter((i) => i !== state),
-						);
-						// Add one, since required state is an index
-						instructions.push(`Set dial ${name} to ${requiredState + 1}.`);
-						break;
+					// case "numberedRotor":
+					// 	requiredState = ctx.ecs.rng.nextFromList(
+					// 		Array.from({ length: element.max })
+					// 			.map((_, i) => i)
+					// 			.filter((i) => i !== state),
+					// 	);
+					// 	// Add one, since required state is an index
+					// 	instructions.push(`Set dial ${name} to ${requiredState}.`);
+					// 	break;
 					case "numberedSlider":
 						requiredState = ctx.ecs.rng.nextFromList(
 							Array.from({ length: element.max })

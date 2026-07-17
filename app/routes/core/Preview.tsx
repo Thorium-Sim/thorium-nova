@@ -24,7 +24,12 @@ export default function TestCoreComponent({ params }: Route.ComponentProps) {
 
 	return (
 		<StationData shipId={player[0]?.id}>
-			<CardProvider cardName={params.component} cardLoaded isWidget={false}>
+			<CardProvider
+				component={params.component}
+				cardLoaded
+				isWidget={false}
+				name={params.component}
+			>
 				<div className="h-full w-full bg-gray-800 p-16">
 					<Suspense fallback={<LoadingSpinner compact />}>
 						<Comp />

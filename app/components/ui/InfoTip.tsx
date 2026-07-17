@@ -14,16 +14,17 @@ const InfoTip = ({
 	className?: string;
 	dialogClassName?: string;
 }) => {
+	if (!children) return null;
 	return (
 		<DialogTrigger>
 			<Button
-				className={cn("btn btn-ghost btn-xs p-0 !px-0 !min-h-4 !h-4 w-4", className)}
+				className={cn("btn btn-ghost btn-xs p-0 px-0! min-h-4! h-4! w-4", className)}
 				aria-label="More Info"
 			>
 				<Icon name="info" className="text-primary inline-block cursor-pointer text-base" />
 			</Button>
 			<Popover className={cn("theme-container", popoverTransitionClasses)}>
-				<Dialog className={cn("max-w-xs w-max panel !bg-black/90 text-white p-2", dialogClassName)}>
+				<Dialog className={cn("max-w-xs w-max panel bg-black/90! text-white p-2", dialogClassName)}>
 					{children}
 				</Dialog>
 			</Popover>

@@ -133,6 +133,7 @@ export function FlightQuickStartProvider({ children }: { children: ReactNode }) 
 	const [defaultFlightName] = q.textPattern.interpolate.useNetRequest({
 		string: settings.flightNameTemplate,
 	});
+	console.log(defaultFlightName);
 	const value = useLocalStorageReducer<
 		typeof quickStartReducer,
 		FlightConfigState,
@@ -167,6 +168,14 @@ export function FlightQuickStartProvider({ children }: { children: ReactNode }) 
 			});
 		}
 	}, [ships, set]);
+
+	// New flight name every time the browser opens, overriding the stored one
+	useEffect(() => {
+		set({
+			type: "flightName",
+			name: defaultFlightName.output,
+		});
+	}, [set]);
 
 	return <QuickStartContext.Provider value={value}>{children}</QuickStartContext.Provider>;
 }

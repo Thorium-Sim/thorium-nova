@@ -52,7 +52,7 @@ function PlayerStationItem({
 	station,
 }: {
 	shipId: number;
-	station: { name: string; description: string };
+	station: { name: string; description?: string };
 }) {
 	const [clients] = q.client.all.useNetRequest();
 

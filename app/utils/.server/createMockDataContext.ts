@@ -158,7 +158,6 @@ export class MockDataContext {
 			initialLoad: true,
 			entities: [],
 		}) as any as FlightDataModel;
-		void this.flight?.initEcs(this.server);
 	}
 	get flight() {
 		return this.database.flight;

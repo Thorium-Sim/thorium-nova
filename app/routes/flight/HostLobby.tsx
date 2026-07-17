@@ -208,7 +208,7 @@ function HostStationItem({
 	setSelectedClient,
 }: {
 	shipId: number;
-	station: { name: string; description: string };
+	station: { name: string; description?: string };
 	selectedClient: string;
 	setSelectedClient: Dispatch<SetStateAction<string>>;
 }) {

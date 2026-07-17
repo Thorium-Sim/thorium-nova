@@ -28,18 +28,16 @@ export const Widgets = () => {
 	return (
 		<>
 			{/* <Widget icon={RiPictureInPictureLine} component={ViewscreenWidget} /> */}
-			{station.widgets?.map((widget) => {
-				const WidgetComp = Cards[widget.component as keyof typeof Cards];
-				if (!widget.icon) return null;
+			{station.widgets?.map(({ component, icon, ...rest }) => {
+				const WidgetComp = Cards[component as keyof typeof Cards];
+				if (!icon) return null;
 				return (
 					<Widget
-						name={widget.name}
-						key={widget.component}
-						icon={
-							<SVGImageLoader className="widget-icon h-6 w-6 cursor-pointer" url={widget.icon} />
-						}
-						component={WidgetComp}
-						size={widget.size}
+						key={component}
+						component={component}
+						{...rest}
+						icon={icon}
+						Component={WidgetComp}
 					/>
 				);
 			})}
@@ -68,14 +66,15 @@ export const ClickWidget: FC<{
 };
 export const Widget: FC<{
 	name: string;
-	icon: IconType;
-	component: ComponentType<{
+	icon: string;
+	component: string;
+	Component: ComponentType<{
 		cardLoaded: boolean;
 		isOpen: boolean;
 		onClose: () => void;
 	}>;
 	size?: "sm" | "md" | "lg" | "xl";
-}> = ({ name, icon, component: Component, size = "md" }) => {
+}> = ({ name, icon, component, Component, size = "md" }) => {
 	const [isOpen, setIsOpen] = useState<"off" | "popover" | "modal">("off");
 	const modalRef = useRef<HTMLDivElement>(null);
 	const dialogRef = useRef<HTMLDivElement>(null);
@@ -92,7 +91,7 @@ export const Widget: FC<{
 		},
 	);
 	const card = (
-		<CardProvider cardLoaded={isOpen !== "off"} cardName={name} isWidget>
+		<CardProvider cardLoaded={isOpen !== "off"} name={name} component={component} isWidget>
 			<Component
 				cardLoaded={isOpen !== "off"}
 				isOpen={isOpen !== "off"}
@@ -156,10 +155,10 @@ export const Widget: FC<{
 				}}
 			>
 				<RAButton className={`widget widget-${pascalCase(name)}`}>
-					{typeof icon === "string" ? (
-						<Icon name={icon} className="widget-icon h-6 w-6 cursor-pointer" />
+					{icon.includes("/") ? (
+						<Icon name={icon as any} className="widget-icon h-6 w-6 cursor-pointer" />
 					) : (
-						icon
+						<SVGImageLoader className="widget-icon h-6 w-6 cursor-pointer" url={icon} />
 					)}
 				</RAButton>
 				<Suspense>

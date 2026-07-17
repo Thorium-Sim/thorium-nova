@@ -37,7 +37,7 @@ function flexLayoutFactory(node: TabNode) {
 	const Core = Cores[compName];
 	if (Core)
 		return (
-			<CardProvider cardName={compName} cardLoaded isWidget={false}>
+			<CardProvider component={compName} name={compName} cardLoaded isWidget={false}>
 				<ErrorBoundary
 					fallback={
 						<div className="p-4">
