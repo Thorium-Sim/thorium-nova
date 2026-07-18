@@ -289,7 +289,6 @@ export async function spawnShip(
 				break;
 			}
 			default: {
-				// TODO: Set up power from reactors and batteries
 				const [entity, ...rest] = spawnShipSystem(
 					shipId,
 					systemPlugin,

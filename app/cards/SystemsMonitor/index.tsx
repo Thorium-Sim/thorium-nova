@@ -320,6 +320,7 @@ function ReactorSummary() {
 	const outputRef = useRef<HTMLSpanElement>(null);
 	const netOutputRef = useRef<HTMLSpanElement>(null);
 	const usedRef = useRef<HTMLSpanElement>(null);
+	const availableRef = useRef<HTMLSpanElement>(null);
 	const { interpolate } = useLiveQuery();
 
 	useAnimationFrame(() => {
@@ -347,6 +348,9 @@ function ReactorSummary() {
 		}
 		if (netOutputRef.current)
 			netOutputRef.current.textContent = `${Math.round((used - batteryUsage) * 10) / 10}`;
+
+		if (availableRef.current)
+			availableRef.current.textContent = `${Math.round((output - used) * 10) / 10}`;
 	}, cardLoaded);
 
 	return (
@@ -359,6 +363,9 @@ function ReactorSummary() {
 			</p>
 			<p className="text-right whitespace-nowrap tabular-nums">
 				Total Used: <span ref={usedRef} className="inline-block w-[4ch] text-right" /> MW
+			</p>
+			<p className="text-right whitespace-nowrap tabular-nums">
+				Total Available: <span ref={availableRef} className="inline-block w-[4ch] text-right" /> MW
 			</p>
 		</div>
 	);
@@ -710,7 +717,7 @@ function System({
 					</Tooltip>
 					<p className="text-sm tabular-nums">
 						<span className="inline-block min-w-[2ch] text-right" ref={powerNumberRef}></span> /{" "}
-						{power.powerLevels.at(-1)} MWh
+						{power.powerLevels.at(-1)} MW
 					</p>
 				</div>
 			) : null}
