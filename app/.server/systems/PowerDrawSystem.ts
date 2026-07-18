@@ -27,15 +27,22 @@ export class PowerDrawSystem extends System {
 				const { currentWarpFactor, speeds } = entity.components.isWarpEngines;
 				// The highest warp factor is the destructive speed, so we don't count that one.
 				const warpFactorCount = speeds.length - 1;
-				if (currentWarpFactor === 0) break;
-				const warpEngineUse = currentWarpFactor / warpFactorCount;
-				powerDraw = (maxSafePower - requiredPower) * warpEngineUse + requiredPower;
+				if (currentWarpFactor === 0) {
+					powerDraw = 0;
+					break;
+				}
+				powerDraw =
+					currentWarpFactor ** 2 * ((maxSafePower - requiredPower) / warpFactorCount ** 2) +
+					requiredPower;
 				break;
 			}
 			case "impulseEngines": {
 				if (!entity.components.isImpulseEngines) return;
 				const { cruisingSpeed, targetSpeed } = entity.components.isImpulseEngines;
-				if (targetSpeed === 0) break;
+				if (targetSpeed === 0) {
+					powerDraw = 0;
+					break;
+				}
 				// We divide the target speed in four, but we can't go below 1/4th
 				// So we scale it where 0.25 is 0, and 1 is 1
 				const impulseEngineUse = Math.max(0, (targetSpeed / cruisingSpeed - 0.25) * (4 / 3));
