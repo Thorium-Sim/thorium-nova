@@ -31,7 +31,7 @@ import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import clsx from "clsx";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { type PerspectiveCamera, Plane, Vector3 } from "three";
 
@@ -499,6 +499,16 @@ export function SolarSystemWrapper() {
 
 	const translate = useTranslate2DTo3D();
 	const pointerMovement = useRef<Vector3 | null>(null);
+	const entities = useMemo(
+		() =>
+			starmapEntities.flatMap((p) =>
+				p.components.isPlanet && p.components.satellite
+					? { id: p.id, satellite: p.components.satellite }
+					: [],
+			),
+		[starmapEntities],
+	);
+
 	return (
 		<SolarSystemMap skyboxKey={system?.components.isSolarSystem?.skyboxKey || "Blank"}>
 			<ambientLight intensity={0.5} />
@@ -536,13 +546,21 @@ export function SolarSystemWrapper() {
 											return;
 										}
 										if (viewingMode === "viewscreen") return;
+										let origin: Vector3 | undefined = undefined;
+										const parent = entities?.find(
+											(s) => s.id === entity.components.satellite?.parentId,
+										)?.satellite;
+										if (parent) origin = getOrbitPosition(parent);
 										useStarmapStore
 											.getState()
-											.setCameraFocus(getOrbitPosition(entity.components.satellite!));
+											.setCameraFocus(
+												getOrbitPosition({ ...entity.components.satellite!, origin }),
+											);
 										useStarmapStore.setState({
 											selectedObjectIds: [entity.id],
 										});
 									}}
+									entities={entities}
 									planet={{
 										id: entity.id,
 										satellite: entity.components.satellite,
