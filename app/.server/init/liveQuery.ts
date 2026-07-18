@@ -73,7 +73,7 @@ export class Client<TRouter extends AnyRouter> extends ServerClient<TRouter> {
 		super(id, router, pubsub);
 
 		this.name = interpolateText(
-			server.clientNameTemplate,
+			server.clientNameTemplate || `{~A,B,C,D,E,F,G}{~A,B,C,D,E,F,G}-RANDOM(10,99)`,
 			{},
 			getPluginTextPatterns(server),
 			createRNG(Math.random() * 100),

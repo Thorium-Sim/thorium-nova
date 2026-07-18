@@ -143,12 +143,16 @@ test("it should support nesting interpolation blocks inside each other", () => {
 		interpolateText(
 			`[code|code|{~Alpha,Beta,Gamma,Delta,Zeta,Lambda,Omicron}-RANDOM(100,999)-{~Ansible,Cyber,Matrix,Naidon,Skadov,Memory,Faraday,Bernal,Dyson,Protocol,Vector,Analog,Digital,Buffer,Cache,Crypto,Fragment,System,Duplex,Threading,Hyper,Interlace,Progressive,Simplex,Multiplex,Syntax,Token}]`,
 			{},
+			{},
+			createRNG(0),
 		),
-	).toEqual("Alpha-293-Matrix");
+	).toEqual("Alpha-144-Memory");
 	expect(
 		interpolateText(
 			`[code|code|{~Alpha,Beta,Gamma,Delta,Zeta,Lambda,Omicron}-RANDOM(100,999)-{~Ansible,Cyber,Matrix,Naidon,Skadov,Memory,Faraday,Bernal,Dyson,Protocol,Vector,Analog,Digital,Buffer,Cache,Crypto,Fragment,System,Duplex,Threading,Hyper,Interlace,Progressive,Simplex,Multiplex,Syntax,Token}]`,
 			{ code: "Hi there" },
+			{},
+			createRNG(0),
 		),
 	).toEqual("Hi there");
 });
@@ -169,6 +173,7 @@ test("it should support text pattern includes", () => {
 				randomNumber: `RANDOM(100,999)`,
 				randomCoolWord: `{~Ansible,Cyber,Matrix,Naidon,Skadov,Memory,Faraday,Bernal,Dyson,Protocol,Vector,Analog,Digital,Buffer,Cache,Crypto,Fragment,System,Duplex,Threading,Hyper,Interlace,Progressive,Simplex,Multiplex,Syntax,Token}`,
 			},
+			createRNG(0),
 		),
-	).toEqual("Alpha-293-Matrix");
+	).toEqual("Alpha-144-Memory");
 });

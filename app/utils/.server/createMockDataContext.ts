@@ -24,6 +24,7 @@ class MockServerDataModel {
 				ships: [],
 				solarSystems: [],
 				inventory: [],
+				textPatterns: [],
 			},
 		},
 	];
@@ -68,6 +69,7 @@ class MockFlightDataModel {
 	) {
 		this.serverDataModel = params.serverDataModel;
 		this.initEntities = params.entities || [];
+		this.initEcs(params.serverDataModel);
 	}
 	run = () => {
 		// Run all the systems

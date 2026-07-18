@@ -18,37 +18,13 @@ export function interpolateText(
 	}
 
 	// Assorted functions
-	template = template.replace(
-		/(RANDOM|CAPITALIZE|LOWERCASE|UPPERCASE|PLURALIZE)\((.+?)\)/g,
-		(
-			_,
-			functionName: "RANDOM" | "CAPITALIZE" | "LOWERCASE" | "UPPERCASE" | "PLURALIZE",
-			input: string,
-		) => {
-			switch (functionName) {
-				case "RANDOM": {
-					const options = input.replace("RANDOM(", "").replace(")", "");
-					const nums = options.split(",").map((v) => Number(v));
-					const max = nums[1] || nums[0];
-					const min = max === nums[0] ? 0 : nums[0];
-					return Math.round((rng.next() + 0.5) * (max - min) + min).toString();
-				}
-				case "CAPITALIZE":
-					return capitalCase(input);
-				case "UPPERCASE":
-					return input.toUpperCase();
-				case "LOWERCASE":
-					return input.toLowerCase();
-				case "PLURALIZE": {
-					const params = input.split(",");
-					return pluralize(Number(params[0]), params[1], params[2]);
-				}
-				default:
-					functionName satisfies never;
-					return "";
-			}
-		},
-	);
+	template = template.replace(/RANDOM\((.+?)\)/g, (_, input: string) => {
+		const options = input.replace("RANDOM(", "").replace(")", "");
+		const nums = options.split(",").map((v) => Number(v));
+		const max = nums[1] || nums[0];
+		const min = max === nums[0] ? 0 : nums[0];
+		return Math.round((rng.next() + 0.5) * (max - min) + min).toString();
+	});
 
 	// Random from list
 	while (template.match(/\{\s*~([^{}]+)\s*\}/g)) {
@@ -56,6 +32,7 @@ export function interpolateText(
 			return rng.nextFromList(options.split(","));
 		});
 	}
+
 	// 1) evaluate all switches like {key|A:out;k=v|B:out2;...|default:...}
 	template = template.replace(/\[(\w+)\|([^\]]+)\]/g, (string, key, body: string) => {
 		const value = ctx[key] ?? "";
@@ -107,6 +84,27 @@ export function interpolateText(
 	template = template.replace(/\{\s*(\w+)\s*\}/g, (_, name) => {
 		return ctx[name] !== undefined ? ctx[name] : "";
 	});
+
+	template = template.replace(
+		/(CAPITALIZE|LOWERCASE|UPPERCASE|PLURALIZE)\((.+?)\)/g,
+		(_, functionName: "CAPITALIZE" | "LOWERCASE" | "UPPERCASE" | "PLURALIZE", input: string) => {
+			switch (functionName) {
+				case "CAPITALIZE":
+					return capitalCase(input);
+				case "UPPERCASE":
+					return input.toUpperCase();
+				case "LOWERCASE":
+					return input.toLowerCase();
+				case "PLURALIZE": {
+					const params = input.split(",");
+					return pluralize(Number(params[0]), params[1], params[2]);
+				}
+				default:
+					functionName satisfies never;
+					return "";
+			}
+		},
+	);
 
 	return template;
 }
