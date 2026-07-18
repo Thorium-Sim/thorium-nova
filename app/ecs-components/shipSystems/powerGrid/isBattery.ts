@@ -33,5 +33,9 @@ export const isBattery = z
 		 * or equal to the length of outputAssignment.
 		 */
 		outputAmount: z.number().default(0),
+		/**
+		 * Whether the battery is drawing power from the reactors
+		 */
+		powerActivated: z.boolean().default(true),
 	})
 	.default({});

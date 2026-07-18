@@ -126,6 +126,7 @@ export const systemsMonitor = t.router({
 					chargeRate: b.components.isBattery!.chargeRate,
 					outputAmount: b.components.isBattery!.outputAmount,
 					outputRate: b.components.isBattery!.outputRate,
+					activated: b.components.isBattery!.powerActivated,
 				}));
 			}),
 		setStorage: t.procedure
@@ -138,6 +139,16 @@ export const systemsMonitor = t.router({
 						(battery.components.isBattery?.capacity || 0) *
 						Math.min(1, Math.max(0, input.storagePercent)),
 				});
+				pubsub.publish.systemsMonitor.batteries.get({
+					shipId: battery?.components.isShipSystem?.shipId || -1,
+				});
+			}),
+		setActivated: t.procedure
+			.input(z.object({ batteryId: z.number(), activated: z.boolean() }))
+			.send(({ ctx, input }) => {
+				const battery = ctx.ecs.getEntityById(input.batteryId);
+				if (!battery || !battery.components.isBattery) throw new Error("Battery not found.");
+				battery.updateComponent("isBattery", { powerActivated: input.activated });
 				pubsub.publish.systemsMonitor.batteries.get({
 					shipId: battery?.components.isShipSystem?.shipId || -1,
 				});

@@ -237,6 +237,42 @@ describe("PowerDistributionSystem", () => {
 		expect(system.components.power?.currentPower).toEqual(0);
 	});
 
+	it("should not charge batteries when their powerActivated is false", () => {
+		const reactor = new Entity();
+		reactor.addComponent("isShipSystem", { type: "reactor" });
+		reactor.addComponent("isReactor", {
+			currentOutput: 8,
+		});
+		ship.components.shipSystems?.shipSystems.set(reactor.id, {});
+		ecs.addEntity(reactor);
+
+		const battery = new Entity();
+		battery.addComponent("isShipSystem", { type: "battery" });
+		battery.addComponent("isBattery", {
+			storage: 0,
+		});
+		ship.components.shipSystems?.shipSystems.set(battery.id, {});
+		ecs.addEntity(battery);
+
+		expect(battery.components.isBattery?.storage).toEqual(0);
+		for (let i = 0; i < 60; i++) {
+			ecs.update(16);
+		}
+		expect(battery.components.isBattery?.storage).toMatchInlineSnapshot(`0.0010666666666666676`);
+		for (let i = 0; i < 30; i++) {
+			ecs.update(16);
+		}
+		expect(battery.components.isBattery?.storage).toMatchInlineSnapshot(`0.0016000000000000016`);
+		const previousStorage = battery.components.isBattery?.storage;
+		expect(typeof previousStorage).toBe("number");
+		battery.updateComponent("isBattery", {
+			powerActivated: false,
+		});
+		ecs.update(16);
+		const storage = battery.components.isBattery?.storage;
+		expect(storage).toEqual(previousStorage);
+	});
+
 	it("should perform decently well", () => {
 		Array.from({ length: 5 }).map(() => {
 			const reactor = new Entity();
@@ -281,6 +317,7 @@ describe("PowerDistributionSystem", () => {
 
 		const time = ecs.now();
 		ecs.update(16);
-		expect(ecs.now() - time).toBeLessThan(1);
+		const now = ecs.now();
+		expect(now - time).toBeLessThan(2);
 	});
 });

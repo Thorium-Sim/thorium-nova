@@ -423,11 +423,13 @@ function Battery({
 	name,
 	outputRate,
 	capacity,
+	activated,
 }: {
 	id: number;
 	name: string;
 	outputRate: number;
 	capacity: number;
+	activated: boolean;
 }) {
 	const { cardLoaded } = useCardContext();
 	const storageRef = useRef<HTMLDivElement>(null);
@@ -440,6 +442,7 @@ function Battery({
 	const chargingRef = useRef<SVGSVGElement>(null);
 	const equalRef = useRef<SVGSVGElement>(null);
 	const dischargingRef = useRef<SVGSVGElement>(null);
+	const offlineRef = useRef<SVGSVGElement>(null);
 	const chargeLabelRef = useRef<HTMLDivElement>(null);
 	const { interpolate } = useLiveQuery();
 	useAnimationFrame(() => {
@@ -474,16 +477,25 @@ function Battery({
 			chargingRef.current?.classList.remove("hidden");
 			dischargingRef.current?.classList.add("hidden");
 			equalRef.current?.classList.add("hidden");
+			offlineRef.current?.classList.add("hidden");
 		}
 		if (chargeAmount < dischargeAmount) {
 			chargingRef.current?.classList.add("hidden");
 			dischargingRef.current?.classList.remove("hidden");
 			equalRef.current?.classList.add("hidden");
+			offlineRef.current?.classList.add("hidden");
 		}
 		if (chargeAmount === dischargeAmount) {
 			chargingRef.current?.classList.add("hidden");
 			dischargingRef.current?.classList.add("hidden");
 			equalRef.current?.classList.remove("hidden");
+			offlineRef.current?.classList.add("hidden");
+		}
+		if (!activated) {
+			chargingRef.current?.classList.add("hidden");
+			dischargingRef.current?.classList.add("hidden");
+			equalRef.current?.classList.add("hidden");
+			offlineRef.current?.classList.remove("hidden");
 		}
 		if (chargeLabelRef.current) {
 			chargeLabelRef.current.textContent = `Net Change: ${Math.round((chargeAmount - dischargeAmount) * 10) / 10} MW`;
@@ -504,13 +516,36 @@ function Battery({
 			)}
 		>
 			<span className="truncate font-medium">{name}</span>
-			<Tooltip ref={chargeLabelRef} content={`Net Change: MW`}>
-				<div className="flex aspect-square h-5 w-5 items-center justify-center place-self-end rounded-full border text-sm">
-					<Icon className="hidden" ref={chargingRef} name="arrow-up" />
-					<Icon className="hidden" ref={equalRef} name="equal" />
-					<Icon className="hidden" ref={dischargingRef} name="arrow-down" />
-				</div>
-			</Tooltip>
+
+			<div className="flex items-center gap-1 place-self-end">
+				<Tooltip ref={chargeLabelRef} content={`Net Change: MW`}>
+					<div className="flex aspect-square h-6 w-6 items-center justify-center rounded-full border text-sm">
+						<Icon className="hidden" ref={chargingRef} name="arrow-up" />
+						<Icon className="hidden" ref={equalRef} name="equal" />
+						<Icon className="hidden" ref={dischargingRef} name="arrow-down" />
+						<Icon className="hidden" ref={offlineRef} name="x" />
+					</div>
+				</Tooltip>{" "}
+				{activated ? (
+					<Button
+						className="btn-xs btn-circle btn-primary"
+						onClick={() =>
+							q.systemsMonitor.batteries.setActivated.netSend({ batteryId: id, activated: false })
+						}
+					>
+						<Icon name="power" />
+					</Button>
+				) : (
+					<Button
+						className="btn-xs btn-circle btn-error"
+						onClick={() =>
+							q.systemsMonitor.batteries.setActivated.netSend({ batteryId: id, activated: true })
+						}
+					>
+						<Icon name="power-off" />
+					</Button>
+				)}
+			</div>
 			{/* <BatteryIcon /> */}
 			<Tooltip ref={storageRef} content={`Storage: MWh`}>
 				<div className="progress-success progress relative h-2 w-full overflow-hidden">

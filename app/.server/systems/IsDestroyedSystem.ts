@@ -28,7 +28,7 @@ export class IsDestroyedSystem extends System {
 function deleteShip(entity: Entity) {
 	// Remove the entity from any physics worlds it is a part of
 	const handles = entity.components.physicsHandles?.handles as Map<string, number>;
-	for (const [worldKey, handle] of handles.entries()) {
+	for (const [worldKey, handle] of handles?.entries() || []) {
 		const world = entity.ecs.getWorld(worldKey);
 		if (!world) continue;
 		const body = world.getRigidBody(handle);

@@ -154,8 +154,8 @@ export class PowerDistributionSystem extends System {
 			remainingBatteries -= 1;
 			const isBattery = battery.components.isBattery;
 			if (!isBattery) continue;
-			const { capacity, storage, chargeRate, outputAmount } = isBattery;
-			if (storage >= capacity) {
+			const { capacity, storage, chargeRate, outputAmount, powerActivated } = isBattery;
+			if (storage >= capacity || !powerActivated) {
 				perBatteryInput = 0;
 			}
 			const storageInput = Math.min(chargeRate, perBatteryInput);
