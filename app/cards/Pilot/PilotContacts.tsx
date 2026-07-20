@@ -735,53 +735,51 @@ export function TorpedoEntity({
 		const playerPosition = playerShip || zeroVector;
 		if (!torpedo || !playerPosition || !playerShip) return;
 
-		if (torpedo) {
-			// Since the sensor grid needs to be oriented at 0,0,0
-			// to properly tilt, we reposition the contacts relative
-			// to the player ship's position.
-			ref.current?.position.set(
-				torpedo.x - playerPosition.x,
-				torpedo.y - playerPosition.y,
-				torpedo.z - playerPosition.z,
-			);
-			if (torpedo.r) {
-				ref.current?.quaternion.set(torpedo.r.x, torpedo.r.y, torpedo.r.z, torpedo.r.w);
+		// Since the sensor grid needs to be oriented at 0,0,0
+		// to properly tilt, we reposition the contacts relative
+		// to the player ship's position.
+		ref.current?.position.set(
+			torpedo.x - playerPosition.x,
+			torpedo.y - playerPosition.y,
+			torpedo.z - playerPosition.z,
+		);
+		if (torpedo.r) {
+			ref.current?.quaternion.set(torpedo.r.x, torpedo.r.y, torpedo.r.z, torpedo.r.w);
+		}
+		if (
+			explosionRef.current &&
+			isDestroyed &&
+			explosionRef.current.position.lengthSq() === 0 &&
+			ref.current?.position
+		) {
+			explosionRef.current.position.copy(ref.current.position);
+		}
+		if (ref.current) {
+			if (isDestroyed) {
+				ref.current.visible = false;
+			} else {
+				ref.current.visible = true;
 			}
-			if (
-				explosionRef.current &&
-				isDestroyed &&
-				explosionRef.current.position.lengthSq() === 0 &&
-				ref.current?.position
-			) {
-				explosionRef.current.position.copy(ref.current.position);
-			}
-			if (ref.current) {
-				if (isDestroyed) {
-					ref.current.visible = false;
+		}
+		// Draw the vertical line from the sensor plane to the ship
+		if (playerShip.r && ref.current?.position && mesh.current?.position) {
+			const planeVector = upVector
+				.set(0, 1, 0)
+				.applyQuaternion(
+					playerQuaternion.set(playerShip.r.x, playerShip.r.y, playerShip.r.z, playerShip.r.w),
+				);
+			plane.set(planeVector, 0);
+			plane.projectPoint(ref.current.position, mesh.current.position);
+			const positions = [...ref.current.position.toArray(), ...mesh.current.position.toArray()];
+			line.current?.geometry.setPositions(positions);
+			if (mesh.current && line.current)
+				if (tilted) {
+					mesh.current.visible = true;
+					line.current.visible = true;
 				} else {
-					ref.current.visible = true;
+					mesh.current.visible = false;
+					line.current.visible = false;
 				}
-			}
-			// Draw the vertical line from the sensor plane to the ship
-			if (playerShip.r && ref.current?.position && mesh.current?.position) {
-				const planeVector = upVector
-					.set(0, 1, 0)
-					.applyQuaternion(
-						playerQuaternion.set(playerShip.r.x, playerShip.r.y, playerShip.r.z, playerShip.r.w),
-					);
-				plane.set(planeVector, 0);
-				plane.projectPoint(ref.current.position, mesh.current.position);
-				const positions = [...ref.current.position.toArray(), ...mesh.current.position.toArray()];
-				line.current?.geometry.setPositions(positions);
-				if (mesh.current && line.current)
-					if (tilted) {
-						mesh.current.visible = true;
-						line.current.visible = true;
-					} else {
-						mesh.current.visible = false;
-						line.current.visible = false;
-					}
-			}
 		}
 	});
 	return (

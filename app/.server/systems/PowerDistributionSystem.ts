@@ -105,6 +105,7 @@ export class PowerDistributionSystem extends System {
 				systemPowerPriority[a.components.isShipSystem!.type] -
 				systemPowerPriority[b.components.isShipSystem!.type],
 		);
+		const torpedoLaunchers = [];
 		while (!hasEnoughPower) {
 			const totalRequiredPower = poweredSystemsByPriority.reduce(
 				(power, sys) =>
@@ -116,22 +117,55 @@ export class PowerDistributionSystem extends System {
 				hasEnoughPower = true;
 				break;
 			}
+
 			insufficientPower = true;
 			const ejectedSystem = poweredSystemsByPriority.pop();
 			if (!ejectedSystem) break;
+			poweredSystems.delete(ejectedSystem.id);
+			if (ejectedSystem.components.power?.powerDraw === 0) {
+				continue;
+			}
+			if (ejectedSystem.components.isTorpedoLauncher && ejectedSystem.components.power) {
+				// If we're using the minimum power, we can deactivate torpedoes
+				// Otherwise, we'll allow torpedoes to use the remaining power before batteries
+				if (
+					ejectedSystem.components.power.powerDraw > ejectedSystem.components.power.powerLevels[0]
+				) {
+					torpedoLaunchers.unshift(ejectedSystem);
+					continue;
+				}
+			}
 			ejectedSystem.updateComponent("power", { powerActivated: false });
 			wasSystemDeactivated = true;
-			poweredSystems.delete(ejectedSystem.id);
 		}
 
 		let netReactorOutput = 0;
 
 		// Now we can confidently deliver power to all systems in the poweredSystems list
 		for (const [_, sys] of poweredSystems) {
+			if (torpedoLaunchers.includes(sys)) continue;
 			sys.updateComponent("power", {
 				currentPower: sys.components.power!.powerDraw,
 			});
 			netReactorOutput += sys.components.power!.powerDraw;
+		}
+
+		// We carve out an exception for torpedo launchers — they automatically draw
+		// whatever remaining power there is
+		for (const torpedoLauncher of torpedoLaunchers) {
+			if (
+				netReactorOutput + (torpedoLauncher.components.power?.powerDraw || 0) >
+				grossReactorOutput
+			) {
+				const currentPower = Math.min(
+					torpedoLauncher.components.power?.powerDraw || 0,
+					Math.max(0, grossReactorOutput - netReactorOutput),
+				);
+				torpedoLauncher.updateComponent("power", {
+					currentPower,
+				});
+				netReactorOutput += currentPower;
+			}
 		}
 
 		// If we ran out of power and had to turn off systems,
@@ -143,6 +177,7 @@ export class PowerDistributionSystem extends System {
 
 		// Apply power to batteries from reactors and update the storage
 		let surplusPower = grossReactorOutput - netReactorOutput;
+
 		// Fill systems from least charge rate to most charge rate, updating the per battery input as necessary
 		const sortedBatteries = Array.from(batteries.values()).sort(
 			(a, b) =>

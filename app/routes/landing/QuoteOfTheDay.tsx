@@ -1,7 +1,7 @@
 import { useRef } from "react";
 
 const quotes = [
- "You can just do things",
+	"You can just do things",
 	"Not all who wander are lost",
 	"If you don’t know where your destination is, you don’t know how long you have to wander",
 	"Its origin and purpose are still a total mystery...",
@@ -422,6 +422,10 @@ const quotes = [
 	"Sometimes the moon is light and sometimes it's in shadow, but you should always remember it's the same moon.",
 	// Buddhist proverb
 	"Great doubt, great awakening. Little doubt, little awakening. No doubt, no awakening.",
+	// JFK
+	"Too often we enjoy the comfort of opinion without the discomfort of thought.",
+	// Serena Chen https://serena.nz/writing/the-quality-is-not-the-point/
+	"In our limited time alive, we’re all just fallible, feeling beings, reaching out into the void to put our palm print on the cave wall, in hopes that some one else will see it. And isn’t that the real point of it all?",
 ];
 
 const QuoteOfTheDay = () => {

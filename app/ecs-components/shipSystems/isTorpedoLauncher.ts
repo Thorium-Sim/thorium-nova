@@ -2,7 +2,7 @@ import z from "zod";
 
 export const isTorpedoLauncher = z
 	.object({
-		status: z.enum(["ready", "loading", "unloading", "loaded", "firing"]).default("ready"),
+		status: z.enum(["ready", "loading", "unloading", "loaded", "firing", "fired"]).default("ready"),
 		/**
 		 * Progression from one status to another.
 		 * Set to a time in ms when the process starts and is decremented each game frame
@@ -13,7 +13,13 @@ export const isTorpedoLauncher = z
 		loadTime: z.number().default(5000),
 
 		/** The time in ms to fire */
-		fireTime: z.number().default(1000),
+		fireTime: z.number().default(5000),
+
+		/** How much energy has been applied to firing the current torpedo */
+		firingEnergy: z.number().default(0),
+
+		/** Which client ordered the torpedo to be fired. Used for sending notifications. */
+		firedClientId: z.string().nullable().default(null),
 
 		/** The entity currently being loaded into the torpedo tube */
 		torpedoEntity: z.number().nullable().default(null),

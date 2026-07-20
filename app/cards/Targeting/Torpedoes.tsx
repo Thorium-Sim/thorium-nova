@@ -2,6 +2,8 @@ import { q, clientId } from "@thorium/context/AppContext";
 import { toast } from "@thorium/context/ToastContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import Button from "@thorium/ui/Button";
+import { Icon } from "@thorium/ui/Icon";
+import { Tooltip } from "@thorium/ui/Tooltip";
 import { cn } from "@thorium/utils/cn";
 import { LiveQueryError } from "@thorium/utils/live-query/client/client";
 import { megaWattHourToGigaJoule } from "@thorium/utils/unitTypes";
@@ -20,31 +22,47 @@ export function Torpedoes() {
 
 	return (
 		<>
-			<ul className="panel panel-alert torpedoes-list relative min-h-16 overflow-y-auto">
-				{Object.entries(torpedoList ?? {}).map(([id, { count, yield: torpedoYield, speed }]) => (
-					<li
-						key={id}
-						className={cn("list-group-item", selectedTorpedo === id ? "selected" : "")}
-						onClick={() => {
-							setSelectedTorpedo(id);
-							q.thorium.genericEvent.netSend({
-								clientId,
-								eventName: "torpedo-pick",
-								properties: "",
-							});
-						}}
-					>
-						<div className="flex items-center justify-between">
-							<div className="flex flex-1 flex-col">
+			<ul className="panel panel-alert torpedoes-list relative max-h-1/3 min-h-16 overflow-y-auto">
+				{Object.entries(torpedoList ?? {}).map(
+					([id, { count, yield: torpedoYield, speed, energy }]) => (
+						<li
+							key={id}
+							className={cn("list-group-item", selectedTorpedo === id ? "selected" : "")}
+							onClick={() => {
+								setSelectedTorpedo(id);
+								q.thorium.genericEvent.netSend({
+									clientId,
+									eventName: "torpedo-pick",
+									properties: "",
+								});
+							}}
+						>
+							<div className="flex items-center gap-1">
 								<span>{id}</span>
-								<span className="text-sm text-gray-400">
-									Yield: {megaWattHourToGigaJoule(torpedoYield)} GJ · Speed: {speed} km/s
-								</span>
+								<div className="grow" />
+								<Tooltip
+									className="flex aspect-square h-5 w-5 items-center justify-center rounded-full border border-white bg-black text-sm"
+									content={<>Yield: {megaWattHourToGigaJoule(torpedoYield)} Gigajoules</>}
+								>
+									<Icon name="sun" className="text-yellow-500" />
+								</Tooltip>
+								<Tooltip
+									className="flex aspect-square h-5 w-5 items-center justify-center rounded-full border border-white bg-black text-sm"
+									content={<>Speed: {speed} km/s</>}
+								>
+									<Icon name="gauge" className="text-green-500" />
+								</Tooltip>
+								<Tooltip
+									className="flex aspect-square h-5 w-5 items-center justify-center rounded-full border border-white bg-black text-sm"
+									content={<>Launch Energy: {energy} Megawatt Seconds</>}
+								>
+									<Icon name="zap" className="text-orange-300" />
+								</Tooltip>
+								<div className="ml-2 tabular-nums">{count}</div>
 							</div>
-							<div>{count}</div>
-						</div>
-					</li>
-				))}
+						</li>
+					),
+				)}
 			</ul>
 			<div className="torpedoes-launchers flex flex-1 flex-col gap-4 overflow-y-auto">
 				{torpedoLaunchers?.map((launcher) => (
@@ -69,7 +87,7 @@ function Launcher({
 	torpedo,
 }: {
 	launcherId: number;
-	state: "ready" | "loading" | "unloading" | "loaded" | "firing";
+	state: "ready" | "loading" | "unloading" | "loaded" | "firing" | "fired";
 	name: string;
 	loadTime: number;
 	selectedTorpedo: string | null;
@@ -101,10 +119,10 @@ function Launcher({
 							transform:
 								state === "ready" || state === "unloading"
 									? "translateY(-100%)"
-									: state === "firing"
+									: state === "fired"
 										? "translateX(-100%)"
 										: "translateY(0)",
-							opacity: state === "firing" ? 0 : 1,
+							opacity: state === "fired" ? 0 : 1,
 						}}
 					>
 						<use
@@ -141,7 +159,7 @@ function Launcher({
 					className={cn(
 						"btn-xs min-w-16",
 						(state === "loaded" || selectedTorpedo) &&
-							!["loading", "unloading", "firing"].includes(state)
+							!["loading", "unloading", "firing", "fired"].includes(state)
 							? "btn-primary"
 							: "btn-disabled",
 					)}
@@ -175,7 +193,7 @@ function Launcher({
 						}
 					}}
 				>
-					Fire
+					{state === "firing" ? "Firing..." : "Fire"}
 				</Button>
 			</div>
 		</div>

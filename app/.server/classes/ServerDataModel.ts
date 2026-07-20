@@ -48,6 +48,7 @@ export class ServerDataModel extends DataStore {
 		this.spawnClients(this.clients || data.clients || {});
 	}
 	getClientByName(clientName: string) {
+		if (this.clients[clientName]) return this.clients[clientName];
 		for (const client in this.clients) {
 			if (this.clients[client].name === clientName) return this.clients[client];
 		}

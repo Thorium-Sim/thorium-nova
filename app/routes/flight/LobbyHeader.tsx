@@ -9,7 +9,6 @@ export function LobbyHeader() {
 	const [flight] = q.flight.active.useNetRequest();
 	const prompt = usePrompt();
 	const confirm = useConfirm();
-	console.log(flight);
 	return (
 		<div className="flex justify-between">
 			<div>

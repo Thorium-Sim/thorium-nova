@@ -33,18 +33,20 @@ export default class TorpedoLauncherPlugin extends BaseShipSystemPlugin {
 	soundEffects: {
 		load: Sound[];
 		unload: Sound[];
+		firingPowerUp: Sound[];
 		fire: Sound[];
 	};
 
 	constructor(params: Partial<TorpedoLauncherPlugin>, plugin: BasePlugin) {
 		super(params, plugin);
 		this.loadTime = params.loadTime ?? 5000;
-		this.fireTime = params.fireTime ?? 1000;
+		this.fireTime = params.fireTime ?? 5000;
 		this.headingDegree = params.headingDegree ?? 0;
 		this.pitchDegree = params.pitchDegree ?? 0;
 
 		this.soundEffects = params.soundEffects ?? {
 			fire: [],
+			firingPowerUp: [],
 			load: [],
 			unload: [],
 		};

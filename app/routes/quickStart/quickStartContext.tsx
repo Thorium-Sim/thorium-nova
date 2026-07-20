@@ -133,7 +133,6 @@ export function FlightQuickStartProvider({ children }: { children: ReactNode }) 
 	const [defaultFlightName] = q.textPattern.interpolate.useNetRequest({
 		string: settings.flightNameTemplate,
 	});
-	console.log(defaultFlightName);
 	const value = useLocalStorageReducer<
 		typeof quickStartReducer,
 		FlightConfigState,

@@ -12,7 +12,7 @@ export function applyCardHighlight(
 		(s) => s.name === station,
 	);
 	for (const card of stationObject?.cards || []) {
-		if (cards?.includes(card.name)) {
+		if (cards?.includes(card.name) || cards?.includes(card.component)) {
 			card.highlight = highlight;
 		}
 	}

@@ -166,13 +166,15 @@ export const targeting = t.router({
 					launcherId: z.number(),
 				}),
 			)
-			.output(z.object({ shipId: z.number(), targetId: z.number() }))
+			.output(z.object({ shipId: z.number() }))
 			.meta({ event: true })
 			.send(({ input, ctx }) => {
 				const launcher = ctx.ecs.getEntityById(input.launcherId);
 
 				if (!launcher?.components.isTorpedoLauncher)
 					throw new Error("System is not a torpedo launcher");
+
+				cancelLoopingSound(launcher, "load");
 
 				checkSystemStability(launcher, "Failed to fire torpedo");
 
@@ -182,44 +184,74 @@ export const targeting = t.router({
 				const power = launcher.components.power;
 				const powerLevels = power?.powerLevels || [0];
 				const currentPower = power?.currentPower || 1;
-				const maxSafePower = powerLevels[powerLevels.length - 1] || 1;
 				const requiredPower = powerLevels[0];
-				// It takes longer to reload based on the efficiency of the torpedo launcher
-				// It will take min 1x and max 20x longer to fire a torpedo, depending on power
-				if (requiredPower > currentPower) {
-					throw new Error("Insufficient Power");
-				}
+
+				if (currentPower < requiredPower) throw new Error("Insufficient power to fire.");
+
 				const inventoryTemplate = ctx.flight?.ecs.getEntityById(
 					launcher.components.isTorpedoLauncher.torpedoEntity!,
 				);
 				if (!inventoryTemplate) throw new Error("Torpedo not found");
 
-				const torpedo = spawnTorpedo(launcher);
-				launcher.ecs?.addEntity(torpedo);
-
-				const powerMultiplier =
-					1 /
-					Math.min(
-						1,
-						Math.max(0.05, (currentPower - requiredPower) / (maxSafePower - requiredPower)),
-					);
-
 				launcher.updateComponent("isTorpedoLauncher", {
 					status: "firing",
-					progress: launcher.components.isTorpedoLauncher.fireTime * powerMultiplier,
+					progress: launcher.components.isTorpedoLauncher.fireTime,
+					firingEnergy: 0,
+					firedClientId: ctx.clientId,
 				});
 				const ship = ctx.ecs.getEntityById(launcher.components.isShipSystem?.shipId || -1);
-				pubsub.publish.starmapCore.torpedos({
-					systemId: torpedo.components.position?.parentId || null,
-				});
+
 				if (ship) {
 					pubsub.publish.targeting.torpedoes.launchers({
 						shipId: ship.id,
 					});
+					playShipSound(launcher, ship, "firingPowerUp");
+				}
 
+				return { shipId: ship?.id || -1 };
+			}),
+		// Triggered by the torpedo launcher ECS system, but can be triggered manually to bypass the firing sequence.
+		fired: t.procedure
+			.input(z.object({ launcherId: z.number() }))
+			.output(
+				z.object({ shipId: z.number(), torpedoId: z.number(), targetId: z.number().nullable() }),
+			)
+			.meta({ event: true })
+			.send(({ input, ctx }) => {
+				const launcher = ctx.ecs.getEntityById(input.launcherId);
+
+				if (!launcher?.components.isTorpedoLauncher)
+					throw new Error("System is not a torpedo launcher");
+				cancelLoopingSound(launcher, "load");
+				cancelLoopingSound(launcher, "firingPowerUp");
+				if (!launcher.components.isTorpedoLauncher.torpedoEntity) {
+					throw new Error("Torpedo launcher is not loaded");
+				}
+				const torpedo = spawnTorpedo(launcher);
+				launcher.ecs?.addEntity(torpedo);
+				pubsub.publish.starmapCore.torpedos({
+					systemId: torpedo.components.position?.parentId || null,
+				});
+				launcher.updateComponent("isTorpedoLauncher", {
+					firedClientId: null,
+					status: "fired",
+					progress: 1000,
+					firingEnergy: 0,
+					torpedoEntity: null,
+				});
+				const ship = ctx.ecs.getEntityById(launcher.components.isShipSystem?.shipId || -1);
+				if (ship) {
+					pubsub.publish.targeting.torpedoes.launchers({
+						shipId: ship.id,
+					});
 					playShipSound(launcher, ship, "fire");
 				}
-				return { shipId: ship?.id || -1, targetId: torpedo.components.isTorpedo?.targetId || -1 };
+
+				return {
+					shipId: ship?.id || -1,
+					torpedoId: torpedo.id,
+					targetId: torpedo.components.isTorpedo!.targetId,
+				};
 			}),
 	}),
 	hull: t.procedure
@@ -553,7 +585,10 @@ export function adjustTorpedoInventory(torpedoId: string | null, launcher: Entit
 export function getShipTorpedos(ecs: ECS, shipId: number) {
 	const ship = ecs.getEntityById(shipId);
 	const templates = getInventoryTemplates(ecs);
-	const torpedoList: Record<string, { count: number; yield: number; speed: number }> = {};
+	const torpedoList: Record<
+		string,
+		{ count: number; yield: number; speed: number; energy: number }
+	> = {};
 	function handleContents(
 		contents: Record<
 			string,
@@ -571,6 +606,7 @@ export function getShipTorpedos(ecs: ECS, shipId: number) {
 					count: 0,
 					yield: template.flags.torpedoWarhead.yield,
 					speed: template.flags.torpedoCasing.speed,
+					energy: template.flags.torpedoCasing.requiredLaunchEnergyMWs,
 				};
 			}
 			torpedoList[item].count += contents[item].count;

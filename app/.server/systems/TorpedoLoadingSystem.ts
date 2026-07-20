@@ -13,47 +13,80 @@ export class TorpedoLoadingSystem extends System {
 	update(entity: Entity, deltaTime: number) {
 		const component = entity.components.isTorpedoLauncher;
 		if (!component) return;
+		let { status, progress, firingEnergy, torpedoEntity } = component;
 
 		// Decrease the deltaTime based on how well the power to the torpedoes is satisfied.
 		let adjustedTime = deltaTime;
 		if (entity.components.power) {
 			const { currentPower, powerLevels } = entity.components.power || {};
 
-			const maxSafePower = powerLevels[powerLevels.length - 1];
 			const requiredPower = powerLevels[0];
-			adjustedTime =
-				deltaTime +
-				deltaTime * (Math.max(0, currentPower - requiredPower) / (maxSafePower - requiredPower));
+			if (currentPower < requiredPower) adjustedTime = 0;
+			if (status === "firing") {
+				firingEnergy += currentPower * (deltaTime / 1000);
+			}
 		}
 
-		let { status, progress } = component;
-		if (status === "loading" || status === "unloading" || status === "firing") {
+		if (
+			status === "loading" ||
+			status === "unloading" ||
+			status === "firing" ||
+			status === "fired"
+		) {
 			progress -= adjustedTime;
-			if (progress <= 0) {
+			if (status === "firing" && progress > 0) {
+				const torpedo = this.ecs.getEntityById(torpedoEntity || -1);
+				if (!torpedo) return;
+				const requiredFiringEnergy =
+					torpedo.components.isInventory?.flags.torpedoCasing?.requiredLaunchEnergyMWs || 0;
+				if (firingEnergy >= requiredFiringEnergy) {
+					cancelLoopingSound(entity, "unload");
+					cancelLoopingSound(entity, "load");
+					cancelLoopingSound(entity, "fire");
+					cancelLoopingSound(entity, "firingPowerUp");
+					this.ecs.triggerAction("targeting.torpedoes.fired", { launcherId: entity.id });
+				} else {
+					entity.updateComponent("isTorpedoLauncher", { status, progress, firingEnergy });
+				}
+			} else if (progress <= 0) {
 				progress = 0;
 				if (status === "loading") {
 					status = "loaded";
-				} else if (status === "unloading") {
+				} else if (status === "unloading" || status === "fired") {
 					status = "ready";
 				} else if (status === "firing") {
-					status = "ready";
+					// This means the torpedo failed to fire because it had insufficient energy. Back to loaded,
+					// and try to notify the station
+					status = "loaded";
+					firingEnergy = 0;
+					if (component.firedClientId)
+						this.ecs.triggerAction("effects.notify", {
+							clientName: component.firedClientId,
+							color: "error",
+							shipId: entity.components.isShipSystem?.shipId || -1,
+							title: "Failed to Fire",
+							body: "Insufficient Power",
+							cards: ["Targeting"],
+						});
 				}
 
 				// Cancel any sounds the torpedo launcher might be looping
 				cancelLoopingSound(entity, "unload");
 				cancelLoopingSound(entity, "load");
 				cancelLoopingSound(entity, "fire");
+				cancelLoopingSound(entity, "firingPowerUp");
 
 				entity.updateComponent("isTorpedoLauncher", {
 					status,
 					progress,
+					firingEnergy: 0,
 					...(status === "ready" ? { torpedoEntity: null } : {}),
 				});
 				pubsub.publish.targeting.torpedoes.launchers({
 					shipId: entity.components.isShipSystem?.shipId || 0,
 				});
 			} else {
-				entity.updateComponent("isTorpedoLauncher", { status, progress });
+				entity.updateComponent("isTorpedoLauncher", { status, progress, firingEnergy });
 			}
 		}
 	}

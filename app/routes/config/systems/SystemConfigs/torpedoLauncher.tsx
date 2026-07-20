@@ -70,8 +70,10 @@ export default function TorpedoLauncherConfig() {
 							inputMode="numeric"
 							pattern="[0-9]*"
 							label="Fire Time"
-							placeholder={"1000"}
-							helperText={"How long it takes to fire a torpedo in milliseconds"}
+							placeholder={"5000"}
+							helperText={
+								"The torpedo firing timeout in seconds. If the torpedo does not get sufficient energy within this duration, the torpedo will not fire."
+							}
 							defaultValue={system.fireTime}
 							onBlur={async (e) => {
 								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;

@@ -68,6 +68,9 @@ export const inventoryFlags = z
 				speed: z.number().default(50),
 				maxForce: z.number().default(1000),
 				maxRange: z.number().default(25000),
+
+				/** The energy required to launch the torpedo in megawatt seconds. The default means 1 megawatt applied for 24 seconds, or 24 megawatts applied for 1 second */
+				requiredLaunchEnergyMWs: z.number().default(24),
 			})
 			.optional(),
 		torpedoWarhead: z
@@ -185,6 +188,10 @@ export const InventoryFlagValues: {
 		color: {
 			info: "The color of the torpedo casing. Supports CSS compatible colors.",
 			defaultValue: "red",
+		},
+		requiredLaunchEnergyMWs: {
+			info: "How much energy in megawatt seconds needs to be supplied to the torpedo launcher before the launch timeout for the torpedo to launch.",
+			defaultValue: 24,
 		},
 	},
 	torpedoWarhead: {

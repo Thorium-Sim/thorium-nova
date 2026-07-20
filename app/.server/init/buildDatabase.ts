@@ -23,7 +23,7 @@ export async function buildDatabase(loadPlugins: (this: ServerDataModel) => Prom
 	);
 
 	// Wait for the plugins to load. Shouldn't take long.
-	const promises = [serverModel.loadPlugins()];
+	await serverModel.loadPlugins();
 	await serverModel.getInitialData();
 
 	// If a flight is in progress, load it.
@@ -41,10 +41,8 @@ export async function buildDatabase(loadPlugins: (this: ServerDataModel) => Prom
 			},
 			{ meta: { filePath: `/flights/${flightName}/data.yml`, flightName } },
 		);
-		promises.push(flight.initPhysics());
+		await flight.initPhysics();
 	}
-
-	await Promise.all(promises);
 
 	thoriumContext.getStore()!.database = { server: serverModel, flight };
 	return thoriumContext.getStore()!.database;
