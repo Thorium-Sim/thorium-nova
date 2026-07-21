@@ -1,4 +1,8 @@
 import type { CardProps } from "@thorium/cards/CardProps";
+import {
+	SensorsDamageOverlay,
+	useSensorGridOffline,
+} from "@thorium/cards/Sensors/SensorsDamageOverlay";
 import { q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
@@ -107,6 +111,8 @@ export function Pilot({ cardLoaded }: CardProps) {
 		}
 	}, [showWarning]);
 
+	const { gridOffline } = useSensorGridOffline();
+
 	return (
 		<CircleGridStoreProvider>
 			<div className="grid h-full grid-cols-4 grid-rows-1 place-content-center gap-4">
@@ -150,10 +156,17 @@ export function Pilot({ cardLoaded }: CardProps) {
 				</div>
 				<div className="pilot-radar col-span-2 aspect-square w-full self-center">
 					<Suspense fallback={null}>
-						<GridCanvas shouldRender={cardLoaded}>
+						<GridCanvas
+							shouldRender={cardLoaded}
+							outerChildren={<SensorsDamageOverlay gridOffline={gridOffline} />}
+						>
 							<CircleGrid>
-								<CircleGridContacts targetedContactId={targetedContact?.id} />
-								<CircleGridWaypoints />
+								{gridOffline ? null : (
+									<>
+										<CircleGridContacts targetedContactId={targetedContact?.id} />
+										<CircleGridWaypoints />
+									</>
+								)}
 							</CircleGrid>
 						</GridCanvas>
 					</Suspense>

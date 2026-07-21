@@ -1,4 +1,8 @@
 import type { CardProps } from "@thorium/cards/CardProps";
+import {
+	SensorsDamageOverlay,
+	useSensorGridOffline,
+} from "@thorium/cards/Sensors/SensorsDamageOverlay";
 import { BeamVisualization, PhaserArcs, Phasers } from "@thorium/cards/Targeting/Phasers";
 import { Shields } from "@thorium/cards/Targeting/Shields";
 import { Torpedoes } from "@thorium/cards/Targeting/Torpedoes";
@@ -27,6 +31,8 @@ export function Targeting({ cardLoaded }: CardProps) {
 	q.pilot.stream.useDataStream({ shipId, systemId: ship.currentSystem });
 	const [hull] = q.targeting.hull.useNetRequest({ shipId });
 	const clickRef = React.useRef(false);
+	const { gridOffline } = useSensorGridOffline();
+
 	return (
 		<CircleGridStoreProvider zoomMax={25000}>
 			<div className="grid h-full grid-cols-4 grid-rows-1 place-content-center gap-4">
@@ -52,16 +58,21 @@ export function Targeting({ cardLoaded }: CardProps) {
 									setTarget.mutate({ target: null, shipId });
 								}
 							}}
+							outerChildren={<SensorsDamageOverlay gridOffline={gridOffline} />}
 						>
 							<CircleGrid fixedChildren={<PhaserArcs />}>
-								<BeamVisualization />
-								<CircleGridContacts
-									targetedContactId={targetedContact?.id}
-									onContactClick={(contact) => {
-										clickRef.current = true;
-										setTarget.mutate({ target: contact, shipId });
-									}}
-								/>
+								{gridOffline ? null : (
+									<>
+										<BeamVisualization />
+										<CircleGridContacts
+											targetedContactId={targetedContact?.id}
+											onContactClick={(contact) => {
+												clickRef.current = true;
+												setTarget.mutate({ target: contact, shipId });
+											}}
+										/>
+									</>
+								)}
 							</CircleGrid>
 						</GridCanvas>
 					</React.Suspense>

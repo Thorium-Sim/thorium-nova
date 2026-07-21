@@ -285,10 +285,12 @@ export function GridCanvas({
 	shouldRender,
 	children,
 	onBackgroundClick,
+	outerChildren,
 }: {
 	shouldRender: boolean;
 	children: ReactNode;
 	onBackgroundClick?: () => void;
+	outerChildren?: ReactNode;
 }) {
 	const client = useQueryClient();
 	const circleGridStore = useCircleGridStore();
@@ -316,7 +318,7 @@ export function GridCanvas({
 	});
 	return (
 		<div
-			className="aspect-square h-full w-full rounded-full border-2 border-white/50 bg-black/50"
+			className="relative aspect-square h-full w-full rounded-full border-2 border-white/50 bg-black/50"
 			{...wheelBind()}
 		>
 			<Canvas
@@ -340,6 +342,7 @@ export function GridCanvas({
 					<QueryClientProvider client={client}>{children}</QueryClientProvider>
 				</ContextBridge>
 			</Canvas>
+			{outerChildren}
 		</div>
 	);
 }

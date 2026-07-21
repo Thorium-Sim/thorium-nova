@@ -33,6 +33,8 @@ export const sensors = t.router({
 
 			return {
 				id: sensors.id,
+				requiredPower: sensors.components.power?.powerLevels[0] || 0,
+				name: sensors.components.identity?.name || "Sensors",
 				passiveRange: sensors.components.isSensors?.passiveRange || 10_000,
 				activeRange: sensors.components.isSensors?.activeRange || 100_000,
 				selectedContact: sensors.components.isSensors?.selectedContact || null,
@@ -271,11 +273,21 @@ export const sensors = t.router({
 			if (typeof systemId === "undefined") {
 				return set;
 			}
+
+			// Track the current power of the sensors system
+			const sensorsSystem = getShipSystem(ctx.ecs, { shipId: input.shipId, systemType: "sensors" });
+			if (sensorsSystem) {
+				set.add(sensorsSystem);
+			}
+
+			// Get any ships that are present on the sensor grid
 			for (const entity of ctx.ecs.componentCache.get("position") || []) {
 				if (entity.components.position?.parentId === systemId) {
 					set.add(entity);
 				}
 			}
+
+			// Get the status of any sensors scans
 			for (const entity of ctx.ecs.componentCache.get("scan") || []) {
 				// TODO April 28, 2028 — make it so completed scans aren't sent anymore
 				if (entity.components.scan?.parentId === input.shipId) {
