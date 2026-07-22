@@ -87,7 +87,6 @@ describe("ReactorHeatSystem", () => {
 					contents: {
 						Deuterium: {
 							count: 100,
-							temperature: 295.37,
 						},
 					},
 				}),
@@ -124,27 +123,22 @@ describe("ReactorHeatSystem", () => {
 		if (ship.components.shipMap) {
 			ship.components.shipMap.deckNodes[0].contents.Water = {
 				count: 1000,
-				temperature: 300,
 			};
 		}
 
-		const water = ship.components.shipMap?.deckNodes[0].contents.Water;
 		const heatComponent = reactor.components.heat;
 
-		expect(water?.temperature).toMatchInlineSnapshot(`300`);
 		expect(heatComponent?.heat).toMatchInlineSnapshot(`300`);
 		// One second
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(water?.temperature).toMatchInlineSnapshot(`300.00005912589245`);
 		expect(heatComponent?.heat).toMatchInlineSnapshot(`300.0108617779006`);
 
 		// One minute
 		for (let i = 0; i < 60 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(water?.temperature).toMatchInlineSnapshot(`300.15049805633595`);
 		expect(heatComponent?.heat).toMatchInlineSnapshot(`300.5336132852704`);
 	});
 	it("should disperse some of the coolant's heat into space", () => {
@@ -156,28 +150,23 @@ describe("ReactorHeatSystem", () => {
 		if (ship.components.shipMap) {
 			ship.components.shipMap.deckNodes[0].contents.Water = {
 				count: 1000,
-				temperature: 300,
 			};
 		}
 
-		const water = ship.components.shipMap?.deckNodes[0].contents.Water;
 		const heatComponent = reactor.components.heat;
 
-		expect(water?.temperature).toMatchInlineSnapshot(`300`);
 		expect(heatComponent?.heat).toMatchInlineSnapshot(`300`);
 
 		// One second
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
-		expect(water?.temperature).toMatchInlineSnapshot(`299.9685120844853`);
 		expect(heatComponent?.heat).toMatchInlineSnapshot(`300.0107158633319`);
 
 		// One minute
 		for (let i = 0; i < 60 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(water?.temperature).toMatchInlineSnapshot(`298.672481264902`);
 		expect(heatComponent?.heat).toMatchInlineSnapshot(`300.1534015618128`);
 		// Test turning off the reactor
 		if (reactor.components.isReactor) {
@@ -186,7 +175,6 @@ describe("ReactorHeatSystem", () => {
 		for (let i = 0; i < 60 * 60; i++) {
 			ecs.update(16);
 		}
-		expect(water?.temperature).toMatchInlineSnapshot(`297.7916745447554`);
 		expect(heatComponent?.heat).toMatchInlineSnapshot(`299.30451177402915`);
 	});
 });

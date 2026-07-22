@@ -1,6 +1,5 @@
 import { q } from "@thorium/context/AppContext";
 import { cn } from "@thorium/utils/cn";
-import type { Kelvin } from "@thorium/utils/unitTypes";
 
 import { cargoSort } from "./cargoSort";
 
@@ -16,7 +15,6 @@ export function CargoList({
 				id: number;
 				contents: {
 					[inventoryTemplateName: string]: {
-						temperature: Kelvin;
 						count: number;
 					};
 				};

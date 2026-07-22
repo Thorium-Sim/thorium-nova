@@ -594,7 +594,6 @@ export function getShipTorpedos(ecs: ECS, shipId: number) {
 			string,
 			{
 				count: number;
-				temperature: number;
 			}
 		>,
 	) {

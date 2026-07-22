@@ -1,6 +1,6 @@
 import type { EdgeFlag } from "@thorium/utils/flags/DeckEdge";
 import type { NodeFlag } from "@thorium/utils/flags/DeckNode";
-import type { Flavor, Kelvin, Liter } from "@thorium/utils/unitTypes";
+import type { Flavor, Liter } from "@thorium/utils/unitTypes";
 
 export default class DeckPlugin {
 	name: string;
@@ -28,7 +28,7 @@ export class DeckNode {
 	flags: NodeFlag[];
 	systems: string[];
 	contents: {
-		[inventoryTemplateName: string]: { count: number; temperature: Kelvin };
+		[inventoryTemplateName: string]: { count: number };
 	};
 	constructor(params: Partial<DeckNode>) {
 		this.id = params.id || 0;
@@ -76,6 +76,6 @@ export class DeckEdge {
 export type ShipMapDeckNode = DeckPlugin["nodes"][0] & {
 	deckIndex: number;
 	contents: {
-		[inventoryTemplateName: string]: { count: number; temperature: Kelvin };
+		[inventoryTemplateName: string]: { count: number };
 	};
 };

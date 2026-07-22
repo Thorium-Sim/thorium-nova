@@ -1,12 +1,11 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { type Entity, System } from "@thorium/utils/ecs";
-import type { Kelvin } from "@thorium/utils/unitTypes";
 
 type DeckNodeMap = {
 	[key: number]: NonNullable<Entity["components"]["shipMap"]>["deckNodes"][number] & {
 		deckIndex: number;
 		contents: {
-			[inventoryTemplateName: string]: { count: number; temperature: Kelvin };
+			[inventoryTemplateName: string]: { count: number };
 		};
 	};
 };

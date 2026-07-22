@@ -1,6 +1,6 @@
 import { getReactorInventory } from "@thorium/utils/.server/ship/getSystemInventory";
 import { type Entity, System } from "@thorium/utils/ecs";
-import { type MeterSquared, StephanBoltzmannConstant } from "@thorium/utils/unitTypes";
+import { type MeterSquared, StephanBoltzmannConstant as _ } from "@thorium/utils/unitTypes";
 
 // W = A * a * T^5
 // W = Watts
@@ -20,7 +20,7 @@ import { type MeterSquared, StephanBoltzmannConstant } from "@thorium/utils/unit
 
 // Specific heat is in J/gK, 1J = 1 wattsecond
 
-const RADIATOR_AREA: MeterSquared = 1;
+const _RADIATOR_AREA: MeterSquared = 1;
 
 export class HeatDispersionSystem extends System {
 	static flightMode = ["nova"];
@@ -28,21 +28,20 @@ export class HeatDispersionSystem extends System {
 		return !!entity.components.heat;
 	}
 	update(entity: Entity, elapsed: number) {
-		const elapsedInSeconds = elapsed / 1000;
+		const _elapsedInSeconds = elapsed / 1000;
 		if (!entity.components.heat) return;
 		const inventory = getReactorInventory(entity) || [];
 		// Radiate the heat of the coolant into space
 		for (const item of inventory) {
 			if (!item.flags?.coolant) continue;
-			const temp = item.temperature;
-			const wattsDispersed = RADIATOR_AREA * StephanBoltzmannConstant * temp ** 5;
+			// const wattsDispersed = RADIATOR_AREA * StephanBoltzmannConstant * temp ** 5;
 
-			const tempDrop =
-				(wattsDispersed * elapsedInSeconds) /
-				(item.flags.coolant.heatCapacity * item.flags.coolant.massPerUnit * 1000 * item.count);
-			if (item.room) {
-				item.room.contents[item.name].temperature = Math.max(2.7, temp - tempDrop);
-			}
+			// const tempDrop =
+			// 	(wattsDispersed * elapsedInSeconds) /
+			// 	(item.flags.coolant.heatCapacity * item.flags.coolant.massPerUnit * 1000 * item.count);
+			// if (item.room) {
+			// 	item.room.contents[item.name].temperature = Math.max(2.7, temp - tempDrop);
+			// }
 		}
 	}
 }

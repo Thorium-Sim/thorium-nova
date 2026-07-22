@@ -27,18 +27,15 @@ export function getReactorInventory(reactor: Entity) {
 	const entityRoom = getDeckNode(entityRoomId, systemShip);
 
 	const inventoryTemplates = getInventoryTemplates(reactor.ecs);
-	const roomInventory = Object.entries(entityRoom?.contents || {}).map(
-		([key, { count, temperature }]) => {
-			const inventoryItem = inventoryTemplates[key];
-			return {
-				room: entityRoom,
-				...inventoryItem,
-				count,
-				temperature,
-				name: key,
-			};
-		},
-	);
+	const roomInventory = Object.entries(entityRoom?.contents || {}).map(([key, { count }]) => {
+		const inventoryItem = inventoryTemplates[key];
+		return {
+			room: entityRoom,
+			...inventoryItem,
+			count,
+			name: key,
+		};
+	});
 
 	return roomInventory;
 }

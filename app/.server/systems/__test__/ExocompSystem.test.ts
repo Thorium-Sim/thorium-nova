@@ -89,7 +89,6 @@ describe("Exocomp System", () => {
 					contents: {
 						"Repair Item": {
 							count: 10,
-							temperature: 295,
 						},
 					},
 				}),

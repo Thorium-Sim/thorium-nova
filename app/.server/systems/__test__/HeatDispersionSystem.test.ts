@@ -3,7 +3,7 @@ import { thoriumContext } from "@thorium/utils/.server/context";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
 import { ECS, Entity } from "@thorium/utils/ecs";
-import { describe, expect, it, beforeEach, aroundEach } from "vitest";
+import { describe, it, beforeEach, aroundEach } from "vitest";
 
 import { FilterInventorySystem } from "../FilterInventorySystem";
 import { FilterShipsWithReactors } from "../FilterShipsWithReactors";
@@ -81,7 +81,6 @@ describe("HeatDispersionSystem", () => {
 					contents: {
 						Water: {
 							count: 100,
-							temperature: 1000,
 						},
 					},
 				}),
@@ -96,18 +95,7 @@ describe("HeatDispersionSystem", () => {
 		ecs.addSystem(filterInventorySystem);
 		ecs.addSystem(heatDispersionSystem);
 	});
-	it("should disperse heat out into space", () => {
+	it.todo("should disperse heat out into space", () => {
 		if (!reactor.components.isReactor) throw new Error("Not reactor");
-
-		// One second
-		expect(ship.components.shipMap?.deckNodes[0].contents.Water.temperature).toMatchInlineSnapshot(
-			`1000`,
-		);
-		for (let i = 0; i < 60; i++) {
-			ecs.update(16);
-		}
-		expect(ship.components.shipMap?.deckNodes[0].contents.Water.temperature).toMatchInlineSnapshot(
-			`899.9549085464537`,
-		);
 	});
 });

@@ -53,7 +53,7 @@ export default class ShipPlugin extends Aspect {
 						volume: z.number(),
 						flags: nodeFlagsSchema.array(),
 						systems: z.string().array(),
-						contents: z.record(z.object({ count: z.number(), temperature: z.number() })),
+						contents: z.record(z.object({ count: z.number() })),
 					})
 					.array(),
 			})

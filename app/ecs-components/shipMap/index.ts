@@ -28,7 +28,6 @@ export const shipMap = z
 					contents: z.record(
 						z.object({
 							count: z.number(),
-							temperature: z.number(),
 						}),
 					),
 					flags: nodeFlagsSchema.array(),

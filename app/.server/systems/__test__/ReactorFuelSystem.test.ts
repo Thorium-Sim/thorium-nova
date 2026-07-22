@@ -76,7 +76,6 @@ describe("ReactorFuelSystem", () => {
 					contents: {
 						Deuterium: {
 							count: 100,
-							temperature: 295.37,
 						},
 					},
 				}),

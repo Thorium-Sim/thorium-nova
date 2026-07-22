@@ -81,7 +81,6 @@ describe("HeatToCoolantSystem", () => {
 					contents: {
 						Water: {
 							count: 100,
-							temperature: 300,
 						},
 					},
 				}),
@@ -98,48 +97,42 @@ describe("HeatToCoolantSystem", () => {
 	});
 	it("should bring the water temperature up to the reactor's temperature", () => {
 		if (!reactor.components.isReactor) throw new Error("Not reactor");
-		const water = ship.components.shipMap?.deckNodes[0].contents.Water;
+
 		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`1200`);
-		expect(water?.temperature).toMatchInlineSnapshot(`300`);
+
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
 		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`1191.9922564707272`);
-		expect(water?.temperature).toMatchInlineSnapshot(`391.2153039905101`);
+
 		for (let i = 0; i < 60 * 60; i++) {
 			ecs.update(16);
 		}
 		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`1127.424395170057`);
-		expect(water?.temperature).toMatchInlineSnapshot(`1126.7005346336514`);
 	});
 	it("should bring the water temperature down to the reactor's temperature", () => {
 		if (!reactor.components.isReactor) throw new Error("Not reactor");
-		const water = ship.components.shipMap?.deckNodes[0].contents.Water;
-		if (water) {
-			water.temperature = 1200;
-		}
+
 		if (reactor.components.heat) {
 			reactor.components.heat.heat = 300;
 		}
 		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`300`);
-		expect(water?.temperature).toMatchInlineSnapshot(`1200`);
+
 		for (let i = 0; i < 60; i++) {
 			ecs.update(16);
 		}
 		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`308.00774352927226`);
-		expect(water?.temperature).toMatchInlineSnapshot(`1108.78469600949`);
+
 		for (let i = 0; i < 60 * 60; i++) {
 			ecs.update(16);
 		}
 		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`372.5756048299453`);
-		expect(water?.temperature).toMatchInlineSnapshot(`373.2994653663502`);
 	});
 	it("more water should lower the reactor's heat faster", () => {
 		if (!reactor.components.isReactor) throw new Error("Not reactor");
 		const water = ship.components.shipMap?.deckNodes[0].contents.Water;
 		if (water) {
 			water.count = 1;
-			water.temperature = 100;
 		}
 		if (reactor.components.heat) {
 			reactor.components.heat.heat = 1200;
@@ -148,10 +141,9 @@ describe("HeatToCoolantSystem", () => {
 			ecs.update(16);
 		}
 		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`1199.0351698356333`);
-		expect(water?.temperature).toMatchInlineSnapshot(`1199.0271656452544`);
+
 		if (water) {
 			water.count = 1000;
-			water.temperature = 100;
 		}
 		if (reactor.components.heat) {
 			reactor.components.heat.heat = 1200;
@@ -160,6 +152,5 @@ describe("HeatToCoolantSystem", () => {
 			ecs.update(16);
 		}
 		expect(reactor.components.heat?.heat).toMatchInlineSnapshot(`1189.7420382472358`);
-		expect(water?.temperature).toMatchInlineSnapshot(`111.68472861525993`);
 	});
 });

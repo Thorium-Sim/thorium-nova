@@ -790,7 +790,6 @@ type Container = {
 		string,
 		{
 			count: number;
-			temperature: number;
 		}
 	>;
 };
@@ -840,17 +839,8 @@ export function transferInventory(
 		const C2 = itemCounts[item] ?? count;
 		if (C2 === 0) return;
 		fromContainer.contents[item].count -= C2;
-		if (!toContainer.contents[item]) toContainer.contents[item] = { count: 0, temperature: 295.37 };
+		if (!toContainer.contents[item]) toContainer.contents[item] = { count: 0 };
 
-		// Average the temperatures of the items being transferred.
-		// The formula we'll use for combining heat is
-		// (T1 * C1 + T2 * C2) / (C1 + C2)
-		const T1 = fromContainer.contents[item].temperature;
-		const T2 = toContainer.contents[item].temperature;
-		const C1 = toContainer.contents[item].count;
-
-		toContainer.contents[item].count += C2;
-		toContainer.contents[item].temperature = (T1 * C1 + T2 * C2) / (C1 + C2);
 		transferredCounts[item] = C2;
 	});
 
