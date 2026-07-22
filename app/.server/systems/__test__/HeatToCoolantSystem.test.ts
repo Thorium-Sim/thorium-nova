@@ -55,7 +55,6 @@ describe("HeatToCoolantSystem", () => {
 		});
 		reactor.addComponent("heat", {
 			heat: 1200,
-			heatDissipationRate: 1,
 			powerToHeat: 0.01,
 			nominalHeat: 300,
 			maxSafeHeat: 400,

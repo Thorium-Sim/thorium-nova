@@ -10,11 +10,6 @@ export const heat = z
 		 */
 		powerToHeat: z.number().min(0).default(0.01),
 		/**
-		 * The effectiveness of transferring heat into space. A multiplier
-		 * for the equation P = A * a * T5
-		 */
-		heatDissipationRate: z.number().min(0).default(1),
-		/**
 		 * The standard heat level. When plotted, this
 		 * represents the very bottom of the heat bar.
 		 */

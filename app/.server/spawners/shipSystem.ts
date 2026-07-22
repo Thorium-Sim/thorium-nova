@@ -128,7 +128,6 @@ export function spawnShipSystem(
 		}
 		const {
 			powerToHeat,
-			heatDissipationRate,
 			maxHeat,
 			maxSafeHeat,
 			nominalHeat,
@@ -140,7 +139,6 @@ export function spawnShipSystem(
 			if (flags.includes("heat")) {
 				entity.addComponent("heat", {
 					powerToHeat: overrides.powerToHeat || powerToHeat,
-					heatDissipationRate: overrides.heatDissipationRate || heatDissipationRate,
 					maxHeat: overrides.maxHeat || maxHeat,
 					maxSafeHeat: overrides.maxSafeHeat || maxSafeHeat,
 					nominalHeat: overrides.nominalHeat || nominalHeat,

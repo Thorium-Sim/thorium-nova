@@ -86,12 +86,6 @@ export default class BaseShipSystemPlugin extends Aspect {
 	powerToHeat: KelvinPerSecond;
 
 	/**
-	 * The effectiveness of transferring heat into space. A multiplier
-	 * for the equation P = A * a * T5
-	 */
-	heatDissipationRate: number;
-
-	/**
 	 * The standard heat level. When plotted, this
 	 * represents the very bottom of the heat bar.
 	 */
@@ -140,7 +134,6 @@ export default class BaseShipSystemPlugin extends Aspect {
 		this.powerActivated = params.powerActivated ?? true;
 		this.connectedBatteryType = params.connectedBatteryType || "none";
 		this.powerToHeat = params.powerToHeat || 10;
-		this.heatDissipationRate = params.heatDissipationRate || 1;
 		this.nominalHeat = params.nominalHeat || 295.37;
 		this.maxSafeHeat = params.maxSafeHeat || 1000;
 		this.maxHeat = params.maxHeat || 2500;

@@ -53,32 +53,6 @@ export default function Heat() {
 						/>
 						<OverrideResetButton property="powerToHeat" setRekey={setRekey} className="mt-6" />
 					</div>
-					<div className="flex pb-4">
-						<Input
-							labelHidden={false}
-							label="Heat Dissipation Rate"
-							helperText="A multiplier for the effectiveness of dissipating heat into space. Less than 1 = less effective, more than 1 = more effective."
-							type="text"
-							inputMode="numeric"
-							pattern="[0-9]*"
-							defaultValue={system.heatDissipationRate}
-							onBlur={(e: any) => {
-								if (Number.isNaN(Number(e.target.value))) return;
-								q.plugin.systems.update.netSend({
-									pluginId,
-									systemId: systemId,
-									shipId,
-									shipPluginId,
-									heatDissipationRate: Number(e.target.value),
-								});
-							}}
-						/>
-						<OverrideResetButton
-							property="heatDissipationRate"
-							setRekey={setRekey}
-							className="mt-6"
-						/>
-					</div>
 
 					<div className="flex pb-4">
 						<Input
