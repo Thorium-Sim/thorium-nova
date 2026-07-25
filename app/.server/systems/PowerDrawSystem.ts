@@ -94,7 +94,7 @@ export class PowerDrawSystem extends System {
 			case "sensors": {
 				// If there is an active scan, just draw the full amount of power
 				for (const scan of this.ecs.componentCache.get("scan") || []) {
-					if (scan.components.scan?.parentId === ship.id) {
+					if (scan.components.scan?.parentId === ship.id && scan.components.scan.progress < 1) {
 						powerDraw = maxSafePower;
 						break;
 					}

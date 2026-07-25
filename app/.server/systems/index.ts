@@ -1,4 +1,5 @@
 import { CommSatelliteSystem } from "@thorium/.server/systems/CommSatelliteSystem";
+import { CoolantLoopSystem } from "@thorium/.server/systems/CoolantLoopSystem";
 /**
  * Since the order of system execution matters, we need to import all
  * of the systems and re-export them in an array
@@ -15,6 +16,7 @@ import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem"
 import { PowerEfficiencyOverloadSystem } from "@thorium/.server/systems/PowerEfficiencyOverloadSystem";
 import { ReactorPowerUpSystem } from "@thorium/.server/systems/ReactorPowerUpSystem";
 import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
+import { ShipSystemHeatSystem } from "@thorium/.server/systems/ShipSystemHeatSystem";
 import { ShortRangeCommPowerSystem } from "@thorium/.server/systems/ShortRangeCommPowerSystem";
 import { SpontaneousFailureSystem } from "@thorium/.server/systems/SpontaneousFailureSystem";
 
@@ -25,8 +27,6 @@ import { DataStreamSystem } from "./DataStreamSystem";
 import { FacingWaypointSystem } from "./FacingWaypointSystem";
 import { FilterInventorySystem } from "./FilterInventorySystem";
 import { FilterShipsWithReactors } from "./FilterShipsWithReactors";
-import { HeatDispersionSystem } from "./HeatDispersionSystem";
-import { HeatToCoolantSystem } from "./HeatToCoolantSystem";
 import { ImpulseSystem } from "./ImpulseSystem";
 import { InterstellarTransitionSystem } from "./InterstellarTransitionSystem";
 import { IsDestroyedSystem } from "./IsDestroyedSystem";
@@ -63,6 +63,7 @@ const systems = [
 	PowerDrawSystem,
 	PowerDistributionSystem,
 	PowerEfficiencyOverloadSystem,
+	ShipSystemHeatSystem,
 	NPCPhaserChargeSystem,
 	TorpedoLoadingSystem,
 	NearbyObjectsSystem,
@@ -87,8 +88,7 @@ const systems = [
 	WaypointRemoveSystem,
 	FacingWaypointSystem,
 	CollisionWarningSystem,
-	HeatToCoolantSystem,
-	HeatDispersionSystem,
+	CoolantLoopSystem,
 	EngineeringPanelAssignmentSystem,
 	DamageCheckSystem,
 	SpontaneousFailureSystem,

@@ -144,27 +144,33 @@ export async function liveQueryPlugin<TRouter extends AnyRouter, TContext>({
 					},
 					async onOpen(_, ws) {
 						socketEmitter.emit("open");
-
-						const result = await Promise.race<string>([
-							new Promise<string>((res) => {
-								const handleConnection = (data: any) => {
-									const { type, ...message } = JSON.parse(data.toString());
-									if (type === "clientConnect") {
-										const id = message.id;
-										socketEmitter.off("message", handleConnection);
-										res(id);
-									}
-								};
-								socketEmitter.on("message", handleConnection);
-							}),
-							new Promise((res, rej) => setTimeout(() => rej(`Client Connect Timeout`), 60 * 1000)),
-						]);
-						initWebsocket({
-							clientId: result,
-							send: (data) => ws.send(data),
-							socketEmitter,
-							extraContext,
-						});
+						try {
+							const result = await Promise.race<string>([
+								new Promise<string>((res) => {
+									const handleConnection = (data: any) => {
+										const { type, ...message } = JSON.parse(data.toString());
+										if (type === "clientConnect") {
+											const id = message.id;
+											socketEmitter.off("message", handleConnection);
+											res(id);
+										}
+									};
+									socketEmitter.on("message", handleConnection);
+								}),
+								new Promise((res, rej) =>
+									setTimeout(() => rej(`Client Connect Timeout`), 60 * 1000),
+								),
+							]);
+							initWebsocket({
+								clientId: result,
+								send: (data) => ws.send(data),
+								socketEmitter,
+								extraContext,
+							});
+						} catch (error) {
+							console.error("Failed to connect client", error);
+							ws.close(3008);
+						}
 					},
 				};
 			})(c, next);

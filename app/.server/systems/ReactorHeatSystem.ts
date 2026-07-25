@@ -1,22 +1,5 @@
 import { type Entity, System } from "@thorium/utils/ecs";
-import type { HeatCapacity, Kelvin, Kilograms, MegaWatt } from "@thorium/utils/unitTypes";
-
-// W = Q / 𝚫t = (c * m * 𝚫T)/𝚫t
-// W = watts
-// Q = Energy Added (watthour)
-// 𝚫t = change in time
-// c = specific heat
-// m = mass
-// 𝚫T = change in temperature
-// So, based on this
-// 𝚫T = (W * 𝚫t) / (c * m)
-// For now, assume c = 0.52, the specific heat of titanium
-// And the mass of the reactor is 10000kg
-
-// Specific heat is in J/gK, 1 J = 1 wattsecond
-
-const HEAT_CAPACITY: HeatCapacity = 0.475;
-const MASS: Kilograms = 10000;
+import type { MegaWatt } from "@thorium/utils/unitTypes";
 
 // TODO May 28, 2026 — If the net reactor output is greater than 0, pump all
 // of that extra energy into heat.
@@ -25,19 +8,15 @@ export class ReactorHeatSystem extends System {
 	test(entity: Entity) {
 		return !!entity.components.isReactor && !!entity.components.heat;
 	}
-	update(entity: Entity, elapsed: number) {
-		const elapsedInSeconds = elapsed / 1000;
+	update(entity: Entity) {
 		if (!entity.components.isReactor || !entity.components.heat) return;
 		const { currentOutput, balanced, balancedBonusMultiplier } = entity.components.isReactor;
 		const { powerToHeat } = entity.components.heat;
+		const { heatMultiplier } = entity.components.damage || { heatMultiplier: 1 };
 
 		const heatGenerated: MegaWatt =
-			currentOutput * powerToHeat * (balanced ? balancedBonusMultiplier : 1);
+			currentOutput * powerToHeat * (balanced ? balancedBonusMultiplier : 1) * heatMultiplier;
 
-		const heatInWatts = heatGenerated * 1e6;
-
-		const changeInHeat: Kelvin = (heatInWatts * elapsedInSeconds) / (HEAT_CAPACITY * MASS * 1000);
-
-		entity.components.heat.heat += changeInHeat;
+		entity.updateComponent("heat", { heatLoad: heatGenerated });
 	}
 }

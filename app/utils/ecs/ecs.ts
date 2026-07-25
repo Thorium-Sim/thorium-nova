@@ -38,7 +38,7 @@ class ECS {
 	maxEntityId = 1;
 	componentCache = new Map<ComponentIds, Set<Entity>>();
 	colliderCache = new Map<string, ColliderDesc>();
-	shipSystemCache = new Map<string, Entity | Entity[]>();
+	shipSystemCache = new Map<number, Map<string, Entity | Entity[]>>();
 	changeBatch = new Set<`${number}-${ComponentIds}`>();
 	// The key is the sector number based on the location of this physics world
 	worlds = new Map<string, World>();

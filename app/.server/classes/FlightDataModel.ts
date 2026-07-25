@@ -124,7 +124,6 @@ export class FlightDataModel extends DataStore {
 			}
 		}
 
-		console.trace();
 		await Promise.all(
 			ships.map(async (ship) => {
 				if (!ship.assets.model) return;

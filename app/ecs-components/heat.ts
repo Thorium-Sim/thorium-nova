@@ -4,6 +4,21 @@ export const heat = z
 	.object({
 		/** The current heat value in Kelvin. Defaults to room temperature. */
 		heat: z.number().min(0).default(295.37),
+
+		/**
+		 * How much volume the coolant takes up in this system in m^3.
+		 * This affects both how fast systems heat up and how quickly
+		 * they cool down when attached to the coolant loop.
+		 * Default is a pipe 10 meters long and 0.3 meter radius
+		 **/
+		coolantVolume: z.number().default(100),
+
+		/** Whether the coolant is flowing through this system */
+		inCoolantLoop: z.boolean().default(false),
+
+		/** How much heat energy in MW is applied to the system, calculated by ECS */
+		heatLoad: z.number().default(0),
+
 		/**
 		 * The percentage of power that passes through the system which is turned
 		 * into heat.

@@ -56,7 +56,7 @@ export * from "./variables";
 export * from "./tweaks";
 export * from "./damageReport";
 export * from "./shipSystems/diagnostic";
-export * from "./legacyCoolant";
+export * from "./coolant";
 export * from "./legacySensorContact";
 export * from "./isInternalMessage";
 export * from "./isDocument";

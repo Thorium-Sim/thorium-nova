@@ -35,7 +35,8 @@ export default function Heat() {
 						<Input
 							labelHidden={false}
 							label="Power to Heat Ratio"
-							helperText="The percentage of power which passes through the system which is turned into heat."
+							helperText="The percentage (0 - 1) of power which passes through the system which is turned into heat."
+							placeholder={`0.01`}
 							type="text"
 							inputMode="numeric"
 							pattern="[0-9]*"

@@ -20,3 +20,4 @@ export * from "./isLongRangeComm";
 export * from "./isShortRangeComm";
 export * from "./isConversationTemplate";
 export * from "./isExocomp";
+export * from "./isCoolantLoop";
