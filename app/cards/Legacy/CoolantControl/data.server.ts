@@ -26,8 +26,8 @@ export const coolantControl = t.router({
 					return {
 						id: system.id,
 						name: system.components.identity?.name || "Coolant Tank",
-						transferSystem: system.components.isCoolantTank.transferSystem,
-						transferDirection: system.components.isCoolantTank.transferDirection,
+						transferSystem: system.components.isCoolantTank.legacyTransferSystem,
+						transferDirection: system.components.isCoolantTank.legacyTransferDirection,
 					};
 				}
 			}
@@ -83,8 +83,8 @@ export const coolantControl = t.router({
 			if (!coolantTank) return;
 
 			coolantTank.updateComponent("isCoolantTank", {
-				transferDirection: input.transferDirection,
-				transferSystem: input.systemId,
+				legacyTransferDirection: input.transferDirection,
+				legacyTransferSystem: input.systemId,
 			});
 
 			pubsub.publish.legacy.coolantControl.tank({

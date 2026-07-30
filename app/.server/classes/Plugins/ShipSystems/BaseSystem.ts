@@ -25,6 +25,7 @@ export const baseShipSystemSchema = z.object({
 	nominalHeat: z.number(),
 	maxSafeHeat: z.number(),
 	maxHeat: z.number(),
+	coolantVolume: z.number(),
 	coolantTransferRate: z.number(),
 	coolantConsumptionRate: z.number(),
 	offlineEfficiency: z.number(),
@@ -103,6 +104,13 @@ export default class BaseShipSystemPlugin extends Aspect {
 	 */
 	maxHeat: Kelvin;
 
+	/**
+	 * How much volume the coolant takes up in this system in m^3.
+	 * This affects both how fast systems heat up and how quickly
+	 * they cool down when attached to the coolant loop.
+	 **/
+	coolantVolume: number;
+
 	coolantTransferRate: number;
 	coolantConsumptionRate: number;
 	////////////
@@ -133,10 +141,11 @@ export default class BaseShipSystemPlugin extends Aspect {
 		this.powerLevels = params.powerLevels || [5, 20];
 		this.powerActivated = params.powerActivated ?? true;
 		this.connectedBatteryType = params.connectedBatteryType || "none";
-		this.powerToHeat = params.powerToHeat || 10;
+		this.powerToHeat = params.powerToHeat || 0.1;
 		this.nominalHeat = params.nominalHeat || 295.37;
 		this.maxSafeHeat = params.maxSafeHeat || 1000;
 		this.maxHeat = params.maxHeat || 2500;
+		this.coolantVolume = params.coolantVolume || 100;
 		this.offlineEfficiency = params.offlineEfficiency || 0.5;
 		this.onlineEfficiency = params.onlineEfficiency || 0.8;
 		this.overloadDamageMultiplier = params.overloadDamageMultiplier || 0.015;

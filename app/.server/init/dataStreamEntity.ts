@@ -76,6 +76,27 @@ export function dataStreamEntity(e: Entity) {
 		};
 	}
 
+	if (e.components.isCoolantTank) {
+		return {
+			id: e.id.toString(),
+			x: e.components.heat?.coolantVolume || 1,
+			z: e.components.heat?.heat || 0,
+			c: e.components.legacyCoolant?.coolant || 0,
+		};
+	}
+	if (e.components.isCoolantRadiator) {
+		return {
+			id: e.id.toString(),
+			z: e.components.heat?.heat || 0,
+		};
+	}
+	if (e.components.isCoolantPump) {
+		return {
+			id: e.id.toString(),
+			y: e.components.power?.currentPower,
+			z: e.components.heat?.heat || 0,
+		};
+	}
 	// This needs to go below all the other ship systems
 	if (e.components.power) {
 		return {
@@ -84,12 +105,7 @@ export function dataStreamEntity(e: Entity) {
 			z: e.components.heat?.heat || 0,
 		};
 	}
-	if (e.components.isCoolantTank) {
-		return {
-			id: e.id.toString(),
-			c: e.components.legacyCoolant?.coolant || 0,
-		};
-	}
+
 	if (e.components.exocomp) {
 		const { parentId: _, type: __, ...position } = e.components.position || {};
 		const shouldSnap = e.components.snapInterpolation ? 1 : 0;

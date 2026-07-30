@@ -1,4 +1,5 @@
 import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
+import { coolantTank } from "@thorium/.server/data/plugins/systems/coolantTank";
 import { exocomps } from "@thorium/.server/data/plugins/systems/exocomps";
 import { longRangeComm } from "@thorium/.server/data/plugins/systems/longRangeComm";
 import { navigation } from "@thorium/.server/data/plugins/systems/navigation";
@@ -48,6 +49,7 @@ export const systems = t.router({
 	longRangeComm,
 	shortRangeComm,
 	exocomps,
+	coolantTank,
 	all: t.procedure
 		.input(z.object({ pluginId: z.string() }).optional())
 		.filter((publish: { pluginId: string } | null, { input }) => {

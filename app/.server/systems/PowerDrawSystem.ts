@@ -147,6 +147,10 @@ export class PowerDrawSystem extends System {
 				}
 				powerDraw = Math.min(powerDraw, maxSafePower);
 			}
+			case "coolantPump": {
+				// We directly update the power draw through the API
+				powerDraw = Math.max(power.powerDraw, power.powerLevels[0]);
+			}
 			default:
 				return;
 		}

@@ -13,8 +13,6 @@ export const cargoContainer = z
 			.record(
 				z.object({
 					count: z.number(),
-					// Measured in Kelvin
-					temperature: z.number(),
 				}),
 			)
 			.default({}),

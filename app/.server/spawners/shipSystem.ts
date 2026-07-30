@@ -1,4 +1,5 @@
 import type BaseShipSystemPlugin from "@thorium/.server/classes/Plugins/ShipSystems/BaseSystem";
+import CoolantTankPlugin from "@thorium/.server/classes/Plugins/ShipSystems/CoolantTank";
 import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
 import { components, type ComponentIds } from "@thorium/ecs-components";
 import { shipMap } from "@thorium/ecs-components/list";
@@ -165,6 +166,58 @@ export function spawnShipSystem(
 				powerLevels: overrides.powerLevels || powerLevels,
 			});
 		}
+	}
+
+	if (template instanceof CoolantTankPlugin) {
+		// Create entities for the coolant tank, the coolant pump, and the radiator
+		// The base entity is the tank itself
+		entity.updateComponent("isCoolantTank", {
+			capacity: template.tankCapacity,
+			coolantDensity: template.coolantDensity,
+			coolantSpecificHeat: template.coolantSpecificHeat,
+		});
+		entity.updateComponent("heat", {
+			coolantVolume: template.tankCapacity,
+		});
+		entity.removeComponent("power");
+
+		const { powerToHeat, maxHeat, maxSafeHeat, nominalHeat, powerLevels } = systemPlugin;
+
+		const radiator = new Entity();
+		radiator.addComponent("identity", { name: "Radiator" });
+		radiator.addComponent("isShipSystem", { shipId, type: "coolantRadiator" });
+		radiator.addComponent("isCoolantRadiator", {
+			area: template.radiatorArea,
+		});
+		radiator.addComponent("heat", {
+			inCoolantLoop: true,
+			powerToHeat: overrides.powerToHeat || powerToHeat,
+			maxHeat: overrides.maxHeat || maxHeat,
+			maxSafeHeat: overrides.maxSafeHeat || maxSafeHeat,
+			nominalHeat: overrides.nominalHeat || nominalHeat,
+			heat: overrides.nominalHeat || nominalHeat,
+		});
+		radiator.addComponent("damage");
+		entities.push(radiator);
+
+		const pump = new Entity();
+		pump.addComponent("identity", { name: "Pump" });
+		pump.addComponent("isShipSystem", { shipId, type: "coolantPump" });
+		pump.addComponent("damage");
+		pump.addComponent("heat", {
+			powerToHeat: overrides.powerToHeat || powerToHeat,
+			maxHeat: overrides.maxHeat || maxHeat,
+			maxSafeHeat: overrides.maxSafeHeat || maxSafeHeat,
+			nominalHeat: overrides.nominalHeat || nominalHeat,
+			heat: overrides.nominalHeat || nominalHeat,
+		});
+		const pumpPowerLevels = overrides.powerLevels || powerLevels;
+		pump.addComponent("power", {
+			powerLevels: pumpPowerLevels,
+			powerDraw: pumpPowerLevels[0],
+		});
+		pump.addComponent("isCoolantPump", { baseFlowRate: template.pumpBaseFlowRate });
+		entities.push(pump);
 	}
 
 	return entities;

@@ -31,7 +31,8 @@ export const systemsMonitor = t.router({
 					systemType: "reactor",
 					shipId,
 				});
-				return reactors.map((r) => {
+				return reactors.flatMap((r) => {
+					if (!r) return [];
 					const inventory = getReactorInventory(r);
 					const fuelPower: MegaWattHour =
 						inventory?.reduce((prev, next) => {
@@ -41,21 +42,24 @@ export const systemsMonitor = t.router({
 					// The reserve is considered full if we can maintain the current output
 					// for one hour
 					const reserve = Math.min(1, Math.max(0, fuelPower / (output || Number.EPSILON)));
-
-					return {
-						id: r.id,
-						name: r.components.identity!.name,
-						desiredOutput: r.components.isReactor!.desiredOutput,
-						maxOutput: r.components.isReactor!.maxOutput,
-						optimalOutputPercent: r.components.isReactor!.optimalOutputPercent,
-						nominalHeat: r.components.heat!.nominalHeat,
-						maxSafeHeat: r.components.heat!.maxSafeHeat,
-						maxHeat: r.components.heat!.maxHeat,
-						reserve,
-						fuel: r.components.isReactor!.unusedFuel.amount || 0,
-						efficiency: r.components.damage?.efficiency,
-						ambiance: r.components.soundEffects?.soundBank.ambiance,
-					};
+					try {
+						return {
+							id: r.id,
+							name: r.components.identity!.name,
+							desiredOutput: r.components.isReactor!.desiredOutput,
+							maxOutput: r.components.isReactor!.maxOutput,
+							optimalOutputPercent: r.components.isReactor!.optimalOutputPercent,
+							nominalHeat: r.components.heat!.nominalHeat,
+							maxSafeHeat: r.components.heat!.maxSafeHeat,
+							maxHeat: r.components.heat!.maxHeat,
+							reserve,
+							fuel: r.components.isReactor!.unusedFuel.amount || 0,
+							efficiency: r.components.damage?.efficiency,
+							ambiance: r.components.soundEffects?.soundBank.ambiance,
+						};
+					} catch {
+						return [];
+					}
 				});
 			}),
 		setDesiredOutput: t.procedure

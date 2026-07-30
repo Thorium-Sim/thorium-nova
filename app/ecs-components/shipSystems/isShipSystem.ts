@@ -19,7 +19,6 @@ const shipSystemTypes = z.enum([
 	"longRangeComm",
 	"shortRangeComm",
 	"exocomps",
-	"coolantReservoir",
 	"coolantPump",
 	"coolantRadiator",
 ]);

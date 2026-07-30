@@ -27,6 +27,8 @@ export const systemCategories: Record<ShipSystemTypes, (typeof systemFilterValue
 	torpedoLauncher: "Defense",
 	warpEngines: "Propulsion",
 	exocomps: "Misc.",
+	coolantPump: "Misc.",
+	coolantRadiator: "Misc.",
 };
 
 export const systemSortValues = ["Name", "Type", "Offline", "Damage"];
@@ -44,6 +46,8 @@ export const systemPowerPriority: Record<ShipSystemTypes, number> = {
 	impulseEngines: 9,
 	navigation: 10,
 	coolantTank: 11,
+	coolantPump: 11,
+	coolantRadiator: 11,
 	exocomps: 12,
 	targeting: 13,
 	warpEngines: 14,

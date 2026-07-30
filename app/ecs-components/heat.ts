@@ -9,7 +9,7 @@ export const heat = z
 		 * How much volume the coolant takes up in this system in m^3.
 		 * This affects both how fast systems heat up and how quickly
 		 * they cool down when attached to the coolant loop.
-		 * Default is a pipe 10 meters long and 0.3 meter radius
+		 * Default is a pipe 10 meters long and 1.7 meter radius
 		 **/
 		coolantVolume: z.number().default(100),
 

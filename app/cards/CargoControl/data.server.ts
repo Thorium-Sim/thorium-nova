@@ -428,8 +428,7 @@ export const cargoControl = t.router({
 
 			if (!inventoryTemplates[inventoryItem]) throw new Error("Inventory item not found.");
 
-			if (!room.contents[inventoryItem])
-				room.contents[inventoryItem] = { count: 0, temperature: 295.37 };
+			if (!room.contents[inventoryItem]) room.contents[inventoryItem] = { count: 0 };
 
 			room.contents[inventoryItem].count = input.count;
 
@@ -507,8 +506,7 @@ export const cargoControl = t.router({
 
 			if (!inventoryTemplates[inventoryItem]) throw new Error("Inventory item not found.");
 
-			if (!room.contents[inventoryItem])
-				room.contents[inventoryItem] = { count: 0, temperature: 295.37 };
+			if (!room.contents[inventoryItem]) room.contents[inventoryItem] = { count: 0 };
 
 			room.contents[inventoryItem].count += input.count;
 
@@ -748,7 +746,6 @@ function getRoomFromFlagsAndSystems(
 				string,
 				{
 					count: number;
-					temperature: number;
 				}
 			>;
 	  }
@@ -805,46 +802,37 @@ export function transferInventory(
 ) {
 	const inventoryTemplates = getInventoryTemplates(ecs);
 
-	const itemCounts: { [key: string]: number } = {};
-	let destinationVolume = toContainer.volume || 0;
-	// First loop to see if there are any errors
-	transfers.forEach(({ item, count }) => {
-		if (!fromContainer.contents[item] || fromContainer.contents[item].count < count) {
-			itemCounts[item] = fromContainer.contents[item]?.count || 0;
-		}
-		const destinationUsedSpace = calculateCargoUsed(toContainer.contents || {}, inventoryTemplates);
-		const movedVolume = calculateCargoUsed(
-			{ [item]: { count: itemCounts[item] || count } },
-			inventoryTemplates,
-		);
-
-		if (destinationUsedSpace + movedVolume > destinationVolume) {
-			const volumeLeft = destinationVolume - destinationUsedSpace;
-			const singleVolume = calculateCargoUsed({ [item]: { count: 1 } }, inventoryTemplates);
-			const cargoItemsThatFitInVolumeLeft = Math.floor(volumeLeft / singleVolume);
-
-			itemCounts[item] = Math.min(itemCounts[item] || count, cargoItemsThatFitInVolumeLeft);
-			if (itemCounts[item] <= 0) throw new Error("Not enough space in destination.");
-		}
-		const actualMovedVolume = calculateCargoUsed(
-			{ [item]: { count: itemCounts[item] || count } },
-			inventoryTemplates,
-		);
-		destinationVolume -= actualMovedVolume;
-	});
-
+	let volumeLeft = toContainer.volume || 0;
+	let errors: string[] = [];
 	const transferredCounts: Record<string, number> = {};
-	// Then loop to do the actual transfer
-	transfers.forEach(({ item, count }) => {
-		const C2 = itemCounts[item] ?? count;
-		if (C2 === 0) return;
-		fromContainer.contents[item].count -= C2;
+	for (const { count, item } of transfers) {
+		// Check to see if the item is in the fromContainer
+		if (!fromContainer.contents[item] || fromContainer.contents[item].count <= 0) {
+			errors.push(`${item} not available`);
+			continue;
+		}
+		const itemVolume = inventoryTemplates[item].volume;
+		const maxItemsByVolume = Math.floor(volumeLeft / itemVolume);
+		if (fromContainer.contents[item].count < count) {
+			errors.push(`Not enough ${item} to completely fulfill request.`);
+		}
+		if (maxItemsByVolume < count) {
+			errors.push(`Not enough space in destination to completely fulfill request.`);
+		}
+		const transferCount = Math.min(
+			count,
+			maxItemsByVolume,
+			fromContainer.contents[item]?.count || 0,
+		);
+		transferredCounts[item] = transferCount;
+
 		if (!toContainer.contents[item]) toContainer.contents[item] = { count: 0 };
+		fromContainer.contents[item].count -= transferCount;
+		toContainer.contents[item].count += transferCount;
+		volumeLeft -= transferCount * itemVolume;
+	}
 
-		transferredCounts[item] = C2;
-	});
-
-	return transferredCounts;
+	return { transferredCounts, errors };
 }
 
 const listFormatter = new Intl.ListFormat("en-US", { style: "long", type: "conjunction" });

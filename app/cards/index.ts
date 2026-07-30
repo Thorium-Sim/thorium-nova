@@ -20,3 +20,4 @@ export * from "./LongRangeComm";
 export * from "./ShortRangeComm";
 export * from "./Exocomps";
 export * from "./EngineeringPanels";
+export * from "./CoolantLoop";

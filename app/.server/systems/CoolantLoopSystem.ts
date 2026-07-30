@@ -10,27 +10,20 @@ export class CoolantLoopSystem extends System {
 	update(entity: Entity, elapsed: number) {
 		const elapsedSeconds = elapsed / 1000;
 		// If any of these entities aren't present, we'll just use the default values
-		const coolantPump = getShipSystem(
-			this.ecs,
-			{ systemType: "coolantPump", shipId: entity.id },
-			true,
-		);
-		const coolantRadiator = getShipSystem(
-			this.ecs,
-			{
+		let coolantPump: Entity | null = null;
+		let coolantRadiator: Entity | null = null;
+		let coolantReservoir: Entity | null = null;
+		try {
+			coolantPump = getShipSystem(this.ecs, { systemType: "coolantPump", shipId: entity.id });
+			coolantRadiator = getShipSystem(this.ecs, {
 				systemType: "coolantRadiator",
 				shipId: entity.id,
-			},
-			true,
-		);
-		const coolantReservoir = getShipSystem(
-			this.ecs,
-			{
-				systemType: "coolantReservoir",
+			});
+			coolantReservoir = getShipSystem(this.ecs, {
+				systemType: "coolantTank",
 				shipId: entity.id,
-			},
-			true,
-		);
+			});
+		} catch {}
 
 		const systems: Entity[] = [];
 		for (const id of entity.components.shipSystems?.shipSystems.keys() || []) {
@@ -39,7 +32,7 @@ export class CoolantLoopSystem extends System {
 				sys &&
 				sys.components.heat &&
 				!sys.components.isCoolantRadiator &&
-				!sys.components.isCoolantReservoir &&
+				!sys.components.isCoolantTank &&
 				!sys.components.isCoolantPump
 			)
 				systems.push(sys);
@@ -52,10 +45,9 @@ export class CoolantLoopSystem extends System {
 		const pumpCurrentPower = coolantPump?.components.power?.currentPower ?? 1;
 		const flowRate = baseFlowRate * (pumpCurrentPower / pumpMinPower) ** (1 / 3);
 
-		const coolantDensity =
-			coolantReservoir?.components.isCoolantReservoir?.coolantDensity || 1113.2;
+		const coolantDensity = coolantReservoir?.components.isCoolantTank?.coolantDensity || 1113.2;
 		const coolantSpecificHeat =
-			coolantReservoir?.components.isCoolantReservoir?.coolantSpecificHeat || 2.42;
+			coolantReservoir?.components.isCoolantTank?.coolantSpecificHeat || 2.42;
 		const reservoirVolume = coolantReservoir?.components.heat?.coolantVolume || 1000;
 		const radiatorVolume = coolantRadiator?.components.heat?.coolantVolume || 100;
 		const reservoirTemperature = coolantReservoir?.components.heat?.heat || 200;
@@ -90,11 +82,12 @@ export class CoolantLoopSystem extends System {
 		for (const system of systems) {
 			if (!system.components.heat) continue;
 			const { heat, coolantVolume, heatLoad, inCoolantLoop } = system.components.heat;
-			const heatTransferSystem = flowRate ? (coolantVolume * 1000) / flowRate : 0;
+			const heatTransferSystem = flowRate ? (coolantVolume * 1000) / flowRate : 1;
 			const systemCoolantMass = coolantVolume * coolantDensity;
 			const heatToSystem = inCoolantLoop
 				? (previousSystemTemperature - heat) / heatTransferSystem
 				: 0;
+
 			// Convert to watt
 			const loadHeatChange = (heatLoad * 1e3) / (systemCoolantMass * coolantSpecificHeat);
 
@@ -108,6 +101,14 @@ export class CoolantLoopSystem extends System {
 				heat: heat + heatInstTempChange,
 			});
 		}
+
+		// This is mostly just for aesthetics
+		coolantPump?.updateComponent("heat", {
+			heat:
+				(coolantPump.components.heat?.heat || reservoirTemperature) +
+				(previousSystemTemperature - (coolantPump.components.heat?.heat || reservoirTemperature)) /
+					heatTransferReservoir,
+		});
 
 		const heatToReservoir =
 			(previousSystemTemperature - reservoirTemperature) / heatTransferReservoir;

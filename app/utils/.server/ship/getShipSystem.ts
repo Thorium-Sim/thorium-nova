@@ -2,11 +2,10 @@ import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
 import type { ECS, Entity } from "@thorium/utils/ecs";
 import { pascalCase } from "change-case";
 
-export function getShipSystem<T extends boolean>(
+export function getShipSystem(
 	ecs: ECS,
 	param: { systemType: ShipSystemTypes; shipId: number } | { systemId: number },
-	safe?: T,
-): T extends true ? Entity | undefined : Entity {
+) {
 	let system: Entity | undefined | null;
 	if ("systemId" in param && param.systemId) {
 		system = ecs.getEntityById(param.systemId);
@@ -32,9 +31,7 @@ export function getShipSystem<T extends boolean>(
 			ecs.shipSystemCache.get(param.shipId)!.set(param.systemType, system);
 		}
 	}
-	if (!safe) {
-		if (!system) throw new Error(`System ${JSON.stringify(param)} not found.`);
-	}
+	if (!system) throw new Error(`System ${JSON.stringify(param)} not found.`);
 	return system!;
 }
 
@@ -42,7 +39,7 @@ export function getShipSystems(ecs: ECS, param: { systemType: string; shipId: nu
 	if (ecs.shipSystemCache.has(param.shipId)) {
 		const shipEntry = ecs.shipSystemCache.get(param.shipId)!;
 		if (shipEntry.has(param.systemType)) {
-			const cacheEntry = shipEntry.get(param.systemType);
+			const cacheEntry = shipEntry.get(param.systemType)!;
 			if (Array.isArray(cacheEntry)) return cacheEntry;
 			return [cacheEntry];
 		}

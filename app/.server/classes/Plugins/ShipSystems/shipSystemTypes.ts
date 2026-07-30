@@ -1,4 +1,4 @@
-import CoolantTankSystemPlugin from "@thorium/.server/classes/Plugins/ShipSystems/CoolantTank";
+import CoolantTankPlugin from "@thorium/.server/classes/Plugins/ShipSystems/CoolantTank";
 import ExocompsPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Exocomps";
 import LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
 import MainComputerPlugin from "@thorium/.server/classes/Plugins/ShipSystems/MainComputer";
@@ -35,7 +35,7 @@ export const ShipSystemTypes = {
 	phasers: PhasersPlugin,
 	sensors: SensorsPlugin,
 	mainComputer: MainComputerPlugin,
-	coolantTank: CoolantTankSystemPlugin,
+	coolantTank: CoolantTankPlugin,
 	navigation: NavigationPlugin,
 	longRangeComm: LongRangeCommPlugin,
 	shortRangeComm: ShortRangeCommPlugin,

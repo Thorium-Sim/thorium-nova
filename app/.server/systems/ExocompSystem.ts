@@ -73,16 +73,16 @@ export class ExocompSystem extends System {
 				// Transfer any inventory that we need from the room to the exocomp
 				if (currentRoom) {
 					try {
-						const transferred = transferInventory(
+						const { transferredCounts } = transferInventory(
 							this.ecs,
 							currentRoom,
 							entity.components.cargoContainer,
 							requestedCargo.map((c) => ({ count: c.count, item: c.name })),
 						);
-						if (Object.keys(transferred).length > 0) {
+						if (Object.keys(transferredCounts).length > 0) {
 							this.log(entity, {
 								state: "normal",
-								text: `Collected cargo from ${currentRoom.name || "room"}: ${inventoryToString(this.ecs, transferred)}`,
+								text: `Collected cargo from ${currentRoom.name || "room"}: ${inventoryToString(this.ecs, transferredCounts)}`,
 							});
 							pubsub.publish.exocomps.exocomps({ shipId: entity.components.exocomp?.shipId || -1 });
 						}
@@ -139,7 +139,7 @@ export class ExocompSystem extends System {
 				}
 
 				try {
-					const transferred = transferInventory(
+					const { transferredCounts } = transferInventory(
 						this.ecs,
 						entity.components.cargoContainer,
 						currentRoom,
@@ -150,7 +150,7 @@ export class ExocompSystem extends System {
 					);
 					this.log(entity, {
 						state: "normal",
-						text: `Transferred cargo to ${currentRoom.name || "room"}: ${inventoryToString(this.ecs, transferred)}`,
+						text: `Transferred cargo to ${currentRoom.name || "room"}: ${inventoryToString(this.ecs, transferredCounts)}`,
 					});
 					this.advanceInstruction(entity);
 				} catch (error) {

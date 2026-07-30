@@ -3,7 +3,7 @@ import path from "node:path";
 
 try {
 	const pkgjsonPath = path.join(process.cwd(), "./package.json");
-	const pkgJson = await Bun.file(pkgjsonPath).json();
+	const pkgJson = await import(pkgjsonPath, { with: { type: "json" } });
 
 	console.info("package.json path:", pkgjsonPath);
 	console.info("package.json version:", pkgJson.version);

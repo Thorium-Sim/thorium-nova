@@ -335,7 +335,7 @@ function ReactorSummary() {
 		let used = 0;
 		for (const system of systems) {
 			const systemData = interpolate(system.id);
-			if (!systemData) continue;
+			if (!systemData || typeof systemData.y !== "number" || Number.isNaN(systemData.y)) continue;
 			used += systemData.y;
 		}
 		if (usedRef.current) usedRef.current.textContent = `${Math.round(used * 10) / 10}`;

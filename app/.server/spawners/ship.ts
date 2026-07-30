@@ -183,6 +183,7 @@ export async function spawnShip(
 				params.playerShip,
 				system.overrides,
 			);
+
 			if (entity.components.isBattery) {
 				entity.updateComponent("isBattery", {
 					storage: entity.components.isBattery.capacity * 0.2,

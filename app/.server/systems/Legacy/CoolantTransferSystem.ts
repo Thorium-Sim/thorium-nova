@@ -13,22 +13,23 @@ export class LegacyCoolantTransferSystem extends System {
 		const coolant = entity.components.legacyCoolant;
 		if (!coolantTank || !coolant) return;
 
-		if (coolantTank.transferSystem === null || coolantTank.transferSystem === -1) return;
-		if (coolantTank.transferDirection === "out" && coolant.coolant <= 0) return;
-		if (coolantTank.transferDirection === "in" && coolant.coolant >= 1) return;
+		if (coolantTank.legacyTransferSystem === null || coolantTank.legacyTransferSystem === -1)
+			return;
+		if (coolantTank.legacyTransferDirection === "out" && coolant.coolant <= 0) return;
+		if (coolantTank.legacyTransferDirection === "in" && coolant.coolant >= 1) return;
 
 		const transferSystem = this.ecs.getEntityById(
-			entity.components.isCoolantTank?.transferSystem || -1,
+			entity.components.isCoolantTank?.legacyTransferSystem || -1,
 		);
 		const systemCoolant = transferSystem?.components.legacyCoolant;
 		if (!systemCoolant) return;
 
 		const tankRate =
-			coolantTank.transferDirection === "out"
+			coolantTank.legacyTransferDirection === "out"
 				? -1 * coolant.coolantTransferRate
 				: 1 * coolant.coolantTransferRate;
 		const systemRate =
-			coolantTank.transferDirection === "out"
+			coolantTank.legacyTransferDirection === "out"
 				? 1 * systemCoolant.coolantTransferRate
 				: -1 * systemCoolant.coolantTransferRate;
 
@@ -56,7 +57,7 @@ export class LegacyCoolantTransferSystem extends System {
 			transferSystem.components.legacyCoolant?.coolant === 1
 		) {
 			entity.updateComponent("isCoolantTank", {
-				transferSystem: -1,
+				legacyTransferSystem: -1,
 			});
 		}
 	}

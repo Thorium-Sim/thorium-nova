@@ -1,0 +1,31 @@
+.pinwheel-rotate {
+	animation: pinwheel-spin 3s linear infinite;
+}
+.pinwheel-rotate:after {
+	animation: pinwheel-spin-reverse 3s linear infinite;
+}
+
+@media (prefers-reduced-motion) {
+	.pinwheel-rotate,
+	.pinwheel-rotate:after {
+		animation: none;
+	}
+}
+
+@keyframes pinwheel-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(-360deg);
+	}
+}
+
+@keyframes pinwheel-spin-reverse {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}

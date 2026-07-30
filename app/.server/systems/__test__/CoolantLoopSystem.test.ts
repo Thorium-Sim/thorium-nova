@@ -38,8 +38,8 @@ describe("CoolantLoopSystem", () => {
 
 		coolantReservoir = new Entity();
 		coolantReservoir.addComponent("heat", { coolantVolume: 1000 });
-		coolantReservoir.addComponent("isCoolantReservoir");
-		coolantReservoir.addComponent("isShipSystem", { shipId: ship.id, type: "coolantReservoir" });
+		coolantReservoir.addComponent("isCoolantTank");
+		coolantReservoir.addComponent("isShipSystem", { shipId: ship.id, type: "coolantTank" });
 		shipSystemsMap.set(coolantReservoir.id, {});
 		ecs.addEntity(coolantReservoir);
 

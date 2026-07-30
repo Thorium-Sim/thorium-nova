@@ -381,6 +381,7 @@ export const client = t.router({
 					loginName: "Test User",
 				});
 				pubsub.publish.ship.get({ shipId: ctx.flight.playerShips[0].id });
+				pubsub.publish.ship.player({ shipId: ctx.flight.playerShips[0].id });
 			} else {
 				flightClient.updateComponent("flightClient", {
 					stationOverride: null,

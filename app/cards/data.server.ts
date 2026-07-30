@@ -18,3 +18,4 @@ export { viewscreen } from "./Viewscreen/data.server";
 export { shortRangeComm } from "./ShortRangeComm/data.server";
 export { exocomps } from "./Exocomps/data.server";
 export { engineeringPanels } from "./EngineeringPanels/data.server";
+export { coolantLoop } from "./CoolantLoop/data.server";

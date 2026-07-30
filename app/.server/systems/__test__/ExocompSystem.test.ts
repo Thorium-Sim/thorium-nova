@@ -295,6 +295,7 @@ describe("Exocomp System", () => {
 		expect(exocomps[0].components.exocomp?.logs[1].text).toEqual(
 			"Collected cargo from Main Cargo Room: 2 Repair Items",
 		);
+
 		expect(exocomps[0].components.cargoContainer?.contents["Repair Item"]?.count).toEqual(2);
 	});
 	it("should send the exocomp between two rooms with two go to commands", () => {
