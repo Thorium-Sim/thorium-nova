@@ -98,7 +98,7 @@
 .radial-dial {
 	@apply flex flex-col items-center;
 	--radial-radius: 25px;
-	--radial-border-width: 4px;
+	--radial-border-width: 6px;
 	--radial-background: transparent;
 }
 .radial-indicator {

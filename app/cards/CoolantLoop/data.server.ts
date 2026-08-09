@@ -78,7 +78,7 @@ export const coolantLoop = t.router({
 				id: number;
 				name: string;
 				nominalHeat: number;
-				maxHeat: number;
+				maxSafeHeat: number;
 				inCoolantLoop: boolean;
 			}[] = [];
 			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() || []) {
@@ -94,7 +94,7 @@ export const coolantLoop = t.router({
 						id: system.id,
 						name: system.components.identity?.name || system.components.isShipSystem?.type || "",
 						nominalHeat: system.components.heat?.nominalHeat || 295,
-						maxHeat: system.components.heat?.maxHeat || 1000,
+						maxSafeHeat: system.components.heat?.maxSafeHeat || 1000,
 						inCoolantLoop: system.components.heat.inCoolantLoop || false,
 					});
 				}

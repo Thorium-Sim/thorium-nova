@@ -426,6 +426,10 @@ const quotes = [
 	"Too often we enjoy the comfort of opinion without the discomfort of thought.",
 	// Serena Chen https://serena.nz/writing/the-quality-is-not-the-point/
 	"In our limited time alive, we’re all just fallible, feeling beings, reaching out into the void to put our palm print on the cave wall, in hopes that some one else will see it. And isn’t that the real point of it all?",
+	// Alfred A. Montapert
+	"Do not confuse motion and progress. A rocking horse keeps moving but does not make any progress.",
+	// Baltasar Gracián
+	"Make haste slowly",
 ];
 
 const QuoteOfTheDay = () => {

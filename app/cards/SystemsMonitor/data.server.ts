@@ -123,6 +123,7 @@ export const systemsMonitor = t.router({
 				});
 				return batteries.map((b) => ({
 					id: b.id,
+					type: b.components.isPhaseCapacitor ? "phaseCapacitor" : "battery",
 					name: b.components.identity!.name,
 					capacity: b.components.isBattery!.capacity,
 					storage: b.components.isBattery!.storage,

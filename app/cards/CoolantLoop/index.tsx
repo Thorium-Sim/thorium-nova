@@ -54,11 +54,13 @@ export function CoolantLoop() {
 		const pump = interpolate(coolantPump.id);
 		const radiatorRatio =
 			((radiator?.z || 1) - coolantRadiator.nominalHeat) /
-			(coolantRadiator.maxHeat - coolantRadiator.nominalHeat);
+			(coolantRadiator.maxSafeHeat - coolantRadiator.nominalHeat);
 		const tankRatio =
-			((tank?.z || 1) - coolantTank.nominalHeat) / (coolantTank.maxHeat - coolantTank.nominalHeat);
+			((tank?.z || 1) - coolantTank.nominalHeat) /
+			(coolantTank.maxSafeHeat - coolantTank.nominalHeat);
 		const pumpRatio =
-			((pump?.z || 1) - coolantPump.nominalHeat) / (coolantPump.maxHeat - coolantPump.nominalHeat);
+			((pump?.z || 1) - coolantPump.nominalHeat) /
+			(coolantPump.maxSafeHeat - coolantPump.nominalHeat);
 		baseRef.current?.style.setProperty("--radiatorColor", mixHeatColors(radiatorRatio));
 		baseRef.current?.style.setProperty("--tankColor", mixHeatColors(tankRatio));
 		baseRef.current?.style.setProperty("--pumpColor", mixHeatColors(pumpRatio));
@@ -197,7 +199,7 @@ export function CoolantLoop() {
 							systemId={s.id}
 							name={s.name}
 							nominalHeat={s.nominalHeat}
-							maxHeat={s.maxHeat}
+							maxSafeHeat={s.maxSafeHeat}
 						/>
 					</Fragment>
 				))}
@@ -254,12 +256,12 @@ function SystemCoolantLoop({
 	systemId,
 	name,
 	nominalHeat,
-	maxHeat,
+	maxSafeHeat,
 }: {
 	systemId: number;
 	name: string;
 	nominalHeat: number;
-	maxHeat: number;
+	maxSafeHeat: number;
 }) {
 	const baseRef = useRef<HTMLDivElement>(null);
 	const textRef = useRef<HTMLSpanElement>(null);
@@ -269,8 +271,7 @@ function SystemCoolantLoop({
 	useAnimationFrame(() => {
 		const system = interpolate(systemId);
 		if (!system) return;
-		const ratio = ((system?.z || 1) - nominalHeat) / (maxHeat - nominalHeat);
-
+		const ratio = ((system?.z || 1) - nominalHeat) / (maxSafeHeat - nominalHeat);
 		baseRef.current?.style.setProperty("--heatColor", mixHeatColors(ratio));
 
 		if (textRef.current) {

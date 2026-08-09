@@ -69,21 +69,21 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 
 	return (
 		<div className="relative grid h-full grid-cols-[1fr_auto] items-center gap-2 text-sm">
-			<div className="flex items-center justify-between gap-2">
+			<div className="reactors-row flex items-center justify-between gap-2">
 				{reactors.map((reactor, i) => (
 					<Reactor key={reactor.id} {...reactor} index={i} cardLoaded={cardLoaded} />
 				))}
 			</div>
 			<ReactorSummary />
-			<div className="flex items-center justify-between gap-2">
-				{batteries.map((battery) => (
-					<Battery {...battery} key={battery.id} />
+			<div className="batteries-row flex items-center justify-between gap-2">
+				{batteries.map((battery, i) => (
+					<Battery {...battery} index={i} key={battery.id} />
 				))}
 			</div>
 			<BatterySummary />
 			<div
 				className={cn(
-					"panel panel-primary grid flex-auto grid-flow-col-dense gap-4 overflow-y-auto p-4 grid-rows-8",
+					"panel panel-primary grid flex-auto grid-flow-col-dense gap-4 overflow-y-auto p-4 grid-rows-8 systems-row",
 				)}
 			>
 				{systems
@@ -112,7 +112,7 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 					))}
 			</div>
 
-			<div className="flex flex-col gap-2 self-end">
+			<div className="system-sort-buttons flex flex-col gap-2 self-end">
 				<p>Sort:</p>
 				<Button
 					className={cn("btn-sm", {
@@ -222,7 +222,7 @@ function Reactor({
 					{name} {index + 1}
 				</span>
 				<div className="flex-1" />
-				<Tooltip ref={heatRef} content={`Heat: K`}>
+				<Tooltip ref={heatRef} content={`Heat: K`} className={`heat-dial-${index}`}>
 					<RadialDial
 						ref={heatProgressRef}
 						marker={(maxSafeHeat - nominalHeat) / (maxHeat - nominalHeat)}
@@ -236,7 +236,10 @@ function Reactor({
 					</RadialDial>
 				</Tooltip>
 				{typeof efficiency === "number" ? (
-					<Tooltip content={`Efficiency: ${Math.round(efficiency * 100)}%`}>
+					<Tooltip
+						content={`Efficiency: ${Math.round(efficiency * 100)}%`}
+						className={`efficiency-dial-${index}`}
+					>
 						<RadialDial
 							label=""
 							count={efficiency}
@@ -248,12 +251,18 @@ function Reactor({
 						</RadialDial>
 					</Tooltip>
 				) : null}
-				<Tooltip content={`Active Fuel: ${(fuel * 100).toFixed(0)}%`}>
+				<Tooltip
+					content={`Active Fuel: ${(fuel * 100).toFixed(0)}%`}
+					className={`active-dial-${index}`}
+				>
 					<RadialDial label="" count={fuel} max={1} color="rgb(180 251 32)" backgroundColor="#888">
 						<Icon name="atomic-slashes" />
 					</RadialDial>
 				</Tooltip>
-				<Tooltip content={`Reserve Fuel: ${(reserve * 100).toFixed(0)}%`}>
+				<Tooltip
+					content={`Reserve Fuel: ${(reserve * 100).toFixed(0)}%`}
+					className={`reserve-dial-${index}`}
+				>
 					<RadialDial
 						label=""
 						count={reserve}
@@ -266,7 +275,7 @@ function Reactor({
 				</Tooltip>
 			</div>
 			<HoldButton
-				className="btn-xs btn-circle btn-primary text-xl"
+				className={cn("btn-xs btn-circle btn-primary text-xl", `power-down-${index}`)}
 				clickAction={(actionCount) => {
 					q.systemsMonitor.reactors.setDesiredOutput.netSend({
 						reactorId: id,
@@ -276,7 +285,7 @@ function Reactor({
 			>
 				<Icon name="arrow-down" />
 			</HoldButton>
-			<Tooltip ref={powerRef} content={`Current Output: MW`}>
+			<Tooltip ref={powerRef} content={`Current Output: MW`} className={`power-output-${index}`}>
 				<div className="progress-warning progress relative h-2 w-full overflow-hidden">
 					<div className="absolute top-0 left-0 h-full bg-current" ref={powerProgressRef}></div>
 					<div
@@ -292,7 +301,7 @@ function Reactor({
 				</div>
 			</Tooltip>
 			<HoldButton
-				className="btn-xs btn-circle btn-primary text-xl"
+				className={cn("btn-xs btn-circle btn-primary text-xl", `power-down-${index}`)}
 				clickAction={(actionCount) => {
 					q.systemsMonitor.reactors.setDesiredOutput.netSend({
 						reactorId: id,
@@ -319,7 +328,6 @@ function ReactorSummary() {
 
 	const outputRef = useRef<HTMLSpanElement>(null);
 	const netOutputRef = useRef<HTMLSpanElement>(null);
-	const usedRef = useRef<HTMLSpanElement>(null);
 	const availableRef = useRef<HTMLSpanElement>(null);
 	const { interpolate } = useLiveQuery();
 
@@ -338,31 +346,30 @@ function ReactorSummary() {
 			if (!systemData || typeof systemData.y !== "number" || Number.isNaN(systemData.y)) continue;
 			used += systemData.y;
 		}
-		if (usedRef.current) usedRef.current.textContent = `${Math.round(used * 10) / 10}`;
 
-		let batteryUsage = 0;
+		let batteryOutput = 0;
+		let batteryInput = 0;
 		for (const battery of batteries) {
 			const batteryData = interpolate(battery.id);
 			if (!batteryData) continue;
-			batteryUsage += batteryData.z;
+			batteryOutput += batteryData.z;
+			batteryInput += batteryData.y;
 		}
+		used += batteryInput;
 		if (netOutputRef.current)
-			netOutputRef.current.textContent = `${Math.round((used - batteryUsage) * 10) / 10}`;
+			netOutputRef.current.textContent = `${Math.round((used - batteryOutput) * 10) / 10}`;
 
 		if (availableRef.current)
-			availableRef.current.textContent = `${Math.round((output - used) * 10) / 10}`;
+			availableRef.current.textContent = `${Math.round((output - used - batteryInput) * 10) / 10}`;
 	}, cardLoaded);
 
 	return (
-		<div>
+		<div className="reactor-summary">
 			<p className="text-right whitespace-nowrap tabular-nums">
 				Total Output: <span ref={outputRef} className="inline-block w-[4ch] text-right" /> MW
 			</p>
 			<p className="text-right whitespace-nowrap tabular-nums">
 				Net Output: <span ref={netOutputRef} className="inline-block w-[4ch] text-right" /> MW
-			</p>
-			<p className="text-right whitespace-nowrap tabular-nums">
-				Total Used: <span ref={usedRef} className="inline-block w-[4ch] text-right" /> MW
 			</p>
 			<p className="text-right whitespace-nowrap tabular-nums">
 				Total Available: <span ref={availableRef} className="inline-block w-[4ch] text-right" /> MW
@@ -397,7 +404,7 @@ function BatterySummary() {
 	}, cardLoaded);
 
 	return (
-		<div>
+		<div className="battery-summary">
 			<p className="text-right whitespace-nowrap tabular-nums">
 				Battery Input: <span ref={inputRef} className="inline-block w-[3ch] text-right" /> MW
 			</p>
@@ -420,12 +427,16 @@ class HoverBatteryEvent extends Event {
 
 function Battery({
 	id,
+	index,
 	name,
+	type,
 	outputRate,
 	capacity,
 	activated,
 }: {
 	id: number;
+	index: number;
+	type: string;
 	name: string;
 	outputRate: number;
 	capacity: number;
@@ -442,7 +453,6 @@ function Battery({
 	const chargingRef = useRef<SVGSVGElement>(null);
 	const equalRef = useRef<SVGSVGElement>(null);
 	const dischargingRef = useRef<SVGSVGElement>(null);
-	const offlineRef = useRef<SVGSVGElement>(null);
 	const chargeLabelRef = useRef<HTMLDivElement>(null);
 	const { interpolate } = useLiveQuery();
 	useAnimationFrame(() => {
@@ -477,26 +487,18 @@ function Battery({
 			chargingRef.current?.classList.remove("hidden");
 			dischargingRef.current?.classList.add("hidden");
 			equalRef.current?.classList.add("hidden");
-			offlineRef.current?.classList.add("hidden");
 		}
 		if (chargeAmount < dischargeAmount) {
 			chargingRef.current?.classList.add("hidden");
 			dischargingRef.current?.classList.remove("hidden");
 			equalRef.current?.classList.add("hidden");
-			offlineRef.current?.classList.add("hidden");
 		}
 		if (chargeAmount === dischargeAmount) {
 			chargingRef.current?.classList.add("hidden");
 			dischargingRef.current?.classList.add("hidden");
 			equalRef.current?.classList.remove("hidden");
-			offlineRef.current?.classList.add("hidden");
 		}
-		if (!activated) {
-			chargingRef.current?.classList.add("hidden");
-			dischargingRef.current?.classList.add("hidden");
-			equalRef.current?.classList.add("hidden");
-			offlineRef.current?.classList.remove("hidden");
-		}
+
 		if (chargeLabelRef.current) {
 			chargeLabelRef.current.textContent = `Net Change: ${Math.round((chargeAmount - dischargeAmount) * 10) / 10} MW`;
 		}
@@ -513,22 +515,26 @@ function Battery({
 			className={cn(
 				"panel panel-primary relative grid w-full grid-cols-[1fr_auto] items-center gap-x-2 p-2",
 				{ "brightness-150": hovered },
+				`battery-${type}`,
 			)}
 		>
 			<span className="truncate font-medium">{name}</span>
 
 			<div className="flex items-center gap-1 place-self-end">
-				<Tooltip ref={chargeLabelRef} content={`Net Change: MW`}>
+				<Tooltip
+					ref={chargeLabelRef}
+					content={`Net Change: MW`}
+					className={`battery-net-change-${index}`}
+				>
 					<div className="flex aspect-square h-6 w-6 items-center justify-center rounded-full border text-sm">
 						<Icon className="hidden" ref={chargingRef} name="arrow-up" />
 						<Icon className="hidden" ref={equalRef} name="equal" />
 						<Icon className="hidden" ref={dischargingRef} name="arrow-down" />
-						<Icon className="hidden" ref={offlineRef} name="x" />
 					</div>
 				</Tooltip>{" "}
 				{activated ? (
 					<Button
-						className="btn-xs btn-circle btn-primary"
+						className={cn("btn-xs btn-circle btn-primary", `battery-activate-${index}`)}
 						onClick={() =>
 							q.systemsMonitor.batteries.setActivated.netSend({ batteryId: id, activated: false })
 						}
@@ -537,7 +543,7 @@ function Battery({
 					</Button>
 				) : (
 					<Button
-						className="btn-xs btn-circle btn-error"
+						className={cn("btn-xs btn-circle btn-error", `battery-activate-${index}`)}
 						onClick={() =>
 							q.systemsMonitor.batteries.setActivated.netSend({ batteryId: id, activated: true })
 						}
@@ -547,7 +553,7 @@ function Battery({
 				)}
 			</div>
 			{/* <BatteryIcon /> */}
-			<Tooltip ref={storageRef} content={`Storage: MWh`}>
+			<Tooltip ref={storageRef} content={`Storage: MWh`} className={`battery-storage-bar-${index}`}>
 				<div className="progress-success progress relative h-2 w-full overflow-hidden">
 					<div className="absolute top-0 left-0 h-full bg-current" ref={storageProgressRef}></div>
 				</div>
@@ -557,7 +563,7 @@ function Battery({
 				<span className="inline-block min-w-[2ch] text-right" ref={storageNumberRef}></span> /{" "}
 				{capacity} MWh
 			</p>
-			<Tooltip ref={outputRef} content={`Storage: MWh`}>
+			<Tooltip ref={outputRef} content={`Output: MWh`} className={`battery-output-bar-${index}`}>
 				<div className="progress-warning progress relative h-2 w-full overflow-hidden">
 					<div className="absolute top-0 left-0 h-full bg-current" ref={outputProgressRef}></div>
 				</div>
@@ -573,12 +579,14 @@ function Battery({
 function System({
 	id,
 	name,
+	type,
 	power,
 	heat,
 	max,
 }: {
 	id: number;
 	name: string;
+	type: string;
 	power?: { powerLevels: number[]; batterySource: number | null; activated: boolean };
 	heat?: {
 		heat: number;
@@ -635,7 +643,7 @@ function System({
 
 	if (!power && !heat) return null;
 	return (
-		<div key={id} className="relative w-full items-center text-left">
+		<div key={id} className={"relative w-full items-center text-left"}>
 			<div className="flex items-center gap-2">
 				<span
 					className={cn("flex-auto truncate text-sm", {
@@ -645,7 +653,7 @@ function System({
 					{name}
 				</span>
 				{heat ? (
-					<Tooltip ref={heatRef} content={`Heat: K`}>
+					<Tooltip ref={heatRef} content={`Heat: K`} className={`system-heat-dial-${type}`}>
 						<RadialDial
 							ref={heatProgressRef}
 							marker={(heat.maxSafeHeat - heat.nominalHeat) / (heat.maxHeat - heat.nominalHeat)}
@@ -674,10 +682,14 @@ function System({
 						>
 							<Label className="sr-only">Choose Connected Battery</Label>
 							<RAButton
-								className={cn("btn btn-xs btn-circle", {
-									"btn-success": connectedBattery,
-									"btn-info": !connectedBattery,
-								})}
+								className={cn(
+									"btn btn-xs btn-circle",
+									{
+										"btn-success": connectedBattery,
+										"btn-info": !connectedBattery,
+									},
+									`system-battery-${type}`,
+								)}
 								aria-label={connectedBattery?.name || "None"}
 								onPointerEnter={() => {
 									if (connectedBattery)
@@ -707,7 +719,7 @@ function System({
 						</RASelect>
 						{power.activated ? (
 							<Button
-								className="btn-xs btn-circle btn-primary"
+								className={cn("btn-xs btn-circle btn-primary", `system-activate-${type}`)}
 								onClick={() =>
 									q.systemsMonitor.systems.setActivated.netSend({ systemId: id, activated: false })
 								}
@@ -716,7 +728,7 @@ function System({
 							</Button>
 						) : (
 							<Button
-								className="btn-xs btn-circle btn-error"
+								className={cn("btn-xs btn-circle btn-error", `system-activate-${type}`)}
 								onClick={() =>
 									q.systemsMonitor.systems.setActivated.netSend({ systemId: id, activated: true })
 								}
@@ -729,7 +741,7 @@ function System({
 			</div>
 
 			{power ? (
-				<div className="flex items-center gap-2">
+				<div className={cn("flex items-center gap-2", `system-power-${type}`)}>
 					<Tooltip ref={powerRef} className="flex-auto" content={`Power Draw: MW`}>
 						<div className="progress-warning progress relative h-2 w-full overflow-hidden bg-transparent">
 							<div
