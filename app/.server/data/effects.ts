@@ -203,6 +203,14 @@ export const effects = t.router({
 			return publish;
 		}),
 	playSound: t.procedure
+
+		.input(
+			z.object({
+				shipId: z.number(),
+				station: z.union([z.string(), z.string().array()]).optional(),
+				sound,
+			}),
+		)
 		.meta({
 			action: () => ({
 				sound: {
@@ -217,13 +225,6 @@ export const effects = t.router({
 			}),
 			event: true,
 		})
-		.input(
-			z.object({
-				shipId: z.number(),
-				station: z.union([z.string(), z.string().array()]).optional(),
-				sound,
-			}),
-		)
 		.send(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			if (!ship) return;

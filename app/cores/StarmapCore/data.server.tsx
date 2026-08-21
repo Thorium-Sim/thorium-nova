@@ -460,22 +460,7 @@ export const starmapCore = t.router({
 		}),
 	// This one is just used for timeline actions
 	setShipDestination: t.procedure
-		.meta({
-			action: () => {
-				return {
-					position: {
-						name: "Position",
-						type: "starmapCoordinates",
-						helper:
-							"A specific point in space to send the ship. Use as an alternative to Nearby Entity.",
-					},
-					entityId: {
-						name: "Nearby Entity",
-						helper: "Send the ship somewhere near this entity. This option is preferred.",
-					},
-				};
-			},
-		})
+
 		.input(
 			z.object({
 				shipId: z.number(),
@@ -492,6 +477,22 @@ export const starmapCore = t.router({
 					.optional(),
 			}),
 		)
+		.meta({
+			action: () => {
+				return {
+					position: {
+						name: "Position",
+						type: "starmapCoordinates",
+						helper:
+							"A specific point in space to send the ship. Use as an alternative to Nearby Entity.",
+					},
+					entityId: {
+						name: "Nearby Entity",
+						helper: "Send the ship somewhere near this entity. This option is preferred.",
+					},
+				};
+			},
+		})
 		.send(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
 			if (!ship) throw new Error("No ship found.");

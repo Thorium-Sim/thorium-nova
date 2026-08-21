@@ -51,6 +51,13 @@ export const timeline = t.router({
 			};
 		}),
 	advance: t.procedure
+
+		.input(
+			z.object({
+				timelineId: z.number().optional(),
+				stepId: z.number().optional(),
+			}),
+		)
 		.meta({
 			action: () => {
 				return {
@@ -67,12 +74,6 @@ export const timeline = t.router({
 				};
 			},
 		})
-		.input(
-			z.object({
-				timelineId: z.number().optional(),
-				stepId: z.number().optional(),
-			}),
-		)
 		.send(async ({ ctx, input }) => {
 			let timeline: Entity | undefined | null;
 			if (input.timelineId !== undefined) {
@@ -147,6 +148,12 @@ export const timeline = t.router({
 			// TODO: August 25, 2023 Send the necessary pubsub updates
 		}),
 	complete: t.procedure
+
+		.input(
+			z.object({
+				timelineId: z.number(),
+			}),
+		)
 		.meta({
 			action: () => {
 				return {
@@ -159,11 +166,6 @@ export const timeline = t.router({
 			},
 			event: true,
 		})
-		.input(
-			z.object({
-				timelineId: z.number(),
-			}),
-		)
 		.output(
 			z.object({
 				timelineId: z.number(),

@@ -37,7 +37,7 @@ export function interpolateText(
 	template = template.replace(/\[(\w+)\|([^\]]+)\]/g, (string, key, body: string) => {
 		const value = ctx[key] ?? "";
 
-		const parts = body.split("|").map((p) => p.trim());
+		const parts = body.split("|");
 
 		if (body.indexOf(":") === -1) {
 			// This is a simple ternary switch.

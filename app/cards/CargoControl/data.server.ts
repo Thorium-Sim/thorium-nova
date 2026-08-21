@@ -332,6 +332,14 @@ export const cargoControl = t.router({
 			};
 		}),
 	getRoomByFlag: t.procedure
+
+		.input(
+			z.object({
+				shipId: z.number(),
+				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
+				systems: z.array(z.string()).optional(),
+			}),
+		)
 		.meta({
 			action: (ctx: DataContext) => {
 				const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
@@ -357,13 +365,6 @@ export const cargoControl = t.router({
 				};
 			},
 		})
-		.input(
-			z.object({
-				shipId: z.number(),
-				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
-				systems: z.array(z.string()).optional(),
-			}),
-		)
 		.output(deckRoomOutput)
 		.send(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
@@ -382,6 +383,16 @@ export const cargoControl = t.router({
 			return { shipId: ship.id, deckName: "", deckIndex: -1, roomName: "", roomId: ship.id };
 		}),
 	setItemCountInRoom: t.procedure
+
+		.input(
+			z.object({
+				shipId: z.number(),
+				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
+				systems: z.array(z.string()).optional(),
+				item: z.string().optional(),
+				count: z.number(),
+			}),
+		)
 		.meta({
 			action: (ctx: DataContext) => {
 				const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
@@ -407,15 +418,6 @@ export const cargoControl = t.router({
 				};
 			},
 		})
-		.input(
-			z.object({
-				shipId: z.number(),
-				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
-				systems: z.array(z.string()).optional(),
-				item: z.string().optional(),
-				count: z.number(),
-			}),
-		)
 		.output(deckRoomOutput)
 		.send(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
@@ -449,6 +451,17 @@ export const cargoControl = t.router({
 		}),
 
 	addItemToRoom: t.procedure
+
+		.input(
+			z.object({
+				shipId: z.number(),
+				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
+				systems: z.array(z.string()).optional(),
+				item: z.string().optional(),
+				count: z.number(),
+				avoidContainer: z.boolean(),
+			}),
+		)
 		.meta({
 			action: (ctx: DataContext) => {
 				const inventoryTemplates = getInventoryTemplates(ctx.flight?.ecs);
@@ -479,16 +492,6 @@ export const cargoControl = t.router({
 				};
 			},
 		})
-		.input(
-			z.object({
-				shipId: z.number(),
-				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
-				systems: z.array(z.string()).optional(),
-				item: z.string().optional(),
-				count: z.number(),
-				avoidContainer: z.boolean(),
-			}),
-		)
 		.output(deckRoomOutput)
 		.send(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
@@ -525,6 +528,16 @@ export const cargoControl = t.router({
 			return { shipId: ship.id, deckName: "", deckIndex: -1, roomName: "", roomId: ship.id };
 		}),
 	removeItemFromRoom: t.procedure
+
+		.input(
+			z.object({
+				shipId: z.number(),
+				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
+				systems: z.array(z.string()).optional(),
+				item: z.string(),
+				count: z.number(),
+			}),
+		)
 		.meta({
 			action: (ctx: DataContext) => {
 				const inventoryTemplates = getPluginInventoryTemplates(ctx);
@@ -549,15 +562,6 @@ export const cargoControl = t.router({
 				};
 			},
 		})
-		.input(
-			z.object({
-				shipId: z.number(),
-				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
-				systems: z.array(z.string()).optional(),
-				item: z.string(),
-				count: z.number(),
-			}),
-		)
 		.output(deckRoomOutput)
 		.send(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);
@@ -587,6 +591,14 @@ export const cargoControl = t.router({
 			return { shipId: ship.id, deckName: "", deckIndex: -1, roomName: "", roomId: ship.id };
 		}),
 	emptyRoomInventory: t.procedure
+
+		.input(
+			z.object({
+				shipId: z.number(),
+				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
+				systems: z.array(z.string()).optional(),
+			}),
+		)
 		.meta({
 			action: () => ({
 				flags: {
@@ -603,13 +615,6 @@ export const cargoControl = t.router({
 				},
 			}),
 		})
-		.input(
-			z.object({
-				shipId: z.number(),
-				flags: z.union([nodeFlagsSchema, nodeFlagsSchema.array()]).optional(),
-				systems: z.array(z.string()).optional(),
-			}),
-		)
 		.output(deckRoomOutput)
 		.send(({ ctx, input }) => {
 			const ship = ctx.flight?.ecs.getEntityById(input.shipId);

@@ -86,6 +86,8 @@ export const exocomps = t.router({
 	}),
 	assign: t.procedure
 		.input(z.object({ exocompId: z.number(), instructions: damageControlInstruction.array() }))
+		.meta({ event: true })
+		.output(z.object({ shipId: z.number(), exocompId: z.number() }))
 		.send(({ ctx, input }) => {
 			const exocomp = ctx.ecs.getEntityById(input.exocompId);
 			if (!exocomp) throw new Error("Exocomp not found");
@@ -101,6 +103,7 @@ export const exocomps = t.router({
 				}),
 			});
 			pubsub.publish.exocomps.exocomps({ shipId: exocomp.components.exocomp?.shipId || -1 });
+			return { shipId: exocomp.components.exocomp?.shipId || -1, exocompId: input.exocompId };
 		}),
 	cancel: t.procedure.input(z.object({ exocompId: z.number() })).send(({ ctx, input }) => {
 		const exocomp = ctx.ecs.getEntityById(input.exocompId);

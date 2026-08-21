@@ -62,14 +62,14 @@ export class CoolantLoopSystem extends System {
 
 		// Coolant flows from the reservoir to the radiator, then through systems, then back to the reservoir
 		const heatToRadiator = radiatorInCoolantLoop
-			? (reservoirTemperature - radiatorTemperature) / heatTransferRadiator
+			? (reservoirTemperature - radiatorTemperature) /
+				(heatTransferRadiator || Number.POSITIVE_INFINITY)
 			: 0;
 
 		// Radiate out the heat
 		const wattsRadiated = radiatorArea * StephanBoltzmannConstant * radiatorTemperature ** 4;
 		const radiatorLoad = wattsRadiated / (radiatorCoolantMass * coolantSpecificHeat);
 		const radiatorInstTempChange = heatToRadiator - radiatorLoad;
-
 		coolantRadiator?.updateComponent("heat", {
 			heat: radiatorTemperature + radiatorInstTempChange * elapsedSeconds,
 		});
@@ -103,15 +103,16 @@ export class CoolantLoopSystem extends System {
 		}
 
 		// This is mostly just for aesthetics
+		const heatToPump =
+			(previousSystemTemperature - (coolantPump?.components.heat?.heat || reservoirTemperature)) /
+			(heatTransferReservoir || Number.POSITIVE_INFINITY);
 		coolantPump?.updateComponent("heat", {
-			heat:
-				(coolantPump.components.heat?.heat || reservoirTemperature) +
-				(previousSystemTemperature - (coolantPump.components.heat?.heat || reservoirTemperature)) /
-					heatTransferReservoir,
+			heat: (coolantPump.components.heat?.heat || reservoirTemperature) + heatToPump,
 		});
 
 		const heatToReservoir =
-			(previousSystemTemperature - reservoirTemperature) / heatTransferReservoir;
+			(previousSystemTemperature - reservoirTemperature) /
+			(heatTransferReservoir || Number.POSITIVE_INFINITY);
 		coolantReservoir?.updateComponent("heat", {
 			heat: reservoirTemperature + heatToReservoir,
 		});

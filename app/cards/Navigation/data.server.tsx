@@ -240,23 +240,7 @@ export const waypoints = t.router({
 			return waypoints;
 		}),
 	spawn: t.procedure
-		.meta({
-			action: () => {
-				return {
-					position: {
-						name: "Position",
-						type: "starmapCoordinates",
-						helper:
-							"A specific point in space to place the waypoint. Use as an alternative to Waypoint Entity.",
-					},
-					entityId: {
-						name: "Waypoint Entity",
-						helper: "The entity to attach the waypoint to. This option is preferred.",
-					},
-				};
-			},
-			event: true,
-		})
+
 		.input(
 			z.object({
 				shipId: z.number(),
@@ -277,6 +261,23 @@ export const waypoints = t.router({
 				tags: z.array(z.string()).optional(),
 			}),
 		)
+		.meta({
+			action: () => {
+				return {
+					position: {
+						name: "Position",
+						type: "starmapCoordinates",
+						helper:
+							"A specific point in space to place the waypoint. Use as an alternative to Waypoint Entity.",
+					},
+					entityId: {
+						name: "Waypoint Entity",
+						helper: "The entity to attach the waypoint to. This option is preferred.",
+					},
+				};
+			},
+			event: true,
+		})
 		.output(
 			z.object({
 				waypointId: z.number(),

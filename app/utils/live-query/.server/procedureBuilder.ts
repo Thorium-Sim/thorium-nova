@@ -1,3 +1,5 @@
+import type { ActionOverrides } from "@thorium/.server/data";
+import type { DataContext } from "@thorium/.server/DataContext";
 import type { ComponentIds } from "@thorium/ecs-components";
 import type { Entity } from "@thorium/utils/ecs";
 
@@ -99,6 +101,15 @@ type CreateProcedureReturnInput<
 	_output_out: FallbackValue<TNext["_output_out"], TPrev["_output_out"]>;
 }>;
 
+interface BaseMeta<TParams extends ProcedureParams> {
+	event?: true;
+	action?:
+		| true
+		| ((ctx: DataContext) => {
+				[k in keyof TParams["_input_out"]]?: ActionOverrides;
+		  });
+}
+
 export interface ProcedureBuilder<TParams extends ProcedureParams> {
 	/**
 	 * Add an input parser to the procedure.
@@ -142,7 +153,9 @@ export interface ProcedureBuilder<TParams extends ProcedureParams> {
 	/**
 	 * Add a meta data to the procedure.
 	 */
-	meta<$Meta>(meta: $Meta): ProcedureBuilder<{
+	meta<$Meta extends BaseMeta<TParams>>(
+		meta: $Meta,
+	): ProcedureBuilder<{
 		_config: TParams["_config"];
 		_meta: $Meta;
 		_publish: TParams["_publish"];

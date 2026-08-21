@@ -21,7 +21,12 @@ export const theme = t.router({
 			return Promise.all(
 				plugin.aspects.themes.map(async (theme) => {
 					const assetPath = await theme.getAssetUrl();
-					const rawCSS = await ctx.readFile.call(theme, path.join(assetPath, theme.assets.rawCSS));
+					let rawCSS = "";
+					try {
+						rawCSS = await ctx.readFile.call(theme, path.join(assetPath, theme.assets.rawCSS));
+					} catch {
+						await ctx.uploadFile.call(theme, new Blob([""], { type: "text/css" }), "raw.css");
+					}
 
 					return {
 						...theme,
@@ -43,7 +48,12 @@ export const theme = t.router({
 			if (!theme) throw new Error("Theme not found");
 			const assetPath = await theme.getAssetUrl();
 
-			const rawCSS = await ctx.readFile.call(theme, path.join(assetPath, theme.assets.rawCSS));
+			let rawCSS = "";
+			try {
+				rawCSS = await ctx.readFile.call(theme, path.join(assetPath, theme.assets.rawCSS));
+			} catch {
+				await ctx.uploadFile.call(theme, new Blob([""], { type: "text/css" }), "raw.css");
+			}
 
 			return {
 				...theme,

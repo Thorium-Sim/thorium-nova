@@ -156,9 +156,9 @@ export const Widget: FC<{
 			>
 				<RAButton className={`widget widget-${pascalCase(name)}`}>
 					{icon.includes("/") ? (
-						<Icon name={icon as any} className="widget-icon h-6 w-6 cursor-pointer" />
-					) : (
 						<SVGImageLoader className="widget-icon h-6 w-6 cursor-pointer" url={icon} />
+					) : (
+						<Icon name={icon as any} className="widget-icon h-6 w-6 cursor-pointer" />
 					)}
 				</RAButton>
 				<Suspense>

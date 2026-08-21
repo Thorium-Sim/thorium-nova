@@ -29,7 +29,12 @@ import {
 
 export function SystemsMonitor({ cardLoaded }: CardProps) {
 	const { shipId } = useStation();
-	const [reactors] = q.systemsMonitor.reactors.get.useNetRequest({ shipId });
+	const [reactors] = q.systemsMonitor.reactors.get.useNetRequest(
+		{ shipId },
+		// Refetch to refresh the active and reserve fuel amount
+		{ refetchInterval: 1000 },
+	);
+
 	const [batteries] = q.systemsMonitor.batteries.get.useNetRequest({ shipId });
 	const [systems] = q.systemsMonitor.systems.get.useNetRequest({ shipId });
 
@@ -83,7 +88,7 @@ export function SystemsMonitor({ cardLoaded }: CardProps) {
 			<BatterySummary />
 			<div
 				className={cn(
-					"panel panel-primary grid flex-auto grid-flow-col-dense gap-4 overflow-y-auto p-4 grid-rows-8 systems-row",
+					"panel panel-alert grid flex-auto grid-flow-col-dense gap-4 overflow-y-auto p-4 grid-rows-8 systems-row h-full",
 				)}
 			>
 				{systems
@@ -215,7 +220,7 @@ function Reactor({
 	return (
 		<div
 			key={id}
-			className="panel panel-primary group relative grid w-full grid-cols-[auto_1fr_auto_auto] items-center gap-4 gap-x-2 overflow-hidden p-2 text-left"
+			className="panel panel-alert group relative grid w-full grid-cols-[auto_1fr_auto_auto] items-center gap-4 gap-x-2 overflow-hidden p-2 text-left"
 		>
 			<div className="col-span-4 flex items-center gap-1 self-start">
 				<span className="truncate">
@@ -301,7 +306,7 @@ function Reactor({
 				</div>
 			</Tooltip>
 			<HoldButton
-				className={cn("btn-xs btn-circle btn-primary text-xl", `power-down-${index}`)}
+				className={cn("btn-xs btn-circle btn-primary text-xl", `power-up-${index}`)}
 				clickAction={(actionCount) => {
 					q.systemsMonitor.reactors.setDesiredOutput.netSend({
 						reactorId: id,
@@ -425,6 +430,13 @@ class HoverBatteryEvent extends Event {
 	}
 }
 
+class HoverSystemsEvent extends Event {
+	static name = "hover-systems-event";
+	constructor(public batteryId: number | null) {
+		super(HoverSystemsEvent.name);
+	}
+}
+
 function Battery({
 	id,
 	index,
@@ -513,10 +525,16 @@ function Battery({
 	return (
 		<div
 			className={cn(
-				"panel panel-primary relative grid w-full grid-cols-[1fr_auto] items-center gap-x-2 p-2",
+				"panel panel-alert relative grid w-full grid-cols-[1fr_auto] items-center gap-x-2 p-2",
 				{ "brightness-150": hovered },
 				`battery-${type}`,
 			)}
+			onPointerEnter={() => {
+				window.dispatchEvent(new HoverSystemsEvent(id));
+			}}
+			onPointerLeave={() => {
+				window.dispatchEvent(new HoverSystemsEvent(null));
+			}}
 		>
 			<span className="truncate font-medium">{name}</span>
 
@@ -611,6 +629,12 @@ function System({
 
 	const connectedBattery = batteries.find((b) => b.id === power?.batterySource);
 
+	const [hovered, setHovered] = useState(false);
+	useEventListener(HoverSystemsEvent.name, (event: HoverSystemsEvent) => {
+		if (power?.batterySource && event.batteryId === power?.batterySource) setHovered(true);
+		else setHovered(false);
+	});
+
 	const { interpolate } = useLiveQuery();
 	useAnimationFrame(() => {
 		const system = interpolate(id);
@@ -643,7 +667,10 @@ function System({
 
 	if (!power && !heat) return null;
 	return (
-		<div key={id} className={"relative w-full items-center text-left"}>
+		<div
+			key={id}
+			className={cn("relative w-full items-center text-left", { "brightness-150": hovered })}
+		>
 			<div className="flex items-center gap-2">
 				<span
 					className={cn("flex-auto truncate text-sm", {

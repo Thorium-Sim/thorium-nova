@@ -430,6 +430,10 @@ const quotes = [
 	"Do not confuse motion and progress. A rocking horse keeps moving but does not make any progress.",
 	// Baltasar Gracián
 	"Make haste slowly",
+	// Satchel Paige
+	"Ain't no man can avoid being born average, but there ain't no man got to be common.",
+	// Charlie Munger
+	"Living with adversity is the best chance for opportunity.",
 ];
 
 const QuoteOfTheDay = () => {

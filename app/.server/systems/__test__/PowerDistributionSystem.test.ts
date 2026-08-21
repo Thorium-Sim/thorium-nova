@@ -140,10 +140,10 @@ describe("PowerDistributionSystem", () => {
 		ecs.update(16);
 		expect(system1.components.power?.currentPower).toEqual(4);
 		expect(system2.components.power?.currentPower).toEqual(4);
-		expect(system3.components.power?.currentPower).toEqual(0);
+		expect(system3.components.power?.currentPower).toEqual(2);
 		expect(system4.components.power?.currentPower).toEqual(0);
-		expect(system3.components.power?.powerActivated).toEqual(false);
-		expect(system4.components.power?.powerActivated).toEqual(false);
+		expect(system3.components.power?.powerActivated).toEqual(true);
+		expect(system4.components.power?.powerActivated).toEqual(true);
 
 		const reactor2 = new Entity();
 		reactor2.addComponent("isShipSystem", { type: "reactor" });
@@ -161,7 +161,7 @@ describe("PowerDistributionSystem", () => {
 		expect(system3.components.power?.currentPower).toEqual(4);
 		expect(system4.components.power?.currentPower).toEqual(0);
 		expect(system3.components.power?.powerActivated).toEqual(true);
-		expect(system4.components.power?.powerActivated).toEqual(false);
+		expect(system4.components.power?.powerActivated).toEqual(true);
 	});
 	it("should properly charge and discharge batteries", () => {
 		const reactor = new Entity();
@@ -229,7 +229,7 @@ describe("PowerDistributionSystem", () => {
 		expect(battery.components.isBattery?.storage).toEqual(1.9999733333333334);
 		expect(battery.components.isBattery?.outputAmount).toEqual(6);
 		expect(system.components.power?.currentPower).toEqual(6);
-		for (let i = 0; i < 60 * 60 * 10.417; i++) {
+		for (let i = 0; i < 60 * 60 * 21; i++) {
 			ecs.update(16);
 		}
 		expect(battery.components.isBattery?.storage).toEqual(0);

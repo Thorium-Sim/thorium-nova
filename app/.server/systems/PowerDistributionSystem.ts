@@ -1,4 +1,3 @@
-import { pubsub } from "@thorium/.server/init/pubsub";
 import { systemPowerPriority } from "@thorium/cards/DamageReports/systemCategories";
 import { type Entity, System } from "@thorium/utils/ecs";
 
@@ -26,7 +25,6 @@ export class PowerDistributionSystem extends System {
 		const reactors = new Map<number, Entity>();
 		const batteries = new Map<number, Entity>();
 		const batterySystems = new Map<number, Entity[]>();
-		let wasSystemDeactivated = false;
 
 		let individualReactorOutput = 0; // Calculate the power output of each reactor
 		let powerBalanced = true;
@@ -61,6 +59,24 @@ export class PowerDistributionSystem extends System {
 			reactor.updateComponent("isReactor", { balanced: powerBalanced });
 		}
 
+		// First distribute power from reactors
+		let netReactorOutput = 0;
+
+		const poweredSystemsByPriority = Array.from(poweredSystems.values()).sort(
+			(a, b) =>
+				systemPowerPriority[a.components.isShipSystem!.type] -
+				systemPowerPriority[b.components.isShipSystem!.type],
+		);
+
+		for (const sys of poweredSystemsByPriority) {
+			const totalAvailablePower = grossReactorOutput - netReactorOutput;
+			if (totalAvailablePower <= 0) break;
+			const powerDraw = sys.components.power?.powerDraw || 0;
+			const currentPower = Math.min(totalAvailablePower, powerDraw);
+			sys.updateComponent("power", { currentPower });
+			netReactorOutput += currentPower;
+		}
+
 		// Reset all of the battery metrics and distribute battery power evenly to connected systems
 		for (const [_, battery] of batteries) {
 			if (!battery.components.isBattery) continue;
@@ -72,113 +88,38 @@ export class PowerDistributionSystem extends System {
 			const systems = batterySystems.get(battery.id) || [];
 			let totalOutput = systems.length === 0 ? 0 : battery.components.isBattery.outputRate;
 			let outputAmount = 0;
-			// Fill systems from least power draw to most power draw, updating the per system output as necessary
-			const sortedSystems = systems.sort(
-				(a, b) => (a.components.power?.powerDraw || 0) - (b.components.power?.powerDraw || 0),
-			);
+			// Fill systems from least remaining power draw to most remaining power draw, updating the per system output as necessary
+			const sortedSystems = systems.sort((a, b) => {
+				const aRemainingPowerDraw =
+					(a.components.power?.powerDraw || 0) - (a.components.power?.currentPower || 0);
+				const bRemainingPowerDraw =
+					(b.components.power?.powerDraw || 0) - (b.components.power?.currentPower || 0);
+				return aRemainingPowerDraw - bRemainingPowerDraw;
+			});
 			let remainingSystems = sortedSystems.length || 1;
 			for (const system of sortedSystems) {
 				const perSystemOutput = totalOutput / remainingSystems;
 				remainingSystems -= 1;
+				const currentPower = system.components.power!.currentPower;
 				const systemPowerInput = Math.min(
 					perSystemOutput,
-					system.components.power!.powerDraw,
+					system.components.power!.powerDraw - currentPower,
 					battery.components.isBattery.outputRate,
 					battery.components.isBattery.storage / elapsedTimeHours,
 				);
 				totalOutput -= systemPowerInput;
 				outputAmount += systemPowerInput;
-				system.updateComponent("power", { currentPower: systemPowerInput });
+				system.updateComponent("power", { currentPower: currentPower + systemPowerInput });
 			}
 			battery.updateComponent("isBattery", {
 				outputAmount,
 			});
 		}
 
-		// Distribute power to all systems from the reactor
-		// If the current power need is greater than the current power supply,
-		// start chopping systems in priority order
-		let hasEnoughPower = false;
-		let insufficientPower = false;
-		const poweredSystemsByPriority = Array.from(poweredSystems.values()).sort(
-			(a, b) =>
-				systemPowerPriority[a.components.isShipSystem!.type] -
-				systemPowerPriority[b.components.isShipSystem!.type],
-		);
-		const torpedoLaunchers = [];
-		while (!hasEnoughPower) {
-			const totalRequiredPower = poweredSystemsByPriority.reduce(
-				(power, sys) =>
-					power + sys.components.power!.powerDraw - sys.components.power!.currentPower,
-				0,
-			);
-			if (totalRequiredPower === 0) break;
-			if (totalRequiredPower <= grossReactorOutput) {
-				hasEnoughPower = true;
-				break;
-			}
-
-			insufficientPower = true;
-			const ejectedSystem = poweredSystemsByPriority.pop();
-			if (!ejectedSystem) break;
-			poweredSystems.delete(ejectedSystem.id);
-			if (ejectedSystem.components.power?.powerDraw === 0) {
-				continue;
-			}
-			if (ejectedSystem.components.isTorpedoLauncher && ejectedSystem.components.power) {
-				// If we're using the minimum power, we can deactivate torpedoes
-				// Otherwise, we'll allow torpedoes to use the remaining power before batteries
-				if (
-					ejectedSystem.components.power.powerDraw > ejectedSystem.components.power.powerLevels[0]
-				) {
-					torpedoLaunchers.unshift(ejectedSystem);
-					continue;
-				}
-			}
-			ejectedSystem.updateComponent("power", { powerActivated: false });
-			wasSystemDeactivated = true;
-		}
-
-		let netReactorOutput = 0;
-
-		// Now we can confidently deliver power to all systems in the poweredSystems list
-		for (const [_, sys] of poweredSystems) {
-			if (torpedoLaunchers.includes(sys)) continue;
-			sys.updateComponent("power", {
-				currentPower: sys.components.power!.powerDraw,
-			});
-			netReactorOutput += sys.components.power!.powerDraw;
-		}
-
-		// We carve out an exception for torpedo launchers — they automatically draw
-		// whatever remaining power there is
-		for (const torpedoLauncher of torpedoLaunchers) {
-			if (
-				netReactorOutput + (torpedoLauncher.components.power?.powerDraw || 0) >
-				grossReactorOutput
-			) {
-				const currentPower = Math.min(
-					torpedoLauncher.components.power?.powerDraw || 0,
-					Math.max(0, grossReactorOutput - netReactorOutput),
-				);
-				torpedoLauncher.updateComponent("power", {
-					currentPower,
-				});
-				netReactorOutput += currentPower;
-			}
-		}
-
-		// If we ran out of power and had to turn off systems,
-		//  we're going to say all of the extra power is tied up
-		// and not use it to charge batteries.
-		if (insufficientPower) {
-			netReactorOutput = grossReactorOutput;
-		}
-
 		// Apply power to batteries from reactors and update the storage
 		let surplusPower = grossReactorOutput - netReactorOutput;
 
-		// Fill systems from least charge rate to most charge rate, updating the per battery input as necessary
+		// Fill batteries from least charge rate to most charge rate, updating the per battery input as necessary
 		const sortedBatteries = Array.from(batteries.values()).sort(
 			(a, b) =>
 				(a.components.isBattery?.chargeRate || 0) - (b.components.isBattery?.chargeRate || 0),
@@ -193,7 +134,7 @@ export class PowerDistributionSystem extends System {
 			if (storage >= capacity || !powerActivated) {
 				perBatteryInput = 0;
 			}
-			const storageInput = Math.min(chargeRate, perBatteryInput);
+			let storageInput = Math.min(chargeRate, perBatteryInput);
 			battery.updateComponent("isBattery", {
 				storage: Math.min(
 					capacity,
@@ -201,10 +142,6 @@ export class PowerDistributionSystem extends System {
 				),
 				chargeAmount: storageInput,
 			});
-		}
-
-		if (wasSystemDeactivated) {
-			pubsub.publish.systemsMonitor.systems.get({ shipId: entity.id });
 		}
 	}
 }

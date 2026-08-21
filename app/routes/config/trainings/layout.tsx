@@ -59,12 +59,14 @@ export default function TrainingsConfig() {
 					</Button>
 
 					<SearchableList
-						items={data.map((d) => ({
-							id: d.name,
-							name: d.name,
-							description: d.description,
-							category: d.category,
-						}))}
+						items={data
+							.map((d) => ({
+								id: d.name,
+								name: d.name,
+								description: d.description,
+								category: d.category,
+							}))
+							.sort((a, b) => a.name.localeCompare(b.name))}
 						searchKeys={["name"]}
 						selectedItem={timelineId || null}
 						setSelectedItem={({ id }) => navigate(`${id}`)}

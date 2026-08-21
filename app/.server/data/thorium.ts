@@ -9,13 +9,14 @@ import { selectValueQuery } from "@thorium/utils/.server/evaluateEntityQuery";
 import { runInSandbox } from "@thorium/utils/.server/runInSandbox";
 import { Entity } from "@thorium/utils/ecs";
 import { actionItem } from "@thorium/utils/flags/actionSchema";
+import type { InputTypes } from "@thorium/utils/zodAutoForm";
 import { capitalCase } from "change-case";
 import z from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
 export type ActionOverrides = {
 	name?: string;
-	type?: string;
+	type?: InputTypes;
 	values?: string[];
 	helper?: string;
 	inputProps?: Record<string, any>;
@@ -172,14 +173,7 @@ export const thorium = t.router({
 			return { id: entity.id };
 		}),
 	setEntityComponent: t.procedure
-		.meta({
-			action: () => ({
-				components: {
-					name: "Components",
-					type: "components",
-				},
-			}),
-		})
+
 		.input(
 			z.object({
 				entityId: z.coerce.number(),
@@ -192,6 +186,14 @@ export const thorium = t.router({
 					.array(),
 			}),
 		)
+		.meta({
+			action: () => ({
+				components: {
+					name: "Components",
+					type: "components",
+				},
+			}),
+		})
 		.send(({ input, ctx }) => {
 			const entity = ctx.flight?.ecs.getEntityById(input.entityId);
 			if (!entity) return;
@@ -318,8 +320,8 @@ export const thorium = t.router({
 			console.debug(input.message);
 		}),
 	runCode: t.procedure
-		.meta({ action: () => ({ code: { type: "textarea" } }) })
 		.input(z.object({ code: z.string() }))
+		.meta({ action: () => ({ code: { type: "textarea" } }) })
 		.send(({ input, ctx }) => {
 			return runInSandbox(input.code, ctx);
 		}),

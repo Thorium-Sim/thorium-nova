@@ -15,6 +15,9 @@ import {
 
 import { Icon } from "./Icon";
 
+export type TSelectItem<I extends string | number> =
+	| { id: I; label: string }
+	| { header: string; items: TSelectItem<I>[] };
 export default function Select<I extends string | number>({
 	label,
 	labelHidden,
@@ -34,7 +37,7 @@ export default function Select<I extends string | number>({
 	label: string;
 	labelHidden?: boolean;
 	disabled?: boolean;
-	items: ({ id: I; label: string } | { header: string; items: { id: I; label: string }[] })[];
+	items: TSelectItem<I>[];
 	selected: I | null;
 	setSelected: (value: I | null) => void;
 	size?: "xxs" | "xs" | "sm" | "md";
@@ -86,22 +89,27 @@ export default function Select<I extends string | number>({
 					selectionMode={multiple ? "multiple" : "single"}
 					className="select-options ring-opacity-5 data-[focused]:ring-opacity-50 isolate max-h-96 w-fit min-w-32 overflow-y-auto rounded-md bg-gray-900 px-2 py-1 text-sm text-white shadow-lg ring-2 ring-gray-400 outline-none"
 				>
-					{items.map((item) =>
-						"header" in item ? (
-							<ListBoxSection key={item.header}>
-								<Header className="font-bold">{item.header}</Header>
-								{item.items.map((item) => (
-									<SelectItem {...item} key={item.id} />
-								))}
-							</ListBoxSection>
-						) : (
-							<SelectItem {...item} key={item.id} />
-						),
-					)}
+					{items.map((item) => (
+						<RenderSelectItem {...item} key={"header" in item ? item.header : item.id} />
+					))}
 				</ListBox>
 			</Popover>
 		</RASelect>
 	);
+}
+
+function RenderSelectItem<I extends string | number>(item: TSelectItem<I>) {
+	if ("header" in item) {
+		return (
+			<ListBoxSection key={item.header} className="px-2">
+				<Header className="-mx-2 font-bold">{item.header}</Header>
+				{item.items.map((item) => (
+					<RenderSelectItem {...item} key={"header" in item ? item.header : item.id} />
+				))}
+			</ListBoxSection>
+		);
+	}
+	return <SelectItem {...item} key={item.id} />;
 }
 
 export function SelectItem<I extends string | number>(item: { id: I; label: string }) {
@@ -109,7 +117,7 @@ export function SelectItem<I extends string | number>(item: { id: I; label: stri
 		<ListBoxItem
 			key={item.id}
 			id={item.id}
-			className="flex min-w-fit cursor-default justify-between rounded px-2 py-0.5 text-gray-100 outline-none data-[focused]:bg-blue-600 data-[focused]:text-white"
+			className="flex min-w-fit cursor-default justify-between rounded py-0.5 text-gray-100 outline-none data-[focused]:bg-blue-600 data-[focused]:text-white"
 			textValue={item.label}
 		>
 			{({ isSelected }) => (

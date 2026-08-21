@@ -313,7 +313,7 @@ export const client = t.router({
 						? null
 						: {
 								...flightClient.components.flightClient?.training,
-								text: md.renderInline(input.text),
+								text: md.render(input.text),
 								card: input.card,
 								mediaUrl: input.mediaUrl,
 								selector,

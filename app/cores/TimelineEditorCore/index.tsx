@@ -2,7 +2,7 @@ import { isSortable } from "@dnd-kit/react/sortable";
 import { StepButtons, TimelineStepEditor } from "@thorium/components/StepEditor";
 import { q } from "@thorium/context/AppContext";
 import Button from "@thorium/ui/Button";
-import Select from "@thorium/ui/Select";
+import Select, { type TSelectItem } from "@thorium/ui/Select";
 import { SortableList } from "@thorium/ui/SortableItem";
 import { cn } from "@thorium/utils/cn";
 import { startTransition, Suspense, useState } from "react";
@@ -47,30 +47,33 @@ export function TimelineEditorCore() {
 					items={[
 						{
 							header: "Missions",
-							items: timelines
-								.filter((t) => t.kind === "missions")
-								.map((t) => ({
+							items: groupItemsByCategory(
+								timelines.filter((t) => t.kind === "missions"),
+								(t) => ({
 									id: `${t.pluginName}-${t.name}`,
 									label: `${activeTimelines.some((a) => a.type === "mission" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
-								})),
+								}),
+							),
 						},
 						{
 							header: "Trainings",
-							items: timelines
-								.filter((t) => t.kind === "trainings")
-								.map((t) => ({
+							items: groupItemsByCategory(
+								timelines.filter((t) => t.kind === "trainings"),
+								(t) => ({
 									id: `${t.pluginName}-${t.name}`,
 									label: `${activeTimelines.some((a) => a.type === "training" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
-								})),
+								}),
+							),
 						},
 						{
 							header: "Reports",
-							items: timelines
-								.filter((t) => t.kind === "reports")
-								.map((t) => ({
+							items: groupItemsByCategory(
+								timelines.filter((t) => t.kind === "reports"),
+								(t) => ({
 									id: `${t.pluginName}-${t.name}`,
 									label: `${activeTimelines.some((a) => a.type === "report" && a.name === t.name) ? "🟢 " : ""}${t.name}`,
-								})),
+								}),
+							),
 						},
 					]}
 					label="Timeline"
@@ -149,4 +152,16 @@ export function TimelineEditorCore() {
 			)}
 		</div>
 	);
+}
+
+function groupItemsByCategory<T extends { category: string; name: string }>(
+	items: T[],
+	mapItem: (item: T) => TSelectItem<string>,
+) {
+	return Object.entries(Object.groupBy(items, (t) => t.category)).map(([category, items]) => {
+		return {
+			header: category,
+			items: items?.sort((a, b) => a.name.localeCompare(b.name)).map(mapItem) || [],
+		};
+	});
 }

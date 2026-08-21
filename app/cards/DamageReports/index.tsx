@@ -1,9 +1,10 @@
+import { DamageReport } from "@thorium/cards/DamageReports/DamageReport";
 import {
 	systemCategories,
 	systemFilterValues,
 	systemSortValues,
 } from "@thorium/cards/DamageReports/systemCategories";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import useAnimationFrame from "@thorium/hooks/useAnimationFrame";
 import { useStation } from "@thorium/routes/station/useStation";
@@ -59,24 +60,33 @@ export function DamageReports() {
 	const selectedSystem = systems.find((d) => d.id === selectedEntity);
 
 	return (
-		<div className="grid h-full w-full grid-cols-4 gap-4">
-			<div className="col-span-1 flex flex-col gap-2 overflow-hidden">
+		<div className="grid h-full w-full grid-flow-col grid-cols-4 grid-rows-[auto_2fr_auto_5fr_auto] gap-x-4">
+			<div className="damage-reports-list contents">
 				<h3>Reports</h3>
-				<ul className="list-group panel w-full flex-[2] overflow-y-auto">
+				<ul className="list-group panel mb-4 min-h-0 w-full overflow-y-auto">
 					{damageReports.map((d) => (
 						<li
 							key={d.id}
 							className={cn("list-group-item", {
 								selected: selectedEntity === d.id,
 							})}
-							onClick={() => setSelectedEntity(d.id)}
+							onClick={() => {
+								q.thorium.genericEvent.netSend({
+									clientId,
+									eventName: "damage-report-selected",
+									properties: `${d.id}`,
+								});
+								setSelectedEntity(d.id);
+							}}
 						>
 							{d.name}
 						</li>
 					))}
 				</ul>
+			</div>
+			<div className="contents">
 				<h3>Systems</h3>
-				<ul className="list-group panel min-h-0 w-full flex-[5] overflow-y-auto">
+				<ul className="damage-systems-list list-group panel mb-4 min-h-0 w-full overflow-y-auto">
 					{systems
 						.filter((s) => selectedFilter === "All" || systemCategories[s.type] === selectedFilter)
 						.sort((a, b) => {
@@ -105,29 +115,36 @@ export function DamageReports() {
 								key={s.id}
 								{...s}
 								isSelected={selectedEntity === s.id}
-								onClick={() => setSelectedEntity(s.id)}
+								onClick={() => {
+									setSelectedEntity(s.id);
+									q.thorium.genericEvent.netSend({
+										clientId,
+										eventName: "damage-system-pick",
+										properties: `${s.id}`,
+									});
+								}}
 							/>
 						))}
 				</ul>
-				<div className="flex justify-between gap-2">
-					<Select
-						className="select-alert flex-1"
-						label="Filter"
-						selected={selectedFilter}
-						items={[
-							{ id: "All", label: "All" },
-							...systemFilterValues.map((f) => ({ id: f, label: f })),
-						]}
-						setSelected={(f) => setSelectedFilter(f || "All")}
-					/>
-					<Select
-						className="select-alert flex-1"
-						label="Sort"
-						selected={selectedSort}
-						items={systemSortValues.map((f) => ({ id: f, label: f }))}
-						setSelected={(f) => setSelectedSort(f || "Name")}
-					/>
-				</div>
+			</div>
+			<div className="filter-sort-dropdowns flex justify-between gap-2">
+				<Select
+					className="select-alert flex-1"
+					label="Filter"
+					selected={selectedFilter}
+					items={[
+						{ id: "All", label: "All" },
+						...systemFilterValues.map((f) => ({ id: f, label: f })),
+					]}
+					setSelected={(f) => setSelectedFilter(f || "All")}
+				/>
+				<Select
+					className="select-alert flex-1"
+					label="Sort"
+					selected={selectedSort}
+					items={systemSortValues.map((f) => ({ id: f, label: f }))}
+					setSelected={(f) => setSelectedSort(f || "Name")}
+				/>
 			</div>
 			{selectedSystem ? (
 				<SystemDetails
@@ -227,7 +244,7 @@ function SystemDetails({
 	const systemDamageReport = damageReports.find((s) => s.systemId === systemId);
 	if (systemDamageReport) {
 		return (
-			<div className="col-span-3 flex flex-col items-center justify-center gap-4">
+			<div className="col-span-3 row-span-5 flex flex-col items-center justify-center gap-4">
 				<h2 className="text-4xl">Damage Report In Progress...</h2>
 				<Button className="btn-alert" onClick={() => setSelectedReportId(systemDamageReport.id)}>
 					Go To Report
@@ -237,7 +254,7 @@ function SystemDetails({
 	}
 	if (!diagnostic) {
 		return (
-			<div className="col-span-3 flex flex-col items-center justify-center gap-4">
+			<div className="diagnostics-list col-span-3 row-span-5 flex flex-col items-center justify-center gap-4">
 				<Button
 					className="btn-lg btn-info"
 					onClick={() => {
@@ -291,12 +308,12 @@ function SystemDetails({
 	}
 
 	if (diagnostic.results) {
-		return <SystemCard systemId={systemId} />;
+		return <SystemMetrics systemId={systemId} />;
 	}
 
 	if (diagnostic.progress < 1) {
 		return (
-			<div className="col-span-3 mx-auto flex w-1/2 flex-col items-center justify-center gap-4">
+			<div className="diagnostic-candidates col-span-3 row-span-5 mx-auto flex w-1/2 flex-col items-center justify-center gap-4">
 				Level {diagnostic.level} Diagnostic In Progress...
 				<DiagnosticProgress diagnosticId={diagnostic.id} progress={diagnostic.progress} />
 				<Button
@@ -335,7 +352,7 @@ function DiagnosticProgress({
 	return <progress ref={ref} className="progress progress-alert" max={1} value={progress} />;
 }
 
-function SystemCard({ systemId }: { systemId: number }) {
+function SystemMetrics({ systemId }: { systemId: number }) {
 	const [diagnostic] = q.damageReports.systemDiagnostic.useNetRequest({
 		systemId: systemId,
 	});
@@ -346,7 +363,7 @@ function SystemCard({ systemId }: { systemId: number }) {
 	const reportCount = Number(diagnostic.level) - 1;
 
 	return (
-		<div className="col-span-3 mx-auto h-full w-5/6 overflow-hidden">
+		<div className="diagnostic-candidates col-span-3 row-span-5 mx-auto h-full w-5/6 overflow-hidden">
 			<div className="flex flex-col gap-2">
 				<MetricPanel
 					id="efficiency"
@@ -484,7 +501,7 @@ function MetricPanel({
 	}
 
 	return (
-		<div className={cn("group p-2 tabular-nums !flex items-center gap-2 panel")}>
+		<div className={cn("group p-2 tabular-nums flex! items-center gap-2 panel")}>
 			<div
 				className={cn(
 					"bg-white/20 rounded-full w-8 h-8 flex items-center justify-center",
@@ -556,7 +573,7 @@ function ReportCandidates({
 	if (!reports) return null;
 
 	return (
-		<div className="col-span-3 mx-auto flex h-full w-5/6 flex-col justify-around overflow-hidden">
+		<div className="diagnostic-candidates col-span-3 row-span-5 mx-auto flex h-full w-5/6 flex-col justify-around overflow-hidden">
 			<div className="grid grid-cols-3 grid-rows-[auto_auto_auto] gap-4">
 				{reports.map((report) => (
 					<div key={report.id} className="panel row-span-3 grid grid-rows-subgrid p-4">
@@ -585,7 +602,7 @@ function ReportCandidates({
 						<Button
 							className="btn-success w-full"
 							onClick={async () => {
-								const { reportId } = await q.damageReports.beginDamageReport.netSend({
+								const { reportId } = await q.damageReports.beginDamageReportFromDiagnostic.netSend({
 									diagnosticId: diagnostic.id,
 									reportCandidateId: report.id,
 								});
@@ -621,37 +638,3 @@ const damageMetricFormats: Record<DamageEffects, (value: number) => ReactNode> =
 	cascadeRisk: (val) => `${Math.round(val * 1000) / 10}%`,
 	crewSafetyRating: (val) => `${Math.round(val * 100)}%`,
 };
-
-function DamageReport({
-	id,
-	name,
-	stepCount,
-	currentStepIndex,
-	currentStepText,
-}: {
-	id: number;
-	name: string;
-	stepCount: number;
-	currentStepIndex: number;
-	currentStepText: string;
-}) {
-	return (
-		<div className="col-span-3 flex flex-col gap-2 text-xl">
-			<div>{name}</div>
-			<div className="panel flex-1 overflow-y-auto p-4 text-2xl whitespace-pre-wrap">
-				{currentStepText}
-			</div>
-			<div className="flex items-center justify-between gap-2">
-				<div className="text-xl">
-					Step {currentStepIndex + 1} / {stepCount}
-				</div>
-				<Button
-					className="btn-error"
-					onClick={() => q.damageReports.abortDamageReport.netSend({ reportId: id })}
-				>
-					Abort Report
-				</Button>
-			</div>
-		</div>
-	);
-}

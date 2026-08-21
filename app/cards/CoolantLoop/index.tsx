@@ -86,7 +86,7 @@ export function CoolantLoop() {
 			ref={baseRef}
 		>
 			{/* Radiator */}
-			<div className="col-start-1 row-span-9 row-start-1 flex flex-col">
+			<div className="coolant-radiator col-start-1 row-span-9 row-start-1 flex flex-col">
 				{Array.from({ length: 15 }).map((_, i) => (
 					<RadiatorFin key={i} />
 				))}
@@ -99,7 +99,7 @@ export function CoolantLoop() {
 			</div>
 
 			{/* Coolant Tank */}
-			<div className="col-span-11 col-start-2 row-span-3 row-start-1 flex flex-col items-center">
+			<div className="coolant-tank col-span-11 col-start-2 row-span-3 row-start-1 flex flex-col items-center">
 				<div className="relative max-w-3/4">
 					<div
 						className="absolute bottom-0 left-0 h-full w-full"
@@ -173,7 +173,7 @@ export function CoolantLoop() {
 			/>
 
 			{/* Radiator Coolant Valve */}
-			<label className="relative col-start-3 row-start-5 flex items-center justify-center border-2 border-white/50 bg-black">
+			<label className="radiator-valve relative col-start-3 row-start-5 flex items-center justify-center border-2 border-white/50 bg-black">
 				<input
 					type="checkbox"
 					className="peer absolute"
@@ -191,7 +191,7 @@ export function CoolantLoop() {
 				/>
 			</label>
 			{/* Systems */}
-			<div className="col-span-4 col-start-15 row-span-7 row-start-2 grid grid-cols-subgrid">
+			<div className="coolant-systems col-span-4 col-start-15 row-span-7 row-start-2 grid grid-cols-subgrid">
 				{systems.map((s) => (
 					<Fragment key={s.id}>
 						<div></div>
@@ -200,6 +200,7 @@ export function CoolantLoop() {
 							name={s.name}
 							nominalHeat={s.nominalHeat}
 							maxSafeHeat={s.maxSafeHeat}
+							type={s.type}
 						/>
 					</Fragment>
 				))}
@@ -212,7 +213,7 @@ export function CoolantLoop() {
 				maxValue={coolantPump.maxSafePower}
 				defaultValue={coolantPump.powerDraw}
 				step={0.1}
-				className="col-span-5 col-start-6 row-start-6"
+				className="coolant-pump-speed col-span-5 col-start-6 row-start-6"
 				onChange={(e) => {
 					if (Array.isArray(e)) return;
 					q.coolantLoop.setPumpPower.netSend({
@@ -237,7 +238,7 @@ function PumpPinwheel({ speed }: { speed: number }) {
 	return (
 		<>
 			<SVGImageLoader url={pinwheel} className="col-start-1 row-start-1" />
-			<div className="relative col-span-4 col-start-5 row-span-4 row-start-6 h-64 translate-y-2 self-end">
+			<div className="coolant-pump relative col-span-4 col-start-7 row-span-4 row-start-6 h-64 translate-y-2 self-end">
 				<SVGImageLoader url={pump} className="absolute z-10 h-64 w-64" />
 				<div className="absolute top-5 left-10 aspect-square h-48 rounded-full bg-black" />
 				<div
@@ -255,11 +256,13 @@ function PumpPinwheel({ speed }: { speed: number }) {
 function SystemCoolantLoop({
 	systemId,
 	name,
+	type,
 	nominalHeat,
 	maxSafeHeat,
 }: {
 	systemId: number;
 	name: string;
+	type: string;
 	nominalHeat: number;
 	maxSafeHeat: number;
 }) {
@@ -286,7 +289,11 @@ function SystemCoolantLoop({
 		};
 	}, []);
 	return (
-		<div ref={baseRef} style={{ "--heatColor": "black" } as any}>
+		<div
+			ref={baseRef}
+			style={{ "--heatColor": "black" } as any}
+			className={`coolant-system-${type}`}
+		>
 			<p className="pl-4">
 				{name} <span className="tabular-nums" ref={textRef} />
 			</p>

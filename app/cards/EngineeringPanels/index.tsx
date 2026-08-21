@@ -86,6 +86,7 @@ export function EngineeringPanels() {
 								key={e.id}
 								className={cn(
 									"panel-cell col-span-2",
+									e.element.type,
 									{
 										"row-span-4!": e.element.type === "numberPad",
 										"col-span-3": e.element.type === "numberedSlider",

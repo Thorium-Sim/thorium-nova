@@ -30,6 +30,24 @@ test("it should interpolate a ternary condition", () => {
 			cool: false,
 		}),
 	).toEqual("this is a not awesome string");
+	expect(
+		interpolateText(
+			`[cool|line break test
+
+	|]After line break`,
+			{ cool: true },
+		),
+	).toEqual(`line break test
+
+	After line break`);
+	expect(
+		interpolateText(
+			`[cool|line break test
+
+|]After line break`,
+			{ cool: false },
+		),
+	).toEqual(`After line break`);
 });
 test("it should interpolate a variable switch", () => {
 	const testString = `this is a [damageType|Electrical:electrical subsystems|Radiation:radiative coating|default:structure] string`;

@@ -127,7 +127,7 @@ export function ComponentDemo() {
 	const [menuSelected, setMenuSelected] = useState<Selection>(new Set(["rulers"]));
 
 	return (
-		<div className="flex h-full flex-col gap-8 overflow-y-auto p-4 text-white">
+		<div className="flex h-full flex-col gap-8 overflow-y-auto p-4">
 			<MenuTrigger>
 				<RAButton className="btn w-min whitespace-nowrap">Open Menu</RAButton>
 				<Menu

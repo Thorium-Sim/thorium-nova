@@ -80,6 +80,7 @@ export const coolantLoop = t.router({
 				nominalHeat: number;
 				maxSafeHeat: number;
 				inCoolantLoop: boolean;
+				type: string;
 			}[] = [];
 			for (const systemId of ship?.components.shipSystems?.shipSystems.keys() || []) {
 				const system = ctx.ecs.getEntityById(systemId);
@@ -96,6 +97,7 @@ export const coolantLoop = t.router({
 						nominalHeat: system.components.heat?.nominalHeat || 295,
 						maxSafeHeat: system.components.heat?.maxSafeHeat || 1000,
 						inCoolantLoop: system.components.heat.inCoolantLoop || false,
+						type: system.components.isShipSystem?.type || "generic",
 					});
 				}
 			}
@@ -103,13 +105,26 @@ export const coolantLoop = t.router({
 		}),
 	setPumpPower: t.procedure
 		.input(z.object({ pumpId: z.number(), power: z.number() }))
+		.meta({ event: true })
+		.output(
+			z.object({
+				pumpId: z.number(),
+				power: z.number(),
+				previousPower: z.number(),
+				shipId: z.number(),
+			}),
+		)
 		.send(({ ctx, input }) => {
 			const pump = ctx.ecs.getEntityById(input.pumpId);
+			const previousPower = pump?.components.power?.powerDraw || 0;
 			pump?.updateComponent("power", { powerDraw: input.power });
 			pubsub.publish.coolantLoop.get({ shipId: pump?.components.isShipSystem?.shipId || -1 });
+			return { ...input, previousPower, shipId: pump?.components.isShipSystem?.shipId || -1 };
 		}),
 	setSystemCooling: t.procedure
 		.input(z.object({ systemId: z.number(), cooling: z.boolean() }))
+		.meta({ event: true })
+		.output(z.object({ shipId: z.number(), systemId: z.number(), cooling: z.boolean() }))
 		.send(({ ctx, input }) => {
 			const system = ctx.ecs.getEntityById(input.systemId);
 			if (!system?.components.heat) throw new Error("System not found.");
@@ -118,6 +133,7 @@ export const coolantLoop = t.router({
 			if (system.components.isShipSystem?.type === "coolantRadiator") {
 				pubsub.publish.coolantLoop.get({ shipId: system.components.isShipSystem?.shipId || -1 });
 			}
+			return { ...input, shipId: system.components.isShipSystem?.shipId || -1 };
 		}),
 	stream: t.procedure.input(z.object({ shipId: z.number() })).dataStream(({ ctx, input }) => {
 		const set = new Set<Entity>();

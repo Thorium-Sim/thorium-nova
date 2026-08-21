@@ -5,7 +5,7 @@ import { DeckPicker } from "@thorium/cards/CargoControl/DeckPicker";
 import { RoomDot, RoomDotLabel } from "@thorium/cards/CargoControl/RoomDot";
 import { ShipView } from "@thorium/cards/CargoControl/ShipView";
 import { useShipMapStore } from "@thorium/cards/CargoControl/useShipMapStore";
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import { useCardContext } from "@thorium/context/CardContext";
 import {
 	damageControlInstruction,
@@ -158,7 +158,7 @@ function ExocompsList() {
 
 	const [exocomps] = q.exocomps.exocomps.useNetRequest({ shipId });
 	return (
-		<div className="row-span-2 flex h-full flex-col justify-center gap-4">
+		<div className="exocomps-list row-span-2 flex h-full flex-col justify-center gap-4">
 			{exocomps.map((exocomp) => (
 				<Exocomp key={exocomp.id} exocomp={exocomp} />
 			))}
@@ -201,6 +201,11 @@ function Exocomp({
 							deckIndex: Math.round(exocompPosition.z || 0),
 						});
 						useShipMapStore.setState({ selectedContainerId: exocomp.id });
+						q.thorium.genericEvent.netSend({
+							clientId,
+							eventName: "exocomp-selected",
+							properties: `${exocomp.id}`,
+						});
 					}}
 				>
 					<Icon name="exocomp" />
@@ -261,7 +266,7 @@ function Instructions() {
 
 	return (
 		<>
-			<div>
+			<div className="exocomp-instructions">
 				<p>Instructions</p>
 				<div
 					className="grid grid-cols-5 gap-4"
@@ -293,7 +298,7 @@ function Instructions() {
 			selectedExocomp &&
 			(selectedExocomp.instructionIndex === -1 ||
 				selectedExocomp.instructionIndex >= selectedExocomp.instructions.length) ? (
-				<Button className="btn-success w-full" onClick={deployExocomp}>
+				<Button className="btn-success deploy-button w-full" onClick={deployExocomp}>
 					Deploy
 				</Button>
 			) : selectedExocomp && selectedExocomp.instructions.length > 0 ? (
@@ -310,7 +315,7 @@ function Instructions() {
 			{instructionIndex !== null ? (
 				<>
 					<div
-						className={cn("panel min-h-0 h-min gap-4 p-4", {
+						className={cn("exocomp-instruction-types", "panel min-h-0 h-min gap-4 p-4", {
 							"grid grid-cols-[4rem_auto] @sm:grid-cols-[repeat(2,4rem_auto)] @lg:grid-cols-[repeat(3,4rem_auto)] place-items-center ":
 								!selectedItem,
 							"flex min-h-0 w-full flex-col gap-4": selectedItem,
@@ -378,6 +383,11 @@ function Instructions() {
 										<button
 											className="aspect-square w-16 cursor-pointer border border-white p-2 hover:bg-white/10 focus:border-white/80 focus:bg-white/20 active:bg-white/30"
 											onClick={() => {
+												q.thorium.genericEvent.netSend({
+													clientId,
+													eventName: "exocomp-instruction-change",
+													properties: e.id,
+												});
 												if (e.config.length === 0) {
 													setExocompInstructions(
 														produce((draft) => {
@@ -419,8 +429,13 @@ function Instructions() {
 							Clear Instruction
 						</Button>
 						<Button
-							className={cn("btn-success flex-auto", { hidden: !selectedItem })}
+							className={cn("set-instruction btn-success flex-auto", { hidden: !selectedItem })}
 							onClick={() => {
+								q.thorium.genericEvent.netSend({
+									clientId,
+									eventName: "exocomp-set-instruction",
+									properties: selectedItem?.id || "",
+								});
 								setExocompInstructions(
 									produce((draft) => {
 										if (typeof instructionIndex === "number" && selectedItem) {
@@ -495,6 +510,11 @@ function InstructionButton({
 					setInstructionIndex(i);
 					setSelectedItem(instructionItems.find((i) => i.id === instruction?.type) || null);
 					setConfig(instruction?.config || {});
+					q.thorium.genericEvent.netSend({
+						clientId,
+						eventName: "exocomp-instruction",
+						properties: `${i}`,
+					});
 				}
 			}}
 			ref={buttonRef}
@@ -579,7 +599,7 @@ function Logs() {
 		<>
 			<p className="-mb-2">Logs</p>
 			<div className="panel min-h-0 flex-auto">
-				<div className="faded-scroll-y flex flex-col-reverse overflow-y-auto p-4">
+				<div className="exocomp-logs faded-scroll-y flex flex-col-reverse overflow-y-auto p-4">
 					{selectedExocomp?.logs
 						.sort((a, b) => b.timestamp - a.timestamp)
 						.map((log) => (

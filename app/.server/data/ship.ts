@@ -185,6 +185,25 @@ export const ship = t.router({
 			};
 		}),
 	spawn: t.procedure
+
+		.input(
+			z.object({
+				template: z.object({ name: z.string(), pluginId: z.string() }),
+				entityId: z.number().optional(),
+				distance: z.number().optional(),
+				position: z
+					.object({
+						parentId: z
+							.union([z.number(), z.object({ name: z.string(), pluginId: z.string() })])
+							.nullable(),
+						x: z.number(),
+						y: z.number(),
+						z: z.number(),
+					})
+					.optional(),
+				tags: z.array(z.string()).optional(),
+			}),
+		)
 		.meta({
 			action: () => {
 				return {
@@ -210,24 +229,6 @@ export const ship = t.router({
 				};
 			},
 		})
-		.input(
-			z.object({
-				template: z.object({ name: z.string(), pluginId: z.string() }),
-				entityId: z.number().optional(),
-				distance: z.number().optional(),
-				position: z
-					.object({
-						parentId: z
-							.union([z.number(), z.object({ name: z.string(), pluginId: z.string() })])
-							.nullable(),
-						x: z.number(),
-						y: z.number(),
-						z: z.number(),
-					})
-					.optional(),
-				tags: z.array(z.string()).optional(),
-			}),
-		)
 		.output(z.object({ id: z.number() }))
 		.send(async ({ ctx, input }) => {
 			if (!ctx.flight) throw new Error("Flight not found.");
@@ -265,20 +266,7 @@ export const ship = t.router({
 			return { id: shipEntity.id };
 		}),
 	move: t.procedure
-		.meta({
-			action: () => ({
-				position: {
-					name: "Position",
-					type: "starmapCoordinates",
-					helper:
-						"A specific point in space to place the ship. Use as an alternative to Nearby Entity.",
-				},
-				entityId: {
-					name: "Nearby Entity",
-					helper: "Place the ship nearby this entity. This option is preferred.",
-				},
-			}),
-		})
+
 		.input(
 			z.object({
 				shipId: z.number(),
@@ -295,6 +283,20 @@ export const ship = t.router({
 					.optional(),
 			}),
 		)
+		.meta({
+			action: () => ({
+				position: {
+					name: "Position",
+					type: "starmapCoordinates",
+					helper:
+						"A specific point in space to place the ship. Use as an alternative to Nearby Entity.",
+				},
+				entityId: {
+					name: "Nearby Entity",
+					helper: "Place the ship nearby this entity. This option is preferred.",
+				},
+			}),
+		})
 		.send(({ ctx, input }) => {
 			const entity = ctx.ecs.getEntityById(input.shipId);
 			if (!entity) return;

@@ -77,3 +77,11 @@
 .training-ghost-button {
 	pointer-events: all;
 }
+.training-infobox ul {
+	list-style-type: disc;
+	margin-left: 2rem;
+	margin-block: 0.5rem;
+}
+.training-infobox li {
+	margin-block: 0.5rem;
+}
