@@ -72,10 +72,10 @@ export default function ThrustersConfig() {
 							labelHidden={false}
 							inputMode="numeric"
 							pattern="[0-9]*"
-							label="Linear Thrust"
-							placeholder={"12500"}
-							helperText="In Kilo-newtons. Affected by the mass of the ship the thrusters are attached to."
-							defaultValue={system.directionThrust}
+							label="Linear Acceleration"
+							placeholder={"625"}
+							helperText="In km/s^2"
+							defaultValue={system.directionAcceleration}
 							onBlur={async (e) => {
 								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
@@ -84,12 +84,12 @@ export default function ThrustersConfig() {
 										systemId: systemId,
 										shipId,
 										shipPluginId,
-										directionThrust: Number(e.target.value),
+										directionAcceleration: Number(e.target.value),
 									});
 								} catch (err) {
 									if (err instanceof Error) {
 										toast({
-											title: "Error changing linear thrust",
+											title: "Error changing linear acceleration",
 											body: err.message,
 											color: "error",
 										});
@@ -97,7 +97,11 @@ export default function ThrustersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton property="directionThrust" setRekey={setRekey} className="mt-6" />
+						<OverrideResetButton
+							property="directionAcceleration"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
 					</div>
 					<div className="flex pb-2">
 						<Input
@@ -136,10 +140,10 @@ export default function ThrustersConfig() {
 							labelHidden={false}
 							inputMode="numeric"
 							pattern="[0-9]*"
-							label="Rotation Thrust"
-							placeholder={"12500"}
-							helperText="In Kilo-newtons. Affected by the mass of the ship the thrusters are attached to."
-							defaultValue={system.rotationThrust}
+							label="Rotation Acceleration"
+							placeholder={"625"}
+							helperText="In km/s^2"
+							defaultValue={system.rotationAcceleration}
 							onBlur={async (e) => {
 								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
@@ -148,12 +152,12 @@ export default function ThrustersConfig() {
 										systemId: systemId,
 										shipId,
 										shipPluginId,
-										rotationThrust: Number(e.target.value),
+										rotationAcceleration: Number(e.target.value),
 									});
 								} catch (err) {
 									if (err instanceof Error) {
 										toast({
-											title: "Error changing rotation thrust",
+											title: "Error changing rotation acceleration",
 											body: err.message,
 											color: "error",
 										});
@@ -161,7 +165,11 @@ export default function ThrustersConfig() {
 								}
 							}}
 						/>
-						<OverrideResetButton property="rotationThrust" setRekey={setRekey} className="mt-6" />
+						<OverrideResetButton
+							property="rotationAcceleration"
+							setRekey={setRekey}
+							className="mt-6"
+						/>
 					</div>
 				</div>
 			</div>

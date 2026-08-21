@@ -21,7 +21,9 @@ export class ImpulseSystem extends System {
 		const ship = this.ecs.getEntityById(entity.components.isShipSystem?.shipId || -1);
 		if (!ship || !ship.components.isShip || !entity.components.isImpulseEngines) return;
 
-		let { thrust, targetSpeed, cruisingSpeed } = entity.components.isImpulseEngines;
+		const shipMass = ship.components.mass?.mass || 700000000;
+		let { acceleration, targetSpeed, cruisingSpeed } = entity.components.isImpulseEngines;
+		const thrustForce = acceleration * shipMass;
 
 		if (entity.components.power) {
 			const { currentPower, powerLevels } = entity.components.power || {};
@@ -34,7 +36,7 @@ export class ImpulseSystem extends System {
 
 			if (currentPower < requiredPower) targetSpeed = 0;
 		}
-		const forwardImpulse = (targetSpeed / cruisingSpeed) * thrust;
+		const forwardImpulse = (targetSpeed / cruisingSpeed) * thrustForce;
 		entity.updateComponent("isImpulseEngines", { forwardImpulse });
 	}
 }

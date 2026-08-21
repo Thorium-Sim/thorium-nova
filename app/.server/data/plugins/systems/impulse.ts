@@ -27,7 +27,7 @@ export const impulse = t.router({
 				shipId: z.string().optional(),
 				cruisingSpeed: z.number().optional(),
 				emergencySpeed: z.number().optional(),
-				thrust: z.number().optional(),
+				acceleration: z.number().optional(),
 				speeds: engineSpeeds.optional(),
 			}),
 		)
@@ -42,8 +42,8 @@ export const impulse = t.router({
 			if (typeof input.emergencySpeed === "number") {
 				shipSystem.emergencySpeed = input.emergencySpeed;
 			}
-			if (typeof input.thrust === "number") {
-				shipSystem.thrust = input.thrust;
+			if (typeof input.acceleration === "number") {
+				shipSystem.acceleration = input.acceleration;
 			}
 			if (Array.isArray(input.speeds)) {
 				shipSystem.speeds = input.speeds;

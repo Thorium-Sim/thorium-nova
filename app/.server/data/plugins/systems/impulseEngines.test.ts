@@ -53,13 +53,13 @@ describe("impulse engines plugin input", () => {
 			});
 			expect(system.emergencySpeed).toEqual(1000);
 
-			expect(system.thrust).toEqual(12500);
+			expect(system.acceleration).toEqual(625);
 			await router.plugin.systems.impulse.update({
 				pluginId: "Test Plugin",
 				systemId: "Test Impulse Engine",
-				thrust: 10000,
+				acceleration: 10000,
 			});
-			expect(system.thrust).toEqual(10000);
+			expect(system.acceleration).toEqual(10000);
 		});
 	});
 });

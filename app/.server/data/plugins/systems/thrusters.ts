@@ -25,9 +25,9 @@ export const thrusters = t.router({
 				shipPluginId: z.string().optional(),
 				shipId: z.string().optional(),
 				directionMaxSpeed: z.number().optional(),
-				directionThrust: z.number().optional(),
+				directionAcceleration: z.number().optional(),
 				rotationMaxSpeed: z.number().optional(),
-				rotationThrust: z.number().optional(),
+				rotationAcceleration: z.number().optional(),
 			}),
 		)
 		.send(({ ctx, input }) => {
@@ -38,14 +38,14 @@ export const thrusters = t.router({
 			if (typeof input.directionMaxSpeed === "number") {
 				shipSystem.directionMaxSpeed = input.directionMaxSpeed;
 			}
-			if (typeof input.directionThrust === "number") {
-				shipSystem.directionThrust = input.directionThrust;
+			if (typeof input.directionAcceleration === "number") {
+				shipSystem.directionAcceleration = input.directionAcceleration;
 			}
 			if (typeof input.rotationMaxSpeed === "number") {
 				shipSystem.rotationMaxSpeed = input.rotationMaxSpeed;
 			}
-			if (typeof input.rotationThrust === "number") {
-				shipSystem.rotationThrust = input.rotationThrust;
+			if (typeof input.rotationAcceleration === "number") {
+				shipSystem.rotationAcceleration = input.rotationAcceleration;
 			}
 
 			pubsub.publish.plugin.systems.get({

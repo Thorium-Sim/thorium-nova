@@ -122,12 +122,10 @@ export default function ImpulseEngineConfig() {
 							labelHidden={false}
 							inputMode="numeric"
 							pattern="[0-9]*"
-							label="Thrust"
-							placeholder={"12500"}
-							helperText={
-								"In Kilo-newtons. Affected by the mass of the ship the engines are attached to."
-							}
-							defaultValue={system.thrust}
+							label="Acceleration"
+							placeholder={"625"}
+							helperText={"How quickly the ship accelerates in km/s^2"}
+							defaultValue={system.acceleration}
 							onBlur={async (e) => {
 								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;
 								try {
@@ -136,12 +134,12 @@ export default function ImpulseEngineConfig() {
 										systemId: systemId,
 										shipId,
 										shipPluginId,
-										thrust: Number(e.target.value),
+										acceleration: Number(e.target.value),
 									});
 								} catch (err) {
 									if (err instanceof Error) {
 										toast({
-											title: "Error changing thrust",
+											title: "Error changing acceleration",
 											body: err.message,
 											color: "error",
 										});

@@ -7,8 +7,8 @@ export const isImpulseEngines = z
 		cruisingSpeed: z.number().default(1500),
 		/** The max speed at emergency impulse in km/s. */
 		emergencySpeed: z.number().default(2000),
-		/** The force in kilo-newtons which impulse engines apply. */
-		thrust: z.number().default(12500),
+		/** The acceleration in km/s^2 impulse engines apply. */
+		acceleration: z.number().default(625),
 		/** The desired speed of the ship in km/s. */
 		targetSpeed: z.number().default(0),
 		/** The forward acceleration of the ship in km/s^2. */
