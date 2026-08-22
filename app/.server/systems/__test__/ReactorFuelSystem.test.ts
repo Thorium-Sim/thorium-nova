@@ -1,4 +1,3 @@
-import { DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import { thoriumContext } from "@thorium/utils/.server/context";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
@@ -66,11 +65,13 @@ describe("ReactorFuelSystem", () => {
 				},
 			],
 			deckNodes: [
-				new DeckNode({
+				{
 					id: 1,
 					deckIndex: 0,
 					x: 0,
 					y: 0,
+					volume: 12000,
+					flags: [],
 					systems: ["reactor"],
 					isRoom: true,
 					contents: {
@@ -78,7 +79,7 @@ describe("ReactorFuelSystem", () => {
 							count: 100,
 						},
 					},
-				}),
+				},
 			],
 		});
 		ship.addComponent("shipSystems");

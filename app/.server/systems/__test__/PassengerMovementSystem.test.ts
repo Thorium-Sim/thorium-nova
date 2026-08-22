@@ -1,4 +1,3 @@
-import { DeckEdge, DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import { thoriumContext } from "@thorium/utils/.server/context";
 import { createMockDataContext } from "@thorium/utils/.server/createMockDataContext";
 import { testDataStoreProps } from "@thorium/utils/.server/db-fs/testDataStoreProps";
@@ -38,58 +37,78 @@ describe("PassengerMovementSystem", () => {
 				},
 			],
 			deckNodes: [
-				new DeckNode({
+				{
 					id: 1,
 					deckIndex: 0,
 					x: 0,
 					y: 0,
-				}),
-				new DeckNode({
+					contents: {},
+					volume: 12000,
+					flags: [],
+					systems: [],
+				},
+				{
 					id: 2,
 					deckIndex: 0,
 					x: 1,
 					y: 1,
-				}),
-				new DeckNode({
+					contents: {},
+					volume: 12000,
+					flags: [],
+					systems: [],
+				},
+				{
 					id: 3,
 					deckIndex: 0,
 					x: 2,
 					y: 1,
-				}),
-				new DeckNode({
+					contents: {},
+					volume: 12000,
+					flags: [],
+					systems: [],
+				},
+				{
 					id: 4,
 					deckIndex: 1,
 					x: 2,
 					y: 1,
-				}),
-				new DeckNode({
+					contents: {},
+					volume: 12000,
+					flags: [],
+					systems: [],
+				},
+				{
 					id: 5,
 					deckIndex: 1,
 					x: 1,
 					y: 0,
-				}),
+					contents: {},
+					volume: 12000,
+					flags: [],
+					systems: [],
+				},
 			],
 			deckEdges: [
-				new DeckEdge({
+				{
 					id: 1,
 					from: 1,
 					to: 2,
-				}),
-				new DeckEdge({
+				},
+				{
 					id: 2,
 					from: 2,
 					to: 3,
-				}),
-				new DeckEdge({
+				},
+				{
 					id: 2,
 					from: 3,
 					to: 4,
-				}),
-				new DeckEdge({
+				},
+				{
 					id: 2,
 					from: 4,
 					to: 5,
-				}),
+				},
 			],
 		});
 		ecs.addEntity(ship);

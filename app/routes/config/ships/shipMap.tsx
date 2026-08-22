@@ -6,7 +6,7 @@ import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import SearchableList from "@thorium/ui/SearchableList";
 import { cn } from "@thorium/utils/cn";
-import { Activity } from "react";
+import { Activity, Suspense } from "react";
 import { useNavigate, Outlet, Link, href, useParams } from "react-router";
 
 import type { Route } from "./+types/shipMap";
@@ -41,10 +41,14 @@ export default function ShipMap({
 					</Link>
 				</div>
 				<Activity mode={currentView === "decks" ? "visible" : "hidden"}>
-					<DecksList pluginId={pluginId} shipId={shipId} deckName={deckName} />
+					<Suspense>
+						<DecksList pluginId={pluginId} shipId={shipId} deckName={deckName} />
+					</Suspense>
 				</Activity>
 				<Activity mode={currentView === "rooms" ? "visible" : "hidden"}>
-					<RoomsList pluginId={pluginId} shipId={shipId} />
+					<Suspense>
+						<RoomsList pluginId={pluginId} shipId={shipId} />
+					</Suspense>
 				</Activity>
 			</div>
 			<Outlet />

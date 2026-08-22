@@ -7,7 +7,7 @@ import Button from "@thorium/ui/Button";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import UploadWell from "@thorium/ui/UploadWell";
 import type { NodeFlag } from "@thorium/utils/flags/DeckNode";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 
 import { DeckEdges } from "./DeckEdges";
@@ -127,30 +127,34 @@ export default function DeckConfig() {
 				}}
 				disableDoubleClickZoom
 			>
-				<SVGImageLoader
-					style={{
-						width: `${data.length * pixelRatio}px`,
-					}}
-					url={deckImage}
-					onClick={async (e) => {
-						if (panned.current || !addingNodes) return;
-						e.stopPropagation();
-						const { left, top } = e.currentTarget.getBoundingClientRect();
+				<Suspense>
+					<SVGImageLoader
+						style={{
+							width: `${data.length * pixelRatio}px`,
+						}}
+						url={deckImage}
+						onClick={async (e) => {
+							if (panned.current || !addingNodes) return;
+							e.stopPropagation();
+							const { left, top } = e.currentTarget.getBoundingClientRect();
 
-						const x = (e.clientX - left) / panState.current.scale / pixelRatio;
-						const y = (e.clientY - top) / panState.current.scale / pixelRatio;
-						const node = await q.plugin.ship.deck.addNode.netSend({
-							pluginId,
-							shipId,
-							deckId: deck.name,
-							x,
-							y,
-						});
-						setSelectedNodeId(node.id);
-					}}
-				/>
+							const x = (e.clientX - left) / panState.current.scale / pixelRatio;
+							const y = (e.clientY - top) / panState.current.scale / pixelRatio;
+							const node = await q.plugin.ship.deck.addNode.netSend({
+								pluginId,
+								shipId,
+								deckId: deck.name,
+								x,
+								y,
+							});
+							setSelectedNodeId(node.id);
+						}}
+					/>
+				</Suspense>
 				<EdgeContextProvider>
-					<DeckEdges deckNodes={deckNodes} deckNodeIds={deckNodeIds} />
+					<Suspense>
+						<DeckEdges deckNodes={deckNodes} deckNodeIds={deckNodeIds} />
+					</Suspense>
 
 					{nodes.map((deckNode) => (
 						<NodeCircle
@@ -173,6 +177,7 @@ export default function DeckConfig() {
 										setSelectedEdgeId(null);
 									} else {
 										setSelectedNodeId(null);
+										console.trace("Add Edge");
 										q.plugin.ship.deck.addEdge.netSend({
 											pluginId,
 											shipId,

@@ -1,7 +1,7 @@
 import path from "node:path";
 
 import type ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
-import { DeckEdge, DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
+import type { DeckEdge, DeckNode } from "@thorium/.server/classes/Plugins/Ship/Deck";
 import type { DataContext } from "@thorium/.server/DataContext";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
@@ -112,7 +112,7 @@ export const deck = t.router({
 			if ("backgroundImage" in input && input.backgroundImage instanceof File) {
 				const ext = path.extname(input.backgroundImage.name);
 				const file = input.backgroundImage;
-				const filePath = `${uniqid(`deck-${deck.name}-`)}${ext}`;
+				const filePath = `${deck.name}${ext}`;
 				if (!ship) return;
 				deck.backgroundUrl = await ctx.uploadFile.call(ship, file, filePath);
 				ship.write();
@@ -143,11 +143,19 @@ export const deck = t.router({
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
 			const { ship, deck } = getDeck(ctx, input);
-			const node = new DeckNode({
+			const node: DeckNode = {
 				x: input.x,
 				y: input.y,
 				id: getNextDeckId(ship),
-			});
+				contents: {},
+				flags: [],
+				icon: "",
+				isRoom: false,
+				name: "",
+				radius: 0,
+				systems: [],
+				volume: 12000,
+			};
 			deck.nodes.push(node);
 
 			pubsub.publish.plugin.ship.get({
@@ -267,12 +275,21 @@ export const deck = t.router({
 			const plugin = getPlugin(ctx, input.pluginId);
 			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) throw new Error("Ship not found");
-
-			const edge = new DeckEdge({
+			// See if there are already any edges between these two points
+			const existingEdge = ship.deckEdges.find(
+				(e) =>
+					(e.from === input.from && e.to === input.to) ||
+					(e.from === input.to && e.to === input.from),
+			);
+			if (existingEdge) return existingEdge;
+			const edge: DeckEdge = {
 				from: input.from,
 				to: input.to,
 				id: getNextEdgeId(ship),
-			});
+				flags: [],
+				isOpen: true,
+				weight: 1,
+			};
 			ship.deckEdges.push(edge);
 
 			pubsub.publish.plugin.ship.get({

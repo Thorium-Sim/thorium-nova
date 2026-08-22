@@ -6,9 +6,9 @@ import z from "zod";
 
 import { Aspect } from "../Aspect";
 import type BasePlugin from "../index";
-import DeckPlugin, { DeckEdge } from "./Deck";
+import type { DeckPlugin, DeckEdge } from "./Deck";
 
-export const shipCategories = z.enum(["Cruiser", "Frigate", "Scout", "Shuttle"]);
+export const shipCategories = z.enum(["Cruiser", "Frigate", "Scout", "Shuttle", "Seeker"]);
 export type ShipCategories = z.infer<typeof shipCategories>;
 
 export default class ShipPlugin extends Aspect {
@@ -172,8 +172,8 @@ export default class ShipPlugin extends Aspect {
 		this.length = params.length || 350;
 		this.shipSystems = params.shipSystems || [];
 		this.theme = params.theme || undefined;
-		this.decks = params.decks?.map((deck) => new DeckPlugin(deck)) || [];
-		this.deckEdges = params.deckEdges?.map((edge) => new DeckEdge(edge)) || [];
+		this.decks = params.decks || [];
+		this.deckEdges = params.deckEdges || [];
 		this.cargoContainers = params.cargoContainers || 4;
 		this.cargoContainerVolume = params.cargoContainerVolume || 4000;
 	}
@@ -185,8 +185,8 @@ export default class ShipPlugin extends Aspect {
 			name,
 			this.decks.map((deck) => deck.name),
 		);
-		const deckObj = new DeckPlugin({ name });
-		this.decks.push(new DeckPlugin({ name }));
+		const deckObj = { name, backgroundUrl: "", nodes: [] };
+		this.decks.push(deckObj);
 
 		return deckObj;
 	}

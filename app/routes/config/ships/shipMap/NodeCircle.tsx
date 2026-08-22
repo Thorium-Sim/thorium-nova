@@ -173,10 +173,6 @@ export function NodeCircle({
 					e.stopPropagation();
 				}}
 				{...events}
-				onPointerDown={(event) => {
-					events.onPointerDown?.(event);
-					selectNode();
-				}}
 				style={{
 					transform: `translate(${x * pixelRatio}px, ${y * pixelRatio}px)`,
 				}}
