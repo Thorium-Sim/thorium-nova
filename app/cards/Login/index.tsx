@@ -41,6 +41,7 @@ export function Login() {
 					onChange={(e) => setLoginName(e.target.value)}
 					autoComplete="off"
 					autoCorrect="off"
+					autoCapitalize="off"
 					value={loginName}
 				/>
 				<Button className="btn-primary w-72" type="submit" disabled={loginName.trim().length === 0}>

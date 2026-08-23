@@ -1,19 +1,49 @@
 import "reflect-metadata";
-import { BrowserWindow, BrowserView, Utils, ApplicationMenu } from "electrobun/bun";
+import path from "node:path";
+
+import { BrowserWindow, BrowserView, ApplicationMenu } from "electrobun";
+import Electrobun, { PATHS } from "electrobun/main";
 
 import type { ThoriumRPC } from "./rpc";
+const controller = new AbortController();
 
 // Create RPC instance using BrowserView.defineRPC
 const thoriumRPC = BrowserView.defineRPC<ThoriumRPC>({
 	maxRequestTime: 5000,
 	handlers: {
 		requests: {
-			quit: async () => {
-				Utils.quit();
-			},
+			quit: async () => {},
 			kiosk: async () => {},
 		},
-		messages: {},
+		messages: {
+			rendererReady: () => {
+				if (controller.signal.aborted) return;
+				const _serverProcess = Bun.spawn(
+					[path.join(PATHS.RESOURCES_FOLDER, "app", "thorium-server")],
+					{
+						serialization: "json",
+						signal: controller.signal,
+						ipc: (message) => {
+							if (message && typeof message === "object" && "type" in message) {
+								switch (message.type) {
+									case "started":
+										thoriumRPC.send.logMessage({
+											level: "info",
+											message: `Started: ${message.address}`,
+										});
+										console.log("Server Started", message.address);
+										break;
+									case "log":
+										console.log(message.message);
+										thoriumRPC.send.logMessage({ level: "info", message: message.message });
+										break;
+								}
+							}
+						},
+					},
+				);
+			},
+		},
 	},
 });
 
@@ -21,20 +51,25 @@ ApplicationMenu.setApplicationMenu([
 	{
 		submenu: [{ label: "Quit", role: "quit", accelerator: "q" }],
 	},
+	{
+		label: "Edit",
+		submenu: [
+			{ role: "undo" },
+			{ role: "redo" },
+			{ type: "separator" },
+			{ role: "cut" },
+			{ role: "copy" },
+			{ role: "paste" },
+			{ role: "selectAll" },
+		],
+	},
 ]);
-
-const server = await (
-	await import("../app/bunServer")
-).startHttpServer({
-	isProd: true,
-	isKiosk: true,
-});
 
 // Create the main window
 // Use native renderer (WKWebView) by default, but allow overriding with CEF
 new BrowserWindow({
 	title: "Thorium Nova",
-	url: server,
+	url: "views://mainview/index.html",
 	frame: {
 		width: 1024,
 		height: 768,
@@ -42,4 +77,11 @@ new BrowserWindow({
 		y: 100,
 	},
 	rpc: thoriumRPC,
+});
+
+Electrobun.events.on("before-quit", () => {
+	controller.abort();
+});
+process.on("exit", (code) => {
+	controller.abort(code);
 });

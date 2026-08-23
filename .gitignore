@@ -26,6 +26,8 @@ icons/sprite.svg
 # Bun server
 /binaries/
 artifacts
+.hutch
+.cottontail-tmp
 
 .wrangler
 

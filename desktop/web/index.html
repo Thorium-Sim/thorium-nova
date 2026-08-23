@@ -5,93 +5,6 @@
 			<meta charset="utf-8" />
 			<meta name="viewport" content="width=device-width, initial-scale=1" />
 			<title>Thorium Nova</title>
-			<script type="module">
-				const logs = document.getElementById("logs");
-
-				async function invoke(command, args, options) {
-					// Using internals is generally a bad idea, but this removes the need for
-					// an extra build process.
-					return window.__TAURI_INTERNALS__.invoke(command, args, options);
-				}
-
-				/**
-				 * Listen to an emitted event to any {@link EventTarget|target}.
-				 *
-				 * @example
-				 * ```typescript
-				 * import { listen } from '@tauri-apps/api/event';
-				 * const unlisten = await listen<string>('error', (event) => {
-				 *   console.info(`Got error, payload: ${event.payload}`);
-				 * });
-				 *
-				 * // you need to call unlisten if your handler goes out of scope e.g. the component is unmounted
-				 * unlisten();
-				 * ```
-				 *
-				 * @param event Event name. Must include only alphanumeric characters, `-`, `/`, `:` and `_`.
-				 * @param handler Event handler callback.
-				 * @param options Event listening options.
-				 * @returns A promise resolving to a function to unlisten to the event.
-				 * Note that removing the listener is required if your listener goes out of scope e.g. the component is unmounted.
-				 *
-				 * @since 1.0.0
-				 */
-				async function listen(event, handler, options) {
-					const target =
-						typeof options?.target === "string"
-							? { kind: "AnyLabel", label: options.target }
-							: (options?.target ?? { kind: "Any" });
-					return invoke("plugin:event|listen", {
-						event,
-						target,
-						handler: transformCallback(handler),
-					}).then((eventId) => {
-						return async () => _unlisten(event, eventId);
-					});
-				}
-
-				/**
-				 * Transforms a callback function to a string identifier that can be passed to the backend.
-				 * The backend uses the identifier to `eval()` the callback.
-				 *
-				 * @return A unique identifier associated with the callback function.
-				 *
-				 * @since 1.0.0
-				 */
-				function transformCallback(callback, once = false) {
-					return window.__TAURI_INTERNALS__.transformCallback(callback, once);
-				}
-
-				/**
-				 * Unregister the event listener associated with the given name and id.
-				 *
-				 * @ignore
-				 * @param event The event name
-				 * @param eventId Event identifier
-				 * @returns
-				 */
-				async function _unlisten(event, eventId) {
-					await invoke("plugin:event|unlisten", {
-						event,
-						eventId,
-					});
-				}
-
-				logs.innerText = "Starting server...";
-				const unlisten = await listen("backend_started", async (event) => {
-					logs.innerText = `Server started. Redirecting to ${event.payload}...`;
-					window.location.replace(event.payload);
-					await unlisten();
-				});
-
-				logs.innerText = "Getting server address...";
-				const serverLocation = await invoke("get_server_address", {}).catch(() => null);
-				logs.innerText = `Got server address: ${serverLocation} Redirecting...`;
-				if (serverLocation) {
-					window.location.replace(serverLocation);
-				}
-				await invoke("get_ip_address", {});
-			</script>
 			<style>
 				*,
 				::before,
@@ -601,6 +514,7 @@
 					</div>
 				</div>
 			</div>
+			<script src="index.js" type="module"></script>
 		</body>
 	</html>
 </html>

@@ -25,10 +25,16 @@ import { getMimeType } from "hono/utils/mime";
 
 import { isObject } from "./typeguards/isObject";
 
-export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; isKiosk: boolean }) {
+process.on("message", (_message) => {
+	// print message from parent
+});
+
+export async function startHttpServer({ isProd }: { isProd: boolean }) {
 	try {
 		console.info(`Starting Thorium...`);
-		const dataStoreProps = bunDataStoreProps(isProd || isKiosk ? "production" : "development");
+		process.send?.({ type: "log", message: "Starting Thorium..." });
+
+		const dataStoreProps = bunDataStoreProps(isProd ? "production" : "development");
 		return await thoriumContext.run(dataStoreProps, async () => {
 			const thoriumPath = thoriumContext.getStore()!.thoriumPath;
 			setBasePath(thoriumPath);
@@ -38,6 +44,7 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 				inited = true;
 			} catch {}
 			if (!inited) {
+				process.send?.({ type: "log", message: "Loading Default Plugin..." });
 				await initDefaultPlugin();
 			}
 			const app = new Hono();
@@ -48,7 +55,9 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 					allowHeaders: ["*"],
 				}),
 			);
+			process.send?.({ type: "log", message: "Building Database..." });
 			const database = await buildDatabase(loadPlugins);
+			process.send?.({ type: "log", message: "Setting Up Server..." });
 			const middleware = await liveQueryPlugin({
 				createContext,
 				initWebsocket,
@@ -136,6 +145,8 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 			});
 
 			let httpsRunning: string | null = null;
+			process.send?.({ type: "log", message: "Checking Ports..." });
+
 			// Quick check to see if root ports are allowed.
 			let rootPortsAllowed = true;
 			let testHttpServer, testHttpsServer;
@@ -166,6 +177,8 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 				await snapshot(database);
 			});
 			if (isProd) {
+				process.send?.({ type: "log", message: "Loading Certs..." });
+
 				const certs = await loadOrCreateCerts();
 				app.get("/ca.crt", () => {
 					return new Response(certs.caPem, {
@@ -179,6 +192,8 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 					cert: certs.serverCertPem,
 					key: certs.serverKeyPem,
 				};
+				process.send?.({ type: "log", message: "Loading Client Bundle..." });
+
 				const getClientBundleFile = (await import("./utils/.server/embeddedUtils"))
 					.getClientBundleFile;
 				app.use(async (c) => {
@@ -198,6 +213,8 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 						return new Response("", { status: 404 });
 					}
 				});
+				process.send?.({ type: "log", message: "Starting Server..." });
+
 				const https = Bun.serve({
 					port: httpsPort,
 					fetch: app.fetch,
@@ -214,14 +231,17 @@ export async function startHttpServer({ isProd, isKiosk }: { isProd: boolean; is
 				websocket,
 				reusePort: true,
 			});
-			if (isProd) {
-				await advertiseMdns(server.port!);
-			}
 			vanity();
 			console.info(`Server running on ${server.url.href}`);
 			if (httpsRunning) {
 				console.info(`HTTPS running on ${httpsRunning}`);
 			}
+			process.send?.({ type: "started", address: server.url.href });
+			if (isProd) {
+				process.send?.({ type: "log", message: `Advertising Server: ${server.url.href}` });
+				await advertiseMdns(server.port!);
+			}
+			process.send?.({ type: "started", address: server.url.href });
 			return server.url.href;
 		});
 	} catch (error) {
