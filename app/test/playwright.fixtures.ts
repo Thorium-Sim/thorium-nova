@@ -17,7 +17,8 @@ export const test = base.extend<
 	}
 >({
 	serverURL: [
-		async (_, use) => {
+		// oxlint-disable-next-line no-empty-pattern
+		async ({}, use) => {
 			let port = 3000;
 			try {
 				const abortController = new AbortController();
@@ -111,7 +112,9 @@ export const test = base.extend<
 		async ({ serverURL }, use) => {
 			await use(serverURL);
 		},
-		{ scope: "test" },
+
+		// @ts-expect-error
+		{ scope: "test", option: true },
 	],
 	forEachTest: [
 		async ({ q, page }, use) => {

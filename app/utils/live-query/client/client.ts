@@ -1,5 +1,3 @@
-import { toast } from "@thorium/context/ToastContext";
-
 import { NETREQUEST_PATH, NETSEND_PATH } from "../constants";
 
 type HTTPHeaders = Record<string, string>;
@@ -95,7 +93,10 @@ export class LiveQueryClient {
 					throw new LiveQueryError(`Error in request ${parsed.error}`, parsed.error);
 				} catch (error) {
 					if (error instanceof SystemStabilityError) {
-						toast({
+						// We dynamically load this module so Playwright
+						// doesn't get upset about loading an SVG later in
+						// the dependency tree
+						(await import("@thorium/context/ToastContext")).toast({
 							title: error.title,
 							body: error.message,
 							color: "error",

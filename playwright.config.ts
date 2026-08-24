@@ -8,7 +8,6 @@ function envToBool(value: string | undefined) {
 	return ["true", "1"].includes(value);
 }
 
-const TEST_SERVER_PORT = Number(process.env.PORT || "4010");
 const IS_CI = envToBool(process.env.CI);
 
 const config: PlaywrightTestConfig = {
@@ -30,7 +29,6 @@ const config: PlaywrightTestConfig = {
 	use: {
 		headless: true,
 		trace: "retain-on-failure",
-		baseURL: `http://localhost:${TEST_SERVER_PORT}`,
 	},
 	projects: [
 		{

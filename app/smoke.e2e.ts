@@ -1,7 +1,8 @@
 import { expect } from "@playwright/test";
 import { test } from "@thorium/test/playwright.fixtures";
 
-test("It should load the app", async ({ page }) => {
+test("It should load the app", async ({ page, serverURL }) => {
+	console.log(serverURL);
 	await page.goto("/");
 
 	await expect(page.getByText("Thorium Nova")).toBeVisible();
