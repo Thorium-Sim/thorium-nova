@@ -31,7 +31,7 @@ async function waitForDone(page: Page, callback: () => Promise<void>) {
 }
 
 test.setTimeout(1000 * 60 * 3);
-test.skip("5 Station Pilot", async ({ startTraining, page, q }) => {
+test("5 Station Pilot", async ({ startTraining, page, q }) => {
 	await startTraining(5, "Pilot");
 
 	// Step 1 - Intro
@@ -158,7 +158,7 @@ test.skip("5 Station Pilot", async ({ startTraining, page, q }) => {
 		await page.getByText("Next", { exact: true }).click();
 	});
 });
-test.skip("5 Station Tactical", async ({ startTraining, page, q }) => {
+test("5 Station Tactical", async ({ startTraining, page, q }) => {
 	await startTraining(5, "Tactical");
 
 	// Step 1 - Intro
@@ -272,7 +272,7 @@ test.skip("5 Station Tactical", async ({ startTraining, page, q }) => {
 		await page.getByText("Next", { exact: true }).click();
 	});
 });
-test.skip("5 Station Sensors", async ({ startTraining, page }) => {
+test("5 Station Sensors", async ({ startTraining, page }) => {
 	await startTraining(5, "Sensors");
 
 	// Step 1 - Intro
@@ -332,7 +332,7 @@ test.skip("5 Station Sensors", async ({ startTraining, page }) => {
 		await page.getByText("Next", { exact: true }).click();
 	});
 });
-test.skip("5 Station Operations", async ({ page, startTraining, q }) => {
+test("5 Station Operations", async ({ page, startTraining, q }) => {
 	await startTraining(5, "Operations");
 
 	// Step 1 - Intro

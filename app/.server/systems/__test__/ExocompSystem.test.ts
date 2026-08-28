@@ -29,6 +29,7 @@ describe("Exocomp System", () => {
 	beforeEach(() => {
 		const mockDataContext = createMockDataContext();
 		ecs = new ECS(mockDataContext.server);
+		ecs.triggerAction = async () => {};
 		ecs.executeBlocks = (blocks, blockMetadata) => executeBlocks(ecs, blocks, blockMetadata);
 		ecs.processTriggers = (events) => processTriggers(ecs, events);
 		exocompSystem = new ExocompSystem();
