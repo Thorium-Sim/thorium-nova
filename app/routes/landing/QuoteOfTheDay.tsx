@@ -438,6 +438,8 @@ const quotes = [
 	// Walden
 	"I should not talk so much about myself if there were anybody else whom I knew as well.",
 	"What a man thinks of himself, that it is which determines, or rather indicates, his fate.",
+	// Shroyer
+	"To be human is to be capable of both incredible good and terrifying evil. If we deny either side of that potential, we're living unaware.",
 ];
 
 const QuoteOfTheDay = () => {

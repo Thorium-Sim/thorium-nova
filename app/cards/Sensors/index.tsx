@@ -127,9 +127,9 @@ export function Sensors({ cardLoaded }: CardProps) {
 				<div className="flex flex-col justify-between">
 					<Scans cardLoaded={cardLoaded} />
 					<div className="flex-auto" />
-					<div className="processed-data flex max-h-1/2 min-h-0 flex-1 flex-col">
+					<div className="processed-data flex max-h-1/2 flex-col">
 						<p>Processed Data</p>
-						<ProcessedData className="panel panel-alert flex-1 overflow-x-hidden overflow-y-auto p-4" />
+						<ProcessedData className="panel panel-alert min-h-48 flex-1 overflow-x-hidden overflow-y-auto p-4" />
 					</div>
 				</div>
 			</div>
@@ -317,7 +317,8 @@ function SensorsScannableObject({
 	const { interpolate } = useLiveQuery();
 	const [inRange, setInRange] = useState(false);
 	useAnimationFrame(() => {
-		const position = interpolate(id) || objectPosition;
+		const interpolatedPosition = interpolate(id);
+		const position = interpolatedPosition?.x ? interpolatedPosition : objectPosition;
 		const shipPosition = interpolate(shipId);
 		if (position && shipPosition && distanceRef.current) {
 			const distance = Math.hypot(
