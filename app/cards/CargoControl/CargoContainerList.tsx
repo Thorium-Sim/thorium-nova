@@ -2,6 +2,7 @@ import { clientId, q } from "@thorium/context/AppContext";
 import { useStation } from "@thorium/routes/station/useStation";
 import { Icon } from "@thorium/ui/Icon";
 import { Tooltip } from "@thorium/ui/Tooltip";
+import { cn } from "@thorium/utils/cn";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 
 import { useShipMapStore } from "./useShipMapStore";
@@ -43,11 +44,14 @@ function CargoContainer({
 	const destinationRoom = rooms.find((room) => room.id === container.destinationNode);
 	return (
 		<button
-			className={`relative flex aspect-square w-full items-center justify-center rounded-full border border-white text-3xl transition-colors ${
-				isSelected
-					? "bg-primary-focus/75 hover:bg-primary-focus"
-					: "bg-transparent hover:bg-white/25"
-			}`}
+			className={cn(
+				`cargo-container relative flex aspect-square w-full items-center justify-center rounded-full border border-white text-3xl transition-colors`,
+				{
+					"bg-primary-focus/75 hover:bg-primary-focus": isSelected,
+					"bg-transparent hover:bg-white/25": !isSelected,
+					moving: Boolean(destinationRoom && container.entityState === "enRoute"),
+				},
+			)}
 			onClick={() => {
 				const containerPosition = interpolate(container.id);
 				if (!containerPosition) return;

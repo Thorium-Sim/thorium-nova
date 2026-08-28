@@ -8,9 +8,11 @@ import { DeckEdge } from "./DeckEdge";
 export function DeckEdges({
 	deckNodes,
 	deckNodeIds,
+	sizeRatio,
 }: {
 	deckNodes: DeckNode[];
 	deckNodeIds: number[];
+	sizeRatio: number;
 }) {
 	const { pluginId, shipId } = useParams() as {
 		pluginId: string;
@@ -27,6 +29,7 @@ export function DeckEdges({
 				.map((edge) => (
 					<DeckEdge
 						key={edge.id}
+						sizeRatio={sizeRatio}
 						{...edge}
 						allNodes={deckNodes}
 						updateEdge={(input: { weight: number } | { flags: EdgeFlag[] }) => {

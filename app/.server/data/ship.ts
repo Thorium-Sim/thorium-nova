@@ -7,7 +7,7 @@ import type { ECS, Entity } from "@thorium/utils/ecs";
 import { getPluginTextPatterns, interpolateText } from "@thorium/utils/interpolationEngine";
 import type { RNG } from "@thorium/utils/rng";
 import { getCompletePositionFromOrbit, getObjectSystem } from "@thorium/utils/starmap/position";
-import { Vector3 } from "three";
+import { Matrix4, Quaternion, Vector3 } from "three";
 import z from "zod";
 
 export const ship = t.router({
@@ -310,6 +310,24 @@ export const ship = t.router({
 			pubsub.publish.ship.player({ shipId: entity.id });
 			pubsub.publish.ship.players();
 		}),
+	pointAt: t.procedure
+		.input(z.object({ shipId: z.number(), objectId: z.number() }))
+		.send(({ ctx, input }) => {
+			const entity = ctx.ecs.getEntityById(input.shipId);
+			if (!entity) return;
+			const object = ctx.ecs.getEntityById(input.objectId);
+			if (!object) return;
+
+			// If the object is in another stage, we need to point in the direction
+			// of that object's stage.
+			const rotationQuat = getDirectionBetweenTwoEntities(entity, object);
+			entity.updateComponent("rotation", {
+				x: rotationQuat.x,
+				y: rotationQuat.y,
+				z: rotationQuat.z,
+				w: rotationQuat.w,
+			});
+		}),
 	destroy: t.procedure
 		.meta({ action: true })
 		.input(z.object({ shipId: z.number() }))
@@ -437,4 +455,54 @@ function getNearbyEntityPoint(objectEntity: Entity, rng: RNG, distance?: number)
 		y: objectPosition.y,
 		z: objectPosition.z + distanceVector.z,
 	};
+}
+
+const rotationQuat = new Quaternion();
+const desiredRotationQuat = new Quaternion();
+const up = new Vector3(0, 1, 0);
+const positionVec = new Vector3();
+const objectVec = new Vector3();
+const matrix = new Matrix4();
+const rotationMatrix = new Matrix4().makeRotationY(-Math.PI);
+
+function getDirectionBetweenTwoEntities(entity1: Entity, entity2: Entity) {
+	const { position, rotation } = entity1.components;
+	const { position: objPos } = entity2.components;
+	if (!position || !rotation || !objPos) throw new Error("Unable to determine direction");
+
+	if (position.parentId === objPos.parentId) {
+		positionVec.set(position.x, position.y, position.z);
+		objectVec.set(objPos.x, objPos.y, objPos.z);
+	} else if (!position.parentId) {
+		// Ship in interstellar — point at the object's parent system
+		positionVec.set(position.x, position.y, position.z);
+		const objectParent = getObjectSystem(entity2);
+		const sysPos = objectParent?.components.position;
+		if (!sysPos) throw new Error("Unable to determine direction");
+		objectVec.set(sysPos.x, sysPos.y, sysPos.z);
+	} else if (!objPos.parentId) {
+		// Object in interstellar - point from the ship's system to the object
+		objectVec.set(objPos.x, objPos.y, objPos.z);
+		const shipParent = getObjectSystem(entity1);
+		const sysPos = shipParent?.components.position;
+		if (!sysPos) throw new Error("Unable to determine direction");
+		positionVec.set(sysPos.x, sysPos.y, sysPos.z);
+	} else {
+		// Two different systems. Point from the ship's system position to the object's system position
+		const shipParent = getObjectSystem(entity1);
+		const sysPos = shipParent?.components.position;
+		if (!sysPos) throw new Error("Unable to determine direction");
+		positionVec.set(sysPos.x, sysPos.y, sysPos.z);
+		const objectParent = getObjectSystem(entity2);
+		const objSysPos = objectParent?.components.position;
+		if (!objSysPos) throw new Error("Unable to determine direction");
+		objectVec.set(objSysPos.x, objSysPos.y, objSysPos.z);
+	}
+
+	rotationQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
+	up.set(0, 1, 0).applyQuaternion(rotationQuat);
+	matrix.lookAt(positionVec, objectVec, up).multiply(rotationMatrix);
+	desiredRotationQuat.setFromRotationMatrix(matrix);
+
+	return desiredRotationQuat;
 }

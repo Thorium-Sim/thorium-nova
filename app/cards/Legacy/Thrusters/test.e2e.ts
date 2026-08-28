@@ -2,7 +2,7 @@ import { expect } from "@playwright/test";
 import { test } from "@thorium/test/playwright.fixtures";
 
 // Skipping because its so flakey
-test.skip("Required Thrusters", async ({ loadCard, page, browser }) => {
+test.skip("Required Thrusters", async ({ loadLegacyCard: loadCard, page, browser }) => {
 	const requiredAngle = 3;
 	await loadCard("LegacyThrusters");
 
@@ -28,7 +28,7 @@ test.skip("Required Thrusters", async ({ loadCard, page, browser }) => {
 
 	await expect(corePage.getByTestId("yaw-value")).not.toHaveText(`0˚`);
 });
-test("Direction Thrusters", async ({ loadCard, page, browser }) => {
+test("Direction Thrusters", async ({ loadLegacyCard: loadCard, page, browser }) => {
 	await loadCard("LegacyThrusters");
 
 	const corePage = await browser.newPage();

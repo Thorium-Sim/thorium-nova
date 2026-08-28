@@ -283,6 +283,63 @@ export const cargoControl = t.router({
 			}
 			return { shipId: ship.id, containerId: container.id, roomId: input.roomId };
 		}),
+	// Mostly just used for notification purposes
+	containerArrived: t.procedure
+		.input(z.object({ containerId: z.number() }))
+		.output(
+			z.object({
+				containerId: z.number(),
+				shipId: z.number(),
+				roomId: z.number(),
+				roomName: z.string(),
+			}),
+		)
+		.meta({ event: true })
+		.send(({ ctx, input }) => {
+			const container = ctx.ecs.getEntityById(input.containerId);
+			if (!container) throw new Error("Unable to find container");
+			const shipId = container.components.position?.parentId || -1;
+			const ship = ctx.ecs.getEntityById(shipId);
+			const roomId = container.components.passengerMovement?.destinationNode || -1;
+			const room = ship?.components.shipMap?.deckNodes.find((d) => d.id === roomId);
+
+			pubsub.publish.cargoControl.containers({
+				shipId,
+			});
+			return {
+				containerId: input.containerId,
+				shipId,
+				roomId,
+				roomName: room?.name || "",
+			};
+		}),
+	containerMoveToRoomInstant: t.procedure
+		.input(z.object({ containerId: z.number(), roomId: z.number().optional() }))
+		.send(({ input, ctx }) => {
+			const container = ctx.ecs.getEntityById(input.containerId);
+			const ship = ctx.ecs.getEntityById(container?.components.position?.parentId || -1);
+			if (!container || !ship?.components.isShip)
+				throw new Error("Unable to determine ship for cargo container.");
+
+			const roomId = input.roomId ?? container?.components.passengerMovement?.destinationNode;
+			const room = ship.components.shipMap?.deckNodes.find((d) => d.id === roomId);
+			if (!room || !roomId) throw new Error("Unable to determine room");
+
+			container.updateComponent("passengerMovement", {
+				destinationNode: roomId,
+				nextNodeIndex: 0,
+				nodePath: [roomId],
+			});
+			container.updateComponent("position", {
+				x: room.x,
+				y: room.y,
+				z: room.deckIndex,
+			});
+
+			pubsub.publish.cargoControl.containers({
+				shipId: ship.id,
+			});
+		}),
 	transfer: t.procedure
 		.input(
 			z.object({
@@ -323,12 +380,13 @@ export const cargoControl = t.router({
 					shipId: input.toId.shipId,
 				});
 			}
+
 			return {
 				toShipId: input.toId.shipId,
 				fromShipId: input.fromId.shipId,
 				toId: input.toId.id,
 				fromId: input.fromId.id,
-				transferNames: Object.keys(result),
+				transferNames: Object.keys(result.transferredCounts),
 			};
 		}),
 	getRoomByFlag: t.procedure

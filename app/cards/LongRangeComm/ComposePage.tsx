@@ -42,8 +42,11 @@ export function ComposePage() {
 				/>
 			</div>
 
-			<Label className="mt-4 text-xl">Message:</Label>
+			<Label className="mt-4 text-xl" htmlFor="compose-message-area">
+				Message:
+			</Label>
 			<TextArea
+				id="compose-message-area"
 				className="textarea compose-message-area w-full flex-1 resize-none"
 				value={message}
 				onChange={(e) => setMessage(e.currentTarget.value)}

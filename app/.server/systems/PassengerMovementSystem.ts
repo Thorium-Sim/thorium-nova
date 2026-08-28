@@ -1,4 +1,3 @@
-import { pubsub } from "@thorium/.server/init/pubsub";
 import { type Entity, System } from "@thorium/utils/ecs";
 
 type DeckNodeMap = {
@@ -60,9 +59,7 @@ export class PassengerMovementSystem extends System {
 				});
 
 				if (entity.components.cargoContainer && entity.components.position?.parentId) {
-					pubsub.publish.cargoControl.containers({
-						shipId: entity.components.position.parentId,
-					});
+					void this.ecs.triggerAction("cargoControl.containerArrived", { containerId: entity.id });
 				}
 				return;
 			}

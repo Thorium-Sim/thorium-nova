@@ -9,7 +9,9 @@ import getPort from "get-port";
 export const test = base.extend<
 	{
 		forEachTest: void;
-		loadCard: (cardName: string) => Promise<void>;
+		loadLegacyCard: (cardName: string) => Promise<void>;
+		startTraining: (crewCount: number, stationName: string) => Promise<void>;
+		stationLogin: () => Promise<void>;
 	},
 	{
 		serverURL: string;
@@ -126,7 +128,7 @@ export const test = base.extend<
 		},
 		{ auto: true, scope: "test" },
 	],
-	loadCard: async ({ q, page }, use) => {
+	loadLegacyCard: async ({ q, page }, use) => {
 		await use(async (cardName: string) => {
 			await q.flight.start.netSend({
 				flightName: "Test",
@@ -149,5 +151,38 @@ export const test = base.extend<
 			});
 			await page.goto("/flight/station");
 		});
+	},
+	startTraining: async ({ q, page }, use) => {
+		await q.flight.stop.netSend();
+		await page.goto("/flight/station");
+
+		await use(async (crewCount, stationId) => {
+			await q.flight.start.netSend({
+				flightName: "Test",
+				hasFlightDirector: true,
+				mode: "nova",
+				ships: [
+					{
+						shipName: "Testing",
+						crewCount: crewCount,
+						shipTemplate: {
+							pluginId: "Thorium Default",
+							shipId: "Astra Frigate",
+						},
+					},
+				],
+			});
+			const playerShips = await q.ship.players.netRequest();
+			const shipId = playerShips[0].id;
+			await q.client.setStation.netSend({
+				clientId: "test",
+				shipId,
+				stationId,
+			});
+
+			await q.client.startTraining.netSend({ clientId: "test" });
+		});
+
+		await q.flight.stop.netSend();
 	},
 });

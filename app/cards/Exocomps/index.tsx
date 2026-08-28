@@ -92,9 +92,10 @@ function SystemRooms({
 	const { shipId } = useStation();
 
 	const [systemRooms] = q.exocomps.rooms.useNetRequest({ shipId });
-	const { rooms } = systemRooms;
+	const { rooms, shipLength } = systemRooms;
 	const [exocomps] = q.exocomps.exocomps.useNetRequest({ shipId });
 
+	const sizeRatio = 350 / shipLength;
 	const [renderSite, setRenderSite] = useState<SVGElement | null>(null);
 	useEffect(() => {
 		if (!renderSite) {
@@ -111,6 +112,7 @@ function SystemRooms({
 			{rooms.map((room) =>
 				room.deck === deck.name ? (
 					<RoomDot
+						sizeRatio={sizeRatio}
 						key={room.id}
 						id={room.id}
 						name={room.name || ""}
@@ -126,6 +128,7 @@ function SystemRooms({
 			{rooms.map((room) =>
 				room.deck === deck.name ? (
 					<RoomDotLabel
+						sizeRatio={sizeRatio}
 						key={room.id}
 						name={room.name || ""}
 						position={{
@@ -140,6 +143,7 @@ function SystemRooms({
 				(container) =>
 					container.position && (
 						<CargoContainerDot
+							sizeRatio={sizeRatio}
 							key={container.id}
 							id={container.id}
 							position={container.position}
@@ -208,6 +212,7 @@ function Exocomp({
 						});
 					}}
 				>
+					<div className="sr-only">Choose Exocomp</div>
 					<Icon name="exocomp" />
 				</button>
 			</Tooltip>
@@ -403,6 +408,7 @@ function Instructions() {
 												}
 											}}
 										>
+											<span className="sr-only">{e.label}</span>
 											<Icon name={e.id} className="h-full w-full" />
 										</button>
 										<p className="w-full text-sm leading-tight text-balance">{e.label}</p>
@@ -519,6 +525,7 @@ function InstructionButton({
 			}}
 			ref={buttonRef}
 		>
+			<span className="sr-only">Exocomp Instruction {i}</span>
 			{instruction ? <Icon name={instruction.type} className="h-full w-full" /> : null}
 		</button>
 	);
@@ -533,6 +540,19 @@ function Parts({
 }) {
 	const { shipId } = useStation();
 	const [exocompParts] = q.exocomps.inventory.useNetRequest({ shipId });
+
+	function setPart(name: string) {
+		setParts(
+			produce((draft) => {
+				const foundItem = draft.find((i) => i.name === name);
+				if (!foundItem) {
+					draft.push({ name, count: 1 });
+				} else {
+					foundItem.count += 1;
+				}
+			}),
+		);
+	}
 	return (
 		<>
 			<div className="faded-scroll-y grid min-h-0 flex-1 grid-cols-[4rem_auto] flex-wrap place-items-center gap-4 overflow-y-auto py-2 @sm:grid-cols-[repeat(2,4rem_auto)] @lg:grid-cols-[repeat(3,4rem_auto)]">
@@ -543,20 +563,14 @@ function Parts({
 							<img
 								className="aspect-square border border-white bg-black/80 object-cover hover:bg-white/10 focus:border-white/80 active:bg-white/30"
 								src={e.image}
-								onClick={() =>
-									setParts(
-										produce((draft) => {
-											const foundItem = draft.find((i) => i.name === e.name);
-											if (!foundItem) {
-												draft.push({ name: e.name, count: 1 });
-											} else {
-												foundItem.count += 1;
-											}
-										}),
-									)
-								}
+								onClick={() => setPart(e.name)}
 							/>
-							<p className="w-full text-sm leading-tight text-balance">{e.name}</p>
+							<p
+								className="flex h-full w-full items-center text-sm leading-tight text-balance"
+								onClick={() => setPart(e.name)}
+							>
+								{e.name}
+							</p>
 						</div>
 					))}
 			</div>

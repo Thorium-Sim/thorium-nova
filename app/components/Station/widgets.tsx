@@ -106,6 +106,7 @@ export const Widget: FC<{
 				<div className={cn(sizeClass, "fixed top-0 left-0 z-150 pt-4")} ref={modalRef}>
 					<div className="absolute top-2 right-2 flex gap-2">
 						<Button className="btn btn-circle btn-xs btn-error" onClick={() => setIsOpen("off")}>
+							<span className="sr-only">Close Widget</span>
 							<Icon name="x" />
 						</Button>
 						<Button
@@ -187,6 +188,7 @@ export const Widget: FC<{
 									});
 								}}
 							>
+								<span className="sr-only">Break Out Widget</span>
 								<Icon name="copy" />
 							</Button>
 							{card}

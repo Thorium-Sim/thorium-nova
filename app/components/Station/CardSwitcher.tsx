@@ -14,6 +14,7 @@ const CardButton: React.FC<{
 	const iconUrl = icon || `/assets/cardIcons/${component}.svg`;
 	return (
 		<button
+			id={`card-button-${kebabCase(name)}`}
 			className={cn(
 				`card-switcher-button`,
 				{ active, highlight },

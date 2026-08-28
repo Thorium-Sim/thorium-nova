@@ -107,6 +107,7 @@ const StationLayout = () => {
 							<div className="training-infobox relative flex flex-col items-end gap-2">
 								<div className="panel backdrop-blur">
 									<div
+										data-testid="training-text"
 										className="mr-4 mb-4 max-w-lg min-w-48 whitespace-pre-line"
 										dangerouslySetInnerHTML={{ __html: client.training?.text }}
 									/>

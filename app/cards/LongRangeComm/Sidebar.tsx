@@ -36,6 +36,7 @@ export function Sidebar({
 					})}
 					onClick={() => setCurrentPage("inbox")}
 				>
+					<span className="sr-only">Inbox</span>
 					<Icon name="inbox" />
 					{inboxLabel > 0 ? (
 						<div className="badge badge-error absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 rounded-full">
@@ -51,6 +52,7 @@ export function Sidebar({
 					})}
 					onClick={() => setCurrentPage("compose")}
 				>
+					<span className="sr-only">Compose Message</span>
 					<Icon name="pencil-line" />
 				</Button>
 			</Tooltip>
@@ -61,6 +63,7 @@ export function Sidebar({
 					})}
 					onClick={() => setCurrentPage("outbox")}
 				>
+					<span className="sr-only">Outbox</span>
 					<Icon name="archive" />
 
 					{outboxLabel > 0 ? (
@@ -77,6 +80,7 @@ export function Sidebar({
 					})}
 					onClick={() => setCurrentPage("sent")}
 				>
+					<span className="sr-only">Sent</span>
 					<Icon name="send" />
 				</Button>
 			</Tooltip>

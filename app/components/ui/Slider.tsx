@@ -38,7 +38,7 @@ function Slider(
 			)}
 			{/* The track element holds the visible track line and the thumb. */}
 			<div {...trackProps} ref={trackRef} className={`track ${state.isDisabled ? "disabled" : ""}`}>
-				<Thumb index={0} state={state} trackRef={trackRef} />
+				<Thumb index={0} state={state} trackRef={trackRef} data-testid="slider-thumb" />
 			</div>
 		</div>
 	);

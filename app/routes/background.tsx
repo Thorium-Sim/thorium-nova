@@ -1,4 +1,5 @@
-import { randomFromList } from "@thorium/utils/operations/randomFromList";
+import { createRNG } from "@thorium/utils/rng";
+import { Outlet } from "react-router";
 
 const backgrounds = [
 	"/assets/backgrounds/background.avif",
@@ -21,15 +22,29 @@ const backgrounds = [
 	"/assets/backgrounds/background18.avif",
 	"/assets/backgrounds/background19.avif",
 	"/assets/backgrounds/background20.avif",
-	"/assets/backgrounds/background12.avif",
+	"/assets/backgrounds/background21.avif",
 ];
 
-export function getBackground() {
-	let bg = sessionStorage.getItem("bg-otd");
-	if (!bg) {
-		bg = randomFromList(backgrounds);
+const rng = createRNG(new Date().toDateString());
+const bg = rng.nextFromList(backgrounds);
 
-		sessionStorage.setItem("bg-otd", bg);
-	}
-	return bg;
+export default function Background() {
+	return (
+		<>
+			<div
+				className="fixed inset-0 -z-10 bg-cover bg-center"
+				style={{
+					backgroundImage: `linear-gradient(
+135deg,
+rgba(0, 0, 0, 1) 0%,
+rgba(0, 0, 0, 0) 40%,
+rgba(0, 0, 0, 0) 60%,
+rgba(0, 0, 0, 1) 100%
+),
+url(${bg})`,
+				}}
+			/>
+			<Outlet />
+		</>
+	);
 }

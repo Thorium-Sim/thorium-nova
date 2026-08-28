@@ -393,8 +393,9 @@ const quotes = [
 	"The uncaught fish is always a big fish",
 	// Kohor
 	"You should have savored the good things in life. Now, you must ponder thoughtfully the end of all pleasure that comes with DEATH.",
-	// Random post
+	// Random posts
 	"A revolution must be started by yourself. An egg, opened from the outside, is food; opened from the inside, it is a new life.",
+	"Set reasonable goals and go after them with unreasonable effort",
 	// Niko Stratis https://bsky.app/profile/nikostratis.com/post/3mgpgk4ivzk25
 	"You can't critique anything if you don't know how to love something.",
 	// Gwendolyn Brooks
@@ -434,6 +435,9 @@ const quotes = [
 	"Ain't no man can avoid being born average, but there ain't no man got to be common.",
 	// Charlie Munger
 	"Living with adversity is the best chance for opportunity.",
+	// Walden
+	"I should not talk so much about myself if there were anybody else whom I knew as well.",
+	"What a man thinks of himself, that it is which determines, or rather indicates, his fate.",
 ];
 
 const QuoteOfTheDay = () => {

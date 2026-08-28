@@ -43,6 +43,9 @@ export default function DeckConfig() {
 	if (!deck) {
 		throw new Error("Deck not found");
 	}
+
+	// The sizes were calibrated on a 350m ship
+	const sizeRatio = 350 / data.length;
 	const {
 		nodeState,
 		edgeState: [, setSelectedEdgeId],
@@ -114,7 +117,7 @@ export default function DeckConfig() {
 				}}
 				style={{ outline: "none", flex: 1 }}
 				className="overflow-hidden rounded-lg border-2 border-white/10 bg-gray-800 text-purple-400"
-				maxZoom={8}
+				maxZoom={15}
 				minZoom={0.5}
 				noStateUpdate={false}
 				onPan={() => {
@@ -153,12 +156,13 @@ export default function DeckConfig() {
 				</Suspense>
 				<EdgeContextProvider>
 					<Suspense>
-						<DeckEdges deckNodes={deckNodes} deckNodeIds={deckNodeIds} />
+						<DeckEdges sizeRatio={sizeRatio} deckNodes={deckNodes} deckNodeIds={deckNodeIds} />
 					</Suspense>
 
 					{nodes.map((deckNode) => (
 						<NodeCircle
 							key={deckNode.id}
+							sizeRatio={sizeRatio}
 							node={deckNode}
 							panState={panState}
 							updateNode={async (params: updateNodeParams) => {

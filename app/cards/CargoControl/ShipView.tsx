@@ -5,6 +5,7 @@ import useEventListener, {
 } from "@thorium/hooks/useEventListener";
 import { useStation } from "@thorium/routes/station/useStation";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
+import { cn } from "@thorium/utils/cn";
 import { useCallback, useRef, type ReactNode, type RefObject } from "react";
 import { Suspense } from "react";
 
@@ -70,9 +71,11 @@ function Deck({
 			}}
 		>
 			<div
-				className={`relative transition-all duration-500 ${
-					deckIndex === i ? "deck-on" : deckIndex < i ? "deck-before" : "deck-after"
-				}`}
+				className={cn(`relative transition-all duration-500`, {
+					"deck-on": deckIndex === i,
+					"deck-before": deckIndex < i,
+					"deck-after": deckIndex > i,
+				})}
 			>
 				{deckChildren?.(d, i, ref)}
 

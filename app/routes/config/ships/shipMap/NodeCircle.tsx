@@ -11,6 +11,7 @@ import InfoTip from "@thorium/ui/InfoTip";
 import Input from "@thorium/ui/Input";
 import { Portal } from "@thorium/ui/Portal";
 import { nodeFlags } from "@thorium/utils/flags/DeckNode";
+import { logslider } from "@thorium/utils/logSlider";
 import { useDrag } from "@use-gesture/react";
 import { capitalCase } from "change-case";
 import {
@@ -106,6 +107,7 @@ export function NodeCircle({
 	removeNode,
 	addingEdges,
 	hasCrossDeckConnection,
+	sizeRatio,
 }: {
 	node: DeckNode;
 	panState: RefObject<PanStateI>;
@@ -116,6 +118,7 @@ export function NodeCircle({
 	selected: boolean;
 	addingEdges: boolean;
 	hasCrossDeckConnection: boolean;
+	sizeRatio: number;
 }) {
 	const { id, x, y, radius } = node;
 	const {
@@ -167,7 +170,7 @@ export function NodeCircle({
 				className={`rounded-full ${
 					selected ? (addingEdges ? "bg-purple-400" : "bg-primary") : "bg-white"
 				} absolute top-0 left-0 h-2 w-2 cursor-grab touch-none ${
-					hasCrossDeckConnection ? "ring-1" : ""
+					hasCrossDeckConnection ? "ring-2" : ""
 				} -translate-1/2 ring-white ring-offset-1 ring-offset-black`}
 				onMouseDown={(e) => {
 					e.stopPropagation();
@@ -175,15 +178,20 @@ export function NodeCircle({
 				{...events}
 				style={{
 					transform: `translate(${x * pixelRatio}px, ${y * pixelRatio}px)`,
+					width: `calc(0.5rem / ${sizeRatio})`,
+					height: `calc(0.5rem / ${sizeRatio})`,
+					// @ts-expect-error
+					"--tw-ring-offset-shadow": `0 0 0 calc(1px / ${sizeRatio}) #000`,
+					"--tw-ring-shadow": `0 0 0 calc(2px / ${sizeRatio}) #fff`,
 				}}
 			>
 				<div
-					className="pointer-events-none absolute rounded-full bg-white/10"
+					className="pointer-events-none absolute -translate-1/2 rounded-full bg-white/10"
 					style={{
 						width: `${radiusValue * 2 * pixelRatio}px`,
 						height: `${radiusValue * 2 * pixelRatio}px`,
-						top: `calc(-${radiusValue * pixelRatio}px + 0.25rem)`,
-						left: `calc(-${radiusValue * pixelRatio}px + 0.25rem)`,
+						left: `calc(0.5rem / ${sizeRatio} / 2)`,
+						top: `calc(0.5rem / ${sizeRatio} / 2)`,
 					}}
 				/>
 			</div>
@@ -203,14 +211,22 @@ export function NodeCircle({
 							<Input
 								label="Radius"
 								type="range"
-								min={0}
+								min={0.1}
 								max={100}
-								defaultValue={radius}
+								defaultValue={logslider(0.1, 100, radius, true)}
 								onMouseDown={(e) => e.stopPropagation()}
-								onChange={(e) => setRadiusValue(e.target.valueAsNumber)}
+								onChange={(e) => {
+									setRadiusValue(logslider(0.1, 100, Number(e.currentTarget.value)));
+								}}
 								onMouseUp={(e) =>
 									updateNode({
-										radius: Number((e.target as EventTarget & HTMLInputElement).value),
+										radius: Number(
+											logslider(
+												0.1,
+												100,
+												Number((e.target as EventTarget & HTMLInputElement).value),
+											),
+										),
 									})
 								}
 							/>

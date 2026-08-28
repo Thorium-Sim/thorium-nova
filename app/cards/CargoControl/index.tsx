@@ -232,9 +232,10 @@ function CargoContainerDeckChildren({
 }) {
 	const { shipId } = useStation();
 	const [cargoRooms] = q.cargoControl.rooms.useNetRequest({ shipId });
-	const { rooms } = cargoRooms;
+	const { rooms, shipLength } = cargoRooms;
 	const [cargoContainers] = q.cargoControl.containers.useNetRequest({ shipId });
 
+	const sizeRatio = 350 / shipLength;
 	const [renderSite, setRenderSite] = useState<SVGElement | null>(null);
 	useEffect(() => {
 		if (!renderSite) {
@@ -246,6 +247,7 @@ function CargoContainerDeckChildren({
 
 	const [currentTooltip, setCurrentTooltip] = useState<number | null>(null);
 	if (!renderSite) return null;
+
 	return (
 		<>
 			{createPortal(
@@ -260,6 +262,7 @@ function CargoContainerDeckChildren({
 									x: room.position.x * 1.086,
 									y: room.position.y * 1.086,
 								}}
+								sizeRatio={sizeRatio}
 								onPointerEnter={() => setCurrentTooltip(room.id)}
 								onPointerLeave={() => setCurrentTooltip(null)}
 							/>
@@ -277,6 +280,7 @@ function CargoContainerDeckChildren({
 									x: room.position.x * 1.086,
 									y: room.position.y * 1.086,
 								}}
+								sizeRatio={sizeRatio}
 								tooltipShown={currentTooltip === room.id}
 							/>
 						) : null,
@@ -287,6 +291,7 @@ function CargoContainerDeckChildren({
 								<CargoContainerDot
 									key={container.id}
 									id={container.id}
+									sizeRatio={sizeRatio}
 									position={container.position}
 									deckIndex={deckIndex}
 								/>

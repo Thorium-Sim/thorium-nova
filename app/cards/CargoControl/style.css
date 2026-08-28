@@ -12,11 +12,17 @@
 	pointer-events: none;
 	opacity: 0;
 }
+#deck-container circle {
+	pointer-events: none;
+}
 .deck-on {
 	transform: perspective(2000px) scale(1);
 	opacity: 1;
 	pointer-events: all;
 	transform-origin: center;
+}
+#deck-container .deck-on circle {
+	pointer-events: all;
 }
 .deck-on .deck-image > svg,
 .deck-after .deck-image > svg,

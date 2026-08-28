@@ -375,7 +375,7 @@ export function CircleGridTiltButton() {
 	});
 	return (
 		<Button className="btn-primary w-full" onClick={() => handleTilt()}>
-			Tilt Sensor View
+			Tilt Radar View
 		</Button>
 	);
 }

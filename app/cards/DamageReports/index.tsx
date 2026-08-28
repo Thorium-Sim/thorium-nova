@@ -61,9 +61,9 @@ export function DamageReports() {
 
 	return (
 		<div className="grid h-full w-full grid-flow-col grid-cols-4 grid-rows-[auto_2fr_auto_5fr_auto] gap-x-4">
-			<div className="damage-reports-list contents">
+			<div className="contents">
 				<h3>Reports</h3>
-				<ul className="list-group panel mb-4 min-h-0 w-full overflow-y-auto">
+				<ul className="damage-reports-list list-group panel mb-4 min-h-0 w-full overflow-y-auto">
 					{damageReports.map((d) => (
 						<li
 							key={d.id}

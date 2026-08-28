@@ -15,5 +15,7 @@ export const damageReport = z.object({
 			name: z.string(),
 			effects: damageEffectsObject,
 		})
-		.array(),
+		.array()
+		.optional()
+		.default([]),
 });

@@ -1,4 +1,4 @@
-import { type PlaywrightTestConfig, devices } from "@playwright/test";
+import { type PlaywrightTestConfig, devices, selectors } from "@playwright/test";
 
 function envToBool(value: string | undefined) {
 	if (!value) {
@@ -9,6 +9,7 @@ function envToBool(value: string | undefined) {
 }
 
 const IS_CI = envToBool(process.env.CI);
+selectors.setTestIdAttribute("id,data-testid,data-testID,data-testId");
 
 const config: PlaywrightTestConfig = {
 	// exit CI with error if any tests are marked as `.only`

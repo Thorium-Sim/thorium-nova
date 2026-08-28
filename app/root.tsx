@@ -9,7 +9,6 @@ import { Icon } from "@thorium/ui/Icon";
 import "./styles/tailwind.css";
 // @ts-expect-error
 import "@fontsource-variable/outfit";
-import { getBackground } from "@thorium/utils/getBackground";
 import { useEffect, useRef } from "react";
 import {
 	isRouteErrorResponse,
@@ -20,7 +19,6 @@ import {
 	ScrollRestoration,
 	type MetaFunction,
 } from "react-router";
-import { ClientOnly } from "remix-utils/client-only";
 
 import type { Route } from "./+types/root";
 import icon from "./images/logo.svg?url";
@@ -33,25 +31,6 @@ export const links: Route.LinksFunction = () => {
 	return [{ rel: "icon", href: icon }];
 };
 
-function Background() {
-	const bg = getBackground();
-	return (
-		<div
-			className="fixed inset-0 -z-10 bg-cover bg-center"
-			style={{
-				backgroundImage: `linear-gradient(
-135deg,
-rgba(0, 0, 0, 1) 0%,
-rgba(0, 0, 0, 0) 40%,
-rgba(0, 0, 0, 0) 60%,
-rgba(0, 0, 0, 1) 100%
-),
-url(${bg})`,
-			}}
-		/>
-	);
-}
-
 export function Layout({ children }: { children: React.ReactNode }) {
 	const container = useRef<HTMLDivElement>(null);
 	return (
@@ -63,9 +42,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<Links />
 			</head>
 			<body>
-				<ClientOnly>{() => <Background />}</ClientOnly>
 				<UNSAFE_PortalProvider getContainer={() => container.current}>
-					<div className="absolute top-0 z-0 h-full w-full text-white">{children}</div>
+					<div className="fixed top-0 z-0 h-full w-full text-white">{children}</div>
 				</UNSAFE_PortalProvider>
 				<div ref={container} />
 				<div id="training-container" />

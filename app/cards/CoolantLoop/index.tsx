@@ -119,7 +119,7 @@ export function CoolantLoop() {
 					<SVGImageLoader url={tankBg} className="w-full" />
 				</div>
 			</div>
-			<div className="col-start-10 row-start-1 pr-4 text-right">
+			<div className="pointer-events-none col-start-10 row-start-1 pr-4 text-right">
 				<p>Coolant Tank</p>
 				<p className="tabular-nums" ref={coolantTankHeatRef}>
 					250K
@@ -237,8 +237,8 @@ function PumpPinwheel({ speed }: { speed: number }) {
 	}, [speed]);
 	return (
 		<>
-			<SVGImageLoader url={pinwheel} className="col-start-1 row-start-1" />
-			<div className="coolant-pump relative col-span-4 col-start-7 row-span-4 row-start-6 h-64 translate-y-2 self-end">
+			<SVGImageLoader url={pinwheel} className="pointer-events-none col-start-1 row-start-1" />
+			<div className="coolant-pump pointer-events-none relative col-span-4 col-start-7 row-span-4 row-start-6 h-64 translate-y-2 self-end">
 				<SVGImageLoader url={pump} className="absolute z-10 h-64 w-64" />
 				<div className="absolute top-5 left-10 aspect-square h-48 rounded-full bg-black" />
 				<div

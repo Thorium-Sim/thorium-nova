@@ -87,7 +87,7 @@ export const ship = t.router({
 				description: z.string().optional(),
 				tags: z.string().array().optional(),
 				mass: z.number().optional(),
-				length: z.number().optional(),
+				length: z.coerce.number().optional(),
 				logo: z.instanceof(File).optional(),
 				model: z.instanceof(File).optional(),
 				top: z.instanceof(Blob).optional(),

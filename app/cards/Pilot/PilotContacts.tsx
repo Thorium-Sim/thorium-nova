@@ -371,7 +371,11 @@ export const ShipEntity = ({
 		<Fragment>
 			<group ref={shipRef} {...eventHandlers}>
 				<primitive object={scene} rotation={[Math.PI / 2, Math.PI, 0]} />
-				{html ? <Html className={`entity-${id}`}></Html> : null}
+				{html ? (
+					<Html
+						className={`contact-entity entity-${id} pointer-events-none h-4 w-4 -translate-1/2`}
+					></Html>
+				) : null}
 			</group>
 			{id !== shipId && (
 				<Fragment>

@@ -127,6 +127,14 @@ export const damageReports = t.router({
 				systemId: diagnostic.components.diagnostic?.targetSystemId || -1,
 			});
 		}),
+	diagnosticFinishEarly: t.procedure
+		.input(z.object({ diagnosticId: z.number() }))
+		.send(({ ctx, input }) => {
+			const diagnostic = ctx.ecs.getEntityById(input.diagnosticId);
+			if (!diagnostic) throw new Error("Invalid diagnostic");
+			diagnostic.updateComponent("diagnostic", { progress: 0.9999 });
+			// The ECS system will handle pubsub
+		}),
 	diagnosticReportCandidateCreate: t.procedure
 		.input(
 			z.object({
@@ -302,7 +310,7 @@ export const damageReports = t.router({
 				abortable: z.coerce.boolean(),
 			}),
 		)
-		.output(z.object({ reportId: z.number(), reportName: z.string() }))
+		.output(z.object({ reportId: z.number(), reportName: z.string(), shipId: z.number() }))
 		.meta({
 			event: true,
 			action: () => {
@@ -343,6 +351,7 @@ export const damageReports = t.router({
 				shipId: input.shipId,
 			} satisfies Omit<ReportVariables, "damageReportId">;
 
+			let timeline: ReportPlugin;
 			const timelines = await selectAvailableTimelines(
 				ctx.ecs,
 				ctx.server.plugins.reduce((acc: ReportPlugin[], p) => {
@@ -354,14 +363,21 @@ export const damageReports = t.router({
 				ctx.flight?.mode,
 				reportVariables,
 			);
-			let timeline: ReportPlugin;
+
 			if (input.timeline) {
 				const timelineName = input.timeline;
 				if (input.timeline.startsWith("#")) {
 					const tag = timelineName.replace("#", "");
+
 					timeline = ctx.ecs.rng.nextFromList(timelines.filter((t) => t.tags.includes(tag)));
 					if (!timeline) throw new Error(`Could not find report timeline by tag: ${timelineName}`);
 				} else {
+					const timelines = ctx.server.plugins.reduce((acc: ReportPlugin[], p) => {
+						if (ctx.flight?.pluginIds.includes(p.id)) {
+							acc.push(...p.aspects.reports.filter((t) => t.flightMode === ctx.flight?.mode));
+						}
+						return acc;
+					}, []);
 					const namedTimeline = timelines.find((t) => t.name === timelineName);
 					if (!namedTimeline) throw new Error(`Could not find report timeline: ${timelineName}`);
 					timeline = namedTimeline;
@@ -382,7 +398,7 @@ export const damageReports = t.router({
 			);
 
 			pubsub.publish.damageReports.damageReports({ shipId: input.shipId });
-			return { reportId, reportName };
+			return { reportId, reportName, shipId: input.shipId };
 		}),
 	abortDamageReport: t.procedure
 		.input(z.object({ reportId: z.number() }))

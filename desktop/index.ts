@@ -31,10 +31,8 @@ const thoriumRPC = BrowserView.defineRPC<ThoriumRPC>({
 											level: "info",
 											message: `Started: ${message.address}`,
 										});
-										console.log("Server Started", message.address);
 										break;
 									case "log":
-										console.log(message.message);
 										thoriumRPC.send.logMessage({ level: "info", message: message.message });
 										break;
 								}

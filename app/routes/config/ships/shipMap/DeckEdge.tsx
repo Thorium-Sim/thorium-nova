@@ -15,12 +15,14 @@ export function DeckEdge({
 	to,
 	allNodes,
 	removeEdge,
+	sizeRatio,
 	updateEdge: _,
 }: {
 	id: number;
 	from: number;
 	to: number;
 	allNodes: DeckNode[];
+	sizeRatio: number;
 	removeEdge: () => void;
 	updateEdge: (input: { weight: number } | { flags: EdgeFlag[] }) => void;
 }) {
@@ -71,7 +73,7 @@ export function DeckEdge({
 					selectedEdge === id ? "stroke-yellow-500" : "hover:stroke-primary"
 				}`}
 				onClick={() => setSelectedEdge(id)}
-				strokeWidth={2}
+				strokeWidth={2 / sizeRatio}
 			/>
 			<Portal>
 				{selectedEdge === id && (

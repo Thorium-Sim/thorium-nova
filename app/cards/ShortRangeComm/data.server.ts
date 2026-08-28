@@ -189,7 +189,6 @@ export const shortRangeComm = t.router({
 					});
 				}
 			}
-
 			return conversations;
 		}),
 	setFrequency: t.procedure

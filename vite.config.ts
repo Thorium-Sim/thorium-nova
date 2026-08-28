@@ -61,10 +61,6 @@ export default defineConfig({
 		},
 	},
 
-	define: {
-		"process.env.THORIUMSIM_CLIENT_ID": `"01FM3JNPNP3GFAXYR22Y7F9XAJ"`,
-		"process.env.THORIUMSIM_URL": `"https://thoriumsim.com"`,
-	},
 	base: "/",
 	server: {
 		port,

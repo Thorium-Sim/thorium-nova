@@ -1,3 +1,4 @@
+import { Html } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { forwardQuaternion } from "@thorium/cards/Pilot/constants";
 import { PlayerArrow } from "@thorium/cards/Pilot/PlayerArrow";
@@ -234,20 +235,26 @@ function SatelliteDot({
 		return { id, mesh: meshRef.current! };
 	});
 	return (
-		<mesh
-			position={position}
-			ref={meshRef}
-			scale={[0, 0, 0]}
-			onClick={onClick}
-			onPointerOver={() => {
-				setCursor("pointer");
-			}}
-			onPointerOut={() => {
-				setCursor("auto");
-			}}
-		>
-			<sphereGeometry args={[0.5]} />
-			<meshBasicMaterial color={selected ? 0xff8800 : 0xffffff} depthWrite={false} />
-		</mesh>
+		<>
+			<Html
+				position={position}
+				className={`satellite-entity entity-${id} pointer-events-none h-4 w-4 -translate-1/2`}
+			></Html>
+			<mesh
+				position={position}
+				ref={meshRef}
+				scale={[0, 0, 0]}
+				onClick={onClick}
+				onPointerOver={() => {
+					setCursor("pointer");
+				}}
+				onPointerOut={() => {
+					setCursor("auto");
+				}}
+			>
+				<sphereGeometry args={[0.5]} />
+				<meshBasicMaterial color={selected ? 0xff8800 : 0xffffff} depthWrite={false} />
+			</mesh>
+		</>
 	);
 }

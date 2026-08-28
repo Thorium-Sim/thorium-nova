@@ -2,24 +2,134 @@ import { type RouteConfig, index, layout, prefix, route } from "@react-router/de
 
 export default [
 	route("debug", "routes/debug.tsx"),
-	layout("routes/landing/route.tsx", [
-		index("routes/blank.tsx"),
-		layout("routes/quickStart/layout.tsx", [
-			route("flight/quick", "routes/quickStart/quickStart.tsx", [
-				route("ship", "routes/quickStart/ship.tsx"),
-				route("mission", "routes/quickStart/mission.tsx"),
+	layout("routes/background.tsx", [
+		layout("routes/landing/route.tsx", [
+			index("routes/blank.tsx"),
+			layout("routes/quickStart/layout.tsx", [
+				route("flight/quick", "routes/quickStart/quickStart.tsx", [
+					route("ship", "routes/quickStart/ship.tsx"),
+					route("mission", "routes/quickStart/mission.tsx"),
+				]),
 			]),
 		]),
-	]),
-	route("flight", "routes/flight/redirect.tsx"),
-	route("flight/lobby", "routes/flight/lobby.tsx", [
-		index("routes/blank.tsx", { id: "lobby-blank" }),
-		layout("routes/quickStart/layout.tsx", { id: "lobby-quickstart-layout" }, [
-			route("quick", "routes/quickStart/quickStart.tsx", { id: "lobby-quickstart-parent" }, [
-				route("ship", "routes/quickStart/ship.tsx", { id: "lobby-quickstart-ship" }),
-				route("mission", "routes/quickStart/mission.tsx", { id: "lobby-quickstart-mission" }),
+		route("flight", "routes/flight/redirect.tsx"),
+		route("flight/lobby", "routes/flight/lobby.tsx", [
+			index("routes/blank.tsx", { id: "lobby-blank" }),
+			layout("routes/quickStart/layout.tsx", { id: "lobby-quickstart-layout" }, [
+				route("quick", "routes/quickStart/quickStart.tsx", { id: "lobby-quickstart-parent" }, [
+					route("ship", "routes/quickStart/ship.tsx", { id: "lobby-quickstart-ship" }),
+					route("mission", "routes/quickStart/mission.tsx", { id: "lobby-quickstart-mission" }),
+				]),
 			]),
 		]),
+		route("config", "routes/config/layout.tsx", [
+			route("thorium", "routes/config/thorium.tsx"),
+			route(":pluginId?", "routes/config/index.tsx"),
+			...prefix(":pluginId", [
+				route("list", "routes/config/aspectList.tsx"),
+				route("starmap", "routes/config/starmap/layout.tsx", [
+					index("routes/config/starmap/index.tsx"),
+					route(":systemId", "routes/config/starmap/system.tsx"),
+				]),
+				route("ships", "routes/config/ships/layout.tsx", [
+					route(":shipId", "routes/config/ships/shipLayout.tsx", [
+						route("basic", "routes/config/ships/basic.tsx"),
+						route("assets", "routes/config/ships/assets.tsx"),
+						route("cargo", "routes/config/ships/cargo.tsx"),
+						route("physics", "routes/config/ships/physics.tsx"),
+						route("shipMap", "routes/config/ships/shipMap.tsx", [
+							route("rooms", "routes/config/ships/shipMap/blank.tsx", [
+								route(":deckName/:roomId", "routes/config/ships/shipMap/roomConfig.tsx"),
+							]),
+							route(":deckName", "routes/config/ships/shipMap/deckConfig.tsx"),
+						]),
+						route("systems", "routes/config/ships/systems.tsx", [
+							route("edit/:pluginId/:systemId", "routes/config/ships/systems/system.tsx", [
+								route("basic", "routes/config/systems/basic.tsx", {
+									id: "override-basic",
+								}),
+								route("heat", "routes/config/systems/heat.tsx", {
+									id: "override-heat",
+								}),
+								route("power", "routes/config/systems/power.tsx", {
+									id: "override-power",
+								}),
+								route(
+									"sounds",
+									"routes/config/systems/sounds.tsx",
+									{
+										id: "override-sounds",
+									},
+									[
+										route(":sound", "routes/config/systems/soundId.tsx", {
+											id: "override-sound",
+										}),
+									],
+								),
+								route("system", "routes/config/ships/systems/systemOverride.tsx"),
+							]),
+						]),
+					]),
+				]),
+				route("systems", "routes/config/systems/layout.tsx", [
+					route(":systemId", "routes/config/systems/systemLayout.tsx", [
+						route("basic", "routes/config/systems/basic.tsx"),
+						route("heat", "routes/config/systems/heat.tsx"),
+						route("damage", "routes/config/systems/damage.tsx"),
+						route("power", "routes/config/systems/power.tsx"),
+						route("sounds", "routes/config/systems/sounds.tsx", [
+							route(":sound", "routes/config/systems/soundId.tsx"),
+						]),
+						route("system", "routes/config/systems/system.tsx"),
+					]),
+				]),
+				route("missions", "routes/config/missions/layout.tsx", []),
+				route("missions/:timelineId", "routes/config/missions/mission.tsx", [
+					route("details", "routes/config/missions/details.tsx"),
+					route("conversations", "routes/config/missions/conversations/list.tsx", [
+						route(":conversationId", "routes/config/missions/conversations/conversation.tsx"),
+					]),
+					route(":stepId", "routes/config/missions/step.tsx"),
+				]),
+				route("reports", "routes/config/reports/layout.tsx", []),
+				route("reports/:timelineId", "routes/config/reports/report.tsx", [
+					route("details", "routes/config/reports/details.tsx"),
+					route(":stepId", "routes/config/reports/step.tsx"),
+				]),
+				route("trainings", "routes/config/trainings/layout.tsx", []),
+				route("trainings/:timelineId", "routes/config/trainings/training.tsx", [
+					route("details", "routes/config/trainings/details.tsx"),
+					route(":stepId", "routes/config/trainings/step.tsx"),
+					route(
+						"conversations",
+						"routes/config/missions/conversations/list.tsx",
+						{ id: "training-conversation-list" },
+						[
+							route(":conversationId", "routes/config/missions/conversations/conversation.tsx", {
+								id: "training-conversation",
+							}),
+						],
+					),
+				]),
+				route("macros", "routes/config/macros/layout.tsx", [
+					route(":macroId", "routes/config/macros/macro.tsx"),
+				]),
+				route("triggers", "routes/config/triggers/layout.tsx", [
+					route(":macroId", "routes/config/triggers/trigger.tsx"),
+				]),
+				route("themes", "routes/config/themes/layout.tsx", [
+					route(":themeId", "routes/config/themes/theme.tsx"),
+				]),
+				route("inventory", "routes/config/inventory/layout.tsx", [
+					route(":inventoryId", "routes/config/inventory/inventory.tsx"),
+				]),
+				route("textPatterns", "routes/config/textPatterns/layout.tsx", [
+					route(":textPatternId", "routes/config/textPatterns/textPattern.tsx"),
+				]),
+			]),
+		]),
+		route("releases", "routes/releases.tsx"),
+		route("docs/*", "routes/docs/layout.tsx"),
 	]),
 	route("flight/station", "routes/station/index.tsx", [
 		route("settings", "routes/station/settingsLayout.tsx", [
@@ -30,116 +140,9 @@ export default [
 	]),
 	route("flight/core", "routes/core/index.tsx"),
 	route("flight/core/preview/:component", "routes/core/Preview.tsx"),
-	route("config", "routes/config/layout.tsx", [
-		route("thorium", "routes/config/thorium.tsx"),
-		route(":pluginId?", "routes/config/index.tsx"),
-		...prefix(":pluginId", [
-			route("list", "routes/config/aspectList.tsx"),
-			route("starmap", "routes/config/starmap/layout.tsx", [
-				index("routes/config/starmap/index.tsx"),
-				route(":systemId", "routes/config/starmap/system.tsx"),
-			]),
-			route("ships", "routes/config/ships/layout.tsx", [
-				route(":shipId", "routes/config/ships/shipLayout.tsx", [
-					route("basic", "routes/config/ships/basic.tsx"),
-					route("assets", "routes/config/ships/assets.tsx"),
-					route("cargo", "routes/config/ships/cargo.tsx"),
-					route("physics", "routes/config/ships/physics.tsx"),
-					route("shipMap", "routes/config/ships/shipMap.tsx", [
-						route("rooms", "routes/config/ships/shipMap/blank.tsx", [
-							route(":deckName/:roomId", "routes/config/ships/shipMap/roomConfig.tsx"),
-						]),
-						route(":deckName", "routes/config/ships/shipMap/deckConfig.tsx"),
-					]),
-					route("systems", "routes/config/ships/systems.tsx", [
-						route("edit/:pluginId/:systemId", "routes/config/ships/systems/system.tsx", [
-							route("basic", "routes/config/systems/basic.tsx", {
-								id: "override-basic",
-							}),
-							route("heat", "routes/config/systems/heat.tsx", {
-								id: "override-heat",
-							}),
-							route("power", "routes/config/systems/power.tsx", {
-								id: "override-power",
-							}),
-							route(
-								"sounds",
-								"routes/config/systems/sounds.tsx",
-								{
-									id: "override-sounds",
-								},
-								[
-									route(":sound", "routes/config/systems/soundId.tsx", {
-										id: "override-sound",
-									}),
-								],
-							),
-							route("system", "routes/config/ships/systems/systemOverride.tsx"),
-						]),
-					]),
-				]),
-			]),
-			route("systems", "routes/config/systems/layout.tsx", [
-				route(":systemId", "routes/config/systems/systemLayout.tsx", [
-					route("basic", "routes/config/systems/basic.tsx"),
-					route("heat", "routes/config/systems/heat.tsx"),
-					route("damage", "routes/config/systems/damage.tsx"),
-					route("power", "routes/config/systems/power.tsx"),
-					route("sounds", "routes/config/systems/sounds.tsx", [
-						route(":sound", "routes/config/systems/soundId.tsx"),
-					]),
-					route("system", "routes/config/systems/system.tsx"),
-				]),
-			]),
-			route("missions", "routes/config/missions/layout.tsx", []),
-			route("missions/:timelineId", "routes/config/missions/mission.tsx", [
-				route("details", "routes/config/missions/details.tsx"),
-				route("conversations", "routes/config/missions/conversations/list.tsx", [
-					route(":conversationId", "routes/config/missions/conversations/conversation.tsx"),
-				]),
-				route(":stepId", "routes/config/missions/step.tsx"),
-			]),
-			route("reports", "routes/config/reports/layout.tsx", []),
-			route("reports/:timelineId", "routes/config/reports/report.tsx", [
-				route("details", "routes/config/reports/details.tsx"),
-				route(":stepId", "routes/config/reports/step.tsx"),
-			]),
-			route("trainings", "routes/config/trainings/layout.tsx", []),
-			route("trainings/:timelineId", "routes/config/trainings/training.tsx", [
-				route("details", "routes/config/trainings/details.tsx"),
-				route(":stepId", "routes/config/trainings/step.tsx"),
-				route(
-					"conversations",
-					"routes/config/missions/conversations/list.tsx",
-					{ id: "training-conversation-list" },
-					[
-						route(":conversationId", "routes/config/missions/conversations/conversation.tsx", {
-							id: "training-conversation",
-						}),
-					],
-				),
-			]),
-			route("macros", "routes/config/macros/layout.tsx", [
-				route(":macroId", "routes/config/macros/macro.tsx"),
-			]),
-			route("triggers", "routes/config/triggers/layout.tsx", [
-				route(":macroId", "routes/config/triggers/trigger.tsx"),
-			]),
-			route("themes", "routes/config/themes/layout.tsx", [
-				route(":themeId", "routes/config/themes/theme.tsx"),
-			]),
-			route("inventory", "routes/config/inventory/layout.tsx", [
-				route(":inventoryId", "routes/config/inventory/inventory.tsx"),
-			]),
-			route("textPatterns", "routes/config/textPatterns/layout.tsx", [
-				route(":textPatternId", "routes/config/textPatterns/textPattern.tsx"),
-			]),
-		]),
-	]),
-	route("releases", "routes/releases.tsx"),
+
 	route("components", "routes/components.tsx"),
 	route("development", "routes/development.tsx"),
 	route("development/:cardId", "routes/developmentCard.tsx"),
-	route("docs/*", "routes/docs/layout.tsx"),
 	route("3d", "routes/3d.tsx"),
 ] satisfies RouteConfig;

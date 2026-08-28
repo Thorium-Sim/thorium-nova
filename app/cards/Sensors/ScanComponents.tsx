@@ -77,6 +77,7 @@ function ResultsWrapper({
 				) : (
 					<Button
 						className="btn btn-xs btn-warning"
+						data-testid={`begin-${scanType}`}
 						onPress={() =>
 							q.sensors.scanStart.netSend({
 								shipId,
