@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.21](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.20...1.0.0-alpha.21) (2026-09-04)
+
+
+### Features
+
+* Adds moons to the starmap ([c58950c](https://github.com/Thorium-Sim/thorium-nova/commit/c58950c18752318f892f6ecc83cce42a2b8c5c83))
+* Coolant Loop card ([48450b8](https://github.com/Thorium-Sim/thorium-nova/commit/48450b8b6156ed3a9222bf14121f7b18ee9fb0b5))
+* Power Distribution revamp ([04574a9](https://github.com/Thorium-Sim/thorium-nova/commit/04574a9a69f682131d7c640982b6eabacc3f472f))
+* Undo Annotations on documents ([9d794b3](https://github.com/Thorium-Sim/thorium-nova/commit/9d794b31871be6e092eba8124687fe06eecb2973))
+
 # [1.0.0-alpha.20](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.19...1.0.0-alpha.20) (2026-05-20)
 
 
