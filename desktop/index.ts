@@ -19,7 +19,7 @@ const thoriumRPC = BrowserView.defineRPC<ThoriumRPC>({
 			rendererReady: () => {
 				if (controller.signal.aborted) return;
 				const _serverProcess = Bun.spawn(
-					[path.join(PATHS.RESOURCES_FOLDER, "app", "thorium-server")],
+					[path.join(PATHS.RESOURCES_FOLDER, "app", "thorium-nova-server")],
 					{
 						serialization: "json",
 						signal: controller.signal,

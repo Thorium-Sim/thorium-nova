@@ -61,7 +61,7 @@ const arch = (process.env.BUILD_ARCH ||
 	`${targetArch}-${targetPlatform}`) as keyof typeof platformMap;
 
 // We have to run this next command using a shell since the --compile flag doesn't work with the Bun API.
-const command = `bun build --minify --define "process.env.NODE_ENV='production'" --asset-naming="[name].[ext]" --target=TARGET --outfile ./binaries/server-ARCH --compile ./desktop/exe.ts ./node_modules/@thorium-sim/rapier3d-node/dist/rapier_wasm3d_bg.wasm`;
+const command = `bun build --minify --define "process.env.NODE_ENV='production'" --asset-naming="[name].[ext]" --target=TARGET --outfile ./binaries/thorium-nova-server-ARCH --compile ./desktop/exe.ts ./node_modules/@thorium-sim/rapier3d-node/dist/rapier_wasm3d_bg.wasm`;
 const target = platformMap[arch];
 if (!target) {
 	throw new Error(
@@ -72,4 +72,8 @@ await new Promise<void>((res, rej) =>
 	exec(command.replace("TARGET", target).replace("ARCH", arch), (err: ExecException | null) =>
 		err ? rej(err) : res(),
 	),
+);
+console.info(
+	"Server compiled to ",
+	path.resolve("./binaries/thorium-nova-server-ARCH").replace("ARCH", arch),
 );

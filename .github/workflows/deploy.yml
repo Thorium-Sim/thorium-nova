@@ -36,9 +36,6 @@ jobs:
           - platform: "macos-latest" # for Arm based macs (M1 and above).
             args: "--target aarch64-apple-darwin"
             arch: "aarch64-apple-darwin"
-          - platform: "macos-latest" # for Intel based macs.
-            args: "--target x86_64-apple-darwin"
-            arch: "x86_64-apple-darwin"
           - platform: "ubuntu-24.04"
             args: ""
             arch: "x86_64-unknown-linux-gnu"
@@ -91,11 +88,18 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-
+      - name: Copy Server Binary
+        if: matrix.platform != 'windows-latest'
+        working-directory: ./app
+        run: cp binaries/thorium-nova-server-${{ matrix.arch }} binaries/thorium-nova-server
+      - name: Copy Server Binary Windows
+        if: startsWith(matrix.platform,'windows')
+        working-directory: ./app
+        run: copy binaries\thorium-nova-server-${{ matrix.arch }} binaries\thorium-nova-server
       - name: Build Electrobun Desktop
         if: matrix.platform != 'ubuntu-24.04'
         working-directory: ./app
-        run: bun run build:desktop
+        run: bun run build-desktop
         env:
           ELECTROBUN_TEAMID: ${{ secrets.APPLE_TEAM_ID }}
           ELECTROBUN_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
@@ -106,13 +110,16 @@ jobs:
         working-directory: ./app
         run: |
           bun .github/actions/getVersion.ts
+      - name: Remove Extra Server Binary
+        working-directory: ./app
+        run: rm binaries/thorium-nova-server
       - name: Release
         id: make-release
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.get-version.outputs.version }}
           make_latest: true
-          body: "See CHANGELOG.md for release notes. Download the asset for your platform. `thoriumNovaServer-` assets run the server without running a kiosk. Be sure to run `chmod +x thoriumNovaServer-ARCH` to make them executable."
+          body: "See CHANGELOG.md for release notes. Download the asset for your platform. `thorium-nova-server-` assets run the server without running a kiosk. Be sure to run `chmod +x thorium-nova-server-ARCH` to make them executable."
           files: |
             app/binaries/*
             app/artifacts/*
