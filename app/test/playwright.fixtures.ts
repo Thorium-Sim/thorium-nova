@@ -38,7 +38,7 @@ export const test = base.extend<
 								: process.platform === "win32"
 									? "pc-windows-msvc"
 									: "unknown";
-					const binaryName = `server-${targetArch}-${targetPlatform}`;
+					const binaryName = `thorium-nova-server-${targetArch}-${targetPlatform}`;
 
 					// Copy Thorium Plugin data into a new folder
 					await mkdir(`./test-data/worker-${port}/plugins/`, {

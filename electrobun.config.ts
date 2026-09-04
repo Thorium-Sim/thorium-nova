@@ -19,7 +19,7 @@ export default {
 		},
 		copy: {
 			"desktop/web/index.html": "views/mainview/index.html",
-			"binaries/server-aarch64-apple-darwin": "thorium-server",
+			"binaries/thorium-nova-server": "thorium-nova-server",
 		},
 		mac: {
 			bundleCEF: false,
