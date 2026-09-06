@@ -11,7 +11,8 @@ import { vi } from "vitest";
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
 let netSendResponse: { response: any } = { response: "" };
-const netSendSpy = vi.fn((_, __) => netSendResponse);
+
+const netSendSpy = vi.fn((_, __) => _ && __ && netSendResponse);
 function setNetSendResponse(response: any) {
 	netSendResponse = { response };
 }

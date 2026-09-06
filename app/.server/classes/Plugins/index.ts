@@ -5,7 +5,7 @@ import TextPatternPlugin from "@thorium/.server/classes/Plugins/TextPattern";
 import TrainingPlugin from "@thorium/.server/classes/Plugins/Training";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { thoriumContext } from "@thorium/utils/.server/context";
-import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
+import { ProxyDataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 
 import { generateIncrementedName } from "../../../utils/generateIncrementedName";
 import type { ServerDataModel } from "../ServerDataModel";
@@ -51,7 +51,7 @@ let storedServer: ServerDataModel;
 // they'll be keyed to the plugin, but will automatically
 // be garbage collected if the plugin is ever deleted.
 const pluginAspects = new WeakMap<BasePlugin, AspectsMap>();
-export default class BasePlugin extends DataStore {
+export default class BasePlugin extends ProxyDataStore {
 	id!: string;
 	name!: string;
 	kind = "plugins" as const;

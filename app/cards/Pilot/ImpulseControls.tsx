@@ -123,7 +123,7 @@ export const ImpulseControls = ({
 	);
 
 	const bind = useDrag(
-		({ down, first, offset: [_, yVal] }) => {
+		({ down, first, offset: [, yVal] }) => {
 			if (first) onFlightControlInteraction?.();
 			downRef.current = down;
 			set({

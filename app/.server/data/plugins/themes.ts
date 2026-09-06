@@ -29,7 +29,7 @@ export const theme = t.router({
 					}
 
 					return {
-						...theme,
+						...theme.toJSON(),
 						rawCSS,
 					};
 				}),
@@ -56,7 +56,7 @@ export const theme = t.router({
 			}
 
 			return {
-				...theme,
+				...theme.toJSON(),
 				rawCSS,
 			};
 		}),

@@ -1,5 +1,5 @@
 import { thoriumContext } from "@thorium/utils/.server/context";
-import { DataStore } from "@thorium/utils/.server/db-fs";
+import { ProxyDataStore } from "@thorium/utils/.server/db-fs";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import { ZodError, type z } from "zod";
 
@@ -11,7 +11,7 @@ type AspectAsset = {
 	[assetName: string]: string | string[];
 };
 
-export abstract class Aspect extends DataStore {
+export abstract class Aspect extends ProxyDataStore {
 	abstract apiVersion: string;
 	abstract kind: AspectKinds;
 	abstract name: string;
@@ -79,7 +79,20 @@ export abstract class Aspect extends DataStore {
 	 * Used for serializing the data before it is stored in the file system.
 	 */
 	toJSON() {
-		const { plugin: _, ...data } = this;
+		const {
+			plugin: _,
+			duplicate: _duplicate,
+			getAssetUrl: _getAssetUrl,
+			getData: _getData,
+			initialData: _initialData,
+			remove: _remove,
+			rename: _rename,
+			toJSON: _toJSON,
+			write: _write,
+			safeMode: _safeMode,
+			writeThrottle: _writeThrottle,
+			...data
+		} = this;
 		return data;
 	}
 	async rename(name: string) {

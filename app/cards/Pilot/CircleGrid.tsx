@@ -305,7 +305,7 @@ export function GridCanvas({
 		UNSAFE_RouteContext,
 	);
 
-	const wheelBind = useWheel(({ delta: [_, y] }) => {
+	const wheelBind = useWheel(({ delta: [, y] }) => {
 		circleGridStore.setState((store) => {
 			const v = store.zoom;
 			const width = store.width;

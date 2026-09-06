@@ -37,6 +37,6 @@ export const starmap = t.router({
 			const solarSystem = plugin.aspects.solarSystems.find(
 				(solarSystem) => solarSystem.name === input.solarSystemId,
 			);
-			return solarSystem;
+			return solarSystem?.toJSON();
 		}),
 });

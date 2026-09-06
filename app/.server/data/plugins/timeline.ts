@@ -567,7 +567,9 @@ const conversations = t.router({
 		})
 		.request(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
-			return plugin.aspects.conversations.filter((c) => c.timelineId === input.timelineId);
+			return plugin.aspects.conversations
+				.filter((c) => c.timelineId === input.timelineId)
+				.map((p) => p.toJSON());
 		}),
 	get: t.procedure
 		.input(z.object({ pluginId: z.string(), conversationId: z.string() }))
@@ -594,7 +596,7 @@ const conversations = t.router({
 					path.join(assetPath, conversation.assets.conversation),
 				);
 			} catch {}
-			return { ...conversation, text };
+			return { ...conversation.toJSON(), text };
 		}),
 	create: t.procedure
 		.input(
@@ -795,7 +797,7 @@ export const timeline = t.router({
 				}
 			}
 
-			return timelines.map((t) => ({ ...t, pluginName: t.plugin.name }));
+			return timelines.map((t) => ({ ...t.toJSON(), pluginName: t.plugin.name }));
 		}),
 	get: t.procedure
 		.input(z.object({ pluginId: z.string(), timelineId: z.string(), timelineType }))
@@ -809,7 +811,7 @@ export const timeline = t.router({
 				(timeline) => timeline.name === input.timelineId,
 			);
 			if (!timeline) throw null;
-			return timeline;
+			return timeline.toJSON();
 		}),
 	create: t.procedure
 		.input(

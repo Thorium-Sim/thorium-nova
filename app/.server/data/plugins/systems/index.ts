@@ -73,7 +73,7 @@ export const systems = t.router({
 			const plugin = getPlugin(ctx, input.pluginId);
 
 			return plugin.aspects.shipSystems.map((shipSystem) => ({
-				...shipSystem,
+				...shipSystem.toJSON(),
 				pluginName: shipSystem.plugin.name,
 				// @ts-expect-error
 				flightModes: shipSystem.constructor.flightModes,

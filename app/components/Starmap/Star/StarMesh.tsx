@@ -35,7 +35,7 @@ const Star: React.FC<{
 	color1 = 0x224488,
 	color2 = 0xf6fcff,
 	size,
-	noLensFlare: _,
+	// noLensFlare: _,
 	showSprite,
 	userData,
 	...props

@@ -1,8 +1,8 @@
 import ciao from "@homebridge/ciao";
 import { registerExitFunction } from "@thorium/.server/init/exitHandler";
-const responder = ciao.getResponder();
 
 export async function advertiseMdns(port: number, name: string = "Thorium Nova") {
+	const responder = ciao.getResponder();
 	const service = responder.createService({
 		name,
 		type: "http",

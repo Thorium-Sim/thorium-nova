@@ -1,9 +1,10 @@
 import { readdir } from "node:fs/promises";
+import path from "node:path";
 
 import type LongRangeCommPlugin from "@thorium/.server/classes/Plugins/ShipSystems/LongRangeComm";
 import { buildDatabase } from "@thorium/.server/init/buildDatabase";
 import { loadOrCreateCerts } from "@thorium/.server/init/certs";
-import { exitHandler, registerExitFunction } from "@thorium/.server/init/exitHandler";
+import { setupExitHandler, registerExitFunction } from "@thorium/.server/init/exitHandler";
 import { initDefaultPlugin } from "@thorium/.server/init/initDefaultPlugin";
 import { createContext, initWebsocket } from "@thorium/.server/init/liveQuery";
 import { advertiseMdns } from "@thorium/.server/init/mdns";
@@ -25,15 +26,34 @@ import { getMimeType } from "hono/utils/mime";
 
 import { isObject } from "./typeguards/isObject";
 
-process.on("message", (_message) => {
+function messageParent(message: any) {
+	if (process.send) {
+		process.send(message);
+	} else {
+		postMessage(message);
+	}
+}
+function handleMessage(_message: unknown) {}
+process.on("message", (message) => {
 	// print message from parent
+	handleMessage(message);
 });
+if (self.addEventListener) {
+	self.addEventListener("message", (event) => {
+		handleMessage(event.data);
+	});
+}
 
-export async function startHttpServer({ isProd }: { isProd: boolean }) {
+export async function startHttpServer({
+	isProd,
+	sendMessageToParent = messageParent,
+}: {
+	isProd: boolean;
+	sendMessageToParent?: (message: any) => void;
+}) {
 	try {
 		console.info(`Starting Thorium...`);
-		process.send?.({ type: "log", message: "Starting Thorium..." });
-
+		sendMessageToParent({ type: "log", message: "Starting Thorium..." });
 		const dataStoreProps = bunDataStoreProps(isProd ? "production" : "development");
 		return await thoriumContext.run(dataStoreProps, async () => {
 			const thoriumPath = thoriumContext.getStore()!.thoriumPath;
@@ -41,11 +61,18 @@ export async function startHttpServer({ isProd }: { isProd: boolean }) {
 			let inited = false;
 			try {
 				await readdir(thoriumPath);
-				inited = true;
+				const plugins = await Array.fromAsync(
+					new Bun.Glob(path.join(thoriumPath, "/plugins/*/manifest.yml")).scan({
+						onlyFiles: true,
+					}),
+				);
+				if (plugins.length > 0) {
+					inited = true;
+				}
 			} catch {}
 			if (!inited) {
-				process.send?.({ type: "log", message: "Loading Default Plugin..." });
-				await initDefaultPlugin();
+				sendMessageToParent({ type: "log", message: "Loading Default Plugin..." });
+				await initDefaultPlugin(isProd);
 			}
 			const app = new Hono();
 			app.use(
@@ -55,9 +82,9 @@ export async function startHttpServer({ isProd }: { isProd: boolean }) {
 					allowHeaders: ["*"],
 				}),
 			);
-			process.send?.({ type: "log", message: "Building Database..." });
+			sendMessageToParent({ type: "log", message: "Building Database..." });
 			const database = await buildDatabase(loadPlugins);
-			process.send?.({ type: "log", message: "Setting Up Server..." });
+			sendMessageToParent({ type: "log", message: "Setting Up Server..." });
 			const middleware = await liveQueryPlugin({
 				createContext,
 				initWebsocket,
@@ -131,11 +158,11 @@ export async function startHttpServer({ isProd }: { isProd: boolean }) {
 					system?.cyphers
 						.map(
 							({ font, name }) => `@font-face {
-			  font-family: "${name}";
-				font-style: normal;
-				font-weight: 400;
-				src: url("${font}") format(${getFontFormat(font)})
-			}\n`,
+				  font-family: "${name}";
+					font-style: normal;
+					font-weight: 400;
+					src: url("${font}") format(${getFontFormat(font)})
+				}\n`,
 						)
 						.join("") || "",
 					{
@@ -143,10 +170,8 @@ export async function startHttpServer({ isProd }: { isProd: boolean }) {
 					},
 				);
 			});
-
 			let httpsRunning: string | null = null;
-			process.send?.({ type: "log", message: "Checking Ports..." });
-
+			sendMessageToParent({ type: "log", message: "Checking Ports..." });
 			// Quick check to see if root ports are allowed.
 			let rootPortsAllowed = true;
 			let testHttpServer, testHttpsServer;
@@ -171,14 +196,13 @@ export async function startHttpServer({ isProd }: { isProd: boolean }) {
 					: rootPortsAllowed
 						? 443
 						: port + 1;
-			exitHandler(dataStoreProps);
+			setupExitHandler(isProd);
 			registerExitFunction(async () => {
 				const database = thoriumContext.getStore()!.database;
 				await snapshot(database);
 			});
 			if (isProd) {
-				process.send?.({ type: "log", message: "Loading Certs..." });
-
+				sendMessageToParent({ type: "log", message: "Loading Certs..." });
 				const certs = await loadOrCreateCerts();
 				app.get("/ca.crt", () => {
 					return new Response(certs.caPem, {
@@ -192,8 +216,7 @@ export async function startHttpServer({ isProd }: { isProd: boolean }) {
 					cert: certs.serverCertPem,
 					key: certs.serverKeyPem,
 				};
-				process.send?.({ type: "log", message: "Loading Client Bundle..." });
-
+				sendMessageToParent({ type: "log", message: "Loading Client Bundle..." });
 				const getClientBundleFile = (await import("./utils/.server/embeddedUtils"))
 					.getClientBundleFile;
 				app.use(async (c) => {
@@ -213,8 +236,7 @@ export async function startHttpServer({ isProd }: { isProd: boolean }) {
 						return new Response("", { status: 404 });
 					}
 				});
-				process.send?.({ type: "log", message: "Starting Server..." });
-
+				sendMessageToParent({ type: "log", message: "Starting Server..." });
 				const https = Bun.serve({
 					port: httpsPort,
 					fetch: app.fetch,
@@ -236,12 +258,12 @@ export async function startHttpServer({ isProd }: { isProd: boolean }) {
 			if (httpsRunning) {
 				console.info(`HTTPS running on ${httpsRunning}`);
 			}
-			process.send?.({ type: "started", address: server.url.href });
+			sendMessageToParent({ type: "started", address: server.url.href, message: "Server Started" });
 			if (isProd) {
-				process.send?.({ type: "log", message: `Advertising Server: ${server.url.href}` });
+				sendMessageToParent({ type: "log", message: `Advertising Server: ${server.url.href}` });
 				await advertiseMdns(server.port!);
 			}
-			process.send?.({ type: "started", address: server.url.href });
+			sendMessageToParent({ type: "started", address: server.url.href, message: "Server Started" });
 			return server.url.href;
 		});
 	} catch (error) {

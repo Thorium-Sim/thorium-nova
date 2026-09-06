@@ -120,7 +120,7 @@ export const thorium = t.router({
 		.request(function getEvents() {
 			const events = Object.entries(router._def.procedures)
 				// @ts-expect-error This does have the meta type
-				.filter(([_, p]) => p._def.meta?.event)
+				.filter(([, p]) => p._def.meta?.event)
 				.map(([name, p]) => {
 					// @ts-expect-error This does have the input type
 					let input = p._def.inputs[0];
@@ -326,14 +326,14 @@ export const thorium = t.router({
 			return runInSandbox(input.code, ctx);
 		}),
 	eventsSub: t.procedure
-		.filter((_: { name: string; values: any }) => true)
+		.filter((publish: { name: string; values: any }) => !!publish)
 		.autoPublish([], () => null)
 		.request(({ publish }) => {
 			if (!publish) return null;
 			return publish;
 		}),
 	actionsSub: t.procedure
-		.filter((_: { name: string; values: any }) => true)
+		.filter((publish: { name: string; values: any }) => !!publish)
 		.autoPublish([], () => null)
 		.request(({ publish }) => {
 			if (!publish) return null;

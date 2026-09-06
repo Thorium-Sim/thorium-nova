@@ -11,8 +11,8 @@ import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import { defineConfig } from "vite";
 import { iconsSpritesheet } from "vite-plugin-icons-spritesheet";
 
-import { componentDocs } from "./scripts/componentDocs";
-import remarkMdxImages from "./scripts/remark-mdx-images";
+import { componentDocs } from "./scripts/componentDocs.js";
+import remarkMdxImages from "./scripts/remark-mdx-images.js";
 // import { analyzer } from "vite-bundle-analyzer";
 // import Inspect from "vite-plugin-inspect";
 

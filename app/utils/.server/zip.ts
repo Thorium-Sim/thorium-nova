@@ -1,50 +1,10 @@
-import fs, { createWriteStream, createReadStream } from "node:fs";
-import path from "node:path";
-import zlib from "node:zlib";
-
-import tar from "tar-stream";
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
 
 export async function unzip(zipPath: string, extractFolder: string) {
-	return new Promise<void>((res, oops) => {
-		const readStream = createReadStream(zipPath);
-		const gunzip = zlib.createGunzip();
-		const parser = tar.extract();
-
-		// Set up event listeners for the parser
-		parser.on("entry", (header, stream, next) => {
-			// Handle each entry in the tarball
-
-			// Ensure the entry is within the extract folder to avoid extracting outside
-			const entryPath = `${extractFolder}/${header.name}`;
-
-			// Create directories if they don't exist
-			if (header.type === "directory") {
-				fs.mkdirSync(entryPath, { recursive: true });
-				next();
-			} else {
-				// Create a write stream for the file
-				const writeStream = createWriteStream(entryPath);
-
-				// Pipe the entry stream to the file
-				stream.pipe(writeStream);
-
-				// Continue to the next entry once the file is written
-				stream.on("end", next);
-			}
-		});
-
-		readStream.pipe(gunzip).pipe(parser);
-
-		// Handle the end of the process
-		parser.on("finish", () => {
-			res();
-		});
-
-		// Handle errors during extraction
-		parser.on("error", (err) => {
-			oops(err);
-		});
-	});
+	const data = await Bun.file(zipPath).bytes();
+	const archive = new Bun.Archive(data); // gzip is auto-detected
+	await archive.extract(extractFolder);
 }
 
 export async function zip(
@@ -52,57 +12,27 @@ export async function zip(
 	zipPath: string,
 	options?: { ignoreFiles?: string[] },
 ) {
-	return new Promise<void>((res, oops) => {
-		// Create a tar packer
-		const pack = tar.pack();
+	const files: Record<string, Uint8Array> = {};
 
-		// Create a gzip stream
-		const gzip = zlib.createGzip();
+	async function walk(dir: string, prefix = "") {
+		const entries = await readdir(dir, { withFileTypes: true });
 
-		// Create a write stream for the output tarball
-		const writeStream = fs.createWriteStream(zipPath);
+		for (const entry of entries) {
+			if (options?.ignoreFiles?.includes(entry.name)) continue;
 
-		// Set up event listeners for the packer
-		// pack.entry({ name: path.basename(folderPath), type: "directory" });
+			const fullPath = join(dir, entry.name);
+			const archivePath = prefix ? `${prefix}/${entry.name}` : entry.name;
 
-		// Function to recursively add entries to the tarball
-		const addFolderToTarball = (folderPath: string, entryPrefix = "") => {
-			const entries = fs.readdirSync(folderPath);
-
-			for (const entry of entries) {
-				if (options?.ignoreFiles?.includes(entry)) continue;
-				const entryPath = path.join(folderPath, entry);
-				const entryName = path.join(entryPrefix, entry);
-
-				const stat = fs.statSync(entryPath);
-
-				if (stat.isDirectory()) {
-					pack.entry({ name: entryName, type: "directory" });
-					addFolderToTarball(entryPath, entryName);
-				} else {
-					const fileContent = fs.readFileSync(entryPath);
-					pack.entry({ name: entryName, size: stat.size }, fileContent);
-				}
+			if (entry.isDirectory()) {
+				await walk(fullPath, archivePath);
+			} else {
+				files[archivePath] = await Bun.file(fullPath).bytes();
 			}
-		};
+		}
+	}
 
-		// Add the contents of the source folder to the tarball
-		addFolderToTarball(folderPath);
+	await walk(folderPath);
 
-		// Finalize the tarball
-		pack.finalize();
-
-		// Pipe the tarball through the gzip stream and then through the write stream
-		pack.pipe(gzip).pipe(writeStream);
-
-		// Handle the end of the process
-		writeStream.on("finish", () => {
-			res();
-		});
-
-		// Handle errors during compression
-		writeStream.on("error", (err) => {
-			oops(err);
-		});
-	});
+	const archive = new Bun.Archive(files, { compress: "gzip" });
+	await Bun.write(zipPath, archive);
 }

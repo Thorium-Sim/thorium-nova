@@ -6,8 +6,8 @@ import { thoriumContext } from "@thorium/utils/.server/context";
 import { unzip } from "@thorium/utils/.server/zip";
 import { embeddedFiles } from "bun";
 
-export async function initDefaultPlugin() {
-	if (process.env.NODE_ENV !== "production") return;
+export async function initDefaultPlugin(isProd: boolean) {
+	if (!isProd) return;
 	const thoriumPath = thoriumContext.getStore()!.thoriumPath;
 	await fs.mkdir(path.join(thoriumPath, "plugins"), { recursive: true });
 	const tempPath = await fs.mkdtemp("thorium-nova");
@@ -21,15 +21,15 @@ export async function initDefaultPlugin() {
 			with: { type: "file" },
 		}
 	);
-
 	try {
 		// Initialize the default plugin
+		const devPluginPath = path.join(import.meta.dirname, "../../../build");
 		if (embeddedFiles.length === 0) {
-			const filename = (await readdir(import.meta.dirname)).find(
-				(f) => f.startsWith("clientBundle") && f.endsWith(".dat"),
+			const filename = (await readdir(devPluginPath)).find(
+				(f) => f.startsWith("defaultPlugin") && f.endsWith(".plug"),
 			);
-			if (!filename) throw new Error("Client assets are not bundled for an unknown reason");
-			await Bun.write(tempFile, Bun.file(path.join(import.meta.dirname, filename)));
+			if (!filename) throw new Error("Default Plugin is not bundled for an unknown reason");
+			await Bun.write(tempFile, Bun.file(path.join(devPluginPath, filename)));
 		} else {
 			await Bun.write(
 				tempFile,

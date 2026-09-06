@@ -55,12 +55,7 @@ export class PhysicsMovementSystem extends System {
 		// Determine whether the entity is using collision or simple physics
 		// and update the position accordingly.
 		const world = getEntityWorld(this.ecs, entity);
-		const position =
-			entity.components.position ||
-			(entity.components.satellite && {
-				...getOrbitPosition(entity.components.satellite),
-				parentId: entity.components.satellite.parentId,
-			});
+		const position = entity.components.position;
 		if (!position) return;
 
 		const handles = entity.components.physicsHandles?.handles || new Map();

@@ -40,7 +40,7 @@ export const cargoControl = t.router({
 			for (const system of ctx.ecs.systems) {
 				if (system.constructor.name === "FilterInventorySystem") {
 					return Object.fromEntries(
-						Array.from(system?.entities.entries()).map(([_, entity]) => [
+						Array.from(system?.entities.entries()).map(([, entity]) => [
 							entity.components.identity?.name,
 							{
 								...entity.components.identity,

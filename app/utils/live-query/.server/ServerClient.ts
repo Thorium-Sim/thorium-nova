@@ -128,7 +128,17 @@ export class ServerClient<TRouter extends AnyRouter> {
 											type: "request",
 										});
 
-										sendData({ type: "netRequestData", data: { id, data } });
+										// Preprocess the data slightly before sending
+										// to make it work better with msgpack
+										function processData(data: any): any {
+											if ("toJSON" in data) {
+												return data.toJSON();
+											}
+											if (Array.isArray(data)) {
+												return data.map((d) => processData(d));
+											}
+										}
+										sendData({ type: "netRequestData", data: { id, data: processData(data) } });
 
 										return data as any;
 									} catch (err) {

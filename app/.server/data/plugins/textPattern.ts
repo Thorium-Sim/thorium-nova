@@ -16,7 +16,7 @@ export const textPattern = t.router({
 		})
 		.request(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
-			return plugin.aspects.textPatterns;
+			return plugin.aspects.textPatterns.map((p) => p.toJSON());
 		}),
 	get: t.procedure
 		.input(z.object({ pluginId: z.string(), textPatternId: z.string() }))
@@ -34,7 +34,7 @@ export const textPattern = t.router({
 				(textPattern) => textPattern.name === input.textPatternId,
 			);
 			if (!textPattern) throw new Error("Text Pattern not found");
-			return textPattern;
+			return textPattern.toJSON();
 		}),
 	create: t.procedure
 		.input(z.object({ pluginId: z.string(), name: z.string() }))

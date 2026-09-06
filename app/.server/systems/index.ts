@@ -41,7 +41,7 @@ import { ProcessTriggersSystem } from "./ProcessTriggersSystem";
 import { ReactorFuelSystem } from "./ReactorFuelSystem";
 import { ReactorHeatSystem } from "./ReactorHeatSystem";
 import { ShieldsSystem } from "./ShieldsSystem";
-import { SolarSystemPositionSystem } from "./SolarSystemPositionSystem";
+import { SolarSystemShipPositionSystem } from "./SolarSystemPositionSystem";
 import { ThrusterSystem } from "./ThrusterSystem";
 import { TimerSystem } from "./TimerSystem";
 import { TorpedoLoadingSystem } from "./TorpedoLoadingSystem";
@@ -53,7 +53,7 @@ const systems = [
 	FilterInventorySystem,
 	FilterShipsWithReactors,
 	InterstellarTransitionSystem,
-	SolarSystemPositionSystem,
+	SolarSystemShipPositionSystem,
 	PassengerMovementSystem,
 	NPCFireWeaponsSystem,
 	TimerSystem,

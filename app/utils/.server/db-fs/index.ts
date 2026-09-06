@@ -12,11 +12,12 @@ export interface DataStoreOptions {
 }
 
 export abstract class DataStore {
-	#throttle: number;
 	#safeMode: boolean;
-	#writeThrottle: (force?: boolean) => Promise<void>;
 	initialData: unknown;
 	private dataLoaded = false;
+	#throttle: number;
+
+	writeThrottle: (force?: boolean) => Promise<void>;
 	/** Useful for implementations to store arbitrary data */
 	#meta: any;
 	get meta(): any {
@@ -25,56 +26,18 @@ export abstract class DataStore {
 	set meta(value) {
 		this.#meta = value;
 	}
-	#handler: ProxyHandler<any> = {
-		get: (target, key) => {
-			if (key === "getData") return target[key];
-			if (key === isProxy) return true;
-			if (key === "mapKey") return target[key];
-			if (
-				!target[isProxy] &&
-				Object.getOwnPropertyDescriptor(target, key) &&
-				typeof target[key] === "object" &&
-				target[key] !== null &&
-				!(target[key] instanceof Date) &&
-				!(target[key] instanceof Map) &&
-				!(target[key] instanceof Set)
-			) {
-				return new Proxy(target[key], this.#handler);
-			}
-			return target[key];
-		},
-		set: (target, key, value) => {
-			target[key] = value;
-
-			this.#writeThrottle();
-			return true;
-		},
-		deleteProperty: (target, key) => {
-			if (key in target) {
-				delete target[key];
-				this.#writeThrottle();
-				return true;
-			}
-			// Ignore it
-			return true;
-		},
-	};
 
 	constructor(initialData: unknown, options: DataStoreOptions) {
 		this.initialData = initialData;
 		this.meta = options.meta;
-		this.#throttle = options.throttle || process.env.NODE_ENV === "production" ? 1000 * 30 : 0;
 		this.#safeMode = options.safeMode || false;
-		this.#writeThrottle =
+		this.#throttle = options.throttle || process.env.NODE_ENV === "production" ? 1000 * 30 : 0;
+		this.writeThrottle =
 			process.env.NODE_ENV === "test"
 				? this.write
 				: throttle(this.write, this.#throttle, {
 						trailing: true,
 					});
-
-		const proxy = new Proxy(this, this.#handler);
-
-		return proxy;
 	}
 	get safeMode() {
 		return this.#safeMode;
@@ -97,5 +60,50 @@ export abstract class DataStore {
 	}
 	async getAssetUrl() {
 		return thoriumContext.getStore()!.thoriumPath;
+	}
+}
+
+export abstract class ProxyDataStore extends DataStore {
+	#handler: ProxyHandler<any> = {
+		get: (target, key) => {
+			if (key === "getData") return target[key];
+			if (key === isProxy) return true;
+			if (key === "mapKey") return target[key];
+			if (
+				!target[isProxy] &&
+				Object.getOwnPropertyDescriptor(target, key) &&
+				typeof target[key] === "object" &&
+				target[key] !== null &&
+				!(target[key] instanceof Date) &&
+				!(target[key] instanceof Map) &&
+				!(target[key] instanceof Set)
+			) {
+				return new Proxy(target[key], this.#handler);
+			}
+			return target[key];
+		},
+		set: (target, key, value) => {
+			target[key] = value;
+
+			this.writeThrottle();
+			return true;
+		},
+		deleteProperty: (target, key) => {
+			if (key in target) {
+				delete target[key];
+				this.writeThrottle();
+				return true;
+			}
+			// Ignore it
+			return true;
+		},
+	};
+
+	constructor(initialData: unknown, options: DataStoreOptions) {
+		super(initialData, options);
+
+		const proxy = new Proxy(this, this.#handler);
+
+		return proxy;
 	}
 }

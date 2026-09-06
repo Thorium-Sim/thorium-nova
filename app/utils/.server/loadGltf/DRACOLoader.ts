@@ -1,5 +1,4 @@
 import { dirname, sep } from "node:path";
-import { Worker } from "node:worker_threads";
 
 import { BufferAttribute, BufferGeometry, Loader } from "three";
 
@@ -222,7 +221,8 @@ export class DRACOLoader extends Loader {
 
 				worker.postMessage({ type: "init", decoderConfig: this.decoderConfig });
 
-				worker.on("message", (message) => {
+				worker.addEventListener("message", (event) => {
+					const message = event.data;
 					switch (message.type) {
 						case "decode":
 							// @ts-expect-error

@@ -7,7 +7,6 @@ import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 
 import "./styles/tailwind.css";
-// @ts-expect-error
 import "@fontsource-variable/outfit";
 import { useEffect, useRef } from "react";
 import {

@@ -271,7 +271,7 @@ export const damageReports = t.router({
 
 			// Group the timelines by categories, so one category with a bunch of reports doesn't dominate
 			const categories = Object.entries(Object.groupBy(timelines, (t) => t.category))
-				.map(([_, value]) => {
+				.map(([, value]) => {
 					return value!;
 				})
 				.filter((c) => c && c.length > 0);

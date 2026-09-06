@@ -55,7 +55,7 @@ export const client = t.router({
 						name: client.name,
 						connected: client.connected,
 						settings: client.settings,
-						...flightClient?.components.flightClient!,
+						...flightClient!.components.flightClient!,
 					};
 				})
 				.filter((client) => client.connected);

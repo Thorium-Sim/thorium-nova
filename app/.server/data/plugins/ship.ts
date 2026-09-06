@@ -20,7 +20,7 @@ export const ship = t.router({
 		})
 		.request(({ ctx, input }) => {
 			const plugin = getPlugin(ctx, input.pluginId);
-			return plugin.aspects.ships;
+			return plugin.aspects.ships.map((p) => p.toJSON());
 		}),
 	get: t.procedure
 		.input(z.object({ pluginId: z.string(), shipId: z.string() }))
@@ -32,7 +32,7 @@ export const ship = t.router({
 			const plugin = getPlugin(ctx, input.pluginId);
 			const ship = plugin.aspects.ships.find((ship) => ship.name === input.shipId);
 			if (!ship) throw null;
-			return ship;
+			return ship.toJSON();
 		}),
 	available: t.procedure.request(({ ctx }) => {
 		return ctx.server.plugins

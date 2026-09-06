@@ -25,7 +25,7 @@ export class FilterInventorySystem extends System {
 	private cacheInventoryTemplates() {
 		this.inventoryTemplates =
 			Object.fromEntries(
-				Array.from(this.entities.entries()).map(([_, entity]) => [
+				Array.from(this.entities.entries()).map(([, entity]) => [
 					entity.components.identity?.name,
 					{
 						...entity.components.identity,

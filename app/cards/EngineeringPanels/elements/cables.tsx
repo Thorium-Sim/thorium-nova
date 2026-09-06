@@ -40,7 +40,7 @@ let colorIdx = 0;
 
 const drawLine = line()
 	.x(([x]) => x)
-	.y(([_, y]) => y)
+	.y(([, y]) => y)
 	.curve(curveBasis);
 
 type Handle = {

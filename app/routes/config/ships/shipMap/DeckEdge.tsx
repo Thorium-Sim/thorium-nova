@@ -16,7 +16,7 @@ export function DeckEdge({
 	allNodes,
 	removeEdge,
 	sizeRatio,
-	updateEdge: _,
+	// updateEdge: _,
 }: {
 	id: number;
 	from: number;

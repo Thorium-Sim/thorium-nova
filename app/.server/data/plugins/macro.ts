@@ -150,11 +150,13 @@ export const macro = t.router({
 		.request(({ ctx, input }) => {
 			if (input?.pluginId) {
 				const plugin = getPlugin(ctx, input.pluginId);
-				return plugin.aspects.macros.filter((t) => t.type === input.type);
+				return plugin.aspects.macros.filter((t) => t.type === input.type).map((m) => m.toJSON());
 			}
-			return ctx.server.plugins.reduce((prev: MacroPlugin[], next) => {
-				return prev.concat(next.aspects.macros.filter((t) => t.type === input.type));
-			}, []);
+			return ctx.server.plugins
+				.reduce((prev: MacroPlugin[], next) => {
+					return prev.concat(next.aspects.macros.filter((t) => t.type === input.type));
+				}, [])
+				.map((m) => m.toJSON());
 		}),
 	get: t.procedure
 		.input(z.object({ pluginId: z.string(), macroId: z.string() }))
@@ -166,7 +168,7 @@ export const macro = t.router({
 			const plugin = getPlugin(ctx, input.pluginId);
 			const macro = plugin.aspects.macros.find((macro) => macro.name === input.macroId);
 			if (!macro) throw null;
-			return macro;
+			return macro.toJSON();
 		}),
 	create: t.procedure
 		.input(

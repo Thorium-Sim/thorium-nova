@@ -85,6 +85,7 @@ export class FlightDataModel extends DataStore {
 			this.ecs.update();
 		}
 		if (process.env.NODE_ENV === "test") return;
+		this.writeThrottle();
 		this.interval = setTimeout(this.run, FlightDataModel.INTERVAL);
 	};
 	destroy() {

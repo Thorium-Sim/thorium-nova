@@ -57,9 +57,8 @@ export function getShipSystem({
 	const plugin = getPlugin(ctx, input.pluginId);
 	const shipSystem = plugin.aspects.shipSystems.find((system) => system.name === systemId);
 	if (!shipSystem) throw new Error(`System not found: ${systemId}`);
-	const { plugin: _, ...system } = shipSystem;
 	return {
-		...system,
+		...shipSystem.toJSON(),
 		...override,
 		pluginName: plugin.name,
 	};

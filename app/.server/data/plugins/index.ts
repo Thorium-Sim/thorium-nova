@@ -31,7 +31,7 @@ export const plugin = t.router({
 	inventory,
 	textPattern,
 	all: t.procedure.request(({ ctx }) => {
-		return ctx.server.plugins;
+		return ctx.server.plugins.map((p) => p.toJSON());
 	}),
 	get: t.procedure
 		.input(z.object({ pluginId: z.string().catch("") }))
@@ -41,7 +41,7 @@ export const plugin = t.router({
 		})
 		.request(({ ctx, input }) => {
 			const plugin = ctx.server.plugins.find((plugin) => plugin.id === input.pluginId);
-			return plugin ? { ...plugin, coverImage: plugin.coverImage } : null;
+			return plugin ? { ...plugin.toJSON(), coverImage: plugin.coverImage } : null;
 		}),
 	create: t.procedure.input(z.object({ name: z.string() })).send(async ({ ctx, input }) => {
 		inputAuth(ctx);

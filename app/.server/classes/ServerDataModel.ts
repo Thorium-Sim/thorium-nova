@@ -1,12 +1,12 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { router } from "@thorium/.server/init/router";
-import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
+import { ProxyDataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
 import { getPluginTextPatterns } from "@thorium/utils/interpolationEngine";
 import randomWords from "@thorium/utils/random-words";
 
 import { Client } from "../init/liveQuery";
 import type BasePlugin from "./Plugins";
-export class ServerDataModel extends DataStore {
+export class ServerDataModel extends ProxyDataStore {
 	clients!: Record<string, Client<any>>;
 	thoriumId!: string;
 	activeFlightName!: string | null;

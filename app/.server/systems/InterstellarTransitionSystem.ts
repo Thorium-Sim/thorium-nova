@@ -2,15 +2,22 @@ import { pubsub } from "@thorium/.server/init/pubsub";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
+import { clearObjectSystem } from "@thorium/utils/starmap/position";
 import { lightMinuteToLightYear } from "@thorium/utils/unitTypes";
 import { Matrix4, Quaternion, Vector3 } from "three";
 
 const MIN_SYSTEM_SIZE = 10_000;
 const SYSTEM_PADDING = 1.05;
+
+// Key is system ID, value is the max distance to leave
+const maxDistanceCache = new Map<number, number>();
 // Get the maximum distance necessary to leave or enter
 // This requires getting the distance of all of the objects from the center of the solar system.
 // We don't care about moons though
 function getMaxDistance(entities: Entity[], systemId: number) {
+	if (maxDistanceCache.has(systemId)) {
+		return maxDistanceCache.get(systemId)!;
+	}
 	const distance = entities.reduce((prev, next) => {
 		if (next.components.satellite?.parentId === systemId) {
 			// It's a star or planet
@@ -34,7 +41,9 @@ function getMaxDistance(entities: Entity[], systemId: number) {
 		return prev;
 	}, 0);
 	// Multiply the max distance by a constant to give a bit of extra room around the edges
-	return Math.max(MIN_SYSTEM_SIZE, distance);
+	const properDistance = Math.max(MIN_SYSTEM_SIZE, distance * SYSTEM_PADDING);
+	maxDistanceCache.set(systemId, properDistance);
+	return properDistance;
 }
 
 const direction = new Vector3();
@@ -66,7 +75,7 @@ export class InterstellarTransitionSystem extends System {
 				...(this.ecs.componentCache.get("position") || []),
 				...(this.ecs.componentCache.get("satellite") || []),
 			];
-			const maxDistance = getMaxDistance(entitiesWithPosition, system.id) * SYSTEM_PADDING;
+			const maxDistance = getMaxDistance(entitiesWithPosition, system.id);
 			const entityDistance = Math.hypot(
 				entity.components.position.x,
 				entity.components.position.y,
@@ -84,6 +93,7 @@ export class InterstellarTransitionSystem extends System {
 					parentId: null,
 				});
 				entity.addComponent("snapInterpolation");
+				clearObjectSystem(entity);
 				// We also need to update the warp engines so they go faster.
 
 				// const warpEngines = warpSystem?.entities.find(e => entity.components.shipSystems?.shipSystemIds.includes(e.id) && e.components.isWarpEngines)
@@ -165,6 +175,7 @@ export class InterstellarTransitionSystem extends System {
 					type: "solar",
 				});
 				entity.addComponent("snapInterpolation");
+				clearObjectSystem(entity);
 
 				// Also set the rotation to the destination to be spot-on to the destination
 				if (

@@ -22,7 +22,7 @@ const SystemMarker: React.FC<SystemMarkerProps> = ({
 	systemId,
 	name,
 	position,
-	draggable: _,
+	// draggable: _,
 	commSatelliteRadius,
 	commSatelliteColor,
 	...props

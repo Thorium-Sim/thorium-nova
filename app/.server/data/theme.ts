@@ -24,6 +24,6 @@ export const theme = t.router({
 						plugin.aspects.themes.find((t) => t.name === ship?.components.theme?.themeId) || null
 					);
 				}, null);
-			return themeObj;
+			return themeObj?.toJSON();
 		}),
 });

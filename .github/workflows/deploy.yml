@@ -36,6 +36,9 @@ jobs:
           - platform: "macos-latest" # for Arm based macs (M1 and above).
             args: "--target aarch64-apple-darwin"
             arch: "aarch64-apple-darwin"
+          - platform: "macos-26-intel" # for Intel based macs.
+            args: "--target x86_64-apple-darwin"
+            arch: "x86_64-apple-darwin"
           - platform: "ubuntu-24.04"
             args: ""
             arch: "x86_64-unknown-linux-gnu"
@@ -51,7 +54,10 @@ jobs:
           path: app
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: 1.3.11
+          bun-version: 1.4.2
+      - name: Install create-dm
+        if: startsWith(matrix.platform, 'macos')
+        run: brew install create-dmg
       - name: Install Dependencies
         working-directory: ./app
         run: bun install
@@ -60,22 +66,42 @@ jobs:
         with:
           name: build
           path: app/build
+      - name: Prepare for app Signing
+        if: startsWith(matrix.platform, 'macos')
+        working-directory: ./app
+        run: |
+          mkdir -p ~/private_keys/
+          echo '${{ secrets.api_key }}' > ~/private_keys/AuthKey_${{ secrets.api_key_id }}.p8
+          chmod +x ./scripts/set-up-keychain.sh
+          ./scripts/set-up-keychain.sh
+        env:
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.MAC_CERTS_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.MAC_CERTS }}
+          APPLE_SIGNING_IDENTITY: ${{ env.CERT_ID }}
+          APPLE_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
+
+      - name: Prepare for app notarization
+        if: startsWith(matrix.platform, 'macos')
+        # Import Apple API key for app notarization on macOS
+        run: xcrun notarytool store-credentials "notarytool-password"
+          --apple-id "$APPLE_ID"
+          --team-id "$APPLE_TEAM_ID"
+          --password "$APPLE_PASSWORD"
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
       - name: Build Bun Server
         working-directory: ./app
         run: bun run build:server
         env:
           BUILD_ARCH: ${{ matrix.arch }}
-      - name: Prepare for app notarization
-        if: startsWith(matrix.platform, 'macos')
-        # Import Apple API key for app notarization on macOS
-        run: |
-          mkdir -p ~/private_keys/
-          echo '${{ secrets.api_key }}' > ~/private_keys/AuthKey_${{ secrets.api_key_id }}.p8
 
       - name: Sign Bun Server
         if: startsWith(matrix.platform, 'macos')
         working-directory: ./app
-        run: bun run sign
+        run: bun run release-desktop
         env:
           BUILD_ARCH: ${{ matrix.arch }}
           # Signing
@@ -84,35 +110,12 @@ jobs:
           APPLE_SIGNING_IDENTITY: ${{ env.CERT_ID }}
           APPLE_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
 
-          # Notarization
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      - name: Copy Server Binary
-        if: matrix.platform != 'windows-latest'
-        working-directory: ./app
-        run: cp binaries/thorium-nova-server-${{ matrix.arch }} binaries/thorium-nova-server
-      - name: Copy Server Binary Windows
-        if: startsWith(matrix.platform,'windows')
-        working-directory: ./app
-        run: copy binaries\thorium-nova-server-${{ matrix.arch }} binaries\thorium-nova-server
-      - name: Build Electrobun Desktop
-        if: matrix.platform != 'ubuntu-24.04'
-        working-directory: ./app
-        run: bun run build-desktop
-        env:
-          ELECTROBUN_TEAMID: ${{ secrets.APPLE_TEAM_ID }}
-          ELECTROBUN_DEVELOPER_ID: ${{ secrets.APPLE_DEVELOPER_ID }}
-          ELECTROBUN_APPLEID: ${{ secrets.APPLE_ID }}
-          ELECTROBUN_APPLEIDPASS: ${{ secrets.APPLE_ID_PASSWORD }}
+          # Notarization uses the static keychain name above
       - name: Get Version
         id: get-version
         working-directory: ./app
         run: |
           bun .github/actions/getVersion.ts
-      - name: Remove Extra Server Binary
-        working-directory: ./app
-        run: rm binaries/thorium-nova-server
       - name: Release
         id: make-release
         uses: softprops/action-gh-release@v3
@@ -122,7 +125,6 @@ jobs:
           body: "See CHANGELOG.md for release notes. Download the asset for your platform. `thorium-nova-server-` assets run the server without running a kiosk. Be sure to run `chmod +x thorium-nova-server-ARCH` to make them executable."
           files: |
             app/binaries/*
-            app/artifacts/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

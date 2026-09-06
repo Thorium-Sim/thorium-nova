@@ -1,9 +1,9 @@
-import { exec, type ExecException } from "node:child_process";
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 
 import { getThoriumPath } from "@thorium/utils/.server/appPaths";
 import { zip } from "@thorium/utils/.server/zip";
+import { $ } from "bun";
 
 const ignoreFiles = [".git", ".DS_Store"];
 const thoriumPath = getThoriumPath("development");
@@ -59,21 +59,68 @@ const targetPlatform =
 
 const arch = (process.env.BUILD_ARCH ||
 	`${targetArch}-${targetPlatform}`) as keyof typeof platformMap;
+await Promise.all([
+	Bun.build({
+		entrypoints: [
+			"./desktop/exe.ts",
+			"./node_modules/@thorium-sim/rapier3d-node/dist/rapier_wasm3d_bg.wasm",
+		],
+		compile: {
+			autoloadBunfig: false,
+			autoloadDotenv: false,
+			autoloadPackageJson: false,
+			autoloadTsconfig: false,
+			windows: {
+				hideConsole: false,
+				title: "Thorium Nova",
+				description: "Starship bridge simulator.",
+				icon: "./desktop/icons/icon.ico",
+			},
+			outfile: `./binaries/thorium-nova-server-${arch}${arch.includes("pc-windows") ? ".exe" : ""}`,
+		},
+		naming: {
+			asset: "[name].[ext]", // equivalent to --asset-naming="[name].[ext]"
+		},
+		bytecode: true,
+		sourcemap: true,
+		minify: true,
+		define: {
+			"process.env.NODE_ENV": "'production'",
+		},
+		target: "bun",
+	}),
+	Bun.build({
+		entrypoints: [
+			"./desktop/index.tsx",
+			"./desktop/exe.ts",
+			"./node_modules/@thorium-sim/rapier3d-node/dist/rapier_wasm3d_bg.wasm",
+		],
+		compile: {
+			autoloadBunfig: false,
+			autoloadDotenv: false,
+			autoloadPackageJson: false,
+			autoloadTsconfig: false,
+			windows: {
+				hideConsole: true,
+				title: "Thorium Nova",
+				description: "Starship bridge simulator.",
+				icon: "./desktop/icons/icon.ico",
+			},
+			outfile: `./binaries/thorium-nova-server-windowed-${arch}${arch.includes("pc-windows") ? ".exe" : ""}`,
+		},
+		naming: {
+			asset: "[name].[ext]", // equivalent to --asset-naming="[name].[ext]"
+		},
+		bytecode: true,
+		sourcemap: true,
+		minify: true,
+		define: {
+			"process.env.NODE_ENV": "'production'",
+		},
+		target: "bun",
+	}),
+]);
+// Clean up the unneeded source maps in the binary folder
+await $`rm binaries/*.map`;
 
-// We have to run this next command using a shell since the --compile flag doesn't work with the Bun API.
-const command = `bun build --minify --define "process.env.NODE_ENV='production'" --asset-naming="[name].[ext]" --target=TARGET --outfile ./binaries/thorium-nova-server-ARCH --compile ./desktop/exe.ts ./node_modules/@thorium-sim/rapier3d-node/dist/rapier_wasm3d_bg.wasm`;
-const target = platformMap[arch];
-if (!target) {
-	throw new Error(
-		`Invalid arch or platform. Arch: ${process.arch}, Platform: ${process.platform}.`,
-	);
-}
-await new Promise<void>((res, rej) =>
-	exec(command.replace("TARGET", target).replace("ARCH", arch), (err: ExecException | null) =>
-		err ? rej(err) : res(),
-	),
-);
-console.info(
-	"Server compiled to ",
-	path.resolve("./binaries/thorium-nova-server-ARCH").replace("ARCH", arch),
-);
+console.info("Server compiled to ", path.resolve(`./binaries/thorium-nova-server-${arch}`));
