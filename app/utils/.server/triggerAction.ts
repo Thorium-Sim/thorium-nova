@@ -1,9 +1,8 @@
 import { DataContext } from "@thorium/.server/DataContext";
 import { router, type AllSends, type SendInputs } from "@thorium/.server/init/router";
 import { thoriumContext } from "@thorium/utils/.server/context";
-import { notifyActions, notifyEvents } from "@thorium/utils/.server/notifyActions";
-import { processTriggers } from "@thorium/utils/.server/processTriggers";
 import { callProcedure } from "@thorium/utils/live-query/.server/router";
+import { onCall } from "@thorium/utils/onCallHandler";
 
 export async function triggerAction<A extends AllSends>(
 	path: A,
@@ -21,22 +20,6 @@ export async function triggerAction<A extends AllSends>(
 		path: path,
 		rawInput: input,
 		ctx: context,
-		onCall: (opts, result) => {
-			const ecs = context?.flight?.ecs;
-			if (!ecs || opts.type !== "send") return;
-
-			void notifyActions(opts.path, opts.rawInput);
-			void notifyEvents(opts.path, {
-				...(opts.rawInput as any),
-				...(typeof result === "object" && !Array.isArray(result) ? result : {}),
-			});
-			processTriggers(ecs, {
-				event: opts.path,
-				values: {
-					...(opts.rawInput as any),
-					...(typeof result === "object" && !Array.isArray(result) ? result : {}),
-				},
-			});
-		},
+		onCall: (opts, result) => onCall(opts, result, context.ecs),
 	});
 }

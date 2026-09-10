@@ -134,6 +134,10 @@ export async function executeBlocks(
 				});
 				break;
 			}
+			case "SetLocalVariable": {
+				localVariables[block.variable] = getValueReference(block.value, localVariables, ecs);
+				break;
+			}
 			case "ShipSystemGetter": {
 				const entity = getEntityReference(block.entity, ecs, stepId, localVariables);
 				if (!entity) break;
@@ -278,28 +282,31 @@ export async function executeBlocks(
 
 						// Process the rest of the values to interpolate variables in
 						...Object.fromEntries(
-							Object.entries(block.values).map(([key, value]) => {
-								if (Array.isArray(value)) {
-									return [key, value.map((v) => processValues(v, key))];
-								}
-								return [key, processValues(value, key)];
-							}),
+							Object.entries(block.values).map(([key, value]) => [key, processValues(value, key)]),
 						),
 					};
 
 					theResult = await triggerAction(block.action as AllSends, values, localVariables);
 
-					function processValues(value: any, key: string) {
+					function processValues(value: any, key: string): any {
+						if (Array.isArray(value)) {
+							return value.map((v) => processValues(v, key));
+						}
+						if (value && typeof value === "object") {
+							return Object.fromEntries(
+								Object.entries(value).map(([key, prop]) => [key, processValues(prop, key)]),
+							);
+						}
 						const actionInputs =
 							// @ts-expect-error
 							router._def.procedures[block.action]._def.inputs?.[0]?._def.shape();
 
-						let val = getValueReference(
-							value,
-							localVariables,
-							ecs,
-							getBaseZodType(actionInputs[key]),
-						);
+						let baseType = undefined;
+						try {
+							baseType = getBaseZodType(actionInputs[key]);
+						} catch {}
+						let val = getValueReference(value, localVariables, ecs, baseType);
+
 						// Special handling for certain keys we know are entity id references or numbers
 						if (typeof val === "boolean" || typeof val === "number") {
 						} else if (value !== "" && !Number.isNaN(Number(val)) && key !== "alertLevel") {
@@ -313,6 +320,7 @@ export async function executeBlocks(
 								ecs.rng,
 							);
 						}
+
 						return val;
 					}
 				} catch (error) {

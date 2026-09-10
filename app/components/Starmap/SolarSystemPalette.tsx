@@ -53,7 +53,14 @@ function useSelectedObject() {
 	return null;
 }
 
-function ZoomToObject({ object }: { object: StarPlugin | PlanetPlugin | SolarSystemPlugin }) {
+function ZoomToObject({
+	object,
+}: {
+	object:
+		| Pick<StarPlugin, "satellite" | "radius">
+		| Pick<PlanetPlugin, "isPlanet" | "satellite">
+		| Pick<SolarSystemPlugin, "position">;
+}) {
 	const useStarmapStore = useGetStarmapStore();
 
 	if (!("satellite" in object)) {

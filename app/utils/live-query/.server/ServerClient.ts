@@ -2,6 +2,7 @@ import { encode } from "@msgpack/msgpack";
 import type { PubSub } from "@thorium/utils/live-query/.server/pubsub";
 import { type AnyRouter, callProcedure } from "@thorium/utils/live-query/.server/router";
 import type { inferRouterContext } from "@thorium/utils/live-query/.server/types";
+import { onCall } from "@thorium/utils/onCallHandler";
 import { SnapshotInterpolation } from "@thorium/utils/snapshot-interpolation/src";
 import type { Snapshot } from "@thorium/utils/snapshot-interpolation/src/types";
 import EventEmitter from "eventemitter3";
@@ -131,12 +132,13 @@ export class ServerClient<TRouter extends AnyRouter> {
 										// Preprocess the data slightly before sending
 										// to make it work better with msgpack
 										function processData(data: any): any {
-											if ("toJSON" in data) {
+											if (data && typeof data === "object" && "toJSON" in data) {
 												return data.toJSON();
 											}
 											if (Array.isArray(data)) {
 												return data.map((d) => processData(d));
 											}
+											return data;
 										}
 										sendData({ type: "netRequestData", data: { id, data: processData(data) } });
 
@@ -213,6 +215,15 @@ export class ServerClient<TRouter extends AnyRouter> {
 			type: "connected",
 		});
 
+		await callProcedure({
+			procedures: this.router._def.procedures,
+			path: "client.connected",
+			ctx: context,
+			rawInput: { clientId: this.id },
+			publish: {},
+			type: "send",
+			onCall: (opts, result) => onCall(opts, result, context.flight?.ecs),
+		});
 		this.connectionOpened();
 	}
 	send(data: SocketMessages) {

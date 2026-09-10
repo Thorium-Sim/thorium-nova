@@ -30,7 +30,7 @@ import { Tooltip } from "@thorium/ui/Tooltip";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import type { Coordinates } from "@thorium/utils/unitTypes";
-import clsx from "clsx";
+import { cn } from "cn";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { type PerspectiveCamera, Plane, Vector3 } from "three";
@@ -109,7 +109,7 @@ function ShipControls() {
 									objective: "patrol",
 								})
 							}
-							className={clsx("btn-sm btn-notice btn-outline", {
+							className={cn("btn-sm btn-notice btn-outline", {
 								"btn-active": starmapShip.behavior.objective === "patrol",
 							})}
 						>
@@ -124,7 +124,7 @@ function ShipControls() {
 									objective: "hold",
 								})
 							}
-							className={clsx("btn-sm btn-warning btn-outline", {
+							className={cn("btn-sm btn-warning btn-outline", {
 								"btn-active": starmapShip.behavior.objective === "hold",
 							})}
 						>
@@ -155,7 +155,7 @@ function ShipControls() {
 									},
 								});
 							}}
-							className={clsx("btn-sm btn-error btn-outline", {
+							className={cn("btn-sm btn-error btn-outline", {
 								"btn-active": starmapShip.behavior.objective === "attack",
 							})}
 						>
@@ -170,7 +170,7 @@ function ShipControls() {
 									objective: "defend",
 								})
 							}
-							className={clsx("btn-sm btn-primary btn-outline", {
+							className={cn("btn-sm btn-primary btn-outline", {
 								"btn-active": starmapShip.behavior.objective === "defend",
 							})}
 						>

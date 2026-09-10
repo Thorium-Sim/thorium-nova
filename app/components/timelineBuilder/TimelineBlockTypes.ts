@@ -10,6 +10,7 @@ export const timelineBlockTypes = [
 	"EntityPropertyIntoVariable",
 	"VariableIntoVariable",
 	"SetVariable",
+	"SetLocalVariable",
 	"Action",
 	"RandomIntoVariable",
 	"MathIntoVariable",
@@ -110,6 +111,7 @@ export const timelineBlockDefaults: {
 		variable: "",
 	},
 	SetVariable: { entity: "this timeline", variable: "", value: "" },
+	SetLocalVariable: { variable: "", value: "" },
 	Action: { action: "", values: {} },
 	RandomIntoVariable: {
 		number1: "0",
@@ -234,6 +236,11 @@ interface VariableIntoVariableBlock extends BaseBlock {
 	entity: string;
 	variable: string;
 }
+interface SetLocalVariableBlock extends BaseBlock {
+	type: "SetLocalVariable";
+	variable: string;
+	value: string;
+}
 
 interface SetVariableBlock extends BaseBlock {
 	type: "SetVariable";
@@ -311,6 +318,7 @@ export type TimelineBlock =
 	| EntityPropertyIntoVariableBlock
 	| VariableIntoVariableBlock
 	| SetVariableBlock
+	| SetLocalVariableBlock
 	| ActionBlock
 	| RandomIntoVariableBlock
 	| MathIntoVariableBlock

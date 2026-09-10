@@ -6,6 +6,7 @@ import type BaseShipSystemPlugin from "@thorium/.server/classes/Plugins/ShipSyst
 import type PhasersPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Phasers";
 import ReactorPlugin from "@thorium/.server/classes/Plugins/ShipSystems/Reactor";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
+import { spawnStations } from "@thorium/.server/spawners/stations";
 import type { position } from "@thorium/ecs-components/position";
 import { getInventoryTemplates } from "@thorium/utils/.server/getInventoryTemplates";
 import { loadGltf } from "@thorium/utils/.server/loadGltf";
@@ -45,6 +46,8 @@ export async function spawnShip(
 		tags?: string[];
 		assets?: Partial<InstanceType<typeof ShipPlugin>["assets"]>;
 		playerShip?: boolean;
+		stationComplement?: { pluginId: string; stationId?: string };
+		crewCount?: number;
 		flightMode: "nova" | "legacy";
 	},
 ) {
@@ -414,6 +417,34 @@ export async function spawnShip(
 			...info,
 			roomId: roomAssignment.id,
 		});
+	}
+
+	// Spawn the stations and the theme for player ships
+	if (params.playerShip) {
+		const activePlugins = dataContext.server.plugins.filter((p) => p.active);
+
+		let theme = template.theme || null;
+		if (!theme) {
+			theme = activePlugins.reduce((acc: { pluginId: string; themeId: string } | null, plugin) => {
+				if (acc) return acc;
+				const theme = plugin.aspects?.themes?.filter((theme) => theme.default)[0];
+				if (!theme) return null;
+				return { pluginId: plugin.id, themeId: theme.name };
+			}, null);
+		}
+		if (theme) {
+			entity.addComponent("theme", theme);
+		}
+
+		if (typeof params.crewCount !== "undefined") {
+			const stationEntities = spawnStations(
+				dataContext,
+				entity,
+				{ crewCount: params.crewCount, stationComplement: params.stationComplement },
+				params.flightMode,
+			);
+			extraEntities.push(...stationEntities);
+		}
 	}
 
 	return { ship: entity, extraEntities: systemEntities.concat(extraEntities) };

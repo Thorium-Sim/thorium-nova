@@ -317,7 +317,7 @@ export const starmapCore = t.router({
 			pubsub.publish.starmapCore.reputation({ entityId: input.targetId });
 		}),
 	spawnSearch: t.procedure
-		.input(z.object({ query: z.string(), allPlugins: z.boolean().optional() }))
+		.input(z.object({ query: z.string().optional(), allPlugins: z.boolean().optional() }))
 		.autoPublish([], () => null)
 
 		.request(({ ctx, input }) => {
@@ -328,6 +328,15 @@ export const starmapCore = t.router({
 					return acc.concat(plugin.aspects.ships);
 				}, []);
 
+			if (input.query === undefined) {
+				return shipTemplates.map(({ pluginName, name, category, assets: { vanity } }) => ({
+					id: `${name}-${pluginName}`,
+					pluginName,
+					name,
+					category,
+					vanity,
+				}));
+			}
 			// TODO August 20, 2022: Add faction here too
 			return matchSorter(shipTemplates, input.query, {
 				keys: ["name", "description", "category", "tags"],

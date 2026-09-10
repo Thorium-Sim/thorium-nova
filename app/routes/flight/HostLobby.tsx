@@ -99,9 +99,8 @@ function FlightButtons() {
 }
 function ClientAssignment() {
 	const [clients] = q.client.all.useNetRequest();
-	const [client] = q.client.get.useNetRequest({ clientId });
 	const [playerShips] = q.ship.players.useNetRequest();
-	const [selectedClient, setSelectedClient] = useState(client.id);
+	const [selectedClient, setSelectedClient] = useState(clientId);
 	const [flight] = q.flight.active.useNetRequest();
 
 	return (
@@ -213,6 +212,8 @@ function HostStationItem({
 	setSelectedClient: Dispatch<SetStateAction<string>>;
 }) {
 	const [clients] = q.client.all.useNetRequest();
+	const [playerShips] = q.ship.players.useNetRequest();
+
 	return (
 		<>
 			<li className="list-group-item" key={station.name}>
@@ -245,7 +246,12 @@ function HostStationItem({
 			</li>
 
 			{clients
-				.filter((c) => c.shipId === shipId && c.stationId === station.name)
+				.filter(
+					(c) =>
+						(c.shipId === shipId ||
+							(!playerShips.some((s) => s.id === c.shipId) && c.originalShipId === shipId)) &&
+						c.stationId === station.name,
+				)
 				.map((client) => (
 					<li
 						key={client.clientId}
@@ -264,6 +270,7 @@ function HostStationItem({
 									e.preventDefault();
 									q.client.setStation.netSend({
 										shipId: null,
+										stationId: null,
 										clientId: client.clientId,
 									});
 								}}

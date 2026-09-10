@@ -91,9 +91,10 @@ export abstract class Aspect extends ProxyDataStore {
 			write: _write,
 			safeMode: _safeMode,
 			writeThrottle: _writeThrottle,
+			pluginName,
 			...data
 		} = this;
-		return data;
+		return { pluginName, ...data };
 	}
 	async rename(name: string) {
 		const otherNames = this.plugin.aspects[this.kind].map((item) => item.name);

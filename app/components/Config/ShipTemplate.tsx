@@ -1,5 +1,5 @@
 import { q } from "@thorium/context/AppContext";
-import SearchableInput, { DefaultResultLabel } from "@thorium/ui/SearchableInput";
+import Select from "@thorium/ui/Select";
 
 export function ShipTemplate({
 	value,
@@ -8,50 +8,24 @@ export function ShipTemplate({
 	value: { pluginId: string; name: string } | undefined;
 	setValue: (value: { pluginId: string; name: string } | null) => void;
 }) {
-	const selectedSpawn = value
-		? {
-				id: value.name,
-				pluginName: value.pluginId,
-				name: value.name,
-				category: "",
-				vanity: "",
-			}
-		: null;
+	const [templates] = q.starmapCore.spawnSearch.useNetRequest({ allPlugins: true });
+
 	return (
-		<SearchableInput<{
-			id: string;
-			pluginName: string;
-			name: string;
-			category: string;
-			vanity: string;
-		}>
-			inputClassName="input-xs"
-			queryKey="spawn"
-			getOptions={async ({ queryKey, signal }) => {
-				const result = await q.starmapCore.spawnSearch.netRequest(
-					{ query: queryKey[1], allPlugins: true },
-					{ signal },
-				);
-				return result;
+		<Select
+			placeholder="Ship spawn search..."
+			label="Ship Template"
+			labelHidden
+			size="xxs"
+			items={templates.map((i) => ({ id: i.id, label: i.name }))}
+			selected={value ? `${value.name}-${value.pluginId}` : null}
+			setSelected={(value) => {
+				if (value) {
+					const [name, pluginId] = value.split("-");
+					setValue({ name, pluginId });
+				} else {
+					setValue(null);
+				}
 			}}
-			ResultLabel={({ active, result, selected }) => (
-				<DefaultResultLabel active={active} selected={selected}>
-					<div className="flex gap-4">
-						<img src={result.vanity} alt="" className="h-8 w-8" />
-						<div>
-							<p className="m-0 leading-none">{result.name}</p>
-							<p className="m-0 leading-none">
-								<small>{result.category}</small>
-							</p>
-						</div>
-					</div>
-				</DefaultResultLabel>
-			)}
-			setSelected={(item) =>
-				setValue(item ? { pluginId: item?.pluginName, name: item?.name } : null)
-			}
-			selected={selectedSpawn}
-			placeholder="Ship Spawn Search..."
 		/>
 	);
 }

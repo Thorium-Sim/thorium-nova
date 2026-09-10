@@ -24,6 +24,7 @@ import { MathIntoVariable } from "@thorium/components/timelineBuilder/MathIntoVa
 import { NoteBlock } from "@thorium/components/timelineBuilder/NoteBlock";
 import { RandomIntoVariable } from "@thorium/components/timelineBuilder/RandomBlock";
 import { ResultPropertyIntoVariable } from "@thorium/components/timelineBuilder/ResultPropertyGetter";
+import { SetLocalVariable } from "@thorium/components/timelineBuilder/SetLocalVariable";
 import { ShipSystemGetter } from "@thorium/components/timelineBuilder/ShipSystemGetter";
 import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
 import { TimelineAvailabilityBlock } from "@thorium/components/timelineBuilder/TimelineAvailabilityBlock";
@@ -87,6 +88,8 @@ export function RenderBlock({
 					<VariableGetter {...block} update={update} />
 				) : block.type === "SetVariable" ? (
 					<SetVariable {...block} update={update} />
+				) : block.type === "SetLocalVariable" ? (
+					<SetLocalVariable {...block} update={update} />
 				) : block.type === "Action" ? (
 					<ActionBlock {...block} update={update} />
 				) : block.type === "RandomIntoVariable" ? (

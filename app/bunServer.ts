@@ -12,19 +12,15 @@ import { router } from "@thorium/.server/init/router";
 import { thoriumContext } from "@thorium/utils/.server/context";
 import { bunDataStoreProps, setBasePath } from "@thorium/utils/.server/db-fs/bunDataStoreProps";
 import { loadPlugins } from "@thorium/utils/.server/db-fs/loadPlugins";
-import { notifyActions, notifyEvents } from "@thorium/utils/.server/notifyActions";
-import { processTriggers } from "@thorium/utils/.server/processTriggers";
 import { snapshot } from "@thorium/utils/.server/snapshot";
 import { vanity } from "@thorium/utils/.server/vanity";
 import { liveQueryPlugin } from "@thorium/utils/live-query/.server/adapters/hono-adapter";
-import type { ProcedureCallOptions } from "@thorium/utils/live-query/.server/procedure";
+import { onCall } from "@thorium/utils/onCallHandler";
 import { Hono } from "hono";
 import { serveStatic } from "hono/bun";
 import { websocket, upgradeWebSocket } from "hono/bun";
 import { cors } from "hono/cors";
 import { getMimeType } from "hono/utils/mime";
-
-import { isObject } from "./typeguards/isObject";
 
 function messageParent(message: any) {
 	if (process.send) {
@@ -91,23 +87,7 @@ export async function startHttpServer({
 				router,
 				upgradeWebSocket,
 				extraContext: database,
-				onCall: (opts: ProcedureCallOptions, result: unknown) => {
-					const ecs = database?.flight?.ecs;
-					if (!ecs || opts.type !== "send") return;
-					const rawInputObj = isObject(opts.rawInput) ? opts.rawInput : {};
-					void notifyActions(opts.path, rawInputObj);
-					void notifyEvents(opts.path, {
-						...rawInputObj,
-						...(typeof result === "object" && !Array.isArray(result) ? result : {}),
-					});
-					void processTriggers(ecs, {
-						event: opts.path,
-						values: {
-							...rawInputObj,
-							...(typeof result === "object" && !Array.isArray(result) ? result : {}),
-						},
-					});
-				},
+				onCall: (opts, result) => onCall(opts, result, database.flight?.ecs),
 			});
 			app.use(middleware);
 			app.get(

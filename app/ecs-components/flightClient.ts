@@ -5,6 +5,8 @@ export const flightClient = z
 		clientId: z.string().default(""),
 		flightId: z.string().default(""),
 		shipId: z.number().nullable().default(null),
+		/** During training, if the client is assigned to another isolated ship, this provides a link back to the original ship. */
+		originalShipId: z.number().nullable().default(null),
 		stationId: z.string().nullable().default(null),
 		currentCard: z.string().nullable().default(null),
 		loginName: z.string().default(""),

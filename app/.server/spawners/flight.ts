@@ -1,38 +1,15 @@
 import { FlightDataModel } from "@thorium/.server/classes/FlightDataModel";
-import type BasePlugin from "@thorium/.server/classes/Plugins";
 import type ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
-import type StationComplementPlugin from "@thorium/.server/classes/Plugins/StationComplement";
 import type { DataContext } from "@thorium/.server/DataContext";
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { flightStartShips } from "@thorium/.server/spawners/flightStartShips";
 import { spawnShip } from "@thorium/.server/spawners/ship";
 import { spawnSolarSystem } from "@thorium/.server/spawners/solarSystem";
-import { isPanelElement } from "@thorium/ecs-components/engineeringPanel";
-import {
-	panelElementList,
-	type PanelElementTypes,
-} from "@thorium/ecs-components/engineeringPanelElementConfig";
 import type { position as positionComponent } from "@thorium/ecs-components/position";
 import { type ECS, Entity } from "@thorium/utils/ecs";
-import { getPluginTextPatterns, interpolateText } from "@thorium/utils/interpolationEngine";
-import { createRNG, type RNG } from "@thorium/utils/rng";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { Vector3 } from "three";
 import z from "zod";
-
-const flightStartShips = z
-	.array(
-		z.object({
-			crewCount: z.number(),
-			shipName: z.string(),
-			theme: z.object({ pluginId: z.string(), themeId: z.string() }).optional(),
-			shipTemplate: z.object({
-				pluginId: z.string(),
-				shipId: z.string(),
-			}),
-			stationComplement: z.object({ pluginId: z.string(), stationId: z.string() }).optional(),
-		}),
-	)
-	.nonempty();
 
 export const flightStartInput = z.object({
 	flightName: z.string(),
@@ -156,114 +133,11 @@ export async function startFlight(
 			tags: ["player"],
 			playerShip: true,
 			flightMode: mode,
+			crewCount: ship.crewCount,
+			stationComplement: ship.stationComplement,
 		});
 
 		extraEntities.forEach((s) => ctx.flight?.ecs.addEntity(s));
-		let theme = ship.theme || null;
-		if (!theme) {
-			theme = activePlugins.reduce((acc: { pluginId: string; themeId: string } | null, plugin) => {
-				if (acc) return acc;
-				const theme = plugin.aspects?.themes?.filter((theme) => theme.default)[0];
-				if (!theme) return null;
-				return { pluginId: plugin.id, themeId: theme.name };
-			}, null);
-		}
-		if (theme) {
-			shipEntity.addComponent("theme", theme);
-		}
-
-		// First see if there is a station complement
-		// that matches the specific one that was passed in
-		const stationComplement = getStationComplement(mode, activePlugins, ship);
-		shipEntity.addComponent("stationComplement", {
-			name: stationComplement?.name || "Station Complement",
-			stations: stationComplement?.stations || [],
-		});
-
-		// Generate Engineering panels for any cards that need them
-		for (const station of shipEntity.components.stationComplement?.stations || []) {
-			for (const card of station.cards) {
-				if (card.component === "EngineeringPanels") {
-					const panel = new Entity();
-
-					panel.addComponent("isPanel", { shipId: shipEntity.id });
-					if (card.config?.tags) {
-						panel.addComponent("tags", { tags: card.config.tags });
-					}
-					ctx.flight.ecs.addEntity(panel);
-
-					card.config = { ...card.config, panelId: panel.id };
-					if ("config" in card && card.config && "elements" in card.config) {
-						for (const { name, ...element } of card.config.elements.slice(0, 24)) {
-							const elementEntity = new Entity();
-							elementEntity.addComponent("identity", { name });
-							elementEntity.addComponent("isPanelElement", {
-								panelId: panel.id,
-								shipId: shipEntity.id,
-								element,
-							});
-							ctx.flight.ecs.addEntity(elementEntity);
-						}
-					} else {
-						let config = Object.assign(
-							{
-								elementCount: 12,
-								elementNameTemplate: `{~A,B,C,D,E}{~A,B,C,D,E}-RANDOM(10,99)`,
-								randomSeed: ctx.flight.ecs.rng.nextString(),
-							},
-
-							card.config,
-						);
-						const rng = createRNG(config.randomSeed);
-						const filteredTypes: PanelElementTypes[] = [];
-						const includedTypes: PanelElementTypes[] = [];
-						const elementCount = Math.min(config.elementCount, 24);
-
-						function addElement(
-							type: PanelElementTypes = rng.nextFromList(
-								panelElementList.filter((v) => !filteredTypes.includes(v)),
-							),
-						) {
-							const elementEntity = new Entity();
-							elementEntity.addComponent("identity", {
-								name: interpolateText(
-									config.elementNameTemplate,
-									{},
-									getPluginTextPatterns(ctx.server),
-									rng,
-								),
-							});
-							elementEntity.addComponent("isPanelElement", {
-								panelId: panel.id,
-								shipId: shipEntity.id,
-								element: getPanelElement(type, rng),
-							});
-							ctx.flight!.ecs.addEntity(elementEntity);
-							includedTypes.push(type);
-							return type;
-						}
-						for (let i = 0; i < elementCount; i++) {
-							const type = addElement();
-							if (
-								i < elementCount - 1 &&
-								type === "cableSocket" &&
-								includedTypes.filter((i) => i === "cableSocket").length < 4
-							) {
-								// Add another cable socket, just to add more variety
-								addElement("cableSocket");
-							}
-
-							// Remove element types as necessary
-							// Only one keypad
-							if (type === "numberPad") filteredTypes.push(type);
-							// No more than 20% of the panel should be one type
-							if (includedTypes.filter((v) => v === type).length >= elementCount / 5)
-								filteredTypes.push(type);
-						}
-					}
-				}
-			}
-		}
 
 		ctx.flight.ecs.addEntity(shipEntity);
 	}
@@ -290,79 +164,6 @@ export async function startFlight(
 	await ctx.flight.write(true);
 
 	return ctx.flight;
-}
-
-function getPanelElement(
-	type: z.infer<typeof isPanelElement>["element"]["type"],
-	rng: RNG,
-): z.infer<typeof isPanelElement>["element"] {
-	switch (type) {
-		case "triSwitch":
-		case "numberPad":
-			return { type };
-		case "pressButton":
-		case "switch":
-			return {
-				type,
-				color: rng.nextFromList([
-					"red",
-					"orange",
-					"yellow",
-					"#00ff00",
-					"cyan",
-					"blue",
-					"rebeccapurple",
-				]),
-			};
-		case "cableSocket":
-			// Even integer
-			return { type, ports: rng.nextInt(2, 5) * 2 };
-		// case "numberedRotor":
-		// 	return { type, max: 6 };
-		case "numberedSlider":
-			return { type, max: rng.nextInt(4, 8) };
-		default:
-			const typeName = type;
-			typeName satisfies never;
-			throw new Error("Invalid panel element type");
-	}
-}
-
-function getStationComplement(
-	mode: "nova" | "legacy",
-	activePlugins: BasePlugin[],
-	ship: z.infer<typeof flightStartShips>[0],
-) {
-	let stationComplement = activePlugins.reduce((acc: StationComplementPlugin | null, plugin) => {
-		if (acc) return acc;
-		if (ship.stationComplement && plugin.id !== ship.stationComplement.pluginId) return acc;
-		if (ship.stationComplement) {
-			return (
-				plugin.aspects.stationComplements.find(
-					(pluginStationComplement) =>
-						pluginStationComplement.name === ship.stationComplement?.stationId,
-				) || null
-			);
-		}
-		return null;
-	}, null);
-	// No station complement? Find the one that best fits from the default plugin
-	if (!stationComplement) {
-		stationComplement = activePlugins.reduce((acc: StationComplementPlugin | null, plugin) => {
-			if (acc) return acc;
-			if (!plugin.default) return acc;
-			// TODO November 18, 2021 - Check to see if the ship is a big ship or a little ship
-			// and assign the appropriate station complement based on that.
-			return (
-				plugin.aspects.stationComplements.find(
-					(pluginStationComplement) =>
-						pluginStationComplement.flightMode === mode &&
-						pluginStationComplement.stationCount === ship.crewCount,
-				) || null
-			);
-		}, null);
-	}
-	return stationComplement;
 }
 
 export type FlightStartingPoint = {

@@ -60,11 +60,14 @@ export function AddBlockButton({
 	const hasEvents = useActiveCores().some((c) => c.component === "EventsCore");
 	const [macros] = q.plugin.macro.all.useNetRequest({ type: "macro" });
 
-	const groupedMacros = macros.reduce((prev: Record<string, MacroPlugin[]>, next) => {
-		if (!prev[next.category]) prev[next.category] = [];
-		prev[next.category].push(next);
-		return prev;
-	}, {});
+	const groupedMacros = macros.reduce(
+		(prev: Record<string, Pick<MacroPlugin, "category" | "pluginName" | "name">[]>, next) => {
+			if (!prev[next.category]) prev[next.category] = [];
+			prev[next.category].push(next);
+			return prev;
+		},
+		{},
+	);
 	const definedVariables = useDefinedVariables();
 
 	useEventListener(AddActionEvent.name, (event: AddActionEvent) => {
@@ -153,10 +156,10 @@ export function AddBlockButton({
 											<Menu>
 												{macros.map((m) => (
 													<StyledMenuItem
-														key={`${m.plugin?.id}-${m.name}`}
+														key={`${m.pluginName}-${m.name}`}
 														onAction={() => {
 															onAddBlock("Macro", {
-																pluginId: m.plugin?.id,
+																pluginId: m.pluginName,
 																macroId: m.name,
 															});
 														}}
@@ -227,6 +230,9 @@ export function AddBlockButton({
 						</StyledMenuItem>
 						<Popover className={popoverClass}>
 							<Menu>
+								<StyledMenuItem onAction={() => onAddBlock("SetLocalVariable")}>
+									Set Local Variable
+								</StyledMenuItem>
 								<StyledMenuItem onAction={() => onAddBlock("EntityPropertyIntoVariable")}>
 									Save Property from Entity as Variable
 								</StyledMenuItem>

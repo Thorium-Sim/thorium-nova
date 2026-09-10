@@ -90,7 +90,8 @@ export const ship = t.router({
 		.autoPublish(["isPlayerShip"], () => null)
 		.request(({ ctx }) => {
 			return (
-				ctx.flight?.playerShips.map((ship) => {
+				ctx.flight?.playerShips.flatMap((ship) => {
+					if (ship.components.isTrainingShip) return [];
 					const systemId = ship.components.position?.parentId;
 					const systemPosition = systemId
 						? ctx.flight?.ecs.getEntityById(systemId)?.components.position || null
@@ -202,6 +203,9 @@ export const ship = t.router({
 					})
 					.optional(),
 				tags: z.array(z.string()).optional(),
+				playerShip: z.boolean().optional(),
+				crewCount: z.number().optional(),
+				stationComplement: z.object({ pluginId: z.string(), stationId: z.string() }).optional(),
 			}),
 		)
 		.meta({
@@ -226,6 +230,14 @@ export const ship = t.router({
 						type: "number",
 						helper: "How far to place the ship from the nearby entity in kilometers.",
 					},
+					playerShip: {
+						type: "checkbox",
+						helper: "Whether the ship will be piloted by a human crew.",
+					},
+					crewCount: {
+						type: "number",
+						helper: "How many human crew stations this ship has",
+					},
 				};
 			},
 		})
@@ -248,6 +260,9 @@ export const ship = t.router({
 				),
 				tags: input.tags,
 				flightMode: ctx.flight.mode,
+				playerShip: input.playerShip,
+				crewCount: input.crewCount,
+				stationComplement: input.stationComplement,
 			});
 
 			const { position, systemId } = getPosition(ctx.ecs, input);

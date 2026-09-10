@@ -397,6 +397,8 @@ const quotes = [
 	"A revolution must be started by yourself. An egg, opened from the outside, is food; opened from the inside, it is a new life.",
 	"Set reasonable goals and go after them with unreasonable effort",
 	"Is the natural state of the soul chaos or quiet? Neither, it's transient, shifting like water.",
+	// https://bsky.app/profile/emilyhare.com/post/3murts377c22u
+	"Don't cling to a mistake just because you spent a lot of time making it.",
 	// Niko Stratis https://bsky.app/profile/nikostratis.com/post/3mgpgk4ivzk25
 	"You can't critique anything if you don't know how to love something.",
 	// Gwendolyn Brooks

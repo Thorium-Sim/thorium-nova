@@ -23,6 +23,25 @@ const clientSettings = z.object({
 export type ClientSettings = z.infer<typeof clientSettings>;
 
 export const client = t.router({
+	connected: t.procedure
+		.input(z.object({ clientId: z.string() }))
+		.meta({ event: true })
+		.output(
+			z.object({
+				name: z.string(),
+				clientId: z.string(),
+				flightId: z.string().optional(),
+				shipId: z.number().optional().nullable(),
+				stationId: z.string().optional().nullable(),
+			}),
+		)
+		.send(({ ctx, input }) => {
+			// This is just used for event triggers
+			const { name } = ctx.server.clients[input.clientId];
+			const { flightId, shipId, stationId } =
+				ctx.getFlightClient(input.clientId)?.components.flightClient || {};
+			return { name, clientId: input.clientId, flightId, shipId, stationId };
+		}),
 	get: t.procedure
 		.input(z.object({ clientId: z.string() }))
 		.filter((publish: { clientId: string } | null, { input }) => {
@@ -55,7 +74,7 @@ export const client = t.router({
 						name: client.name,
 						connected: client.connected,
 						settings: client.settings,
-						...flightClient!.components.flightClient!,
+						...flightClient?.components.flightClient!,
 					};
 				})
 				.filter((client) => client.connected);
@@ -73,14 +92,22 @@ export const client = t.router({
 		}),
 	setStation: t.procedure
 		.input(
-			z.union([
-				z.object({
-					shipId: z.number(),
-					stationId: z.string(),
-					clientId: z.string(),
-				}),
-				z.object({ shipId: z.null(), clientId: z.string() }),
-			]),
+			z.object({
+				shipId: z.number().nullable(),
+				originalShipId: z.number().nullable().optional(),
+				stationId: z.string().nullable(),
+				clientId: z.string(),
+			}),
+		)
+		.meta({ event: true, action: true })
+		.output(
+			z.object({
+				name: z.string(),
+				clientId: z.string(),
+				flightId: z.string().optional(),
+				shipId: z.number().optional().nullable(),
+				stationId: z.string().optional().nullable(),
+			}),
 		)
 		.send(({ ctx, input }) => {
 			const flightClient = ctx.getFlightClient(input.clientId);
@@ -93,6 +120,7 @@ export const client = t.router({
 				flightClient.updateComponent("flightClient", {
 					stationId: null,
 					shipId: null,
+					originalShipId: null,
 				});
 				const clientId = flightClient.components.flightClient!.clientId;
 				pubsub.publish.client.all();
@@ -105,7 +133,11 @@ export const client = t.router({
 				pubsub.publish.ship.get({
 					shipId: flightClient.components.flightClient?.shipId || -1,
 				});
-				return flightClient;
+
+				const { name } = ctx.server.clients[input.clientId];
+				const { flightId, shipId, stationId } =
+					ctx.getFlightClient(input.clientId)?.components.flightClient || {};
+				return { name, clientId: input.clientId, flightId, shipId, stationId };
 			}
 			const ship = ctx.ecs.getEntityById(input.shipId);
 			if (!ship?.components.isShip) {
@@ -123,6 +155,7 @@ export const client = t.router({
 			flightClient.updateComponent("flightClient", {
 				stationId: input.stationId,
 				shipId: input.shipId,
+				originalShipId: input.originalShipId || input.shipId,
 			});
 
 			const clientId = flightClient.components.flightClient!.clientId;
@@ -136,7 +169,11 @@ export const client = t.router({
 			pubsub.publish.ship.get({
 				shipId: input.shipId,
 			});
-			return flightClient;
+
+			const { name } = ctx.server.clients[input.clientId];
+			const { flightId, shipId, stationId } =
+				ctx.getFlightClient(input.clientId)?.components.flightClient || {};
+			return { name, clientId: input.clientId, flightId, shipId, stationId };
 		}),
 	setCard: t.procedure
 		.meta({ event: true, action: true })
@@ -202,7 +239,8 @@ export const client = t.router({
 			if (!ctx.flight) throw new Error("Flight has not started.");
 			const flightClient = ctx.getFlightClient(input.clientId);
 			if (!flightClient?.components.flightClient) throw new Error("Invalid flight client");
-			const { shipId, stationId } = flightClient.components.flightClient;
+			const { shipId, stationId, training: trainingActive } = flightClient.components.flightClient;
+			if (trainingActive) return;
 			if (!shipId) throw new Error("Invalid flight client");
 			const ship = ctx.ecs.getEntityById(shipId);
 
@@ -260,6 +298,23 @@ export const client = t.router({
 				clientId: flightClient.components.flightClient?.clientId || "",
 			});
 			pubsub.publish.flight.timelines();
+		}),
+	stopTraining: t.procedure
+		.input(z.object({ clientId: z.string() }))
+		.meta({ action: true })
+		.send(({ ctx, input }) => {
+			if (!ctx.flight) throw new Error("Flight has not started.");
+			const flightClient = ctx.getFlightClient(input.clientId);
+			if (!flightClient?.components.flightClient) throw new Error("Invalid flight client");
+			const { training } = flightClient.components.flightClient;
+			if (!training) throw new Error("No training is active");
+			flightClient.updateComponent("flightClient", { training: null });
+			// TODO September 9, 2026 - There needs to be a more aggressive cleanup configuration.
+			// Some way to remove contacts, objects, conditions, triggers, and child timelines spawned by the timeline.
+			pubsub.publish.client.all();
+			pubsub.publish.client.get({
+				clientId: flightClient.components.flightClient?.clientId || "",
+			});
 		}),
 	setTraining: t.procedure
 		.input(
