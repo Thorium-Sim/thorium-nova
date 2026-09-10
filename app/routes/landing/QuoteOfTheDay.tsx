@@ -443,6 +443,9 @@ const quotes = [
 	"What a man thinks of himself, that it is which determines, or rather indicates, his fate.",
 	// Shroyer
 	"To be human is to be capable of both incredible good and terrifying evil. If we deny either side of that potential, we're living unaware.",
+	// Antonio Gramsci
+	"The old world is dying, and the new world struggles to be born: now is the time of monsters.",
+	"I’m a pessimist because of intelligence, but an optimist because of will.",
 ];
 
 const QuoteOfTheDay = () => {
