@@ -3,5 +3,5 @@ import type { Entity } from "@thorium/utils/ecs";
 
 export const componentEntityMaps = new Map<
 	ComponentIds,
-	Set<{ procedure: string; entityMap: (entity: Entity) => any }>
+	Set<{ procedure: string; entityMap: (entity: Pick<Entity, "id" | "components">) => any }>
 >();

@@ -23,6 +23,7 @@ export function spawnTimeline(
 			timelineId: timelineEntity.id,
 			timelineStepId: stepItem.id,
 		});
+		step.addComponent("disposable", { entityIds: [timelineEntity.id] });
 		addEntity(step);
 		stepIds.push(step.id);
 	}
@@ -62,6 +63,7 @@ export function spawnTimeline(
 				description: conversation.description,
 			});
 			conversationEntity.addComponent("tags", { tags: conversation.tags });
+			conversationEntity.addComponent("disposable", { entityIds: [timelineEntity.id] });
 			addEntity(conversationEntity);
 		}
 	}

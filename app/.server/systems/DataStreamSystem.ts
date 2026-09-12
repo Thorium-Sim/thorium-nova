@@ -18,6 +18,7 @@ export class DataStreamSystem extends System {
 			}
 		}
 
+		// Trigger publishes for requests that correspond to a specific component update
 		for (const key of this.ecs.changeBatch) {
 			const [entityId, component] = key.split("-");
 			const entity = this.ecs.getEntityById(Number(entityId));
@@ -34,6 +35,23 @@ export class DataStreamSystem extends System {
 				}
 			});
 		}
+
+		// Trigger publishes for requests that relate to an entity that was removed
+		for (const [, entity] of this.ecs.removeBatch) {
+			for (const component in entity.components) {
+				componentEntityMaps.get(component as ComponentIds)?.forEach(({ entityMap, procedure }) => {
+					const filter = entityMap(entity);
+					if (Array.isArray(filter)) {
+						for (const f of filter) {
+							pubsub.directPublish(procedure, f);
+						}
+					} else {
+						pubsub.directPublish(procedure, filter);
+					}
+				});
+			}
+		}
+		this.ecs.removeBatch.clear();
 		this.ecs.changeBatch.clear();
 	}
 }

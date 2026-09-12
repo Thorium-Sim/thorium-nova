@@ -30,32 +30,24 @@ export const WelcomeButtons = ({ className }: { className?: string }) => {
 function FlightButtons() {
 	const [flight] = q.flight.active.useNetRequest();
 
-	return flight ? (
-		<>
-			<NavLink className="btn btn-primary btn-outline" to="/flight">
-				Go To Flight Lobby
-			</NavLink>
-			{process.env.NODE_ENV !== "production" && (
-				<NavLink className="btn btn-info btn-outline" to="/cards">
-					Go To Card Development
-				</NavLink>
-			)}
-			<Button className="btn btn-error btn-outline" onClick={() => q.flight.stop.netSend()}>
-				Stop Flight
-			</Button>
-		</>
-	) : (
-		<ClientButtons />
-	);
-}
-
-function ClientButtons() {
 	return (
 		<>
-			<NavLink className="btn btn-primary btn-outline" to="/flight/quick/ship">
-				Start Flight
-			</NavLink>
-			{/* <Disclosure>
+			{flight ? (
+				<NavLink className="btn btn-primary btn-outline" to="/flight">
+					Go To Flight Lobby
+				</NavLink>
+			) : (
+				<>
+					<NavLink className="btn btn-primary btn-outline" to="/flight/quick/ship">
+						Start Flight
+					</NavLink>
+					<NavLink
+						className="btn btn-warning btn-outline"
+						to="/flight/quick/ship?missionId=Training&missionPluginId=Thorium Default"
+					>
+						Start Training Flight
+					</NavLink>
+					{/* <Disclosure>
 			<Disclosure.Button className="btn btn-info btn-outline">
 				Load a Saved Flight
 			</Disclosure.Button>
@@ -73,23 +65,16 @@ function ClientButtons() {
 				<Flights />
 			</Suspense>
 		</Disclosure> */}
-
-			{/* <Button className="btn btn-warning btn-outline">Join a Server</Button> */}
+				</>
+			)}
 			<NavLink className="btn btn-notice btn-outline" to="/config">
 				Configure Plugins
 			</NavLink>
-
-			{/* {process.env.NODE_ENV === "production" &&
-	location.protocol !== "https:" && (
-		<a
-			className="btn btn-error btn-outline"
-			href={`https://${location.hostname}:${
-				Number(location.port) + 1
-			}`}
-		>
-			Use HTTPS
-		</a>
-	)} */}
+			{flight ? (
+				<Button className="btn btn-error btn-outline" onClick={() => q.flight.stop.netSend()}>
+					Stop Flight
+				</Button>
+			) : null}
 		</>
 	);
 }

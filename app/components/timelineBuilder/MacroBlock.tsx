@@ -107,3 +107,13 @@ function getRequiredVariables(blocks: TimelineBlock[], definedVariables: string[
 	}
 	return output.filter((a, i, arr) => arr.indexOf(a) === i && !definedVariables.includes(a));
 }
+
+export function getHasMacroSlotBlock(blocks: TimelineBlock[]): boolean {
+	for (const block of blocks) {
+		if (block.type === "MacroSlot") return true;
+		if ("triggerBlocks" in block) {
+			if (getHasMacroSlotBlock(block.triggerBlocks)) return true;
+		}
+	}
+	return false;
+}

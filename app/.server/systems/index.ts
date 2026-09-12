@@ -5,6 +5,7 @@ import { CoolantLoopSystem } from "@thorium/.server/systems/CoolantLoopSystem";
  * of the systems and re-export them in an array
  */
 import { DamageCheckSystem } from "@thorium/.server/systems/DamageCheckSystem";
+import { DisposalSystem } from "@thorium/.server/systems/DisposalSystem";
 import { EngineeringPanelAssignmentSystem } from "@thorium/.server/systems/EngineeringPanelAssignmentSystem";
 import { ExocompPowerSystem, ExocompSystem } from "@thorium/.server/systems/ExocompSystem";
 import { legacySystems } from "@thorium/.server/systems/Legacy";
@@ -95,6 +96,7 @@ const systems = [
 	IsDestroyedSystem,
 	// We slot the legacy systems in right before these two shared systems
 	...legacySystems,
+	DisposalSystem,
 	DataStreamSystem,
 	ProcessTriggersSystem,
 ];

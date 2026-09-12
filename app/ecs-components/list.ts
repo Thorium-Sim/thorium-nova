@@ -64,3 +64,4 @@ export * from "./isStarbase";
 export { shipAlerts } from "./shipAlerts";
 export { damageControlAssignment } from "./damageControl";
 export * from "./engineeringPanel";
+export * from "./disposable";

@@ -339,4 +339,46 @@ export const thorium = t.router({
 			if (!publish) return null;
 			return publish;
 		}),
+	/**
+	 * This can be used to make an entity be removed when the parent is removed. To keep an entity from
+	 * ever being automatically removed, it can be assigned the flight as its parent.
+	 */
+	markDisposableParent: t.procedure
+		.input(
+			z.object({
+				entityId: z.number(),
+				parentId: z.number(),
+			}),
+		)
+		.meta({ action: true })
+		.send(({ ctx, input }) => {
+			const entity = ctx.ecs.getEntityById(input.entityId);
+			if (entity && !entity?.components.disposable?.entityIds.includes(input.parentId)) {
+				entity?.updateComponent("disposable", {
+					entityIds: [...(entity.components.disposable?.entityIds || []), input.parentId],
+				});
+			}
+		}),
+	/**
+	 * This will automatically remove the entity if it no longer has any disposable parents.
+	 */
+	unmarkDisposableParent: t.procedure
+		.input(
+			z.object({
+				entityId: z.number(),
+				parentId: z.number().optional(),
+			}),
+		)
+		.meta({ action: true })
+		.send(({ ctx, input }) => {
+			const entity = ctx.ecs.getEntityById(input.entityId);
+			if (!entity?.components.disposable) return;
+			entity?.updateComponent("disposable", {
+				entityIds:
+					entity.components.disposable?.entityIds.filter((e) => e !== input.parentId) || [],
+			});
+			if (entity.components.disposable.entityIds.length === 0) {
+				ctx.ecs.removeEntity(entity);
+			}
+		}),
 });

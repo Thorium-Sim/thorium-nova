@@ -447,7 +447,16 @@ export async function spawnShip(
 		}
 	}
 
-	return { ship: entity, extraEntities: systemEntities.concat(extraEntities) };
+	const allExtraEntities = systemEntities.concat(extraEntities);
+
+	// Mark the extra entities as disposable so they are automatically cleaned up when the ship is removed.
+	for (const extraEntity of allExtraEntities) {
+		extraEntity.updateComponent("disposable", {
+			entityIds: [...(extraEntity.components.disposable?.entityIds || []), entity.id],
+		});
+	}
+
+	return { ship: entity, extraEntities: allExtraEntities };
 }
 
 async function getMeshSize(url: string | null): Promise<Vector3> {

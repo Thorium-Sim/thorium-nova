@@ -236,6 +236,8 @@ export const exocomps = t.router({
 				...assignmentProps,
 			});
 
+			assignment.addComponent("disposable", { entityIds: [shipId] });
+
 			ctx.ecs.addEntity(assignment);
 			return {
 				assignmentId: assignment.id,

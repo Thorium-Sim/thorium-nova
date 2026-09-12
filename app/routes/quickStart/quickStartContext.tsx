@@ -4,6 +4,7 @@ import { useLocalStorageReducer } from "@thorium/hooks/useLocalStorage";
 import uniqid from "@thorium/utils/uniqid";
 import { produce } from "immer";
 import { createContext, useContext, useEffect, type ReactNode } from "react";
+import { useSearchParams } from "react-router";
 
 export interface FlightConfigState {
 	hasFlightDirector: boolean;
@@ -176,6 +177,21 @@ export function FlightQuickStartProvider({ children }: { children: ReactNode }) 
 		});
 	}, [set]);
 
+	const [searchParams, setSearchParams] = useSearchParams();
+	const missionId = searchParams.get("missionId");
+	const missionPluginId = searchParams.get("missionPluginId");
+	useEffect(() => {
+		if (missionId && missionPluginId) {
+			set({ type: "missionId", missionId: { missionId, pluginId: missionPluginId } });
+			setSearchParams((params) => {
+				params.delete("missionId");
+				params.delete("missionPluginId");
+				return params;
+			});
+		}
+	}, [set, missionId, missionPluginId]);
+
+	console.log(value[0].missionId);
 	return <QuickStartContext.Provider value={value}>{children}</QuickStartContext.Provider>;
 }
 

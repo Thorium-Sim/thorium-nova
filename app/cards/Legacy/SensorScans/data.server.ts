@@ -126,6 +126,8 @@ export const sensorScans = t.router({
 				timestamp: Date.now(),
 				// TODO September 20, 2025 - Make it so a contact can be selected by the crew to be the focus of the scan
 			});
+			scan.addComponent("disposable", { entityIds: [input.shipId] });
+
 			ctx.ecs.addEntity(scan);
 			pubsub.publish.legacy.sensorScans.scans({ shipId: input.shipId });
 

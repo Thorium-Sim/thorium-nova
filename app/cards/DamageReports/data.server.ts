@@ -107,6 +107,8 @@ export const damageReports = t.router({
 				shipId: ship.id,
 				progress: 0,
 			});
+			diagnostic.addComponent("disposable", { entityIds: [ship.id] });
+
 			ctx.ecs.addEntity(diagnostic);
 			pubsub.publish.damageReports.systemDiagnostic({
 				systemId: input.systemId,
@@ -505,6 +507,7 @@ async function createDamageReport(
 		affectedSystems,
 		abortable,
 	});
+	damageReport.addComponent("disposable", { entityIds: [shipId] });
 
 	// Put all the necessary variables on the timeline
 	damageReport.addComponent("variables", {

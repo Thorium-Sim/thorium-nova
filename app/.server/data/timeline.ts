@@ -40,6 +40,12 @@ export const timeline = t.router({
 				})),
 			});
 
+			if (ctx.localVariables?.timelineId) {
+				// We'll automatically make this timeline dependent on its parent timeline,
+				// so it will clean up when the parent is removed.
+				timelineEntity.addComponent("disposable", { entityIds: [ctx.localVariables.timelineId] });
+			}
+
 			// Trigger the first step
 			await triggerStep(
 				ctx.flight.ecs.getEntityById(timelineEntity.components.isTimeline?.steps[0] || -1)!,

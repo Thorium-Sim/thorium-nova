@@ -21,6 +21,7 @@ export const flightClient = z
 				text: z.string(),
 				mediaUrl: z.string().optional(),
 				timelineId: z.number().optional(),
+				rootTimelineId: z.number().optional(),
 				allowAdvance: z.boolean().default(false),
 			})
 			.nullable()

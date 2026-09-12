@@ -74,6 +74,7 @@ export const client = t.router({
 						name: client.name,
 						connected: client.connected,
 						settings: client.settings,
+						// oxlint-disable-next-line typescript/no-non-null-asserted-optional-chain
 						...flightClient?.components.flightClient!,
 					};
 				})
@@ -250,6 +251,7 @@ export const client = t.router({
 				shipId,
 				station: stationId,
 				stationComplement: ship?.components.stationComplement?.name || "",
+				timelineId: -1,
 			} satisfies TrainingVariables;
 
 			const timelines = await selectAvailableTimelines(
@@ -268,7 +270,7 @@ export const client = t.router({
 
 			// This automatically adds the timeline entity to ECS
 			const training = spawnTimeline(timeline, (entity) => ctx.ecs.addEntity(entity), shipId);
-
+			trainingVariables.timelineId = training.id;
 			training.addComponent("variables", {
 				variables: [
 					{ name: "clientId", type: "any", value: trainingVariables.clientId },
@@ -279,6 +281,11 @@ export const client = t.router({
 						type: "any",
 						value: trainingVariables.stationComplement,
 					},
+					{
+						name: "timelineId",
+						type: "any",
+						value: trainingVariables.timelineId,
+					},
 				],
 			});
 			flightClient.updateComponent("flightClient", {
@@ -287,6 +294,7 @@ export const client = t.router({
 					allowAdvance: false,
 					...flightClient.components.flightClient?.training,
 					timelineId: training.id,
+					rootTimelineId: training.id,
 				},
 			});
 			// Trigger the first step
@@ -308,6 +316,9 @@ export const client = t.router({
 			if (!flightClient?.components.flightClient) throw new Error("Invalid flight client");
 			const { training } = flightClient.components.flightClient;
 			if (!training) throw new Error("No training is active");
+			if (flightClient.components.flightClient.training?.rootTimelineId) {
+				ctx.ecs.removeEntityById(flightClient.components.flightClient.training.rootTimelineId);
+			}
 			flightClient.updateComponent("flightClient", { training: null });
 			// TODO September 9, 2026 - There needs to be a more aggressive cleanup configuration.
 			// Some way to remove contacts, objects, conditions, triggers, and child timelines spawned by the timeline.

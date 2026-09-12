@@ -120,6 +120,7 @@ export async function runInkStory(conversation: Entity) {
 						stepId: conversation.id,
 					},
 				});
+				triggerEntity.addComponent("disposable", { entityIds: [conversation.id] });
 				conversation.ecs.addEntity(triggerEntity);
 				break;
 			}

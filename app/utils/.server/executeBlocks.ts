@@ -181,6 +181,10 @@ export async function executeBlocks(
 							localVariables,
 						},
 					});
+					if (stepId) {
+						// Delete the trigger if the timeline step is deleted (likely by the timeline being deleted)
+						triggerEntity.addComponent("disposable", { entityIds: [stepId] });
+					}
 					ecs.addEntity(triggerEntity);
 				}
 				if (executionType === "prerequisite") {
@@ -227,6 +231,10 @@ export async function executeBlocks(
 							localVariables,
 						},
 					});
+					if (stepId) {
+						// Delete the trigger if the timeline step is deleted (likely by the timeline being deleted)
+						triggerEntity.addComponent("disposable", { entityIds: [stepId] });
+					}
 					ecs.addEntity(triggerEntity);
 				}
 				if (executionType === "prerequisite") {
@@ -267,6 +275,10 @@ export async function executeBlocks(
 							localVariables,
 						},
 					});
+					if (stepId) {
+						// Delete the trigger if the timeline step is deleted (likely by the timeline being deleted)
+						triggerEntity.addComponent("disposable", { entityIds: [stepId] });
+					}
 					ecs.addEntity(triggerEntity);
 				}
 				break;

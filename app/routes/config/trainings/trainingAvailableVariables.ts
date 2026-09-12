@@ -3,6 +3,7 @@ export const trainingVariableNames = [
 	"shipId",
 	"station",
 	"stationComplement",
+	"timelineId",
 ] as const;
 
 export type TrainingVariables = Record<(typeof trainingVariableNames)[number], any>;

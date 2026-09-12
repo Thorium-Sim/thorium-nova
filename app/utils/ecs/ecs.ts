@@ -40,6 +40,7 @@ class ECS {
 	colliderCache = new Map<string, ColliderDesc>();
 	shipSystemCache = new Map<number, Map<string, Entity | Entity[]>>();
 	changeBatch = new Set<`${number}-${ComponentIds}`>();
+	removeBatch = new Map<number, Pick<Entity, "id" | "components">>();
 	// The key is the sector number based on the location of this physics world
 	worlds = new Map<string, World>();
 
@@ -79,16 +80,7 @@ class ECS {
 			this.entities.delete(entity.id);
 		}
 
-		Object.keys(entity.components).forEach((componentName) => {
-			const componentCache = this.componentCache.get(componentName as ComponentIds);
-			if (!componentCache) return;
-			componentCache.forEach((e) => {
-				if (e.id === entity.id) {
-					componentCache.delete(e);
-				}
-			});
-			this.batchChange(entity.id, componentName as ComponentIds);
-		});
+		this.removeBatch.set(entity.id, entity.toJSON());
 		return entity;
 	}
 	/**
@@ -198,6 +190,7 @@ class ECS {
 		this.componentCache.clear();
 		this.shipSystemCache.clear();
 		this.changeBatch.clear();
+		this.removeBatch.clear();
 	}
 	getWorld(key: string) {
 		if (!this.worlds.has(key)) {

@@ -475,6 +475,7 @@ function determineScan(
 				progress: 0,
 				timestamp: Date.now(),
 			});
+			scanEntity.addComponent("disposable", { entityIds: [entity.id] });
 			entity.ecs?.addEntity(scanEntity);
 
 			scanCount++;
