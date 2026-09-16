@@ -334,6 +334,7 @@ export const client = t.router({
 				station: z.string().optional(),
 				shipId: z.number().optional(),
 				text: z.string(),
+				alignment: z.enum(["horizontal", "vertical"]).optional(),
 				card: z.string().optional(),
 				selector: z.union([z.string().array(), z.string()]).optional(),
 				mediaUrl: z.string().optional(),
@@ -380,6 +381,7 @@ export const client = t.router({
 						: {
 								...flightClient.components.flightClient?.training,
 								text: md.render(input.text),
+								alignment: input.alignment,
 								card: input.card,
 								mediaUrl: input.mediaUrl,
 								selector,

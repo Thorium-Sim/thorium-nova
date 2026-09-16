@@ -1,13 +1,3 @@
-[anchor] {
-	bottom: anchor(bottom);
-	position: absolute;
-	left: anchor(left);
-	position-try-options:
-		flip-block,
-		flip-inline,
-		flip-block flip-inline;
-}
-
 .training {
 	position: fixed;
 	inset: 0;
@@ -66,7 +56,7 @@
 	position: fixed;
 	position-anchor: --parent;
 	position-area: center;
-	position-try-fallbacks: flip-inline;
+	position-try-fallbacks: flip-inline, flip-block;
 	white-space: pre-line;
 	min-width: fit-content;
 	transition: all0 0.3s ease;
@@ -83,6 +73,9 @@
 .training-highlight ~ .training-infobox {
 	position-area: right;
 	position-anchor: --highlight;
+	&.align-vertical {
+		position-area: bottom;
+	}
 }
 .training-ghost-button {
 	pointer-events: all;

@@ -104,7 +104,11 @@ const StationLayout = () => {
 							{client.training?.selector?.map((selector, index) => (
 								<TrainingHighlight key={selector} selector={selector} index={index} />
 							))}
-							<div className="training-infobox relative flex flex-col items-end gap-2">
+							<div
+								className={cn("training-infobox relative flex flex-col items-end gap-2", {
+									"align-vertical": client.training.alignment === "vertical",
+								})}
+							>
 								<div className="panel backdrop-blur">
 									<div
 										data-testid="training-text"
