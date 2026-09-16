@@ -34,7 +34,7 @@ export const CircleGirdStoreContext = createContext<ReturnType<
 export function CircleGridStoreProvider({
 	zoomMin = 0.01,
 	zoomMax = 10000,
-	defaultZoom = 100,
+	defaultZoom = 10,
 	children,
 }: {
 	zoomMin?: number;
