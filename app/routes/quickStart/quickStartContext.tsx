@@ -148,7 +148,7 @@ export function FlightQuickStartProvider({ children }: { children: ReactNode }) 
 				{
 					id: uniqid(),
 					name: "Voyager",
-					crewCount: 1,
+					crewCount: 5,
 					shipId: { pluginId: "Thorium Default", shipId: "Astra Frigate" },
 				},
 			],

@@ -193,50 +193,8 @@ function ShipConfig({
 
 	return (
 		<div>
-			<div className="flex gap-4">
-				<Input
-					placeholder="Ship Name Here"
-					className="mb-4"
-					label="Ship Name"
-					labelHidden={false}
-					value={ship.name}
-					onChange={(e) => dispatch({ type: "shipName", id: ship.id, name: e.target.value })}
-				/>
-				<div>
-					<p className="text-nowrap">Station Count</p>
-					<div className="flex items-center justify-around select-none">
-						<button
-							className="cursor-pointer appearance-none rounded-full text-2xl hover:text-white/80 focus:ring focus:outline-none active:text-white/50"
-							onClick={() =>
-								dispatch({
-									type: "increaseCrewCount",
-									id: ship.id,
-									availableCrewSizes,
-								})
-							}
-						>
-							<Icon name="arrow-up" />
-						</button>
-						<div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-white/60 px-2 tabular-nums">
-							{ship.crewCount}
-						</div>
-						<button
-							className="cursor-pointer appearance-none rounded-full text-2xl hover:text-white/80 focus:ring focus:outline-none active:text-white/50"
-							onClick={() =>
-								dispatch({
-									type: "decreaseCrewCount",
-									id: ship.id,
-									availableCrewSizes,
-								})
-							}
-						>
-							<Icon name="arrow-down" />
-						</button>
-					</div>
-				</div>
-			</div>
 			{pickingShip ? (
-				<div className="h-64">
+				<div className="flex h-72 flex-col">
 					<SearchableList
 						selectedItem={ship.shipId}
 						setSelectedItem={({ id }) => {
@@ -262,17 +220,61 @@ function ShipConfig({
 					/>
 				</div>
 			) : (
-				<button
-					className="flex w-full cursor-pointer gap-2 rounded-lg border border-white/30 p-2 text-left hover:bg-white/10"
-					type="button"
-					onClick={() => setPickingShip(true)}
-				>
-					<img src={pickedShip?.vanityUrl} alt={pickedShip?.name} className="h-12 w-12" />
-					<div className="flex-auto">
-						<p className="font-bold">{pickedShip?.name}</p>
-						<p>{pickedShip?.description}</p>
+				<>
+					<div className="flex gap-4">
+						<Input
+							placeholder="Ship Name Here"
+							className="mb-4"
+							label="Ship Name"
+							labelHidden={false}
+							value={ship.name}
+							onChange={(e) => dispatch({ type: "shipName", id: ship.id, name: e.target.value })}
+						/>
+						<div>
+							<p className="text-nowrap">Station Count</p>
+							<div className="flex items-center justify-around select-none">
+								<button
+									className="cursor-pointer appearance-none rounded-full text-2xl hover:text-white/80 focus:ring focus:outline-none active:text-white/50"
+									onClick={() =>
+										dispatch({
+											type: "increaseCrewCount",
+											id: ship.id,
+											availableCrewSizes,
+										})
+									}
+								>
+									<Icon name="arrow-up" />
+								</button>
+								<div className="flex h-8 w-8 items-center justify-center rounded-lg border-2 border-white/60 px-2 tabular-nums">
+									{ship.crewCount}
+								</div>
+								<button
+									className="cursor-pointer appearance-none rounded-full text-2xl hover:text-white/80 focus:ring focus:outline-none active:text-white/50"
+									onClick={() =>
+										dispatch({
+											type: "decreaseCrewCount",
+											id: ship.id,
+											availableCrewSizes,
+										})
+									}
+								>
+									<Icon name="arrow-down" />
+								</button>
+							</div>
+						</div>
 					</div>
-				</button>
+					<button
+						className="flex w-full cursor-pointer gap-2 rounded-lg border border-white/30 p-2 text-left hover:bg-white/10"
+						type="button"
+						onClick={() => setPickingShip(true)}
+					>
+						<img src={pickedShip?.vanityUrl} alt={pickedShip?.name} className="h-12 w-12" />
+						<div className="flex-auto">
+							<p className="font-bold">{pickedShip?.name}</p>
+							<p>{pickedShip?.description}</p>
+						</div>
+					</button>
+				</>
 			)}
 		</div>
 	);
