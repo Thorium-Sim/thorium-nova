@@ -8,7 +8,7 @@ export class ThrusterSystem extends System {
 	update(entity: Entity) {
 		if (!entity.components.isThrusters) return;
 		const ship = this.ecs.getEntityById(entity.components.isShipSystem?.shipId || -1);
-		if (!ship || !ship.components.isShip || !entity.components.isImpulseEngines) return;
+		if (!ship || !ship.components.isShip || !entity.components.isThrusters) return;
 
 		const shipMass = ship.components.mass?.mass || 700000000;
 
