@@ -13,6 +13,14 @@
 	inset: 0;
 	anchor-name: --parent;
 	pointer-events: none;
+	&:has(.training-infobox .training-ghost-button > input:checked) {
+		.training-ghost-button {
+			--size: calc(2.5rem);
+			font-size: 1.5rem;
+			--btn-bg: #ffff00;
+		}
+	}
+	&:has(.training-infobox .training-ghost-button > input:checked),
 	&:has(.training-infobox .training-ghost-button:hover) {
 		.training-overlay {
 			backdrop-filter: brightness(1);
@@ -35,16 +43,17 @@
 
 .training-highlight {
 	position: fixed;
-	width: 1px;
-	height: 1px;
+	width: anchor-size(width);
+	height: anchor-size(height);
+	box-sizing: content-box;
 	transition: backdrop-filter 0.3s ease;
 	backdrop-filter: brightness(3);
 	pointer-events: none;
-	transition-property: transform, top, bottom, left, right;
+	transition-property: all;
 	transition-duration: 0.3s;
 	transition-timing-function: ease;
 	transform-origin: top left;
-	padding: 1rem;
+	padding: 0.5rem;
 	border-radius: 10px;
 	will-change: height, width, transform;
 	position-anchor: --training-highlight;
@@ -60,6 +69,7 @@
 	position-try-fallbacks: flip-inline;
 	white-space: pre-line;
 	min-width: fit-content;
+	transition: all0 0.3s ease;
 	.panel {
 		transition: opacity 0.3s ease;
 		margin: 0 0.5rem;
