@@ -406,8 +406,8 @@ export const targeting = t.router({
 				return true;
 			})
 			.autoPublish(["isPhasers"], (entity) => {
-				const systemId = entity.ecs.getEntityById(entity.components.isShipSystem?.shipId || -1)
-					?.components.position?.parentId;
+				const ship = entity?.ecs.getEntityById(entity.components.isShipSystem?.shipId || -1);
+				const systemId = ship?.components.position?.parentId;
 				if (systemId) return { systemId };
 				return null;
 			})
