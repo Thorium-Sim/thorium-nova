@@ -1,9 +1,11 @@
 import "reflect-metadata";
 import { render } from "@gpuix/react";
+import open from "open";
 
 import { exit } from "../app/.server/init/exitHandler";
 // @ts-expect-error
 import thoriumSvg from "../app/images/logo.svg" with { type: "text" };
+import { getThoriumPath } from "../app/utils/.server/appPaths";
 import { ipAddresses } from "../app/utils/ipaddresses";
 import { openInBrowser } from "./openInBrowser";
 
@@ -60,6 +62,24 @@ function ThoriumApp({ log, url }: { log: string; url: URL | null }) {
 				onClick={() => exit()}
 			>
 				Close Server
+			</div>
+			<div
+				style={{
+					backgroundColor: "#29382a",
+					borderRadius: 8,
+					paddingTop: 8,
+					paddingBottom: 8,
+					paddingLeft: 12,
+					paddingRight: 12,
+					marginTop: 12,
+					color: "white",
+					// @ts-expect-error
+					hover: { backgroundColor: "#506252" },
+					active: { backgroundColor: "#506252" },
+				}}
+				onClick={() => open(getThoriumPath("production"))}
+			>
+				Open Data Folder
 			</div>
 		</div>
 	);

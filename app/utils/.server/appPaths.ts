@@ -3,6 +3,16 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+const home = os.homedir();
+const platform = process.platform;
+
+const appData = (() => {
+	if (platform === "darwin") return path.join(home, "Library", "Application Support");
+	if (platform === "win32") return process.env.APPDATA || path.join(home, "AppData", "Roaming");
+	// linux / other
+	return process.env.XDG_CONFIG_HOME || path.join(home, ".config");
+})();
+
 export function getThoriumPath(env: string) {
 	let __dirname =
 		env === "production"
@@ -14,16 +24,11 @@ export function getThoriumPath(env: string) {
 	__dirname = __dirname.replaceAll("%20", " ");
 
 	let thoriumPath = path.join(__dirname, "data");
-	/* istanbul ignore next */
+
 	if (env === "production") {
-		/* istanbul ignore next */
-		if (!fs.existsSync(`${os.homedir()}/Documents`)) {
-			/* istanbul ignore next */
-			fs.mkdirSync(`${os.homedir()}/Documents`, { recursive: true });
-		}
-		thoriumPath = path.join(os.homedir(), `/Documents/thorium-nova`);
+		thoriumPath = path.join(appData, "thorium-nova");
 	}
-	/* istanbul ignore next */
+
 	if (process.env.THORIUM_PATH) {
 		let testPath = String(process.env.THORIUM_PATH).replace("~", os.homedir());
 		if (testPath.startsWith("/")) testPath = path.join(__dirname, testPath);
@@ -35,6 +40,8 @@ export function getThoriumPath(env: string) {
 			// Do nothing.
 		}
 	}
+
+	fs.mkdirSync(thoriumPath, { recursive: true });
 
 	/* format path to function with windows machines */
 	thoriumPath = thoriumPath.replaceAll("\\", "/");

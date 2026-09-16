@@ -234,6 +234,7 @@ export async function startHttpServer({
 				reusePort: true,
 			});
 			vanity();
+			console.info(`App data at ${thoriumPath}`);
 			console.info(`Server running on ${server.url.href}`);
 			if (httpsRunning) {
 				console.info(`HTTPS running on ${httpsRunning}`);

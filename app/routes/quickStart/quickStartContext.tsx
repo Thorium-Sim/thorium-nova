@@ -191,7 +191,6 @@ export function FlightQuickStartProvider({ children }: { children: ReactNode }) 
 		}
 	}, [set, missionId, missionPluginId]);
 
-	console.log(value[0].missionId);
 	return <QuickStartContext.Provider value={value}>{children}</QuickStartContext.Provider>;
 }
 
