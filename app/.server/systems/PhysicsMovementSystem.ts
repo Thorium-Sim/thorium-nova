@@ -10,7 +10,7 @@ import {
 } from "@thorium/utils/.server/ship/collisionDamage";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
-import { KM_TO_LM, M_TO_KM } from "@thorium/utils/unitTypes";
+import { KM_TO_LM, M_TO_KM, rpmToRadianPerSecond } from "@thorium/utils/unitTypes";
 import { Euler, Object3D, Quaternion, Vector3 } from "three";
 
 import { getSectorNumber, getWorldPosition, RAPIER } from "../init/rapier";
@@ -178,7 +178,11 @@ export class PhysicsMovementSystem extends System {
 					// Set the max rotation velocity
 					const { x, y, z } = body.angvel();
 					tempVector.set(x, y, z);
-					if (tempVector.lengthSq() > thrusters.components.isThrusters.rotationMaxSpeed) {
+					// Convert rotation max speed from RPM to radians per second
+					if (
+						tempVector.lengthSq() >
+						rpmToRadianPerSecond(thrusters.components.isThrusters.rotationMaxSpeed)
+					) {
 						tempVector.multiplyScalar(BRAKE_CONSTANT);
 						const { x, y, z } = tempVector;
 						body.setAngvel({ x, y, z }, true);

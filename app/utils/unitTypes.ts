@@ -114,3 +114,7 @@ export type HeatCapacity = Flavor<number, "heatcapacity">;
 
 // https://en.wikipedia.org/wiki/Stefan–Boltzmann_constant
 export const StephanBoltzmannConstant = 5.670373 * 1e-8;
+
+export function rpmToRadianPerSecond(rpm: number) {
+	return (rpm / 60) * Math.PI * 2;
+}
