@@ -243,7 +243,6 @@ export const ship = t.router({
 		})
 		.output(z.object({ id: z.number() }))
 		.send(async ({ ctx, input }) => {
-			console.log({ input });
 			if (!ctx.flight) throw new Error("Flight not found.");
 
 			const shipTemplate = ctx.server.plugins

@@ -55,6 +55,22 @@ export function SolarSystemMenuButtons() {
 			<AddPlanetMenu />
 			<AddMoonMenu />
 			<Button
+				className="btn-secondary btn-outline btn-xs"
+				disabled={!selectedObjectIds}
+				onClick={async () => {
+					const [planetId] = useStarmapStore.getState().selectedObjectIds;
+					if (!planetId || typeof planetId !== "string") return;
+					const { starbase } = await q.plugin.starmap.starbase.create.netSend({
+						pluginId,
+						solarSystemId,
+						planetId,
+					});
+					useStarmapStore.setState({ selectedObjectIds: [starbase.name] });
+				}}
+			>
+				Add Starbase
+			</Button>
+			<Button
 				className="btn-error btn-outline btn-xs"
 				disabled={!selectedObjectIds}
 				onClick={deleteObject}

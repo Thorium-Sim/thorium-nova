@@ -1,5 +1,6 @@
 import { promises as fs } from "node:fs";
 import { readdir } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 
 import { thoriumContext } from "@thorium/utils/.server/context";
@@ -10,7 +11,7 @@ export async function initDefaultPlugin(isProd: boolean) {
 	if (!isProd) return;
 	const thoriumPath = thoriumContext.getStore()!.thoriumPath;
 	await fs.mkdir(path.join(thoriumPath, "plugins"), { recursive: true });
-	const tempPath = await fs.mkdtemp("thorium-nova");
+	const tempPath = await fs.mkdtemp(path.join(os.tmpdir(), "thorium-nova"));
 	const tempFile = path.join(tempPath, "defaultPlugin.plug");
 
 	// This is just necessary to embed the plugin, but we don't reference it this way.

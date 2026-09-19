@@ -1,10 +1,11 @@
 import type PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
 import type SolarSystemPlugin from "@thorium/.server/classes/Plugins/Universe/SolarSystem";
 import type StarPlugin from "@thorium/.server/classes/Plugins/Universe/Star";
+import type { StarbasePlugin } from "@thorium/.server/classes/Plugins/Universe/Starbase";
 import { q } from "@thorium/context/AppContext";
 import Checkbox from "@thorium/ui/Checkbox";
 import Input from "@thorium/ui/Input";
-import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { getCompletePositionFromOrbitClient } from "@thorium/utils/starmap/getOrbitPosition";
 import { solarRadiusToKilometers } from "@thorium/utils/unitTypes";
 import { Box3, Vector3 } from "three";
 
@@ -42,12 +43,21 @@ function useSelectedObject() {
 		return { type: "planet" as const, object: planet };
 	}
 
-	const moon = systemData?.planets.reduce((prev: PlanetPlugin | null, next) => {
-		if (prev) return prev;
-		return next.satellites?.find((moon) => selectedObjectIds.includes(moon.name)) || null;
-	}, null);
-	if (moon) {
-		return { type: "planet" as const, object: moon };
+	const satellite = systemData?.planets.reduce(
+		(prev: PlanetPlugin | StarbasePlugin | null, next) => {
+			if (prev) return prev;
+			return (
+				next.satellites?.find((satellite) => selectedObjectIds.includes(satellite.name)) || null
+			);
+		},
+		null,
+	);
+
+	if (satellite?.type === "starbase") {
+		return { type: "starbase" as const, object: satellite };
+	}
+	if (satellite?.type === "planet" || (satellite && "isPlanet" in satellite)) {
+		return { type: "planet" as const, object: satellite };
 	}
 
 	return null;
@@ -59,10 +69,16 @@ function ZoomToObject({
 	object:
 		| Pick<StarPlugin, "satellite" | "radius">
 		| Pick<PlanetPlugin, "isPlanet" | "satellite">
+		| Pick<StarbasePlugin, "isStarbase" | "satellite" | "length">
 		| Pick<SolarSystemPlugin, "position">;
 }) {
 	const useStarmapStore = useGetStarmapStore();
+	const [pluginId, solarSystemId] = useSystemIds();
 
+	const [systemData] = q.plugin.starmap.get.useNetRequest({
+		pluginId,
+		solarSystemId,
+	});
 	if (!("satellite" in object)) {
 		return null;
 	}
@@ -71,10 +87,18 @@ function ZoomToObject({
 		<Button
 			className="btn-block btn-xs"
 			onClick={() => {
-				const position = getOrbitPosition(object.satellite);
+				const position = getCompletePositionFromOrbitClient(
+					{ components: object },
+					systemData?.planets.map((p) => ({
+						id: p.name,
+						components: { satellite: p.satellite },
+					})) || [],
+				);
 				let radius = 0;
 				if ("isPlanet" in object) {
 					radius = object.isPlanet.radius;
+				} else if ("isStarbase" in object) {
+					radius = object.length;
 				} else {
 					radius = solarRadiusToKilometers(object.radius);
 				}
@@ -211,7 +235,7 @@ export function SolarSystemPalette() {
 		>
 			<ZoomToObject object={results.object} />
 			<BasicDisclosure object={results.object} type={results.type} />
-			{results.type === "planet" && (
+			{results && "isPlanet" in results.object && (
 				<>
 					<PlanetDisclosure object={results.object} />
 					<PlanetAssetDisclosure object={results.object} />

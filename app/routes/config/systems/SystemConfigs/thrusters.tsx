@@ -142,7 +142,7 @@ export default function ThrustersConfig() {
 							pattern="[0-9]*"
 							label="Rotation Acceleration"
 							placeholder={"625"}
-							helperText="In km/s^2"
+							helperText="In radians per second^2"
 							defaultValue={system.rotationAcceleration}
 							onBlur={async (e) => {
 								if (!e.target.value || Number.isNaN(Number(e.target.value))) return;

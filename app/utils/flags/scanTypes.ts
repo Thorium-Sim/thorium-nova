@@ -48,13 +48,14 @@ export const scanRecord = z.object({
 			factionName: z.string(),
 			image: z
 				.object({
-					type: z.enum(["ship", "planet", "star", "solarSystem", "unknown"]),
+					type: z.enum(["ship", "planet", "starbase", "star", "solarSystem", "unknown"]),
 					vanity: z.string().optional(),
 					hue: z.number().optional(),
 					isWhite: z.boolean().optional(),
 					cloudMapAsset: z.string().nullish(),
 					ringMapAsset: z.string().nullish(),
 					textureMapAsset: z.string().optional(),
+					model: z.string().optional(),
 				})
 				.optional(),
 		})

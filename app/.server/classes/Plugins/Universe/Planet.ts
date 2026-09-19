@@ -1,8 +1,10 @@
+import { StarbasePlugin } from "@thorium/.server/classes/Plugins/Universe/Starbase";
 import type { isPlanet } from "@thorium/ecs-components/list";
 import type { satellite } from "@thorium/ecs-components/satellite";
 import type z from "zod";
 
 export default class PlanetPlugin {
+	type: "planet";
 	name: string;
 	description: string;
 	keyLocation: boolean;
@@ -13,7 +15,7 @@ export default class PlanetPlugin {
 	isPlanet: z.infer<typeof isPlanet>;
 	population: number;
 	temperature: number;
-	satellites: PlanetPlugin[];
+	satellites: (PlanetPlugin | StarbasePlugin)[];
 	constructor(
 		params: { name: string } & Partial<
 			Omit<PlanetPlugin, "satellite"> & {
@@ -25,6 +27,7 @@ export default class PlanetPlugin {
 			}
 		>,
 	) {
+		this.type = "planet";
 		this.keyLocation = params.keyLocation || false;
 		this.name = params.name;
 		this.description = params.description || "";
@@ -58,6 +61,9 @@ export default class PlanetPlugin {
 
 		this.temperature = params.temperature || 5800;
 
-		this.satellites ??= params.satellites?.map((planet) => new PlanetPlugin(planet)) ?? [];
+		this.satellites ??=
+			params.satellites?.map((satellite) =>
+				satellite.type === "planet" ? new PlanetPlugin(satellite) : new StarbasePlugin(satellite),
+			) ?? [];
 	}
 }

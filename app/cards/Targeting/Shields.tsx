@@ -31,19 +31,27 @@ const shieldStyle = (
 	shields.forEach((s) => {
 		const integrity = s.strength / s.maxStrength;
 		const color = shieldColor(integrity);
-		if ((s.direction === "starboard" && !extra) || (s.direction === "fore" && extra)) {
+		if (
+			(s.direction === "starboard" && !extra) ||
+			(s.direction === "fore" && extra) ||
+			shields.length === 1
+		) {
 			output.push(`20px 0px 20px -15px ${color}`);
 			output.push(`inset -20px 0px 20px -15px ${color}`);
 		}
-		if ((s.direction === "port" && !extra) || (s.direction === "aft" && extra)) {
+		if (
+			(s.direction === "port" && !extra) ||
+			(s.direction === "aft" && extra) ||
+			shields.length === 1
+		) {
 			output.push(`-20px 0px 20px -15px ${color}`);
 			output.push(`inset 20px 0px 20px -15px ${color}`);
 		}
-		if (s.direction === "fore" && !extra) {
+		if ((s.direction === "fore" && !extra) || shields.length === 1) {
 			output.push(`0px -20px 20px -15px ${color}`);
 			output.push(`inset 0px 20px 20px -15px ${color}`);
 		}
-		if (s.direction === "aft" && !extra) {
+		if ((s.direction === "aft" && !extra) || shields.length === 1) {
 			output.push(`0px 20px 20px -15px ${color}`);
 			output.push(`inset 0px -20px 20px -15px ${color}`);
 		}
@@ -62,12 +70,10 @@ const shieldStyle = (
 export function Shields() {
 	const { shipId, ship } = useStation();
 	const [shields] = q.targeting.shields.get.useNetRequest({ shipId });
-
 	if (!ship) return null;
-	if (shields.length === 0) return null;
 	return (
 		<div className="shields-container">
-			<div className="my-4 flex w-full gap-8">
+			<div className="my-4 flex w-full justify-center gap-8">
 				<ShieldView />
 			</div>
 			{shields[0].state === "down" ? (
@@ -121,7 +127,7 @@ export function ShieldView() {
 		<>
 			<div
 				ref={topViewRef}
-				className="aspect-square flex-1 rounded-full p-4"
+				className="aspect-square max-w-48 flex-1 rounded-full p-4"
 				style={{ boxShadow: shieldStyle(shields) }}
 			>
 				<img src={ship.assets?.topView} alt="Top" />
@@ -129,7 +135,7 @@ export function ShieldView() {
 			{shields.length === 6 ? (
 				<div
 					ref={sideViewRef}
-					className="aspect-square flex-1 rounded-full p-4"
+					className="aspect-square max-w-48 flex-1 rounded-full p-4"
 					style={{ boxShadow: shieldStyle(shields, true) }}
 				>
 					<img src={ship.assets?.sideView} alt="Side" />

@@ -19,6 +19,8 @@ export const flightClient = z
 				card: z.string().optional(),
 				selector: z.string().array().optional(),
 				text: z.string(),
+				alignment: z.enum(["horizontal", "vertical"]).optional(),
+
 				mediaUrl: z.string().optional(),
 				timelineId: z.number().optional(),
 				rootTimelineId: z.number().optional(),

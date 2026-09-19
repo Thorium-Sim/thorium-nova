@@ -64,6 +64,7 @@ export const systemsMonitor = t.router({
 			}),
 		setDesiredOutput: t.procedure
 			.input(z.object({ reactorId: z.number(), output: z.number() }))
+			.meta({ action: true })
 			.send(({ ctx, input }) => {
 				const reactor = ctx.ecs.getEntityById(input.reactorId);
 				if (!reactor?.components.isReactor) throw new Error("Reactor not found.");

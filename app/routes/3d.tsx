@@ -1,21 +1,21 @@
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
+// import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
 import { Suspense } from "react";
 import { Matrix4 } from "three";
 
 export const instanceMatrix = new Matrix4();
 
+const modelUrl = "/plugins/Thorium Default/ships/Astra Seeker/assets/model.glb";
 export default function ThreeD() {
 	return (
 		<div className="absolute inset-0 bg-black">
-			<Canvas>
+			<Canvas camera={{ near: 0.1, far: 10000, position: [0, 0, 500] }}>
 				<ambientLight intensity={0.1} />
 				<directionalLight color="white" position={[2, 3, 5]} />
 				<OrbitControls />
 				<Suspense>
 					<Ship />
-					<Sprite />
 				</Suspense>
 			</Canvas>
 		</div>
@@ -23,20 +23,17 @@ export default function ThreeD() {
 }
 
 function Ship() {
-	const model = useGLTF(
-		"http://localhost:3000/plugins/Thorium%20Default/ships/Alotech%20Frigate/assets/model.glb?1740849292995",
-		false,
-	);
-	return <primitive object={model.scene} />;
+	const model = useGLTF(modelUrl, false);
+	return <primitive object={model.scene} scale={[30, 30, 30]} />;
 }
 
-function Sprite() {
-	const spriteMap = useShipSprite(
-		"http://localhost:3000/plugins/Thorium%20Default/ships/Astra%20Frigate/assets/logo.svg",
-	);
-	return (
-		<sprite position={[1, 1, 0]}>
-			<spriteMaterial attach="material" map={spriteMap} color={0x888888} sizeAttenuation={false} />
-		</sprite>
-	);
-}
+// function Sprite() {
+// 	const spriteMap = useShipSprite(
+// 		"http://localhost:3000/plugins/Thorium%20Default/ships/Astra%20Frigate/assets/logo.svg",
+// 	);
+// 	return (
+// 		<sprite position={[1, 1, 0]}>
+// 			<spriteMaterial attach="material" map={spriteMap} color={0x888888} sizeAttenuation={false} />
+// 		</sprite>
+// 	);
+// }

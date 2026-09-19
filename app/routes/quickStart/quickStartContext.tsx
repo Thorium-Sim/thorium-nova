@@ -148,7 +148,7 @@ export function FlightQuickStartProvider({ children }: { children: ReactNode }) 
 				{
 					id: uniqid(),
 					name: "Voyager",
-					crewCount: 1,
+					crewCount: 5,
 					shipId: { pluginId: "Thorium Default", shipId: "Astra Frigate" },
 				},
 			],
@@ -191,7 +191,6 @@ export function FlightQuickStartProvider({ children }: { children: ReactNode }) 
 		}
 	}, [set, missionId, missionPluginId]);
 
-	console.log(value[0].missionId);
 	return <QuickStartContext.Provider value={value}>{children}</QuickStartContext.Provider>;
 }
 

@@ -111,7 +111,7 @@ export function ObjectImage({
 					/>
 				) : objectImage.type === "star" ? (
 					<StarCanvas hue={objectImage.hue || 30} isWhite={objectImage.isWhite || false} />
-				) : objectImage.type === "ship" ? (
+				) : objectImage.type === "ship" || objectImage.type === "starbase" ? (
 					<img draggable="false" alt="" src={objectImage?.vanity} />
 				) : null}
 			</Suspense>

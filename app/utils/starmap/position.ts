@@ -2,7 +2,7 @@ import type { position as TPosition } from "@thorium/ecs-components/position";
 import { Vector3 } from "three";
 import type { z } from "zod";
 
-import type { Entity } from "../ecs";
+import type { ECS, Entity } from "../ecs";
 import { solarRadiusToKilometers, type SolarRadius } from "../unitTypes";
 import { getOrbitPosition } from "./getOrbitPosition";
 /** Gets a point that is some distance from object, in the direction of ship. Used for setting waypoints. */
@@ -87,11 +87,11 @@ export function getObjectOffsetPosition(
 }
 
 /** Gets an objects position based on its satellite component, including if it is orbiting another satellite */
-export function getCompletePositionFromOrbit(object: Entity) {
+export function getCompletePositionFromOrbit(object: Entity, ecs: ECS = object.ecs) {
 	const origin = new Vector3(0, 0, 0);
 	if (object.components.satellite) {
 		if (object.components.satellite.parentId) {
-			const parent = object.ecs?.getEntityById(object.components.satellite?.parentId);
+			const parent = ecs.getEntityById(object.components.satellite?.parentId);
 			if (parent?.components?.satellite) {
 				const parentPosition = getOrbitPosition(parent.components.satellite);
 				origin.copy(parentPosition);

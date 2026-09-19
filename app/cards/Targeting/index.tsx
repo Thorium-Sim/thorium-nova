@@ -36,8 +36,8 @@ export function Targeting({ cardLoaded }: CardProps) {
 	return (
 		<CircleGridStoreProvider zoomMax={25000}>
 			<div className="grid h-full grid-cols-4 grid-rows-1 place-content-center gap-4">
-				<div className="flex flex-col justify-between pb-4">
-					<div className="panel hull-container flex flex-col items-center text-center">
+				<div className="flex flex-col justify-between gap-4 pb-2">
+					<div className="panel hull-monitor flex flex-col items-center text-center">
 						<div className="my-2 text-2xl font-bold tabular-nums">{hull}</div>
 						<div>Hull Integrity</div>
 					</div>

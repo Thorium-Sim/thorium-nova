@@ -572,6 +572,24 @@ export function SolarSystemWrapper() {
 						</Suspense>
 					);
 				}
+				if (entity.components.isStarbase) {
+					const {
+						assets: { logo: logoUrl, model: modelUrl },
+					} = entity.components.isStarbase;
+					return (
+						<Suspense key={entity.id} fallback={null}>
+							<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
+								<StarmapShip
+									id={entity.id}
+									size={entity.components.size?.length || 1500}
+									logoUrl={logoUrl}
+									modelUrl={modelUrl}
+									spriteColor={selectedObjectIds.includes(entity.id) ? "#0088ff" : "white"}
+								/>
+							</ErrorBoundary>
+						</Suspense>
+					);
+				}
 
 				return null;
 			})}

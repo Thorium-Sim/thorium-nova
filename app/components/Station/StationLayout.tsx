@@ -7,7 +7,7 @@ import { Icon } from "@thorium/ui/Icon";
 import { Portal } from "@thorium/ui/Portal";
 import { SVGImageLoader } from "@thorium/ui/SVGImageLoader";
 import { cn } from "@thorium/utils/cn";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 
 import { CardArea } from "./CardArea";
 import { CardSwitcher } from "./CardSwitcher";
@@ -104,7 +104,11 @@ const StationLayout = () => {
 							{client.training?.selector?.map((selector, index) => (
 								<TrainingHighlight key={selector} selector={selector} index={index} />
 							))}
-							<div className="training-infobox relative flex flex-col items-end gap-2">
+							<div
+								className={cn("training-infobox relative flex flex-col items-end gap-2", {
+									"align-vertical": client.training.alignment === "vertical",
+								})}
+							>
 								<div className="panel backdrop-blur">
 									<div
 										data-testid="training-text"
@@ -125,9 +129,10 @@ const StationLayout = () => {
 										</Button>
 									) : null}
 								</div>
-								<Button className="btn-info btn-xs btn-circle training-ghost-button absolute top-2 right-4">
+								<label className="btn btn-info btn-xs btn-circle training-ghost-button absolute top-2 right-4">
 									<Icon name="ghost" />
-								</Button>
+									<input type="checkbox" className="absolute opacity-0" />
+								</label>
 							</div>
 						</div>
 					</Portal>
@@ -137,47 +142,7 @@ const StationLayout = () => {
 	);
 };
 
-const padding = 8;
 function TrainingHighlight({ selector, index }: { selector: string; index: number }) {
-	const ref = useRef<HTMLDivElement>(null);
-
-	const [selectorPresent, setSelectorPresent] = useState(false);
-	useEffect(() => {
-		if (!selectorPresent) return;
-		const el = document.querySelector(selector);
-		if (!el) return;
-		const observer = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				if (ref.current) {
-					ref.current.style.height = `${entry.borderBoxSize[0].blockSize + padding}px`;
-					ref.current.style.width = `${entry.borderBoxSize[0].inlineSize + padding}px`;
-				}
-			}
-		});
-
-		observer.observe(el);
-
-		return () => {
-			observer.unobserve(el);
-		};
-	}, [selector, selectorPresent]);
-
-	useEffect(() => {
-		const observer = new MutationObserver(() => {
-			const el = document.body.querySelector(selector);
-			setSelectorPresent(!!el);
-		});
-		observer.observe(document.body, {
-			attributes: false,
-			characterData: false,
-			subtree: true,
-			childList: true,
-		});
-		return () => {
-			observer.disconnect();
-		};
-	}, [selector]);
-
 	return (
 		<>
 			<style>{`
@@ -187,7 +152,6 @@ anchor-name: --training-highlight-${index};
 `}</style>
 
 			<div
-				ref={ref}
 				className={cn("training-highlight", {
 					"highlight-target": index === 0,
 				})}
