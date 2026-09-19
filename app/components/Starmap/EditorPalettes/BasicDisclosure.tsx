@@ -16,7 +16,7 @@ export function BasicDisclosure({
 	type,
 }: {
 	object: { name: string; description: string; skyboxKey?: string };
-	type: "system" | "star" | "planet";
+	type: "system" | "star" | "planet" | "starbase";
 }) {
 	const useStarmapStore = useGetStarmapStore();
 	const [pluginId, solarSystemId] = useSystemIds();

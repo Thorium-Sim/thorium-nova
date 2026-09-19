@@ -1,4 +1,4 @@
-import { isPlanet } from "@thorium/ecs-components/list";
+import { isPlanet, isStarbase } from "@thorium/ecs-components/list";
 import { satellite } from "@thorium/ecs-components/satellite";
 import { UNIVERSE_RADIUS } from "@thorium/utils/constants";
 import { spectralTypes } from "@thorium/utils/flags/starTypes";
@@ -23,8 +23,20 @@ const basePlanetSchema = z.object({
 	population: z.number(),
 	temperature: z.number(),
 });
+const starbaseSchema = z.object({
+	type: z.literal("starbase"),
+	name: z.string(),
+	description: z.string(),
+	tags: z.string().array(),
+	keyLocation: z.boolean().optional(),
+	population: z.number(),
+	length: z.number(),
+	mass: z.number(),
+	satellite: satellite._def.innerType.extend({ parentId: z.string() }),
+	isStarbase: isStarbase,
+});
 const planetSchema = basePlanetSchema.extend({
-	satellites: z.lazy(() => basePlanetSchema.array()).optional(),
+	satellites: z.lazy(() => z.union([starbaseSchema, basePlanetSchema]).array()).optional(),
 });
 export default class SolarSystemPlugin extends Aspect {
 	static schema = z.object({

@@ -9,6 +9,7 @@ export function getClassification(object: Entity) {
 		return `${
 			object.components.isShip.shipClass ? `${object.components.isShip.shipClass} Class ` : ""
 		}${object.components.isShip.category}`;
+	if (object.components.isStarbase) return "Starbase";
 	if (object.components.isSolarSystem) return "Solar System";
 	return "";
 }

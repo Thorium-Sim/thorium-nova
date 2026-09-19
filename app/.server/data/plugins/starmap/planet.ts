@@ -1,6 +1,7 @@
 import path from "node:path";
 
 import PlanetPlugin from "@thorium/.server/classes/Plugins/Universe/Planet";
+import type { DataContext } from "@thorium/.server/DataContext";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { satellite } from "@thorium/ecs-components/satellite";
@@ -148,18 +149,12 @@ export const planet = t.router({
 		)
 		.send(({ ctx, input }) => {
 			inputAuth(ctx);
-			const system = getSolarSystem(ctx, input.pluginId, input.solarSystemId);
-
-			const planet = system.planets.reduce((prev: PlanetPlugin | null, next) => {
-				if (prev) return prev;
-				if (next.name === input.planetId) return next;
-				return next.satellites?.find((moon) => moon.name === input.planetId) || null;
-			}, null);
-
-			if (!planet) {
-				throw new Error(`No planet found with id ${input.planetId}`);
-			}
-
+			const [system, planet] = findPlanetForMoon(
+				ctx,
+				input.pluginId,
+				input.solarSystemId,
+				input.planetId,
+			);
 			const planetType = planetTypes.find((p) => p.classification === input.planetType);
 			if (!planetType) {
 				throw new Error(`Invalid planet type: ${input.planetType}`);
@@ -185,6 +180,7 @@ export const planet = t.router({
 					distanceToRadiusRatioRange[0]);
 
 			const moon: PlanetPlugin = {
+				type: "planet",
 				name,
 				keyLocation: false,
 				description: "",
@@ -296,8 +292,13 @@ export const planet = t.router({
 			const system = getSolarSystem(ctx, input.pluginId, input.solarSystemId);
 			const planet = system.planets.reduce((prev: PlanetPlugin | null, next) => {
 				if (prev) return prev;
+				if (next.type !== "planet") return prev;
 				if (next.name === input.planetId) return next;
-				return next.satellites?.find((moon) => moon.name === input.planetId) || null;
+				const satellite =
+					next.satellites
+						?.filter((moon) => moon.type !== "starbase")
+						.find((moon) => moon.name === input.planetId) || null;
+				return satellite;
 			}, null);
 
 			if (!planet) {
@@ -393,3 +394,28 @@ export const planet = t.router({
 			return planet;
 		}),
 });
+
+export function findPlanetForMoon(
+	ctx: DataContext,
+	pluginId: string,
+	solarSystemId: string,
+	planetId: string,
+) {
+	const system = getSolarSystem(ctx, pluginId, solarSystemId);
+
+	const planet = system.planets.reduce((prev: PlanetPlugin | null, next) => {
+		if (prev) return prev;
+		if (!next.isPlanet) return prev;
+		if (next.name === planetId) return next;
+		const satellite =
+			next.satellites
+				?.filter((moon) => moon.type !== "starbase")
+				.find((moon) => moon.name === planetId) || null;
+		return satellite;
+	}, null);
+
+	if (!planet) {
+		throw new Error(`No planet found with id ${planetId}`);
+	}
+	return [system, planet] as const;
+}

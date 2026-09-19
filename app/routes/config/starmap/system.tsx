@@ -1,6 +1,7 @@
 import { Planet } from "@thorium/components/Starmap/Planet";
 import { SolarSystemMap } from "@thorium/components/Starmap/SolarSystemMap";
 import StarEntity from "@thorium/components/Starmap/Star";
+import { Starbase } from "@thorium/components/Starmap/Starbase";
 import { useSystemIds } from "@thorium/components/Starmap/useSystemIds";
 import { q } from "@thorium/context/AppContext";
 import { useMemo, Fragment } from "react";
@@ -47,19 +48,36 @@ export default function SolarSystemWrapper({
 						}}
 						entities={entities}
 					/>
-					{planet.satellites?.map((s) => (
-						<Planet
-							key={s.name}
-							planet={{
-								id: s.name,
-								name: s.name,
-								isPlanet: s.isPlanet,
-								satellite: s.satellite,
-							}}
-							entities={entities}
-							isSatellite
-						/>
-					))}
+					{planet.satellites?.map((s) =>
+						s.type === "starbase" ? (
+							<Starbase
+								key={s.name}
+								starbase={{
+									id: s.name,
+									name: s.name,
+									isStarbase: s.isStarbase,
+									satellite: s.satellite,
+									mass: s.mass,
+									length: s.length,
+									population: s.population,
+								}}
+								isSatellite
+								entities={entities}
+							/>
+						) : (
+							<Planet
+								key={s.name}
+								planet={{
+									id: s.name,
+									name: s.name,
+									isPlanet: s.isPlanet,
+									satellite: s.satellite,
+								}}
+								entities={entities}
+								isSatellite
+							/>
+						),
+					)}
 				</Fragment>
 			))}
 			{children}

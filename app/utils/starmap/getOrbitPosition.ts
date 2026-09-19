@@ -1,4 +1,3 @@
-import type { Entity } from "@thorium/utils/ecs";
 import { Vector3 } from "three";
 
 import { degToRad } from "../unitTypes";
@@ -32,8 +31,13 @@ interface OrbitPositionProps {
 
 /** Gets an objects position based on its satellite component, including if it is orbiting another satellite */
 export function getCompletePositionFromOrbitClient(
-	object: Pick<Entity, "components">,
-	planets: Pick<Entity, "id" | "components">[],
+	object: {
+		components: {
+			satellite?: OrbitPositionProps & { parentId: string | number | null };
+			position?: { x: number; y: number; z: number };
+		};
+	},
+	planets: { id: string | number; components: { satellite?: OrbitPositionProps } }[],
 ) {
 	const origin = new Vector3(0, 0, 0);
 	if (object.components.satellite) {

@@ -5,7 +5,7 @@ import { shortRangeStateMap } from "@thorium/cards/ShortRangeComm/shared";
 import { getShipSystem, getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { type ECS, type Entity, System } from "@thorium/utils/ecs";
 import type { scanRecord, scanTypes } from "@thorium/utils/flags/scanTypes";
-import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { getCompletePositionFromOrbit } from "@thorium/utils/starmap/position";
 import type { KiloWattHour } from "@thorium/utils/unitTypes";
 import { capitalCase } from "change-case";
 import type { z } from "zod";
@@ -79,7 +79,7 @@ export class SensorScanSystem extends System {
 
 		const shipPosition = parent.components.position;
 		const objectPosition = object.components.satellite
-			? getOrbitPosition(object.components.satellite)
+			? getCompletePositionFromOrbit(object)
 			: object.components.position;
 		if (!shipPosition || !objectPosition) return;
 
@@ -224,13 +224,17 @@ export function generateScanResults(object: Entity, ecs: ECS, scanType: z.infer<
 								? "star"
 								: object.components.isSolarSystem
 									? "solarSystem"
-									: "unknown",
-					vanity: object.components.isShip?.assets.vanity,
+									: object.components.isStarbase
+										? "starbase"
+										: "unknown",
+					vanity:
+						object.components.isShip?.assets.vanity || object.components.isStarbase?.assets.vanity,
 					hue: object.components.isStar?.hue,
 					isWhite: object.components.isStar?.isWhite,
 					cloudMapAsset: object.components.isPlanet?.cloudMapAsset,
 					ringMapAsset: object.components.isPlanet?.ringMapAsset,
 					textureMapAsset: object.components.isPlanet?.textureMapAsset,
+					model: object.components.isStarbase?.assets.model,
 				},
 			};
 			break;
@@ -261,7 +265,7 @@ export function generateScanResults(object: Entity, ecs: ECS, scanType: z.infer<
 				shipId: object.id,
 				systemType: "Targeting",
 			});
-			const target = ecs.getEntityById(targeting[0].components.isTargeting?.target || -1);
+			const target = ecs.getEntityById(targeting[0]?.components.isTargeting?.target || -1);
 			currentResults.targeting = {
 				scanTime: Date.now(),
 				targetId: target?.id || -1,

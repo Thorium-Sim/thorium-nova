@@ -459,7 +459,7 @@ export async function spawnShip(
 	return { ship: entity, extraEntities: allExtraEntities };
 }
 
-async function getMeshSize(url: string | null): Promise<Vector3> {
+export async function getMeshSize(url: string | null): Promise<Vector3> {
 	if (!url) return new Vector3(1, 1, 1);
 	const gltf = await loadGltf(url);
 	if (!gltf) return new Vector3();

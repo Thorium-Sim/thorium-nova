@@ -56,7 +56,7 @@ export function generateRigidBody(
 		? "planet"
 		: entity.components.isStar
 			? "star"
-			: entity.components.isShip
+			: entity.components.isShip || entity.components.isStarbase
 				? "ship"
 				: entity.components.isTorpedo
 					? "torpedo"
@@ -108,12 +108,16 @@ export function generateRigidBody(
 			return body;
 		}
 		case "ship": {
-			if (!entity.components.isShip) break;
-			const model = entity.components.isShip.assets.model;
+			if (!entity.components.isShip && !entity.components.isStarbase) break;
+			const model =
+				entity.components.isShip?.assets.model || entity.components.isStarbase?.assets.model;
 			if (!model) break;
 			const colliderDesc = colliderCache.get(model);
 
-			if (!colliderDesc) break;
+			if (!colliderDesc) {
+				console.warn("Collider not found for", model);
+				break;
+			}
 			tempVector.set(
 				entity.components.position?.x || 0,
 				entity.components.position?.y || 0,
@@ -126,7 +130,7 @@ export function generateRigidBody(
 				colliderDesc,
 				world,
 				tempVector,
-				entity.components.rotation || { x: 0, y: 0, z: 0, w: 0 },
+				entity.components.rotation || { x: 0, y: 0, z: 0, w: 1 },
 			);
 			res.body.userData = { entityId: entity.id };
 			if (entity.components.mass?.mass) {

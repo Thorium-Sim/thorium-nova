@@ -152,7 +152,7 @@ export class AutoThrustSystem extends System {
 
 		if (thrusters) {
 			// Use thrusters to apply the minute steering force
-			steeringForce.set(0, 0, 0).add(separation(entity)).add(leaderFollowing()).normalize();
+			steeringForce.set(0, 0, 0); //.add(separation(entity)).add(leaderFollowing()).normalize();
 
 			// Apply the steering force to the thrusters
 			thrustersEntity.updateComponent("isThrusters", {

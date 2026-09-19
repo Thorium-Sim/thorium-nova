@@ -5,11 +5,13 @@ import { getPlugin, pluginFilter } from "../utils";
 import { planet } from "./planet";
 import { solarSystem } from "./solarSystem";
 import { star } from "./star";
+import { starbase } from "./starbase";
 
 export const starmap = t.router({
 	solarSystem,
 	star,
 	planet,
+	starbase,
 	/** Returns all solar systems in a plugin */
 	all: t.procedure
 		.input(z.object({ pluginId: z.string() }))

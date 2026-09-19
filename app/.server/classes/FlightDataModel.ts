@@ -117,24 +117,33 @@ export class FlightDataModel extends DataStore {
 	async initPhysics() {
 		// Fetch and calculate all of the colliders for the ships in the plugins
 		// Loop over every ship in every loaded plugin
-		const ships: ShipPlugin[] = [];
+		const thoriumPath = await this.getAssetUrl();
+		// Key is the model URL
+		const colliders = new Map<string, { mass: number; length: number }>();
 		for (const plugin of this.serverDataModel.plugins) {
 			if (!this.pluginIds.includes(plugin.id)) continue;
 			for (const ship of plugin.aspects.ships) {
-				ships.push(ship);
+				colliders.set(ship.assets.model, { mass: ship.mass, length: ship.length });
+			}
+			for (const system of plugin.aspects.solarSystems) {
+				for (const planet of system.planets || []) {
+					for (const satellite of planet.satellites || []) {
+						if (satellite.type === "starbase" && satellite.isStarbase.assets.model) {
+							colliders.set(satellite.isStarbase.assets.model, {
+								mass: satellite.mass,
+								length: satellite.length,
+							});
+						}
+					}
+				}
 			}
 		}
-
-		await Promise.all(
-			ships.map(async (ship) => {
-				if (!ship.assets.model) return;
-				const assetUrl = path.join(await ship.getAssetUrl(), ship.assets.model);
-				if (!assetUrl) return;
-				const colliderDesc = await generateColliderDesc(assetUrl, ship.mass /*ship.length*/);
-				if (!colliderDesc) return;
-				this.ecs.colliderCache.set(ship.assets.model, colliderDesc);
-			}),
-		);
+		for (const [model, { mass, length }] of colliders) {
+			const assetUrl = path.join(thoriumPath, model);
+			const colliderDesc = await generateColliderDesc(assetUrl, mass, length);
+			if (!colliderDesc) return;
+			this.ecs.colliderCache.set(model, colliderDesc);
+		}
 	}
 
 	stop() {
@@ -208,11 +217,7 @@ export class FlightDataModel extends DataStore {
 	}
 }
 
-async function generateColliderDesc(
-	filePath: string,
-	mass: number,
-	// size: number,
-) {
+async function generateColliderDesc(filePath: string, mass: number, size: number) {
 	try {
 		const hull = new ConvexHull();
 		const gltf = await loadGltf(filePath);
@@ -220,8 +225,7 @@ async function generateColliderDesc(
 			throw new Error("Failed to load gltf");
 		}
 		// This properly scales the collider to the size of the ship
-		// gltf.scene.children[0].scale.multiplyScalar(size / 1000);
-
+		gltf.scene.children[0].scale.multiplyScalar(size / 1000);
 		hull.setFromObject(gltf.scene.children[0]);
 		const vertices = [];
 		for (const vertex of hull.vertices) {
@@ -229,7 +233,6 @@ async function generateColliderDesc(
 		}
 		const verticesFloat32 = new Float32Array(vertices);
 		const colliderDesc = RAPIER.ColliderDesc.convexHull(verticesFloat32)?.setMass(mass);
-
 		return colliderDesc;
 	} catch (err) {
 		console.error("Failed to generate convex hulls for", filePath);

@@ -54,26 +54,24 @@ export async function startFlight(
 	const activePlugins = ctx.server.plugins.filter((p) => p.active);
 	ctx.flight.pluginIds = activePlugins.map((p) => p.id);
 
-	let solarSystemMap: Record<string, Entity> | null = null;
+	let solarSystemMap: Record<string, Entity> = {};
 	if (mode === "nova") {
 		await ctx.flight.initPhysics();
 
 		// This will spawn all of the systems and planets bundled with the plugins
-		solarSystemMap = ctx.flight.pluginIds.reduce((map: Record<string, Entity>, pluginId) => {
+		for (const pluginId of ctx.flight.pluginIds) {
 			const plugin = ctx.server.plugins.find((plugin) => plugin.id === pluginId);
-			if (!plugin) return map;
 			// Create entities for the universe objects
-			plugin.aspects.solarSystems.forEach((solarSystem) => {
-				const entities = spawnSolarSystem(solarSystem);
-				entities.forEach((object) => {
+			for (const solarSystem of plugin?.aspects.solarSystems || []) {
+				const entities = await spawnSolarSystem(solarSystem);
+				for (const object of entities) {
 					const { entity, key } = object;
 					ctx.flight?.ecs.addEntity(entity);
 
-					map[key] = entity;
-				});
-			});
-			return map;
-		}, {});
+					solarSystemMap[key] = entity;
+				}
+			}
+		}
 	}
 
 	// Duplicate the inventory templates in the active plugins

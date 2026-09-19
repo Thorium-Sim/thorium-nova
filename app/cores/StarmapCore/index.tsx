@@ -28,7 +28,10 @@ import Input from "@thorium/ui/Input";
 import Select from "@thorium/ui/Select";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import {
+	getCompletePositionFromOrbitClient,
+	getOrbitPosition,
+} from "@thorium/utils/starmap/getOrbitPosition";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import { cn } from "cn";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
@@ -567,6 +570,24 @@ export function SolarSystemWrapper() {
 										isPlanet: entity.components.isPlanet,
 										name: entity.components.identity?.name || "",
 									}}
+								/>
+							</ErrorBoundary>
+						</Suspense>
+					);
+				}
+				if (entity.components.isStarbase) {
+					const {
+						assets: { logo: logoUrl, model: modelUrl },
+					} = entity.components.isStarbase;
+					return (
+						<Suspense key={entity.id} fallback={null}>
+							<ErrorBoundary FallbackComponent={() => <></>} onError={(err) => console.error(err)}>
+								<StarmapShip
+									id={entity.id}
+									size={entity.components.size?.length || 1500}
+									logoUrl={logoUrl}
+									modelUrl={modelUrl}
+									spriteColor={selectedObjectIds.includes(entity.id) ? "#0088ff" : "white"}
 								/>
 							</ErrorBoundary>
 						</Suspense>

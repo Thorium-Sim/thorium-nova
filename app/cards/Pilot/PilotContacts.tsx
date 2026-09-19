@@ -71,7 +71,33 @@ export function CircleGridContacts({
 	return (
 		<group>
 			{orbs.map((entity) => {
-				const { satellite, isPlanet, isStar } = entity.components;
+				const id = entity.id;
+				const { satellite, isPlanet, isStar, isStarbase } = entity.components;
+				if (isStarbase) {
+					const {
+						assets: { model: modelUrl, logo: logoUrl },
+					} = isStarbase;
+					const size = entity.components.size?.length || 1500;
+					if (!modelUrl || !logoUrl) return null;
+					return (
+						<Suspense key={id} fallback={null}>
+							<ErrorBoundary FallbackComponent={fallback} onError={onError}>
+								<ShipEntity
+									id={id}
+									systemId={systemId}
+									modelUrl={modelUrl}
+									logoUrl={logoUrl}
+									size={size}
+									tilted={tilted}
+									onClick={onContactClick}
+									isTargeted={targetedContactId === id}
+									isSelected={selectedContactId === id}
+									onContactOcclusion={onContactOcclusion}
+								/>
+							</ErrorBoundary>
+						</Suspense>
+					);
+				}
 				if (!satellite) return null;
 				return (
 					<PlanetaryEntity
