@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0-alpha.22](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.21...1.0.0-alpha.22) (2026-09-19)
+
+
+### Bug Fixes
+
+* Address layout issues when selecting a ship class when starting a flight. ([6ac63b4](https://github.com/Thorium-Sim/thorium-nova/commit/6ac63b4364e33ffb922d8a758f03bf93bc146bac))
+* Fix hull monitor training highlight ([1773b79](https://github.com/Thorium-Sim/thorium-nova/commit/1773b79bf6bfd1d05dfc2a3aafaa7a1907a55c83))
+* Improve thruster acceleration and max speed. ([4fb8c6b](https://github.com/Thorium-Sim/thorium-nova/commit/4fb8c6bafebb2685ae68f452b7cb1a4e44472263))
+* Make single-shield configurations look better on the Targeting screen. ([acc0976](https://github.com/Thorium-Sim/thorium-nova/commit/acc0976de405d8610f7adbd62ae6b5282792020f))
+* Set default radar zoom to be a bit further out ([8b9a7f9](https://github.com/Thorium-Sim/thorium-nova/commit/8b9a7f9d2651b6751eafcc2b6d95069f629212d7))
+* Thrusters now operate properly ([b061a50](https://github.com/Thorium-Sim/thorium-nova/commit/b061a509d946c1077dbba3d91e5d5f909038715e))
+* Training highlights now properly size to fit their highlighted content ([6be55be](https://github.com/Thorium-Sim/thorium-nova/commit/6be55bec99557d74b416dbc93343b94c5d21a097))
+
+
+### Features
+
+* Basic starbase support. ([198d5bb](https://github.com/Thorium-Sim/thorium-nova/commit/198d5bbcfcfa5bf2d52eb4a944c2a6dfc3cc52dd))
+* Move data folder out of Documents, but include a button to open the data folder from the server window. ([c429137](https://github.com/Thorium-Sim/thorium-nova/commit/c42913793dcbd9848257f3f165d23ca505efa40b))
+* Support vertically aligning training infobox ([7efd347](https://github.com/Thorium-Sim/thorium-nova/commit/7efd347746e64d813d9aef79d410b0ebb0ecc11e))
+
 # [1.0.0-alpha.21](https://github.com/Thorium-Sim/thorium-nova/compare/1.0.0-alpha.20...1.0.0-alpha.21) (2026-09-12)
 
 
