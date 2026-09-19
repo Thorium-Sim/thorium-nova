@@ -1,6 +1,6 @@
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
+// import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
 import { Suspense } from "react";
 import { Matrix4 } from "three";
 
@@ -27,13 +27,13 @@ function Ship() {
 	return <primitive object={model.scene} scale={[30, 30, 30]} />;
 }
 
-function Sprite() {
-	const spriteMap = useShipSprite(
-		"http://localhost:3000/plugins/Thorium%20Default/ships/Astra%20Frigate/assets/logo.svg",
-	);
-	return (
-		<sprite position={[1, 1, 0]}>
-			<spriteMaterial attach="material" map={spriteMap} color={0x888888} sizeAttenuation={false} />
-		</sprite>
-	);
-}
+// function Sprite() {
+// 	const spriteMap = useShipSprite(
+// 		"http://localhost:3000/plugins/Thorium%20Default/ships/Astra%20Frigate/assets/logo.svg",
+// 	);
+// 	return (
+// 		<sprite position={[1, 1, 0]}>
+// 			<spriteMaterial attach="material" map={spriteMap} color={0x888888} sizeAttenuation={false} />
+// 		</sprite>
+// 	);
+// }

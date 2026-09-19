@@ -28,10 +28,7 @@ import Input from "@thorium/ui/Input";
 import Select from "@thorium/ui/Select";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { useLiveQuery } from "@thorium/utils/live-query/client";
-import {
-	getCompletePositionFromOrbitClient,
-	getOrbitPosition,
-} from "@thorium/utils/starmap/getOrbitPosition";
+import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import type { Coordinates } from "@thorium/utils/unitTypes";
 import { cn } from "cn";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
