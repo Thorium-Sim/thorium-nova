@@ -27,7 +27,7 @@ const Checkbox = (
 				/>
 				<span className={cn("flex items-center gap-1", { "sr-only": labelHidden })}>{label}</span>
 			</label>
-			{helperText && <p className="mb-2 text-sm leading-tight text-white">{helperText}</p>}
+			{helperText && <p className="mb-2 text-sm leading-tight text-gray-400">{helperText}</p>}
 		</>
 	);
 };

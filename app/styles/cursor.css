@@ -21,6 +21,15 @@
 	cursor: url(/assets/cursors/wait/01.png), wait;
 	animation: wait-cursor 1.5s steps(77) infinite;
 }
+@utility cursor-grab {
+	cursor: grab !important;
+}
+@utility cursor-grabbing {
+	cursor: grabbing !important;
+}
+@utility cursor-crosshair {
+	cursor: crosshair !important;
+}
 @keyframes wait-cursor {
 	0% {
 		cursor: url(/assets/cursors/wait/01.png), wait;
@@ -43,7 +52,7 @@
 	7.792% {
 		cursor: url(/assets/cursors/wait/07.png), wait;
 	}
-	9.090% {
+	9.09% {
 		cursor: url(/assets/cursors/wait/08.png), wait;
 	}
 	10.389% {
@@ -67,7 +76,7 @@
 	18.181% {
 		cursor: url(/assets/cursors/wait/15.png), wait;
 	}
-	19.480% {
+	19.48% {
 		cursor: url(/assets/cursors/wait/16.png), wait;
 	}
 	20.779% {
@@ -91,7 +100,7 @@
 	28.571% {
 		cursor: url(/assets/cursors/wait/23.png), wait;
 	}
-	29.870% {
+	29.87% {
 		cursor: url(/assets/cursors/wait/24.png), wait;
 	}
 	31.168% {
@@ -136,7 +145,7 @@
 	48.051% {
 		cursor: url(/assets/cursors/wait/38.png), wait;
 	}
-	49.350% {
+	49.35% {
 		cursor: url(/assets/cursors/wait/39.png), wait;
 	}
 	50.649% {
@@ -160,7 +169,7 @@
 	58.441% {
 		cursor: url(/assets/cursors/wait/46.png), wait;
 	}
-	59.740% {
+	59.74% {
 		cursor: url(/assets/cursors/wait/47.png), wait;
 	}
 	61.038% {
@@ -205,7 +214,7 @@
 	77.922% {
 		cursor: url(/assets/cursors/wait/61.png), wait;
 	}
-	79.220% {
+	79.22% {
 		cursor: url(/assets/cursors/wait/62.png), wait;
 	}
 	80.519% {
@@ -229,7 +238,7 @@
 	88.311% {
 		cursor: url(/assets/cursors/wait/69.png), wait;
 	}
-	89.610% {
+	89.61% {
 		cursor: url(/assets/cursors/wait/70.png), wait;
 	}
 	90.909% {

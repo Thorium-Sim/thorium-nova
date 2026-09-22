@@ -78,6 +78,7 @@ const links = {
 	shipMap: "Ship Map",
 	systems: "Systems",
 	cargo: "Cargo",
+	docking: "Docking Ports",
 };
 
 function SettingsList() {

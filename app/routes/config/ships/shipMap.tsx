@@ -114,18 +114,18 @@ function DecksList({
 					onClick={async (event) => {
 						event.preventDefault();
 						event.stopPropagation();
-						const deckname = await prompt({
+						const newName = await prompt({
 							header: "Change the current deck's name",
 							body: "Give this deck a distinct name",
 							defaultValue: deckName,
 							inputProps: { className: "input-error" },
 						});
-						if (deckName && typeof deckname === "string") {
+						if (deckName && typeof newName === "string") {
 							const result = await q.plugin.ship.deck.update.netSend({
 								pluginId,
 								shipId,
 								deckId: deckName,
-								newName: deckname,
+								newName,
 							});
 							if (result) {
 								await queryClient.resetQueries({

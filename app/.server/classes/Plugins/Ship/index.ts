@@ -1,5 +1,6 @@
 import { edgeFlagsSchema } from "@thorium/utils/flags/DeckEdge";
 import { nodeFlagsSchema } from "@thorium/utils/flags/DeckNode";
+import { shipCategories, type ShipCategories } from "@thorium/utils/flags/shipClasses";
 import { generateIncrementedName } from "@thorium/utils/generateIncrementedName";
 import type { Liter } from "@thorium/utils/unitTypes";
 import z from "zod";
@@ -7,9 +8,6 @@ import z from "zod";
 import { Aspect } from "../Aspect";
 import type BasePlugin from "../index";
 import type { DeckPlugin, DeckEdge } from "./Deck";
-
-export const shipCategories = z.enum(["Cruiser", "Frigate", "Scout", "Shuttle", "Seeker"]);
-export type ShipCategories = z.infer<typeof shipCategories>;
 
 export default class ShipPlugin extends Aspect {
 	static schema = z.object({
@@ -75,6 +73,15 @@ export default class ShipPlugin extends Aspect {
 			topView: z.string().optional(),
 			sideView: z.string().optional(),
 		}),
+		dockingPorts: z
+			.object({
+				name: z.string(),
+				incomingCategories: shipCategories.array(),
+				allowOutgoing: z.boolean(),
+				position: z.object({ x: z.number(), y: z.number(), z: z.number() }),
+				orientation: z.object({ x: z.number(), y: z.number(), z: z.number() }),
+			})
+			.array(),
 	});
 	apiVersion = "ships/v1" as const;
 	kind = "ships" as const;
@@ -82,7 +89,7 @@ export default class ShipPlugin extends Aspect {
 	nameTemplate: string;
 	description: string;
 	/**
-	 * A general category of the ship. Used to determine faction icons.
+	 * A general category of the ship. Used to determine faction icons and docking compatibility.
 	 */
 	category: ShipCategories;
 	tags: string[];
@@ -149,6 +156,9 @@ export default class ShipPlugin extends Aspect {
 	/** The volume of the ship's cargo containers. */
 	cargoContainerVolume: Liter;
 
+	/** Define the docking ports for this ship. */
+	dockingPorts: DockingPort[];
+
 	constructor(params: Partial<ShipPlugin>, plugin: BasePlugin) {
 		const name = generateIncrementedName(
 			params.name || "New Ship",
@@ -176,6 +186,7 @@ export default class ShipPlugin extends Aspect {
 		this.deckEdges = params.deckEdges || [];
 		this.cargoContainers = params.cargoContainers || 4;
 		this.cargoContainerVolume = params.cargoContainerVolume || 4000;
+		this.dockingPorts = params.dockingPorts || [];
 	}
 	addDeck(deck: Partial<DeckPlugin>) {
 		let { name } = deck;
@@ -199,4 +210,33 @@ export default class ShipPlugin extends Aspect {
 		});
 		this.decks.splice(index, 1);
 	}
+	addDockingPort(dockingPort: Pick<DockingPort, "position" | "orientation"> & { name?: string }) {
+		let { name } = dockingPort;
+		const order = this.dockingPorts.length;
+		if (!name) name = `Docking Port ${order + 1}`;
+		name = generateIncrementedName(
+			name,
+			this.dockingPorts.map((dockingPort) => dockingPort.name),
+		);
+		const dockingPortObj = { ...dockingPort, name, incomingCategories: [], allowOutgoing: true };
+		this.dockingPorts.push(dockingPortObj);
+
+		return dockingPortObj;
+	}
+	removeDockingPort(index: number) {
+		this.dockingPorts.splice(index, 1);
+	}
+}
+/** Exterior 1-to-1 docking interfaces */
+export interface DockingPort {
+	name: string;
+	/** Which classes of ships this docking port allows to dock with it. Leave empty to prevent other ships docking.*/
+	incomingCategories: ShipCategories[];
+	/** Allows this docking port to dock with other docking ports. */
+	allowOutgoing: boolean;
+	/** Where the docking port is relative to the center of the ship model, measured in meters */
+	position: { x: number; y: number; z: number };
+	/** A normalized vector directing which way the opposing docking port should connect */
+	orientation: { x: number; y: number; z: number };
+	// TODO September 21, 2026 ⛰️ 💨 🔥 - Someday we should have a way to define ships that are already docked when this ship spawns.
 }

@@ -1,17 +1,20 @@
 import path from "node:path";
 
-import ShipPlugin, { shipCategories } from "@thorium/.server/classes/Plugins/Ship";
+import ShipPlugin from "@thorium/.server/classes/Plugins/Ship";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import inputAuth from "@thorium/utils/.server/inputAuth";
+import { shipCategories } from "@thorium/utils/flags/shipClasses";
 import uniqid from "@thorium/utils/uniqid";
 import z from "zod";
 
 import { deck } from "./deck";
+import { dockingPort } from "./dockingPort";
 import { getPlugin } from "./utils";
 
 export const ship = t.router({
 	deck,
+	dockingPort,
 	all: t.procedure
 		.input(z.object({ pluginId: z.string() }))
 		.filter((publish: { pluginId: string } | null, { input }) => {
