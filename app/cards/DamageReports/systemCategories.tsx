@@ -29,6 +29,7 @@ export const systemCategories: Record<ShipSystemTypes, (typeof systemFilterValue
 	exocomps: "Misc.",
 	coolantPump: "Misc.",
 	coolantRadiator: "Misc.",
+	dockingPort: "Misc.",
 };
 
 export const systemSortValues = ["Name", "Type", "Offline", "Damage"];
@@ -56,4 +57,5 @@ export const systemPowerPriority: Record<ShipSystemTypes, number> = {
 	generic: 17,
 	battery: 1000,
 	reactor: 1000,
+	dockingPort: 1000,
 };

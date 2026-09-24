@@ -1,5 +1,6 @@
 import z from "zod";
 
+/** The various handles this object has across multiple physics worlds */
 export const physicsHandles = z
 	.object({
 		/**

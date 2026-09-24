@@ -308,6 +308,22 @@ export async function spawnShip(
 		}
 	});
 
+	// Initialize the docking ports
+	for (const port of template.dockingPorts || []) {
+		const portEntity = new Entity();
+		portEntity.addComponent("identity", { name: port.name });
+		portEntity.addComponent("isDockingPort", {
+			allowOutgoing: port.allowOutgoing,
+			incomingCategories: port.incomingCategories,
+			orientation: [port.orientation.x, port.orientation.y, port.orientation.z],
+		});
+		portEntity.addComponent("position", { parentId: entity.id, type: "ship", ...port.position });
+		portEntity.addComponent("disposable", { entityIds: [entity.id] });
+		portEntity.addComponent("isShipSystem", { shipId: entity.id, type: "dockingPort" });
+		extraEntities.push(portEntity);
+		entity.components.shipSystems?.shipSystems.set(portEntity.id, {});
+	}
+
 	// Now let's power up the reactors. We'll start with the reactors providing the minimum power for the entire ship.
 	const totalPower = systemEntities.reduce((prev, next) => {
 		return prev + (next.components.power?.powerLevels[0] || 0);

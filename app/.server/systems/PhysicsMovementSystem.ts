@@ -1,5 +1,5 @@
 import {
-	generateRigidBody,
+	getBodyForEntity,
 	getEntityWorld,
 	universeToWorld,
 	worldToUniverse,
@@ -9,11 +9,12 @@ import {
 	handleTorpedoDamage,
 } from "@thorium/utils/.server/ship/collisionDamage";
 import { type Entity, System } from "@thorium/utils/ecs";
+import { computeDockedTransform } from "@thorium/utils/starmap/docking";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { KM_TO_LM, M_TO_KM, rpmToRadianPerSecond } from "@thorium/utils/unitTypes";
 import { Euler, Object3D, Quaternion, Vector3 } from "three";
 
-import { getSectorNumber, getWorldPosition, RAPIER } from "../init/rapier";
+import { getWorldPosition, RAPIER } from "../init/rapier";
 
 const tempObj = new Object3D();
 const tempVector = new Vector3();
@@ -24,6 +25,9 @@ const velocityEuler = new Euler();
 const velocityQuaternion = new Quaternion();
 const BRAKE_CONSTANT = 0.99;
 const eventQueue = new RAPIER.EventQueue(true);
+
+const frameAVec = new Vector3(0, 0, 1);
+const frameBVec = new Vector3(0, 0, 1);
 
 const map = new Map<number, { x: number; y: number; z: number }>();
 /**
@@ -40,6 +44,7 @@ const map = new Map<number, { x: number; y: number; z: number }>();
 export class PhysicsMovementSystem extends System {
 	static flightMode = ["nova"];
 	collisionStepEntities = new Set<number>();
+	simpleJointEntities = new Set<number>();
 	test(entity: Entity) {
 		return Boolean(
 			(entity.components.position && entity.components.velocity) ||
@@ -48,17 +53,17 @@ export class PhysicsMovementSystem extends System {
 	}
 	preUpdate(): void {
 		this.collisionStepEntities.clear();
+		this.simpleJointEntities.clear();
 		map.clear();
 	}
 	update(entity: Entity, elapsed: number) {
 		if (this.ecs.colliderCache.size === 0) return;
+
 		// Determine whether the entity is using collision or simple physics
 		// and update the position accordingly.
-		const world = getEntityWorld(this.ecs, entity);
+		const world = getEntityWorld(entity);
 		const position = entity.components.position;
 		if (!position) return;
-
-		const handles = entity.components.physicsHandles?.handles || new Map();
 
 		// Nab some systems to use elsewhere.
 		const systems: Entity[] = [];
@@ -85,19 +90,7 @@ export class PhysicsMovementSystem extends System {
 			tempObj.quaternion.set(x, y, z, w);
 		}
 		if (world) {
-			const worldPosition = getWorldPosition(position);
-			const worldSector = getSectorNumber(position);
-			worldVector.copy(worldPosition);
-			// Make sure the entity in question has a corresponding body in the physics world.
-			const handle = handles?.get(worldSector);
-			const body =
-				typeof handle === "number"
-					? world.getRigidBody(handle)
-					: generateRigidBody(world, entity, this.ecs.colliderCache) || null;
-			if (typeof body?.handle === "number") {
-				handles?.set(worldSector, body.handle);
-				entity.updateComponent("physicsHandles", { handles });
-			}
+			const body = getBodyForEntity(entity);
 
 			if (body && !isHighSpeed) {
 				/**
@@ -105,6 +98,11 @@ export class PhysicsMovementSystem extends System {
 				 */
 				this.collisionStepEntities.add(entity.id);
 
+				// No need to do further calculations if this entity is docked, since its body is attached to the parent entity
+				// and will be dragged around with the joint during the world update phase
+				if (entity.components.isDocked) return;
+
+				// No need to do an update if this ship is docked with another ship
 				// Transform the position of the body based on the position of the entity relative
 				// to the position of the physics world entity.
 				if (entity.components.position) {
@@ -203,6 +201,10 @@ export class PhysicsMovementSystem extends System {
 			/**
 			 * Simple Physics
 			 */
+			// If this ship is docked, just match it to the docked entity's position
+			if (entity.components.isDocked) {
+				this.simpleJointEntities.add(entity.id);
+			}
 			const elapsedRatio = elapsed / 1000;
 			const mass = entity.components.mass?.mass || 1;
 			{
@@ -382,12 +384,8 @@ export class PhysicsMovementSystem extends System {
 				});
 			if (!position) continue;
 
-			const world = getEntityWorld(this.ecs, entity);
-			if (!world) continue;
 			const worldPosition = getWorldPosition(position);
-
-			const bodyHandle = entity.components.physicsHandles?.handles.get(getSectorNumber(position));
-			const body = world.bodies.get(bodyHandle);
+			const body = getBodyForEntity(entity);
 			if (!body) continue;
 			// No need to update fixed bodies.
 			if (body.bodyType() === RAPIER.RigidBodyType.Fixed) continue;
@@ -418,6 +416,44 @@ export class PhysicsMovementSystem extends System {
 					forwardVelocity: tempVector.set(x, y, z).length(),
 				});
 			}
+		}
+
+		// Now loop over the simple joint entities and snap them to the docking port
+		for (const entityId of this.simpleJointEntities) {
+			const entity = this.ecs.getEntityById(entityId);
+			const joint = this.ecs.getEntityById(entity?.components.isDocked?.jointId || -1);
+			if (!joint?.components.fixedJoint) continue;
+			const { anchorA, anchorB, frameA, frameB, idA, idB } = joint.components.fixedJoint;
+			const shipA = this.ecs.getEntityById(idA);
+			const shipB = this.ecs.getEntityById(idB);
+			if (!shipA?.components.position || !shipA.components.size || !shipA.components.rotation)
+				continue;
+			if (!shipB?.components.size || !shipB.components.rotation) continue;
+			const { position, rotation } = computeDockedTransform({
+				hostPosition: shipA.components.position,
+				hostRotation: shipA.components.rotation,
+				hostPortPos: anchorA,
+				hostPortDir: frameAVec.set(0, 0, 1).applyQuaternion(frameA).toArray(),
+				hostScale: shipA.components.size.length,
+				guestPortPos: anchorB,
+				guestPortDir: frameBVec.set(0, 0, 1).applyQuaternion(frameB).toArray(),
+				guestScale: shipB.components.size.length,
+				currentGuestRotation: shipB.components.rotation,
+			});
+
+			shipB.updateComponent("position", {
+				x: position.x,
+				y: position.y,
+				z: position.z,
+				parentId: shipA.components.position.parentId,
+				type: shipA.components.position.type,
+			});
+			shipB.updateComponent("rotation", {
+				x: rotation.x,
+				y: rotation.y,
+				z: rotation.z,
+				w: rotation.w,
+			});
 		}
 	}
 }

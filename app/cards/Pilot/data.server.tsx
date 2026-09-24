@@ -1,4 +1,5 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
+import { getEntityWorld, RAPIER } from "@thorium/.server/init/rapier";
 import { t } from "@thorium/.server/init/t";
 import { cancelLoopingSound, playShipSound } from "@thorium/utils/.server/playRangedSound";
 import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
@@ -6,10 +7,12 @@ import {
 	clearAutopilotState,
 	deactivateForwardAutopilot,
 } from "@thorium/utils/.server/ship/clearAutopilotState";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
-import type { Entity } from "@thorium/utils/ecs";
+import { getShipSystem, getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
+import { triggerAction } from "@thorium/utils/.server/triggerAction";
+import { Entity } from "@thorium/utils/ecs";
+import { computeDockedTransform } from "@thorium/utils/starmap/docking";
 import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
-import { Vector3 } from "three";
+import { Quaternion, Vector3 } from "three";
 import z from "zod";
 
 export const pilot = t.router({
@@ -455,6 +458,92 @@ export const pilot = t.router({
 
 				return { systemId, shipId, rotation };
 			}),
+	}),
+	testDocking: t.procedure.input(z.object({ shipId: z.number() })).send(async ({ ctx, input }) => {
+		if (!ctx.flight) return;
+		const { id } = await triggerAction("ship.spawn", {
+			template: { pluginId: "Thorium Default", name: "Astra Frigate" },
+			entityId: input.shipId,
+			distance: 5,
+		});
+		const guest = ctx.ecs.getEntityById(id);
+		const host = ctx.ecs.getEntityById(input.shipId);
+
+		const [hostPort] = getShipSystems(ctx.ecs, { systemType: "dockingPort", shipId: input.shipId });
+		const [guestPort] = getShipSystems(ctx.ecs, { systemType: "dockingPort", shipId: id });
+
+		// const { position, rotation } = computeDockedTransform({
+		// 	hostPosition: host!.components.position!,
+		// 	hostRotation: host!.components.rotation!,
+		// 	hostPortPos: hostPort.components.position!,
+		// 	hostPortDir: hostPort.components.isDockingPort!.orientation!,
+		// 	hostScale: host!.components.size!.length / 1000,
+		// 	guestPortPos: guestPort.components.position!,
+		// 	guestPortDir: guestPort.components.isDockingPort!.orientation,
+		// 	guestScale: guest!.components.size!.length / 1000,
+		// 	currentGuestRotation: guest!.components.rotation,
+		// });
+		// guest?.updateComponent("position", { x: position.x, y: position.y, z: position.z });
+		// guest?.updateComponent("rotation", {
+		// 	x: rotation.x,
+		// 	y: rotation.y,
+		// 	z: rotation.z,
+		// 	w: rotation.w,
+		// });
+
+		const jointEntity = new Entity();
+		jointEntity.addComponent("fixedJoint", {
+			idA: host?.id,
+			idB: guest?.id,
+			anchorA: new Vector3(
+				hostPort.components.position?.x,
+				hostPort.components.position?.y,
+				hostPort.components.position?.z,
+			).divideScalar(1000),
+			anchorB: new Vector3(
+				guestPort.components.position?.x,
+				guestPort.components.position?.y,
+				guestPort.components.position?.z,
+			).divideScalar(1000),
+			frameA: new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), {
+				x: hostPort.components.isDockingPort!.orientation[0],
+				y: hostPort.components.isDockingPort!.orientation[1],
+				z: hostPort.components.isDockingPort!.orientation[2],
+			}),
+			frameB: new Quaternion().setFromUnitVectors(new Vector3(0, 0, 1), {
+				x: guestPort.components.isDockingPort!.orientation[0],
+				y: hostPort.components.isDockingPort!.orientation[1],
+				z: hostPort.components.isDockingPort!.orientation[2],
+			}),
+		});
+		ctx.ecs.addEntity(jointEntity);
+		guest?.addComponent("isDocked", {
+			dockingPortId: guestPort.id,
+			hostDockingPortId: hostPort.id,
+			hostShipId: host!.id,
+			jointId: jointEntity.id,
+		});
+		hostPort.updateComponent("isDockingPort", { connectedPortId: guestPort.id });
+		guestPort.updateComponent("isDockingPort", { connectedPortId: hostPort.id });
+	}),
+
+	testDocking2: t.procedure.input(z.object({ shipId: z.number() })).send(async ({ ctx, input }) => {
+		if (!ctx.flight) return;
+		const ship = ctx.ecs.getEntityById(input.shipId);
+		if (!ship) return;
+		const [hostDockingPort] = getShipSystems(ctx.ecs, {
+			shipId: input.shipId,
+			systemType: "dockingPort",
+		});
+		const guestDockingPort = ctx.ecs.getEntityById(
+			hostDockingPort.components.isDockingPort?.connectedPortId,
+		);
+		const guestShip = ctx.ecs.getEntityById(guestDockingPort?.components.isShipSystem?.shipId);
+		const jointId = guestShip?.components.isDocked?.jointId;
+		ctx.ecs.removeEntityById(jointId || -1);
+		guestShip.removeComponent("isDocked");
+		hostDockingPort.updateComponent("isDockingPort", { connectedPortId: null });
+		guestDockingPort.updateComponent("isDockingPort", { connectedPortId: null });
 	}),
 	stream: t.procedure
 		.input(z.object({ shipId: z.number(), systemId: z.number().nullable() }))

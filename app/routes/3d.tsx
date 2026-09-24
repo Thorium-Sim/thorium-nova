@@ -1,30 +1,60 @@
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-// import { useShipSprite } from "@thorium/components/Starmap/ShipSprite";
-import { Suspense } from "react";
-import { Matrix4 } from "three";
+import { q } from "@thorium/context/AppContext";
+import { computeDockedTransform } from "@thorium/utils/starmap/docking";
+import { Euler, Quaternion, Vector3 } from "three";
 
-export const instanceMatrix = new Matrix4();
-
-const modelUrl = "/plugins/Thorium Default/ships/Astra Seeker/assets/model.glb";
 export default function ThreeD() {
+	const ship1Position = new Vector3(-2, 0, 0);
+	const ship1Orientation = new Quaternion().setFromEuler(new Euler(0.5, Math.PI / 2, -Math.PI));
+	const ship2Orientation = new Quaternion().setFromEuler(new Euler(0, Math.PI, Math.PI / 2));
+	const [ship] = q.plugin.ship.get.useNetRequest({
+		pluginId: "Thorium Default",
+		shipId: "Astra Frigate",
+	});
+	const model = useGLTF(ship.assets.model, false);
+
+	const { position, rotation } = computeDockedTransform({
+		hostPosition: ship1Position,
+		hostRotation: ship1Orientation,
+		hostPortPos: ship.dockingPorts[0].position,
+		hostPortDir: [
+			ship.dockingPorts[0].orientation.x,
+			ship.dockingPorts[0].orientation.y,
+			ship.dockingPorts[0].orientation.z,
+		],
+		hostScale: 1,
+		guestPortPos: ship.dockingPorts[0].position,
+		guestPortDir: [
+			ship.dockingPorts[0].orientation.x,
+			ship.dockingPorts[0].orientation.y,
+			ship.dockingPorts[0].orientation.z,
+		],
+		guestScale: 1,
+		currentGuestRotation: ship2Orientation,
+	});
 	return (
 		<div className="absolute inset-0 bg-black">
-			<Canvas camera={{ near: 0.1, far: 10000, position: [0, 0, 500] }}>
-				<ambientLight intensity={0.1} />
+			<Canvas
+				camera={{
+					near: 0.1,
+					far: 10000,
+					position: [0, 0, 5],
+				}}
+			>
+				<ambientLight intensity={1} />
 				<directionalLight color="white" position={[2, 3, 5]} />
 				<OrbitControls />
-				<Suspense>
-					<Ship />
-				</Suspense>
+
+				<primitive
+					object={model.scene.clone()}
+					position={ship1Position}
+					quaternion={ship1Orientation}
+				/>
+				<primitive object={model.scene.clone()} position={position} quaternion={rotation} />
 			</Canvas>
 		</div>
 	);
-}
-
-function Ship() {
-	const model = useGLTF(modelUrl, false);
-	return <primitive object={model.scene} scale={[30, 30, 30]} />;
 }
 
 // function Sprite() {

@@ -184,5 +184,5 @@ function Preview({ path }: { path: string }) {
 		return scene;
 	}, [model]);
 
-	return <primitive object={scene} rotation={[Math.PI / 2, Math.PI, 0]} />;
+	return <primitive object={scene} />;
 }

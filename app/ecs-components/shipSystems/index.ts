@@ -21,3 +21,4 @@ export * from "./isShortRangeComm";
 export * from "./isConversationTemplate";
 export * from "./isExocomp";
 export * from "./isCoolantTank";
+export * from "./isDockingPort";

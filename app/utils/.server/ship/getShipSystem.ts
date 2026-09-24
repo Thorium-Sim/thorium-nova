@@ -35,7 +35,7 @@ export function getShipSystem(
 	return system!;
 }
 
-export function getShipSystems(ecs: ECS, param: { systemType: string; shipId: number }) {
+export function getShipSystems(ecs: ECS, param: { systemType: ShipSystemTypes; shipId: number }) {
 	if (ecs.shipSystemCache.has(param.shipId)) {
 		const shipEntry = ecs.shipSystemCache.get(param.shipId)!;
 		if (shipEntry.has(param.systemType)) {

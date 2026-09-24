@@ -197,7 +197,6 @@ export function StarmapShip({
 								scale={size / 1000}
 								userData={{ type: "ship", id }}
 								object={model}
-								rotation={[Math.PI / 2, Math.PI, 0]}
 							/>
 						</group>
 					)}

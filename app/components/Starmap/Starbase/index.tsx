@@ -171,7 +171,6 @@ export function Starbase({
 									scale={size / 1000}
 									userData={{ type: "starbase", id }}
 									object={model}
-									rotation={[Math.PI / 2, Math.PI, 0]}
 								/>
 								{selected && <Selected />}
 							</group>

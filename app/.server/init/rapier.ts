@@ -3,7 +3,7 @@ import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { degToRad, solarMassToKilograms, terranMassToKilograms } from "@thorium/utils/unitTypes";
 import { Euler, Quaternion, Vector3 } from "three";
 
-import type { ECS, Entity } from "../../utils/ecs";
+import type { Entity } from "../../utils/ecs";
 import { SECTOR_GRID_SIZE } from "./rapierConsts";
 
 export { RAPIER };
@@ -201,7 +201,7 @@ function generateShipRigidBody(
 }
 
 /** Returns the world that contains this entity */
-export function getEntityWorld(ecs: ECS, entity: Entity) {
+export function getEntityWorld(entity: Entity) {
 	const position =
 		entity.components.position ||
 		(entity.components.satellite && {
@@ -211,5 +211,20 @@ export function getEntityWorld(ecs: ECS, entity: Entity) {
 	if (typeof position?.parentId !== "number") return null;
 	const entitySector = getSectorNumber(position);
 
-	return ecs.getWorld(entitySector);
+	return entity.ecs.getWorld(entitySector);
+}
+
+export function getBodyForEntity(entity: Entity | null) {
+	if (!entity) return null;
+	const world = getEntityWorld(entity);
+
+	const position = entity.components.position;
+	if (!position || !world) return null;
+	const handles = entity.components.physicsHandles?.handles || new Map();
+
+	const worldSector = getSectorNumber(position);
+	const handle = handles?.get(worldSector);
+	const body = world.getRigidBody(handle);
+
+	return body;
 }

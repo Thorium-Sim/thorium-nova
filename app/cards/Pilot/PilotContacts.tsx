@@ -79,6 +79,7 @@ export function CircleGridContacts({
 					} = isStarbase;
 					const size = entity.components.size?.length || 1500;
 					if (!modelUrl || !logoUrl) return null;
+
 					return (
 						<Suspense key={id} fallback={null}>
 							<ErrorBoundary FallbackComponent={fallback} onError={onError}>
@@ -396,7 +397,7 @@ export const ShipEntity = ({
 	return (
 		<Fragment>
 			<group ref={shipRef} {...eventHandlers}>
-				<primitive object={scene} rotation={[Math.PI / 2, Math.PI, 0]} />
+				<primitive object={scene} />
 				{html ? (
 					<Html
 						className={`contact-entity entity-${id} pointer-events-none h-4 w-4 -translate-1/2`}

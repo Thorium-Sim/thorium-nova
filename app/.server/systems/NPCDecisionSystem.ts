@@ -244,16 +244,24 @@ export class NPCDecisionSystem extends System {
 			path = pathfinder(entity, wanderVector) || [];
 		}
 		const nextCoordinates = path.shift();
+
+		const distanceFromDesired = Math.hypot(
+			desiredPosition.x - position.x,
+			desiredPosition.y - position.y,
+			desiredPosition.z - position.z,
+		);
+
 		entity.updateComponent("autopilot", {
 			rotationAutopilot: true,
 			forwardAutopilot: true,
-			desiredCoordinates: desiredPosition
-				? {
-						x: desiredPosition.x,
-						y: desiredPosition.y,
-						z: desiredPosition.z,
-					}
-				: null,
+			desiredCoordinates:
+				desiredPosition && distanceFromDesired > 0
+					? {
+							x: desiredPosition.x,
+							y: desiredPosition.y,
+							z: desiredPosition.z,
+						}
+					: null,
 			desiredRotation,
 			path,
 			nextCoordinates,
