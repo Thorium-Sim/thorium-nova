@@ -117,7 +117,7 @@ export class SensorScanSystem extends System {
 		let shieldStatus: "up" | "down" = "down";
 		const shields = getShipSystems(this.ecs, {
 			shipId: object.id,
-			systemType: "Shields",
+			systemType: "shields",
 		});
 		for (const sys of shields) {
 			const shield = sys.components.isShields;
@@ -244,7 +244,7 @@ export function generateScanResults(object: Entity, ecs: ECS, scanType: z.infer<
 			let shieldStatus: "up" | "down" = "down";
 			const shields = getShipSystems(ecs, {
 				shipId: object.id,
-				systemType: "Shields",
+				systemType: "shields",
 			});
 			for (const sys of shields) {
 				const shield = sys.components.isShields;
@@ -263,7 +263,7 @@ export function generateScanResults(object: Entity, ecs: ECS, scanType: z.infer<
 		case "targeting": {
 			const targeting = getShipSystems(ecs, {
 				shipId: object.id,
-				systemType: "Targeting",
+				systemType: "targeting",
 			});
 			const target = ecs.getEntityById(targeting[0]?.components.isTargeting?.target || -1);
 			currentResults.targeting = {
@@ -278,11 +278,11 @@ export function generateScanResults(object: Entity, ecs: ECS, scanType: z.infer<
 		case "weapons": {
 			const phasers = getShipSystems(ecs, {
 				shipId: object.id,
-				systemType: "Phasers",
+				systemType: "phasers",
 			});
 			const torpedoes = getShipSystems(ecs, {
 				shipId: object.id,
-				systemType: "TorpedoLauncher",
+				systemType: "torpedoLauncher",
 			});
 
 			currentResults.weapons = {

@@ -8,7 +8,9 @@ export const isDockingPort = z
 		/** Whether the ship can use this docking port to dock with other ships */
 		allowOutgoing: z.boolean().default(false),
 		/** The orientation of the docking port relative to the ship. In other words, when docked, the orientations of each docking port will be inverse of each other. */
-		orientation: z.tuple([z.number(), z.number(), z.number()]).default([0, 1, 0]),
+		orientation: z
+			.object({ x: z.number(), y: z.number(), z: z.number() })
+			.default({ x: 0, y: 1, z: 0 }),
 		state: z.enum(["idle", "outgoing", "incoming"]).default("idle"),
 		clamps: z.boolean().default(false),
 		ramps: z.boolean().default(false),

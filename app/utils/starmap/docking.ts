@@ -1,3 +1,5 @@
+import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
+import { Entity } from "@thorium/utils/ecs";
 import { Quaternion, Vector3 } from "three";
 
 type Coordinate = { x: number; y: number; z: number };
@@ -87,4 +89,71 @@ export function computeDockedTransform({
 		);
 
 	return { position: guestPosition, rotation: guestRotation };
+}
+
+const anchorA = new Vector3();
+const anchorB = new Vector3();
+const frameA = new Quaternion();
+const frameB = new Quaternion();
+const forward = new Vector3(0, 0, 1);
+
+export function dockEntities(guest: Entity, host: Entity) {
+	const ecs = guest.ecs;
+	const [hostPort] = getShipSystems(ecs, { systemType: "dockingPort", shipId: host.id });
+	const [guestPort] = getShipSystems(ecs, { systemType: "dockingPort", shipId: guest.id });
+	if (!hostPort.components.position || !guestPort.components.position)
+		throw new Error("Unable to dock — missing position component.");
+
+	const jointEntity = new Entity();
+	jointEntity.addComponent("fixedJoint", {
+		idA: host?.id,
+		idB: guest?.id,
+		anchorA: {
+			...anchorA
+				.set(
+					hostPort.components.position.x,
+					hostPort.components.position.y,
+					hostPort.components.position.z,
+				)
+				.divideScalar(1000),
+		},
+		anchorB: {
+			...anchorB
+				.set(
+					guestPort.components.position.x,
+					guestPort.components.position.y,
+					guestPort.components.position.z,
+				)
+				.divideScalar(1000),
+		},
+		frameA: {
+			...frameA.setFromUnitVectors(forward, hostPort.components.isDockingPort!.orientation),
+		},
+		frameB: {
+			...frameB.setFromUnitVectors(forward, guestPort.components.isDockingPort!.orientation),
+		},
+	});
+
+	ecs.addEntity(jointEntity);
+
+	guest?.addComponent("isDocked", {
+		dockingPortId: guestPort.id,
+		hostDockingPortId: hostPort.id,
+		hostShipId: host!.id,
+		jointId: jointEntity.id,
+	});
+	hostPort.updateComponent("isDockingPort", { connectedPortId: guestPort.id });
+	guestPort.updateComponent("isDockingPort", { connectedPortId: hostPort.id });
+}
+
+export function undock(guest: Entity) {
+	if (!guest.components.isDocked) return;
+	const { dockingPortId, hostDockingPortId, jointId } = guest.components.isDocked;
+
+	const hostDockingPort = guest.ecs.getEntityById(hostDockingPortId);
+	const guestDockingPort = guest.ecs.getEntityById(dockingPortId);
+	guest.ecs.removeEntityById(jointId || -1);
+	guest.removeComponent("isDocked");
+	hostDockingPort?.updateComponent("isDockingPort", { connectedPortId: null });
+	guestDockingPort?.updateComponent("isDockingPort", { connectedPortId: null });
 }

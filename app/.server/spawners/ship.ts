@@ -315,7 +315,7 @@ export async function spawnShip(
 		portEntity.addComponent("isDockingPort", {
 			allowOutgoing: port.allowOutgoing,
 			incomingCategories: port.incomingCategories,
-			orientation: [port.orientation.x, port.orientation.y, port.orientation.z],
+			orientation: port.orientation,
 		});
 		portEntity.addComponent("position", { parentId: entity.id, type: "ship", ...port.position });
 		portEntity.addComponent("disposable", { entityIds: [entity.id] });
