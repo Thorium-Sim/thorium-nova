@@ -85,7 +85,7 @@ export default function DockingPortsConfig({
 			</p>
 			<Checkbox
 				label="Allow Outgoing"
-				helperText="Allow this docking port to initiate docking with other docking ports."
+				helperText="Allow this docking port to initiate docking with other docking ports. By convention, ships should only have one outgoing docking port."
 				defaultChecked={port.allowOutgoing}
 				onChange={(e) =>
 					void q.plugin.ship.dockingPort.update.netSend({

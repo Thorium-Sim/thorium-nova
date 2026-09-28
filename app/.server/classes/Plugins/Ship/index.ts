@@ -218,7 +218,13 @@ export default class ShipPlugin extends Aspect {
 			name,
 			this.dockingPorts.map((dockingPort) => dockingPort.name),
 		);
-		const dockingPortObj = { ...dockingPort, name, incomingCategories: [], allowOutgoing: true };
+		const dockingPortObj = {
+			...dockingPort,
+			name,
+			incomingCategories: [],
+			distance: 50,
+			allowOutgoing: true,
+		};
 		this.dockingPorts.push(dockingPortObj);
 
 		return dockingPortObj;
@@ -234,6 +240,8 @@ export interface DockingPort {
 	incomingCategories: ShipCategories[];
 	/** Allows this docking port to dock with other docking ports. */
 	allowOutgoing: boolean;
+	/** How close the ship must be in kilometers to request docking */
+	distance: number;
 	/** Where the docking port is relative to the center of the ship model, measured in meters */
 	position: { x: number; y: number; z: number };
 	/** A normalized vector directing which way the opposing docking port should connect */

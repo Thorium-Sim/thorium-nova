@@ -83,6 +83,7 @@ export const dockingPort = t.router({
 				z.union([
 					z.object({ newName: z.string() }),
 					z.object({ newIndex: z.number() }),
+					z.object({ distance: z.number() }),
 					z.object({
 						incomingCategories: shipCategories.array(),
 					}),
@@ -105,6 +106,9 @@ export const dockingPort = t.router({
 			if ("newIndex" in input && typeof input.newIndex === "number") {
 				const deckIndex = ship.dockingPorts.findIndex((deck) => deck.name === input.portId);
 				moveArrayItem(ship.decks, deckIndex, input.newIndex);
+			}
+			if ("distance" in input) {
+				dockingPort.distance = input.distance;
 			}
 			if ("incomingCategories" in input && Array.isArray(input.incomingCategories)) {
 				dockingPort.incomingCategories = input.incomingCategories;

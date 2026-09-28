@@ -1,3 +1,4 @@
+import { shipCategories } from "@thorium/utils/flags/shipClasses";
 import z from "zod";
 
 export const isShip = z
@@ -13,7 +14,7 @@ export const isShip = z
 		/**
 		 * The category of the ship, eg. station, fighter, shuttle, cruiser, carrier, etc.
 		 */
-		category: z.string().default("Cruiser"),
+		category: shipCategories.default("Cruiser"),
 		/**
 		 * The current alert level of the ship. On a scale from 5 being "all clear" and 1 being "red alert".
 		 * p represents a cloaked status.

@@ -316,6 +316,7 @@ export async function spawnShip(
 			allowOutgoing: port.allowOutgoing,
 			incomingCategories: port.incomingCategories,
 			orientation: port.orientation,
+			distance: port.distance,
 		});
 		portEntity.addComponent("position", { parentId: entity.id, type: "ship", ...port.position });
 		portEntity.addComponent("disposable", { entityIds: [entity.id] });

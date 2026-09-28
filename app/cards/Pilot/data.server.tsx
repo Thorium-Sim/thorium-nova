@@ -6,7 +6,8 @@ import {
 	clearAutopilotState,
 	deactivateForwardAutopilot,
 } from "@thorium/utils/.server/ship/clearAutopilotState";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { getShipSystem, getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
+import { shipPubsubFilter } from "@thorium/utils/.server/shipPubsubFilter";
 import { Entity } from "@thorium/utils/ecs";
 import { pathfinder } from "@thorium/utils/starmap/pathfinder.server";
 import { Vector3 } from "three";
@@ -456,7 +457,149 @@ export const pilot = t.router({
 				return { systemId, shipId, rotation };
 			}),
 	}),
+	docking: t.router({
+		get: t.procedure
+			.input(z.object({ shipId: z.number() }))
+			.filter(shipPubsubFilter)
+			.autoPublish(["isDockingPort"], (entity) => ({
+				shipId: entity.components.isShipSystem?.shipId || -1,
+			}))
+			.request(({ ctx, input }) => {
+				const dockingPorts = getShipSystems(ctx.ecs, {
+					systemType: "dockingPort",
+					shipId: input.shipId,
+				});
 
+				return dockingPorts.flatMap((d) =>
+					d.components.isDockingPort
+						? {
+								name: d.components.identity?.name || "Docking Port",
+								state: d.components.isDockingPort.state,
+								connectedShipName: ctx.ecs.getEntityById(
+									ctx.ecs.getEntityById(d.components.isDockingPort.connectedPortId || -1)
+										?.components.isShipSystem?.shipId || -1,
+								)?.components.identity?.name,
+								connectedPortName: ctx.ecs.getEntityById(
+									d.components.isDockingPort.connectedPortId || -1,
+								)?.components.identity?.name,
+							}
+						: [],
+				);
+			}),
+		requestToDock: t.procedure
+			.input(z.object({ shipId: z.number(), hostId: z.number() }))
+			.send(({ ctx, input }) => {
+				const guest = ctx.ecs.getEntityById(input.shipId);
+				const guestDockingPorts = getShipSystems(ctx.ecs, {
+					systemType: "dockingPort",
+					shipId: input.shipId,
+				});
+				const guestDockingPort = guestDockingPorts.find(
+					(g) => g.components.isDockingPort?.allowOutgoing,
+				);
+				if (!guestDockingPort) throw new Error("Guest does not allow outgoing docking");
+
+				const hostDockingPorts = getShipSystems(ctx.ecs, {
+					systemType: "dockingPort",
+					shipId: input.hostId,
+				});
+				const category = guest?.components.isShip?.category;
+				if (!category) throw new Error("Guest is not a ship.");
+
+				const hostDockingPort = hostDockingPorts.find(
+					(p) =>
+						p.components.isDockingPort?.state === "idle" &&
+						p.components.isDockingPort?.incomingCategories.includes(category),
+				);
+				if (!hostDockingPort) throw new Error("Host ship has no available docking ports");
+				hostDockingPort.updateComponent("isDockingPort", {
+					state: "requested",
+					connectedPortId: guestDockingPort.id,
+				});
+
+				guestDockingPort.updateComponent("isDockingPort", {
+					state: "requesting",
+					connectedPortId: hostDockingPort.id,
+				});
+				pubsub.publish.pilot.docking.get({ shipId: input.shipId });
+				pubsub.publish.pilot.docking.get({ shipId: input.hostId });
+			}),
+		cancelDocking: t.procedure.input(z.object({ shipId: z.number() })).send(({ ctx, input }) => {
+			const hostIds = [];
+			for (const guestDockingPort of getShipSystems(ctx.ecs, {
+				systemType: "dockingPort",
+				shipId: input.shipId,
+			})) {
+				guestDockingPort.updateComponent("isDockingPort", {
+					state: "idle",
+					connectedPortId: null,
+				});
+				const hostDockingPort = ctx.ecs.getEntityById(
+					guestDockingPort.components.isDockingPort?.connectedPortId || -1,
+				);
+				hostDockingPort?.updateComponent("isDockingPort", {
+					state: "idle",
+					connectedPortId: null,
+				});
+				hostIds.push(hostDockingPort?.components.isShipSystem?.shipId);
+			}
+
+			pubsub.publish.pilot.docking.get({ shipId: input.shipId });
+			for (const shipId of hostIds) {
+				if (shipId) {
+					pubsub.publish.pilot.docking.get({ shipId });
+				}
+			}
+		}),
+		respondToRequest: t.procedure
+			.input(
+				z.object({
+					requestedDockingPortId: z.number(),
+					response: z.enum(["accept", "deny"]),
+					/** Used to switch which docking port the ship will connect with */
+					acceptedDockingPortId: z.number().optional(),
+				}),
+			)
+			.send(({ ctx, input }) => {
+				const requestedDockingPort = ctx.ecs.getEntityById(input.requestedDockingPortId);
+				if (!requestedDockingPort) throw new Error("Docking Port Not Found");
+				const requestingDockingPort = ctx.ecs.getEntityById(
+					requestedDockingPort?.components.isDockingPort?.connectedPortId || -1,
+				);
+				if (!requestingDockingPort) throw new Error("Docking Request Not Found");
+
+				if (input.response === "deny") {
+					requestedDockingPort.updateComponent("isDockingPort", {
+						connectedPortId: null,
+						state: "idle",
+					});
+					requestedDockingPort.updateComponent("isDockingPort", {
+						connectedPortId: null,
+						state: "idle",
+					});
+				} else {
+					requestedDockingPort.updateComponent("isDockingPort", {
+						state: "incoming",
+					});
+					requestedDockingPort.updateComponent("isDockingPort", {
+						state: "outgoing",
+					});
+				}
+
+				pubsub.publish.pilot.docking.get({
+					shipId: requestedDockingPort.components.isShipSystem?.shipId || -1,
+				});
+				pubsub.publish.pilot.docking.get({
+					shipId: requestingDockingPort.components.isShipSystem?.shipId || -1,
+				});
+			}),
+		setClamps: t.procedure
+			.input(z.object({ shipId: z.number(), clamps: z.enum(["attached", "detached"]) }))
+			.send(({ ctx, input }) => {}),
+		setRamps: t.procedure
+			.input(z.object({ shipId: z.number(), clamps: z.enum(["extended", "retracted"]) }))
+			.send(({ ctx, input }) => {}),
+	}),
 	stream: t.procedure
 		.input(z.object({ shipId: z.number(), systemId: z.number().nullable() }))
 		.dataStream(({ ctx, input }) => {
