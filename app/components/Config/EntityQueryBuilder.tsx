@@ -632,7 +632,18 @@ export function PropertyInput({
 				<div>
 					{value?.map((v: any, i: number) => (
 						<div key={i} className="rounded border border-white/20 bg-black/10 p-2">
-							<Input label="Label" className="input-xs" defaultValue={v.label} />
+							<Input
+								label="Label"
+								className="input-xs"
+								defaultValue={v.label}
+								onChange={(e) =>
+									setValue(
+										produce(value, (draft: any) => {
+											draft[i].label = e.currentTarget.value;
+										}),
+									)
+								}
+							/>
 							<SortableBlocks
 								timelineType={"missions"}
 								executionType={["main"]}

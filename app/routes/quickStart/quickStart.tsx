@@ -85,7 +85,7 @@ export default function FlightQuickStart() {
 									title: "Ship is required",
 									body: "You have at least one ship to start a flight.",
 									color: "warning",
-									action: () => navigate("ship"),
+									actions: [{ action: () => navigate("ship") }],
 								});
 								return;
 							}

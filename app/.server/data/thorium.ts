@@ -114,11 +114,14 @@ export const thorium = t.router({
 		}),
 	executeBlocks: t.procedure
 		.input(
-			z.object({ blocks: timelineBlock.array(), localVariables: z.record(z.any()).optional() }),
+			z.object({
+				blocks: timelineBlock.array(),
+				localVariables: z.record(z.any()).optional().nullable(),
+			}),
 		)
 		.send(async ({ input, ctx }) => {
 			await ctx.ecs.executeBlocks(input.blocks, {
-				localVariables: input.localVariables,
+				localVariables: input.localVariables || {},
 				executionType: "main",
 			});
 		}),

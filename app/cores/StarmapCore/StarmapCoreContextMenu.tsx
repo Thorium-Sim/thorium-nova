@@ -176,22 +176,40 @@ export const StarmapCoreContextMenu = ({
 							Orbit Star
 						</button>
 					) : object.type === "ship" ? (
-						<button
-							className={menuItemClass}
-							onClick={() => {
-								if (selectedShips.length > 0) {
-									q.starmapCore.setFollowShip.netSend({
-										ships: useStarmapStore.getState().selectedObjectIds as number[],
-										objectId: object.id,
-										// TODO: March 15, 2024 - This should change based on the current objective of the ship
-										objective: "defend",
-									});
-									setOpen(false);
-								}
-							}}
-						>
-							Follow Ship
-						</button>
+						<>
+							<button
+								className={menuItemClass}
+								onClick={() => {
+									if (selectedShips.length > 0) {
+										q.starmapCore.setFollowShip.netSend({
+											ships: useStarmapStore.getState().selectedObjectIds as number[],
+											objectId: object.id,
+											// TODO: March 15, 2024 - This should change based on the current objective of the ship
+											objective: "defend",
+										});
+										setOpen(false);
+									}
+								}}
+							>
+								Follow Ship
+							</button>
+							{useStarmapStore.getState().selectedObjectIds.length === 1 ? (
+								<button
+									className={menuItemClass}
+									onClick={() => {
+										if (selectedShips.length > 0) {
+											q.pilot.docking.requestToDock.netSend({
+												shipId: useStarmapStore.getState().selectedObjectIds[0] as number,
+												hostId: object.id,
+											});
+											setOpen(false);
+										}
+									}}
+								>
+									Request To Dock
+								</button>
+							) : null}
+						</>
 					) : null
 				) : null}
 				{object ? (

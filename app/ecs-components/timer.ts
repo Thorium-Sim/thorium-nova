@@ -1,3 +1,4 @@
+import { timelineBlock } from "@thorium/ecs-components/timelineBlocks";
 import z from "zod";
 
 // Zod schema that matches the Timer component
@@ -9,7 +10,7 @@ export const timer = z
 		hidden: z.boolean().default(false),
 		// Timeline blocks that are activated when
 		// this timer completes
-		completeBlocks: z.any().array().default([]),
+		completeBlocks: timelineBlock.array().default([]),
 		blockMetadata: z
 			.object({
 				stepId: z.number().optional(),

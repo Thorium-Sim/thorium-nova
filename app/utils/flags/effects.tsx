@@ -1,4 +1,3 @@
-import { timelineBlock } from "@thorium/ecs-components/timelineBlocks";
 import z from "zod";
 
 export const effectOptions = z.union([
@@ -15,21 +14,6 @@ export const effectOptions = z.union([
 		type: z.literal("speak"),
 		message: z.string(),
 		voice: z.string().optional(),
-	}),
-	z.object({
-		type: z.literal("message"),
-		title: z.string(),
-		body: z.string().optional(),
-		duration: z.number().optional(),
-
-		actions: z
-			.object({
-				label: z.string().optional(),
-				blocks: timelineBlock.array(),
-				localVariables: z.any(),
-			})
-			.array()
-			.optional(),
 	}),
 ]);
 

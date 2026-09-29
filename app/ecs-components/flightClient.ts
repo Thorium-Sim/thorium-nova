@@ -8,6 +8,7 @@ export const flightClient = z
 		/** During training, if the client is assigned to another isolated ship, this provides a link back to the original ship. */
 		originalShipId: z.number().nullable().default(null),
 		stationId: z.string().nullable().default(null),
+		/** The component of the station card that is currently visible */
 		currentCard: z.string().nullable().default(null),
 		loginName: z.string().default(""),
 		offlineState: z

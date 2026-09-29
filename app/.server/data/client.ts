@@ -63,6 +63,32 @@ export const client = t.router({
 			} = ctx.getFlightClient(input.clientId)?.components.flightClient || {};
 			return { id, name, connected, settings, ...flightClient };
 		}),
+	notifications: t.procedure
+		.input(z.object({ clientId: z.string() }))
+		.filter((publish: { clientId: string }, { input }) => {
+			if (!publish) return true;
+			if (publish.clientId === input.clientId) return true;
+			return false;
+		})
+		.autoPublish(["notification"], (entity) => ({
+			clientId: entity.components.notification?.clientId || "",
+		}))
+		.request(({ ctx, input }) => {
+			let notifications = [];
+			for (const notification of ctx.ecs.componentCache.get("notification") || []) {
+				console.log(notification.components.notification?.clientId, input.clientId);
+				if (notification.components.notification?.clientId === input.clientId) {
+					notifications.push({
+						id: notification.id,
+						title: notification.components.identity?.name || "New Notification",
+						body: notification.components.identity?.description,
+						color: notification.components.notification.color,
+						actions: notification.components.notification.actions,
+					});
+				}
+			}
+			return notifications;
+		}),
 	all: t.procedure
 		.autoPublish(["flightClient"], () => null)
 		.request(({ ctx }) => {
@@ -183,6 +209,7 @@ export const client = t.router({
 				clientId: z.string().optional(),
 				shipId: z.number().optional(),
 				station: z.string().optional(),
+				/** The component of the station card that should be made visible */
 				card: z.string(),
 			}),
 		)

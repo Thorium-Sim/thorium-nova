@@ -1,5 +1,4 @@
 import { clientId, q } from "@thorium/context/AppContext";
-import { toast } from "@thorium/context/ToastContext";
 import { doEvent } from "@thorium/hooks/useEventListener";
 
 import "./effects.css";
@@ -103,10 +102,6 @@ const Effects = () => {
 						}
 						return synth?.speak(words);
 					} catch {}
-					break;
-				}
-				case "message": {
-					toast(effect);
 					break;
 				}
 				// case "shutdown":

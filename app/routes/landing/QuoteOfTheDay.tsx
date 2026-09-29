@@ -446,6 +446,8 @@ const quotes = [
 	// Antonio Gramsci
 	"The old world is dying, and the new world struggles to be born: now is the time of monsters.",
 	"I’m a pessimist because of intelligence, but an optimist because of will.",
+	// Random graffiti https://bsky.app/profile/cassidoo.co/post/3mwokoklltc2q
+	"Y'all want everything, but nothing if it takes time.",
 ];
 
 const QuoteOfTheDay = () => {

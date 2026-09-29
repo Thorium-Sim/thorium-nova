@@ -1,6 +1,7 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import { cancelLoopingSound, playShipSound } from "@thorium/utils/.server/playRangedSound";
+import { scheduleAction } from "@thorium/utils/.server/scheduleAction";
 import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
 import {
 	clearAutopilotState,
@@ -490,6 +491,7 @@ export const pilot = t.router({
 			.input(z.object({ shipId: z.number(), hostId: z.number() }))
 			.send(({ ctx, input }) => {
 				const guest = ctx.ecs.getEntityById(input.shipId);
+				const host = ctx.ecs.getEntityById(input.hostId);
 				const guestDockingPorts = getShipSystems(ctx.ecs, {
 					systemType: "dockingPort",
 					shipId: input.shipId,
@@ -521,6 +523,58 @@ export const pilot = t.router({
 					state: "requesting",
 					connectedPortId: hostDockingPort.id,
 				});
+				if (host?.components.isPlayerShip) {
+					ctx.ecs.triggerAction(
+						"effects.notify",
+						{
+							shipId: host.id,
+							title: "Request to Dock",
+							color: "info",
+							body: `${guest.components.identity?.name || "A ship"} is requesting to dock.`,
+							cards: ["Pilot"],
+							actions: [
+								{
+									label: "Accept",
+									blocks: [
+										{
+											type: "Action",
+											id: "accept",
+											action: "pilot.docking.respondToRequest",
+											values: {
+												requestedDockingPortId: hostDockingPort.id,
+												response: "accept",
+											},
+										},
+									],
+								},
+								{
+									label: "Deny",
+									blocks: [
+										{
+											type: "Action",
+											id: "deny",
+											action: "pilot.docking.respondToRequest",
+											values: {
+												requestedDockingPortId: hostDockingPort.id,
+												response: "deny",
+											},
+										},
+									],
+								},
+							],
+						},
+						ctx,
+					);
+				} else {
+					// TODO September 29, 2026 — We'll need the automated docking to be more sophisticated.
+					// Perhaps an optional allow docking option with a default based on faction fallback.
+					scheduleAction(
+						ctx.ecs,
+						"pilot.docking.respondToRequest",
+						{ response: "accept", requestedDockingPortId: hostDockingPort.id },
+						Math.random() * 3 + 2, // Between 2 and 5 seconds
+					);
+				}
 				pubsub.publish.pilot.docking.get({ shipId: input.shipId });
 				pubsub.publish.pilot.docking.get({ shipId: input.hostId });
 			}),

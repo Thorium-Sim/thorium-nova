@@ -7,6 +7,7 @@ import type { SoundEffect } from "@thorium/ecs-components/soundEffect";
 import { timelineBlock } from "@thorium/ecs-components/timelineBlocks";
 import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
 import { playServerSound } from "@thorium/utils/.server/playRangedSound";
+import { Entity } from "@thorium/utils/ecs";
 import { type EffectPayload, effectOptions, notBridgeStation } from "@thorium/utils/flags/effects";
 import { randomFromList } from "@thorium/utils/operations/randomFromList";
 import z from "zod";
@@ -295,7 +296,7 @@ export const effects = t.router({
 						.object({ label: z.string(), blocks: timelineBlock.array() })
 						.array()
 						.optional(),
-					/** Add a highlight to the indicated cards, if they're present */
+					/** Add a highlight to the indicated cards (by either component or card name), if they're present */
 					cards: z.string().array().optional(),
 				})
 				.and(stationOrClient),
@@ -310,87 +311,26 @@ export const effects = t.router({
 			}),
 		})
 		.send(({ ctx, input }) => {
+			const clientIds: string[] = [];
 			if ("clientName" in input) {
-				const { clientName: _, ...notification } = input;
 				const clientId = ctx.server.getClientByName(input.clientName)?.id || "";
-				const card = getCardForStation({ ctx, cards: input.cards, clientId });
+				clientIds.push(clientId);
+			} else if ("shipId" in input) {
+				let { shipId, station, cards } = input;
+				if (!station) {
+					// Find the station that matches the cards
+					const { ship } = getShip({ ctx, shipId, station });
+					for (const shipStation of ship?.components.stationComplement?.stations || []) {
+						if (
+							shipStation.cards.some((c) => cards?.includes(c.component) || cards?.includes(c.name))
+						) {
+							station = shipStation.name;
+							break;
+						}
+					}
+				}
 
-				const actions = input.actions
-					? input.actions.map((a) => ({
-							label: a.label,
-							type: "blocks" as const,
-							blocks: a.blocks,
-							localVariables: ctx.localVariables,
-						}))
-					: card
-						? [
-								{
-									blocks: [
-										{
-											id: "card-change",
-											type: "Action",
-											action: "client.setCard",
-											values: { card, clientId },
-										},
-									],
-								},
-							]
-						: undefined;
-				pubsub.publish.effects.sub({
-					effect: {
-						type: "message",
-						...notification,
-						actions,
-					},
-					clientId,
-				});
-
-				// Add the card highlight to this client's station
-				const flightClient = ctx.getFlightClient(input.clientName);
-				applyCardHighlight(
-					ctx.ecs,
-					flightClient?.components.flightClient?.shipId || -1,
-					flightClient?.components.flightClient?.stationId,
-					input.cards,
-				);
-
-				pubsub.publish.station.get({ clientId });
-			} else {
-				const { shipId, station, ...notification } = input;
-				const card = getCardForStation({ ctx, cards: input.cards, shipId, station });
-				const actions = input.actions
-					? input.actions.map((a) => ({
-							label: a.label,
-							type: "blocks" as const,
-							blocks: a.blocks,
-							localVariables: ctx.localVariables,
-						}))
-					: card
-						? [
-								{
-									blocks: [
-										{
-											id: "card-change",
-											type: "Action",
-											action: "client.setCard",
-											values: { card, shipId, station },
-										},
-									],
-								},
-							]
-						: undefined;
-				pubsub.publish.effects.sub({
-					effect: {
-						type: "message",
-						...notification,
-						actions,
-					},
-					shipId,
-					station,
-				});
-				// Add the card highlight
-				applyCardHighlight(ctx.ecs, input.shipId, input.station, input.cards);
-				// Find all clients assigned this station
+				// Find the clients that are assigned to that station
 				for (const client of ctx.ecs.componentCache.get("flightClient") || []) {
 					const flightClient = client.components.flightClient;
 					if (
@@ -398,9 +338,86 @@ export const effects = t.router({
 						flightClient.shipId === shipId &&
 						flightClient.stationId === station
 					) {
-						pubsub.publish.station.get({ clientId: flightClient.clientId });
+						clientIds.push(flightClient.clientId);
 					}
 				}
+			}
+
+			for (const clientId of clientIds) {
+				const card = getCardForStation({ ctx, cards: input.cards, ...input });
+				const actions = input.actions
+					? input.actions.map((a) => ({
+							label: a.label,
+							type: "blocks" as const,
+							blocks: a.blocks,
+							localVariables: ctx.localVariables,
+						}))
+					: card
+						? [
+								{
+									blocks: [
+										{
+											id: "card-change",
+											type: "Action" as const,
+											action: "client.setCard",
+											values: { card, clientId },
+										},
+									],
+								},
+							]
+						: undefined;
+
+				const notificationEntity = new Entity();
+				notificationEntity.addComponent("identity", {
+					name: input.title,
+					description: input.body,
+				});
+				notificationEntity.addComponent("notification", {
+					clientId,
+					color: input.color,
+					actions,
+				});
+				// Don't include the timer if there are buttons to click on the notification
+				if (!actions || !actions?.some((a) => "label" in a && a.label)) {
+					notificationEntity.addComponent("timer", {
+						label: input.title,
+						remainingDurationMs: input.duration || 5000,
+						hidden: true,
+						paused: false,
+						completeBlocks: [
+							{
+								type: "Action",
+								id: "clear",
+								action: "effects.clearNotification",
+								values: { notificationId: notificationEntity.id },
+							},
+						],
+					});
+				}
+				ctx.ecs.addEntity(notificationEntity);
+
+				// Add the card highlight
+				const flightClient = ctx.getFlightClient(clientId)?.components.flightClient;
+				if (flightClient) {
+					const { shipId, stationId } = flightClient;
+					if (shipId && stationId) {
+						applyCardHighlight(ctx.ecs, shipId, stationId, input.cards);
+					}
+				}
+				// Find all clients assigned this station
+				pubsub.publish.station.get({ clientId });
+				pubsub.publish.client.notifications({ clientId });
+			}
+		}),
+	clearNotification: t.procedure
+		.input(z.object({ notificationId: z.number() }))
+		.send(({ ctx, input }) => {
+			const entity = ctx.ecs.getEntityById(input.notificationId);
+			if (!entity) return;
+			const clientId = entity.components.notification?.clientId;
+			ctx.ecs.removeEntity(entity);
+			if (clientId) {
+				pubsub.publish.client.notifications({ clientId });
 			}
 		}),
 });
@@ -434,9 +451,8 @@ function matchSound(
 	return false;
 }
 
-function getCardForStation({
+function getShip({
 	ctx,
-	cards,
 	clientId,
 	shipId,
 	station,
@@ -447,21 +463,40 @@ function getCardForStation({
 	station?: string;
 	clientId?: string;
 }) {
-	if (!cards) return null;
 	if (clientId) {
 		const flightClient = ctx.getFlightClient(clientId);
 		station = station || flightClient?.components.flightClient?.stationId || undefined;
 		shipId = flightClient?.components.flightClient?.shipId || shipId;
 	}
 	const ship = ctx.ecs.getEntityById(shipId || -1);
+
+	return { ship, station };
+}
+
+function getCardForStation({
+	ctx,
+	cards,
+	clientId,
+	shipId,
+	station: inputStation,
+}: {
+	ctx: DataContext;
+	cards?: string[];
+	shipId?: number;
+	station?: string;
+	clientId?: string;
+}) {
+	if (!cards) return null;
+
+	const { ship, station } = getShip({ ctx, clientId, shipId, station: inputStation });
 	if (!ship || !station) return null;
 
-	const stationCards = ship.components.stationComplement?.stations
-		.find((s) => s.name === station)
-		?.cards.map((c) => c.name);
-	if (!stationCards) return null;
-	for (let card of cards) {
-		if (stationCards.includes(card)) return card;
+	const stationObj = ship.components.stationComplement?.stations.find((s) => s.name === station);
+	if (!stationObj) return null;
+
+	for (let stationCard of stationObj.cards) {
+		if (cards.includes(stationCard.component) || cards.includes(stationCard.name))
+			return stationCard.component;
 	}
 	return null;
 }

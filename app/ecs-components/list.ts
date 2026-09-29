@@ -66,3 +66,4 @@ export { damageControlAssignment } from "./damageControl";
 export * from "./engineeringPanel";
 export * from "./disposable";
 export * from "./physicsJoint";
+export * from "./notification";

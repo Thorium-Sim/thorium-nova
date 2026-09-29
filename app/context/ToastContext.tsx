@@ -1,4 +1,4 @@
-import { q } from "@thorium/context/AppContext";
+import { clientId, q } from "@thorium/context/AppContext";
 import Button from "@thorium/ui/Button";
 import { Icon } from "@thorium/ui/Icon";
 import { Transition } from "@thorium/ui/Transition";
@@ -17,7 +17,7 @@ const Toast = ({
 	actions,
 	pause,
 	resume,
-}: Notification & {
+}: Omit<Notification, "duration"> & {
 	dismiss: () => void;
 }) => {
 	let action: NotificationAction | undefined = undefined;
@@ -29,7 +29,7 @@ const Toast = ({
 		<Transition
 			isOpen={visible}
 			className={cn(
-				`toast alert absolute right-0 m-4 block! min-h-16 w-md max-w-xs`,
+				`toast alert relative right-0 m-4 block! min-h-16 w-md max-w-xs`,
 				"entering:opacity-0 exiting:opacity-0 exiting:pointer-events-none transition-all duration-500 data-entered:opacity-100! data-exited:hidden",
 				{
 					"cursor-pointer": !!action,
@@ -43,7 +43,11 @@ const Toast = ({
 			)}
 			onClick={() => {
 				if (action) {
-					q.thorium.executeBlocks.netSend(action);
+					if ("blocks" in action) {
+						q.thorium.executeBlocks.netSend(action);
+					} else {
+						action.action();
+					}
 					dismiss();
 				}
 			}}
@@ -76,7 +80,11 @@ const Toast = ({
 								"btn-notice": color === "notice",
 							})}
 							onClick={() => {
-								q.thorium.executeBlocks.netSend(action);
+								if ("blocks" in action) {
+									q.thorium.executeBlocks.netSend(action);
+								} else {
+									action.action();
+								}
 								dismiss();
 							}}
 						>
@@ -88,26 +96,34 @@ const Toast = ({
 		</Transition>
 	);
 };
-interface NotificationAction {
+interface LocalNotificationAction {
+	label?: string | undefined;
+	action: () => void;
+}
+interface RemoteNotificationAction {
 	label?: string | undefined;
 	blocks: any[];
 	localVariables?: any;
 }
+type NotificationAction = LocalNotificationAction | RemoteNotificationAction;
 
-interface Notification {
-	id: string;
+interface Notification<Action extends NotificationAction = NotificationAction> {
+	id: string | number;
 	title: string;
 	body?: ReactNode;
 	visible: boolean;
 	duration?: number;
-	actions?: NotificationAction[];
+	actions?: Action[];
 	color?: "info" | "success" | "warning" | "error" | "notice";
 	pause: () => void;
 	resume: () => void;
 }
 
-function toastReducer(state: Notification[], action: Notification | string) {
-	if (typeof action === "string") {
+function toastReducer(
+	state: Notification<LocalNotificationAction>[],
+	action: Notification<LocalNotificationAction> | string | number,
+) {
+	if (typeof action === "string" || typeof action === "number") {
 		const item = state.find((item) => item.id === action);
 		if (!item?.visible) {
 			return state.filter((notification) => notification.id !== action);
@@ -122,17 +138,22 @@ function toastReducer(state: Notification[], action: Notification | string) {
 	return [...state, action];
 }
 export let toast: (
-	notification: Omit<Notification, "id" | "visible" | "pause" | "resume">,
+	notification: Omit<Notification<LocalNotificationAction>, "id" | "visible" | "pause" | "resume">,
 ) => void = () => {};
 
 export default function ToastContainer() {
 	const [toasts, dispatch] = useReducer(toastReducer, []);
 	const toastsRef = useRef(toasts);
 	toastsRef.current = toasts;
-
+	const [remoteNotifications] = q.client.notifications.useNetRequest({ clientId });
 	useEffect(() => {
 		const timeouts: Record<string, ReturnType<typeof setTimeout>> = {};
-		toast = (notification: Omit<Notification, "id" | "visible" | "pause" | "resume">) => {
+		toast = (
+			notification: Omit<
+				Notification<LocalNotificationAction>,
+				"id" | "visible" | "pause" | "resume"
+			>,
+		) => {
 			if (toastsRef.current.some((t) => t.visible && t.title === notification.title)) {
 				return;
 			}
@@ -178,6 +199,16 @@ export default function ToastContainer() {
 	}
 	return createPortal(
 		<div className="fixed top-0 right-0 z-20">
+			{remoteNotifications.map((toast) => (
+				<Toast
+					key={toast.id}
+					{...toast}
+					visible
+					pause={() => q.timer.pause.netSend({ timerId: toast.id })}
+					resume={() => q.timer.resume.netSend({ timerId: toast.id })}
+					dismiss={() => q.effects.clearNotification.netSend({ notificationId: toast.id })}
+				/>
+			))}
 			{toasts.map((toast) => (
 				<Toast key={toast.id} {...toast} dismiss={() => dispatch(toast.id)} />
 			))}

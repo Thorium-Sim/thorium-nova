@@ -1,6 +1,5 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
-import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { Entity } from "@thorium/utils/ecs";
 import z from "zod";
 
@@ -79,7 +78,7 @@ export const remoteAccess = t.router({
 
 			const code = remoteAccessCode.components.remoteAccessCode;
 			if (code) {
-				await triggerAction("effects.notify", {
+				await ctx.ecs.triggerAction("effects.notify", {
 					clientName: code.clientId,
 					color: "success",
 					shipId: code.shipId,
@@ -106,7 +105,7 @@ export const remoteAccess = t.router({
 
 			const code = remoteAccessCode.components.remoteAccessCode;
 			if (code) {
-				await triggerAction("effects.notify", {
+				await ctx.ecs.triggerAction("effects.notify", {
 					clientName: code.clientId,
 					color: "error",
 					shipId: code.shipId,

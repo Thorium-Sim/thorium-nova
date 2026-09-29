@@ -11,3 +11,4 @@ export * from "./timeline";
 export * from "./plugins";
 export * from "./conversation";
 export * from "./textPattern";
+export * from "./timer";

@@ -309,13 +309,16 @@ export async function executeBlocks(
 								Object.entries(value).map(([key, prop]) => [key, processValues(prop, key)]),
 							);
 						}
-						const actionInputs =
-							// @ts-expect-error
-							router._def.procedures[block.action]._def.inputs?.[0]?._def.shape();
-
 						let baseType = undefined;
 						try {
-							baseType = getBaseZodType(actionInputs[key]);
+							// @ts-expect-error
+							const actionInputShape = router._def.procedures[block.action]._def.inputs?.[0];
+							if (actionInputShape?._def.shape) {
+								const actionInputs = actionInputShape._def.shape();
+								baseType = getBaseZodType(actionInputs[key]);
+							} else {
+								baseType = getBaseZodType(actionInputShape);
+							}
 						} catch {}
 						let val = getValueReference(value, localVariables, ecs, baseType);
 
@@ -476,6 +479,13 @@ function getBaseZodType(schema: any) {
 	}
 	if (schema._def.typeName === "ZodLiteral") {
 		return typeof schema._def.value;
+	}
+	if (schema._def.typeName === "ZodIntersection") {
+		const left: any = getBaseZodType(schema._def.left);
+		const right: any = getBaseZodType(schema._def.right);
+
+		if (left === "unknown") return right;
+		return left;
 	}
 	console.error("Unable to determine zod type for schema", schema);
 	return "unknown";
