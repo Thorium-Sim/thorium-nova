@@ -106,20 +106,7 @@ const Effects = () => {
 					break;
 				}
 				case "message": {
-					let action = () => {};
-					switch (effect.action?.type) {
-						case "cardChange":
-							for (const card of effect.action.cards) {
-								if (station.cards.some((c) => c.name === card)) {
-									action = () => {
-										q.client.setCard.netSend({ clientId, card });
-									};
-									break;
-								}
-							}
-							break;
-					}
-					toast({ ...effect, action });
+					toast(effect);
 					break;
 				}
 				// case "shutdown":

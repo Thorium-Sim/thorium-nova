@@ -1,3 +1,4 @@
+import { timelineBlock } from "@thorium/ecs-components/timelineBlocks";
 import z from "zod";
 
 export const effectOptions = z.union([
@@ -21,13 +22,13 @@ export const effectOptions = z.union([
 		body: z.string().optional(),
 		duration: z.number().optional(),
 
-		action: z
-			.union([
-				/** Change cards to the first card listed here which is present on the station */
-				z.object({ type: z.literal("cardChange"), cards: z.string().array() }),
-				// Placeholder until another action is encoded here
-				z.object({ type: z.literal("unknown") }),
-			])
+		actions: z
+			.object({
+				label: z.string().optional(),
+				blocks: timelineBlock.array(),
+				localVariables: z.any(),
+			})
+			.array()
 			.optional(),
 	}),
 ]);

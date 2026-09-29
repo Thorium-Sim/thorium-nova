@@ -1,8 +1,12 @@
+import { isSortable } from "@dnd-kit/react/sortable";
 import type {
 	ComponentQuery,
 	EntityQuery,
 	ValueQuery,
 } from "@thorium/.server/classes/Plugins/TimelineStep";
+import { AddBlockButton } from "@thorium/components/timelineBuilder/AddBlockMenu";
+import { SortableBlocks } from "@thorium/components/timelineBuilder/SortableBlocks";
+import { timelineBlockDefaults } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { components, type ComponentIds } from "@thorium/ecs-components";
 import { SoundConfigForm } from "@thorium/routes/config/systems/soundId";
 import Checkbox from "@thorium/ui/Checkbox";
@@ -13,6 +17,8 @@ import Select from "@thorium/ui/Select";
 import TagInput from "@thorium/ui/TagInput";
 import { Tooltip } from "@thorium/ui/Tooltip";
 import { cn } from "@thorium/utils/cn";
+import { moveArrayItem } from "@thorium/utils/operations/moveArrayItem";
+import uniqid from "@thorium/utils/uniqid";
 import {
 	type InputTypes,
 	ZOD_COMPARISONS,
@@ -435,7 +441,7 @@ function ComponentCombobox({
 					].flat()}
 				>
 					{(item) => (
-						<ListBoxItem className="data-[focused]:bg-secondary cursor-default truncate px-2 py-1 font-normal text-white select-none">
+						<ListBoxItem className="data-focused:bg-secondary cursor-default truncate px-2 py-1 font-normal text-white select-none">
 							{capitalCase(item.id)}
 						</ListBoxItem>
 					)}
@@ -486,7 +492,7 @@ export function PropertyCombobox({
 					items={properties}
 				>
 					{(item) => (
-						<ListBoxItem className="data-[focused]:bg-secondary cursor-default truncate px-2 py-1 font-normal text-white select-none">
+						<ListBoxItem className="data-focused:bg-secondary cursor-default truncate px-2 py-1 font-normal text-white select-none">
 							{capitalCase(item.id)}
 						</ListBoxItem>
 					)}
@@ -620,6 +626,91 @@ export function PropertyInput({
 					defaultValue={value}
 					{...inputProps}
 				/>
+			);
+		case "labeledBlockList":
+			return (
+				<div>
+					{value?.map((v: any, i: number) => (
+						<div key={i} className="rounded border border-white/20 bg-black/10 p-2">
+							<Input label="Label" className="input-xs" defaultValue={v.label} />
+							<SortableBlocks
+								timelineType={"missions"}
+								executionType={["main"]}
+								blocks={v.blocks}
+								onDragEnd={(event) => {
+									setValue(
+										produce(value, (draft: any) => {
+											if (
+												event.canceled ||
+												!event.operation.source ||
+												!isSortable(event.operation.source)
+											)
+												return;
+											const index = draft[i].blocks.findIndex(
+												(b: any) => b.id === event.operation.source?.id,
+											);
+											moveArrayItem(draft[i].blocks, index, event.operation.source.index);
+										}),
+									);
+								}}
+								onUpdate={async (block, property, propertyValue) => {
+									setValue(
+										produce(value, (draft: any) => {
+											const index = draft[i].blocks.findIndex((b: any) => b.id === block.id);
+											draft[i].blocks[index][property] = propertyValue;
+										}),
+									);
+								}}
+								onReplace={(id, blocks) => {
+									setValue(
+										produce(value, (draft: any) => {
+											const index = draft[i].blocks.findIndex((b: any) => b.id === id);
+											draft[i].blocks.splice(index, 1, ...blocks);
+										}),
+									);
+								}}
+								onRemove={(id) =>
+									setValue(
+										produce(value, (draft: any) => {
+											const index = draft[i].blocks.findIndex((b: any) => b.id === id);
+											draft[i].blocks.splice(index, 1);
+										}),
+									)
+								}
+							/>
+							<AddBlockButton
+								timelineType={"missions"}
+								executionType={["main"]}
+								onAddBlock={async (type, init, initOverrides) => {
+									if (
+										type === "Action" &&
+										init &&
+										"action" in init &&
+										typeof init.action === "string"
+									) {
+										// @ts-expect-error
+										init.values = getActionPresetValues(init.action, init.values, initOverrides);
+									}
+									const blockDefault = timelineBlockDefaults[type] as any;
+
+									setValue(
+										produce(value, (draft: any) => {
+											draft[i].blocks.push({ ...blockDefault, ...init, id: uniqid("blk-"), type });
+										}),
+									);
+								}}
+							>
+								<Button className="btn btn-xs btn-outline btn-success">Add Block</Button>
+							</AddBlockButton>
+						</div>
+					))}
+					<Button
+						className="btn btn-success btn-xs mt-2"
+						onClick={() => setValue([...(value || []), { label: "", blocks: [] }])}
+					>
+						Add Action
+					</Button>
+				</div>
 			);
 		default:
 			if (inputType !== "text") {

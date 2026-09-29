@@ -169,7 +169,8 @@ export type InputTypes =
 	| "starmapCoordinates"
 	| "shipTemplate"
 	| "components"
-	| "sound";
+	| "sound"
+	| "labeledBlockList";
 
 export function getInputType<T extends keyof typeof ZOD_COMPARISONS>(
 	item: {

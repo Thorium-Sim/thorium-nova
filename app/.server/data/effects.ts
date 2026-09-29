@@ -1,8 +1,10 @@
+import type { DataContext } from "@thorium/.server/DataContext";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
 import type { position as positionComponent } from "@thorium/ecs-components/position";
 import { sound } from "@thorium/ecs-components/sound";
 import type { SoundEffect } from "@thorium/ecs-components/soundEffect";
+import { timelineBlock } from "@thorium/ecs-components/timelineBlocks";
 import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
 import { playServerSound } from "@thorium/utils/.server/playRangedSound";
 import { type EffectPayload, effectOptions, notBridgeStation } from "@thorium/utils/flags/effects";
@@ -280,7 +282,7 @@ export const effects = t.router({
 			pubsub.publish.effects.events(input);
 		}),
 	notify: t.procedure
-		.meta({ action: true })
+
 		.input(
 			z
 				.object({
@@ -288,20 +290,57 @@ export const effects = t.router({
 					body: z.string().optional(),
 					duration: z.coerce.number().optional(),
 					color: z.enum(["info", "success", "warning", "error", "notice"]),
+					/** Add some actions underneath the notification. Disables the duration. */
+					actions: z
+						.object({ label: z.string(), blocks: timelineBlock.array() })
+						.array()
+						.optional(),
 					/** Add a highlight to the indicated cards, if they're present */
 					cards: z.string().array().optional(),
 				})
 				.and(stationOrClient),
 		)
+		.meta({
+			action: () => ({
+				cards: {
+					type: "tags",
+					helper: "Add a highlight to the indicated cards, if they're present",
+				},
+				actions: { type: "labeledBlockList" },
+			}),
+		})
 		.send(({ ctx, input }) => {
 			if ("clientName" in input) {
 				const { clientName: _, ...notification } = input;
 				const clientId = ctx.server.getClientByName(input.clientName)?.id || "";
+				const card = getCardForStation({ ctx, cards: input.cards, clientId });
+
+				const actions = input.actions
+					? input.actions.map((a) => ({
+							label: a.label,
+							type: "blocks" as const,
+							blocks: a.blocks,
+							localVariables: ctx.localVariables,
+						}))
+					: card
+						? [
+								{
+									blocks: [
+										{
+											id: "card-change",
+											type: "Action",
+											action: "client.setCard",
+											values: { card, clientId },
+										},
+									],
+								},
+							]
+						: undefined;
 				pubsub.publish.effects.sub({
 					effect: {
 						type: "message",
 						...notification,
-						action: { type: "cardChange", cards: input.cards || [] },
+						actions,
 					},
 					clientId,
 				});
@@ -318,12 +357,33 @@ export const effects = t.router({
 				pubsub.publish.station.get({ clientId });
 			} else {
 				const { shipId, station, ...notification } = input;
-
+				const card = getCardForStation({ ctx, cards: input.cards, shipId, station });
+				const actions = input.actions
+					? input.actions.map((a) => ({
+							label: a.label,
+							type: "blocks" as const,
+							blocks: a.blocks,
+							localVariables: ctx.localVariables,
+						}))
+					: card
+						? [
+								{
+									blocks: [
+										{
+											id: "card-change",
+											type: "Action",
+											action: "client.setCard",
+											values: { card, shipId, station },
+										},
+									],
+								},
+							]
+						: undefined;
 				pubsub.publish.effects.sub({
 					effect: {
 						type: "message",
 						...notification,
-						action: { type: "cardChange", cards: input.cards || [] },
+						actions,
 					},
 					shipId,
 					station,
@@ -372,4 +432,36 @@ function matchSound(
 		return true;
 	}
 	return false;
+}
+
+function getCardForStation({
+	ctx,
+	cards,
+	clientId,
+	shipId,
+	station,
+}: {
+	ctx: DataContext;
+	cards?: string[];
+	shipId?: number;
+	station?: string;
+	clientId?: string;
+}) {
+	if (!cards) return null;
+	if (clientId) {
+		const flightClient = ctx.getFlightClient(clientId);
+		station = station || flightClient?.components.flightClient?.stationId || undefined;
+		shipId = flightClient?.components.flightClient?.shipId || shipId;
+	}
+	const ship = ctx.ecs.getEntityById(shipId || -1);
+	if (!ship || !station) return null;
+
+	const stationCards = ship.components.stationComplement?.stations
+		.find((s) => s.name === station)
+		?.cards.map((c) => c.name);
+	if (!stationCards) return null;
+	for (let card of cards) {
+		if (stationCards.includes(card)) return card;
+	}
+	return null;
 }

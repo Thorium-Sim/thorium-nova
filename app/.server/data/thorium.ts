@@ -5,6 +5,7 @@ import { traverseFiles } from "@thorium/.server/data/traverseFiles";
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { router, type AllSends } from "@thorium/.server/init/router";
 import { t } from "@thorium/.server/init/t";
+import { timelineBlock } from "@thorium/ecs-components/timelineBlocks";
 import { selectValueQuery } from "@thorium/utils/.server/evaluateEntityQuery";
 import { runInSandbox } from "@thorium/utils/.server/runInSandbox";
 import { Entity } from "@thorium/utils/ecs";
@@ -110,6 +111,16 @@ export const thorium = t.router({
 					ctx.ecs.triggerAction(action.action as AllSends, action.values, ctx),
 				),
 			);
+		}),
+	executeBlocks: t.procedure
+		.input(
+			z.object({ blocks: timelineBlock.array(), localVariables: z.record(z.any()).optional() }),
+		)
+		.send(async ({ input, ctx }) => {
+			await ctx.ecs.executeBlocks(input.blocks, {
+				localVariables: input.localVariables,
+				executionType: "main",
+			});
 		}),
 	note: t.procedure
 		.input(z.object({ note: z.string() }))

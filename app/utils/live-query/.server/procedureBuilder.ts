@@ -101,7 +101,7 @@ type CreateProcedureReturnInput<
 	_output_out: FallbackValue<TNext["_output_out"], TPrev["_output_out"]>;
 }>;
 
-interface BaseMeta<TParams extends ProcedureParams> {
+export interface BaseMeta<TParams extends ProcedureParams> {
 	event?: true;
 	action?:
 		| true
