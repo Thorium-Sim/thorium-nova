@@ -6,6 +6,7 @@ import { cn } from "@thorium/utils/cn";
 import uniqid from "@thorium/utils/uniqid";
 import { type ReactNode, useEffect, useReducer, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { href, useLocation } from "react-router";
 
 // TODO September 25, 2025 - Replace this with React Aria Components
 const Toast = ({
@@ -146,6 +147,8 @@ export default function ToastContainer() {
 	const toastsRef = useRef(toasts);
 	toastsRef.current = toasts;
 	const [remoteNotifications] = q.client.notifications.useNetRequest({ clientId });
+	const location = useLocation();
+
 	useEffect(() => {
 		const timeouts: Record<string, ReturnType<typeof setTimeout>> = {};
 		toast = (
@@ -199,16 +202,19 @@ export default function ToastContainer() {
 	}
 	return createPortal(
 		<div className="fixed top-0 right-0 z-20">
-			{remoteNotifications.map((toast) => (
-				<Toast
-					key={toast.id}
-					{...toast}
-					visible
-					pause={() => q.timer.pause.netSend({ timerId: toast.id })}
-					resume={() => q.timer.resume.netSend({ timerId: toast.id })}
-					dismiss={() => q.effects.clearNotification.netSend({ notificationId: toast.id })}
-				/>
-			))}
+			{location.pathname.startsWith(href("/flight/core")) ||
+			location.pathname.startsWith(href("/flight/station"))
+				? remoteNotifications.map((toast) => (
+						<Toast
+							key={toast.id}
+							{...toast}
+							visible
+							pause={() => q.timer.pause.netSend({ timerId: toast.id })}
+							resume={() => q.timer.resume.netSend({ timerId: toast.id })}
+							dismiss={() => q.effects.clearNotification.netSend({ notificationId: toast.id })}
+						/>
+					))
+				: null}
 			{toasts.map((toast) => (
 				<Toast key={toast.id} {...toast} dismiss={() => dispatch(toast.id)} />
 			))}

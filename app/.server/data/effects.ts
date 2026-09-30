@@ -311,40 +311,36 @@ export const effects = t.router({
 			}),
 		})
 		.send(({ ctx, input }) => {
-			const clientIds: string[] = [];
+			let shipId: number | undefined = undefined;
+			const stations: string[] = [];
 			if ("clientName" in input) {
 				const clientId = ctx.server.getClientByName(input.clientName)?.id || "";
-				clientIds.push(clientId);
+				const flightClient = ctx.getFlightClient(clientId)?.components.flightClient;
+				if (flightClient?.stationId && flightClient.shipId) {
+					stations.push(flightClient.stationId);
+					shipId = flightClient.shipId;
+				}
 			} else if ("shipId" in input) {
-				let { shipId, station, cards } = input;
-				if (!station) {
+				let { station, cards } = input;
+				shipId = input.shipId;
+				if (station) {
+					stations.push(station);
+				} else {
 					// Find the station that matches the cards
 					const { ship } = getShip({ ctx, shipId, station });
 					for (const shipStation of ship?.components.stationComplement?.stations || []) {
 						if (
 							shipStation.cards.some((c) => cards?.includes(c.component) || cards?.includes(c.name))
 						) {
-							station = shipStation.name;
+							stations.push(shipStation.name);
 							break;
 						}
 					}
 				}
-
-				// Find the clients that are assigned to that station
-				for (const client of ctx.ecs.componentCache.get("flightClient") || []) {
-					const flightClient = client.components.flightClient;
-					if (
-						flightClient &&
-						flightClient.shipId === shipId &&
-						flightClient.stationId === station
-					) {
-						clientIds.push(flightClient.clientId);
-					}
-				}
 			}
+			if (!shipId) return;
 
-			for (const clientId of clientIds) {
-				const card = getCardForStation({ ctx, cards: input.cards, ...input });
+			for (const station of stations) {
 				const actions = input.actions
 					? input.actions.map((a) => ({
 							label: a.label,
@@ -352,20 +348,7 @@ export const effects = t.router({
 							blocks: a.blocks,
 							localVariables: ctx.localVariables,
 						}))
-					: card
-						? [
-								{
-									blocks: [
-										{
-											id: "card-change",
-											type: "Action" as const,
-											action: "client.setCard",
-											values: { card, clientId },
-										},
-									],
-								},
-							]
-						: undefined;
+					: undefined;
 
 				const notificationEntity = new Entity();
 				notificationEntity.addComponent("identity", {
@@ -373,7 +356,8 @@ export const effects = t.router({
 					description: input.body,
 				});
 				notificationEntity.addComponent("notification", {
-					clientId,
+					shipId,
+					station,
 					color: input.color,
 					actions,
 				});
@@ -397,7 +381,7 @@ export const effects = t.router({
 				ctx.ecs.addEntity(notificationEntity);
 
 				// Add the card highlight
-				const flightClient = ctx.getFlightClient(clientId)?.components.flightClient;
+				const flightClient = ctx.getFlightClient(station)?.components.flightClient;
 				if (flightClient) {
 					const { shipId, stationId } = flightClient;
 					if (shipId && stationId) {
@@ -405,8 +389,8 @@ export const effects = t.router({
 					}
 				}
 				// Find all clients assigned this station
-				pubsub.publish.station.get({ clientId });
-				pubsub.publish.client.notifications({ clientId });
+				pubsub.publish.station.get({ clientId: station });
+				pubsub.publish.client.notifications({ clientId: station });
 			}
 		}),
 	clearNotification: t.procedure
@@ -414,10 +398,16 @@ export const effects = t.router({
 		.send(({ ctx, input }) => {
 			const entity = ctx.ecs.getEntityById(input.notificationId);
 			if (!entity) return;
-			const clientId = entity.components.notification?.clientId;
+			const station = entity.components.notification?.station;
+			const shipId = entity.components.notification?.shipId;
 			ctx.ecs.removeEntity(entity);
-			if (clientId) {
-				pubsub.publish.client.notifications({ clientId });
+			if (!shipId || !station) return;
+			for (const e of ctx.ecs.componentCache.get("flightClient") || []) {
+				const flightClient = e.components.flightClient;
+				if (!flightClient) continue;
+				if (flightClient.shipId === shipId && flightClient.stationId === station) {
+					pubsub.publish.client.notifications({ clientId: flightClient.clientId });
+				}
 			}
 		}),
 });
@@ -471,32 +461,4 @@ function getShip({
 	const ship = ctx.ecs.getEntityById(shipId || -1);
 
 	return { ship, station };
-}
-
-function getCardForStation({
-	ctx,
-	cards,
-	clientId,
-	shipId,
-	station: inputStation,
-}: {
-	ctx: DataContext;
-	cards?: string[];
-	shipId?: number;
-	station?: string;
-	clientId?: string;
-}) {
-	if (!cards) return null;
-
-	const { ship, station } = getShip({ ctx, clientId, shipId, station: inputStation });
-	if (!ship || !station) return null;
-
-	const stationObj = ship.components.stationComplement?.stations.find((s) => s.name === station);
-	if (!stationObj) return null;
-
-	for (let stationCard of stationObj.cards) {
-		if (cards.includes(stationCard.component) || cards.includes(stationCard.name))
-			return stationCard.component;
-	}
-	return null;
 }

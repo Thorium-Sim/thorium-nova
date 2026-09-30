@@ -2,7 +2,7 @@ import type { MacroPlugin } from "@thorium/.server/classes/Plugins/Macro";
 import { useDefinedVariables } from "@thorium/components/timelineBuilder/DefinedVariableContext";
 import type { TimelineBlock } from "@thorium/components/timelineBuilder/TimelineBlockTypes";
 import { q } from "@thorium/context/AppContext";
-import { AddActionEvent, ChooseActionEvent } from "@thorium/cores/EventsCore";
+import { AddActionEvent, ChooseActionEvent } from "@thorium/cores/EventsCore/events";
 import useEventListener from "@thorium/hooks/useEventListener";
 import { useActiveCores } from "@thorium/routes/core/CoreFlexLayout";
 import { Icon } from "@thorium/ui/Icon";

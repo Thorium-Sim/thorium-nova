@@ -1,26 +1,8 @@
 import { q } from "@thorium/context/AppContext";
+import { AddActionEvent, ChooseActionEvent } from "@thorium/cores/EventsCore/events";
 import useEventListener from "@thorium/hooks/useEventListener";
 import Button from "@thorium/ui/Button";
 import { useState } from "react";
-
-export class ChooseActionEvent extends Event {
-	static name = "ChooseActionEvent";
-	constructor(public addBlockId: string) {
-		super(ChooseActionEvent.name);
-	}
-}
-
-export class AddActionEvent extends Event {
-	static name = "AddActionEvent";
-	constructor(
-		public addBlockId: string,
-		public type: "action" | "event",
-		public blockName: string,
-		public values: any,
-	) {
-		super(AddActionEvent.name);
-	}
-}
 
 export function EventsCore() {
 	const [choosing, setChoosing] = useState<string | null>(null);
@@ -38,7 +20,6 @@ export function EventsCore() {
 		undefined,
 		(action) => action && setActions((e) => [{ name: action.name, values: action.values }, ...e]),
 	);
-
 	return (
 		<div className="flex h-full text-sm">
 			<div className="flex h-full max-w-1/2 grow flex-col">
@@ -48,14 +29,10 @@ export function EventsCore() {
 						<div key={i} className="relative border-b border-b-white/50 last-of-type:border-0">
 							<p className="text-sm font-bold">{e.name}</p>
 							{Object.entries(e.values).map(([key, value]) => (
-								<p key={key} className="text-xs">
+								<p key={key} className="text-xs whitespace-pre">
 									{/* @ts-expect-error */}
 									<span className="font-medium">{key}:</span>{" "}
-									{Array.isArray(value)
-										? value.join(", ")
-										: typeof value === "object"
-											? JSON.stringify(value)
-											: value}
+									{typeof value === "object" ? JSON.stringify(value, null, 2) : value}
 								</p>
 							))}
 							{choosing ? (
@@ -80,9 +57,10 @@ export function EventsCore() {
 						<div key={i} className="relative border-b border-b-white/50 last-of-type:border-0">
 							<p className="text-sm font-bold">{e.name}</p>
 							{Object.entries(e.values).map(([key, value]) => (
-								<p key={key} className="text-xs">
+								<p key={key} className="text-xs whitespace-pre">
 									{/* @ts-expect-error */}
-									<span className="font-medium">{key}:</span> {value}
+									<span className="font-medium">{key}:</span>{" "}
+									{typeof value === "object" ? JSON.stringify(value, null, 2) : value}
 								</p>
 							))}
 							{choosing ? (

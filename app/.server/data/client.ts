@@ -70,20 +70,24 @@ export const client = t.router({
 			if (publish.clientId === input.clientId) return true;
 			return false;
 		})
-		.autoPublish(["notification"], (entity) => ({
-			clientId: entity.components.notification?.clientId || "",
-		}))
+		.autoPublish([], () => null)
 		.request(({ ctx, input }) => {
 			let notifications = [];
+			if (!ctx.flight) return [];
+			const flightClient = ctx.getFlightClient(input.clientId)?.components.flightClient;
+			if (!flightClient) return [];
+			const { stationId, shipId } = flightClient;
 			for (const notification of ctx.ecs.componentCache.get("notification") || []) {
-				console.log(notification.components.notification?.clientId, input.clientId);
-				if (notification.components.notification?.clientId === input.clientId) {
+				const n = notification.components.notification;
+				const identity = notification.components.identity;
+				if (!n) continue;
+				if (n.station === stationId && n.shipId === shipId) {
 					notifications.push({
 						id: notification.id,
-						title: notification.components.identity?.name || "New Notification",
-						body: notification.components.identity?.description,
-						color: notification.components.notification.color,
-						actions: notification.components.notification.actions,
+						title: identity?.name || "New Notification",
+						body: identity?.description,
+						color: n.color,
+						actions: n.actions,
 					});
 				}
 			}
@@ -189,6 +193,7 @@ export const client = t.router({
 
 			pubsub.publish.client.all();
 			pubsub.publish.client.get({ clientId });
+			pubsub.publish.client.notifications({ clientId });
 			pubsub.publish.station.get({ clientId });
 			pubsub.publish.theme.get({ clientId });
 			pubsub.publish.ship.get({ clientId });
