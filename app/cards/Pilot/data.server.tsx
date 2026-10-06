@@ -1,5 +1,7 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import { t } from "@thorium/.server/init/t";
+import { spawnWaypoint } from "@thorium/cards/Navigation/data.server";
+import { dockEntities, undock } from "@thorium/utils/.server/docking";
 import { cancelLoopingSound, playShipSound } from "@thorium/utils/.server/playRangedSound";
 import { scheduleAction } from "@thorium/utils/.server/scheduleAction";
 import { checkSystemStability } from "@thorium/utils/.server/ship/checkSystemStability";
@@ -329,6 +331,10 @@ export const pilot = t.router({
 			}),
 	}),
 	thrusters: t.router({
+		get: t.procedure.input(z.object({ shipId: z.number() })).request(({ ctx, input }) => {
+			const thrusters = getShipSystem(ctx.ecs, { systemType: "thrusters", shipId: input.shipId });
+			return { id: thrusters.id };
+		}),
 		setDirection: t.procedure
 			.meta({ event: true })
 			.input(
@@ -621,22 +627,78 @@ export const pilot = t.router({
 					requestedDockingPort?.components.isDockingPort?.connectedPortId || -1,
 				);
 				if (!requestingDockingPort) throw new Error("Docking Request Not Found");
+				const guestShip = ctx.ecs.getEntityById(
+					requestingDockingPort.components.isShipSystem?.shipId || -1,
+				);
+				if (!guestShip) throw new Error("Guest ship not found.");
 
 				if (input.response === "deny") {
 					requestedDockingPort.updateComponent("isDockingPort", {
 						connectedPortId: null,
 						state: "idle",
 					});
-					requestedDockingPort.updateComponent("isDockingPort", {
+					requestingDockingPort.updateComponent("isDockingPort", {
 						connectedPortId: null,
 						state: "idle",
 					});
 				} else {
 					requestedDockingPort.updateComponent("isDockingPort", {
+						state: "outgoing",
+					});
+					requestingDockingPort.updateComponent("isDockingPort", {
 						state: "incoming",
 					});
-					requestedDockingPort.updateComponent("isDockingPort", {
-						state: "outgoing",
+
+					// Create a waypoint for the guest ship to navigate to.
+					// It should be twice the length of the guest ship away from the docking port
+					// in the orientation direction.
+
+					const position = requestedDockingPort.components.position;
+					const hostShip = ctx.ecs.getEntityById(
+						requestedDockingPort.components.isShipSystem?.shipId || -1,
+					);
+					const hostLength = hostShip?.components.size?.length || 350;
+					const hostPosition = hostShip!.components.position!;
+					const hostRotation = hostShip!.components.rotation!;
+					const portPositionVec = new Vector3(position?.x, position?.y, position?.z)
+						// Expand to the size of the ship, and convert meters to kilometers at the same time.
+						.multiplyScalar(hostLength / 1000)
+						// Rotate to orient it the same way as the host ship
+						.applyQuaternion(hostRotation)
+						// Add the host's position. We now have the world coordinate for the docking port
+						.add(hostPosition);
+					const distance = ((guestShip?.components.size?.length || 350) * 3) / 1000;
+					const orientation = requestedDockingPort.components.isDockingPort!.orientation;
+					// Get the orientation vector
+					const waypointPosition = new Vector3(orientation.x, orientation.y, orientation.z)
+						// Rotate it to match the host's current rotation
+						.applyQuaternion(hostRotation)
+						// Set the distance
+						.multiplyScalar(distance)
+						// Add the port's position to get a point out in space.
+						.add(portPositionVec);
+
+					const newWaypoint = spawnWaypoint(ctx.ecs, {
+						position: waypointPosition,
+						shipId: guestShip.id,
+						systemId: hostPosition.parentId,
+						active: true,
+						name: `${hostShip?.components.identity?.name || ""} ${requestedDockingPort.components.identity?.name || "Docking Port"}`.trim(),
+						tags: ["docking"],
+					});
+					ctx.ecs.addEntity(newWaypoint);
+
+					if (!guestShip.components.isPlayerShip) {
+						guestShip.updateComponent("shipBehavior", {
+							objective: "dock",
+							action: "moveTo",
+							actionTarget: newWaypoint.id,
+							behaviorTarget: hostShip!.id,
+						});
+					}
+
+					pubsub.publish.waypoints.all({
+						shipId: guestShip.id,
 					});
 				}
 
@@ -647,12 +709,69 @@ export const pilot = t.router({
 					shipId: requestingDockingPort.components.isShipSystem?.shipId || -1,
 				});
 			}),
+		test: t.procedure.send(({ ctx }) => {
+			const playerShip = ctx.ecs.getEntityById(3145)!;
+			const guestShip = ctx.ecs.getEntityById(3215)!;
+			dockEntities(guestShip, playerShip);
+		}),
 		setClamps: t.procedure
-			.input(z.object({ shipId: z.number(), clamps: z.enum(["attached", "detached"]) }))
-			.send(({ ctx, input }) => {}),
+			.input(z.object({ dockingPortId: z.number(), clamps: z.enum(["attached", "detached"]) }))
+			.send(({ ctx, input }) => {
+				let dockingPort = ctx.ecs.getEntityById(input.dockingPortId);
+				if (!dockingPort) throw new Error("Guest docking port not found");
+				const guestShip = ctx.ecs.getEntityById(dockingPort.components.isShipSystem?.shipId || -1);
+				if (!guestShip) throw new Error("Guest ship not found from docking port");
+				const hostDockingPort = ctx.ecs.getEntityById(
+					dockingPort.components.isDockingPort?.connectedPortId || -1,
+				);
+				const hostShip = ctx.ecs.getEntityById(
+					hostDockingPort?.components.isShipSystem?.shipId || -1,
+				);
+				if (
+					input.clamps === "detached" &&
+					dockingPort.components.isDockingPort?.state !== "clamps"
+				) {
+					undock(guestShip);
+				} else if (hostShip && dockingPort.components.isDockingPort?.state === "outgoing") {
+					dockEntities(guestShip, hostShip);
+					ctx.flight!.paused = true;
+					ctx.ecs.update();
+					for (const clientId in ctx.server.clients) {
+						const client = ctx.server.clients[clientId];
+						if (!client) continue;
+						client.sendDataStream();
+					}
+					console.log("Clamps attached");
+				}
+				pubsub.publish.pilot.docking.get({
+					shipId: guestShip.id,
+				});
+				pubsub.publish.pilot.docking.get({
+					shipId: hostShip?.id || -1,
+				});
+			}),
 		setRamps: t.procedure
-			.input(z.object({ shipId: z.number(), clamps: z.enum(["extended", "retracted"]) }))
-			.send(({ ctx, input }) => {}),
+			.input(z.object({ dockingPortId: z.number(), ramps: z.enum(["extended", "retracted"]) }))
+			.send(({ ctx, input }) => {
+				let dockingPort = ctx.ecs.getEntityById(input.dockingPortId);
+				if (!dockingPort) return;
+				const hostDockingPort = ctx.ecs.getEntityById(
+					dockingPort.components.isDockingPort?.connectedPortId || -1,
+				);
+				if (input.ramps === "extended") {
+					if (dockingPort.components.isDockingPort?.state !== "clamps") return;
+					dockingPort.updateComponent("isDockingPort", { state: "ramps" });
+				} else {
+					if (dockingPort.components.isDockingPort?.state !== "ramps") return;
+					dockingPort.updateComponent("isDockingPort", { state: "clamps" });
+				}
+				pubsub.publish.pilot.docking.get({
+					shipId: dockingPort.components.isShipSystem?.shipId || -1,
+				});
+				pubsub.publish.pilot.docking.get({
+					shipId: hostDockingPort?.components.isShipSystem?.shipId || -1,
+				});
+			}),
 	}),
 	stream: t.procedure
 		.input(z.object({ shipId: z.number(), systemId: z.number().nullable() }))
@@ -679,6 +798,15 @@ export const pilot = t.router({
 					set.add(entity);
 				}
 			}
+
 			return set;
 		}),
+	// Pairs with the ThrustersHelper component
+	debugThrustersStream: t.procedure.dataStream(({ ctx }) => {
+		const set = new Set<Entity>();
+		for (const entity of ctx.ecs.componentCache.get("isThrusters") || []) {
+			set.add(entity);
+		}
+		return set;
+	}),
 });

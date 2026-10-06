@@ -358,45 +358,14 @@ export const waypoints = t.router({
 				throw new Error("Either position or entityId are required");
 			}
 
-			const newWaypoint = new Entity();
-			newWaypoint.addComponent("isWaypoint", {
-				assignedShipId: shipId,
+			const newWaypoint = spawnWaypoint(ctx.ecs, {
+				...input,
+				shipId,
 				attachedObjectId: object?.id,
-				permanent: input.permanent,
-				isActive: input.active,
-				lastInteractedAt: Date.now(),
+				systemId,
+				position,
+				name: object?.components.identity?.name,
 			});
-			// If we have an object, set the name to the name of that object
-			if (object?.components.identity?.name) {
-				// TODO: INTL in the server here.
-				newWaypoint.addComponent("identity", {
-					name: `${object.components.identity.name} Waypoint`,
-				});
-			} else {
-				// Count up the highest waypoint count and use that.
-				let waypointNum = 1;
-				for (const waypoint of ctx.ecs.componentCache.get("isWaypoint") || []) {
-					if (waypoint.components.isWaypoint?.assignedShipId === shipId) {
-						const nameWords = waypoint.components.identity?.name.split(" ") || [];
-						const num = Number.parseInt(nameWords[nameWords.length - 1], 10);
-						if (num && num >= waypointNum) waypointNum = num + 1;
-					}
-				}
-				newWaypoint.addComponent("identity", {
-					name: `Waypoint ${waypointNum}`,
-				});
-			}
-			newWaypoint.addComponent("position", {
-				...position,
-				parentId: systemId,
-				type: systemId ? "solar" : "interstellar",
-			});
-
-			if (input.tags && input.tags.length > 0) {
-				newWaypoint.addComponent("tags", {
-					tags: input.tags,
-				});
-			}
 
 			ctx.flight.ecs.addEntity(newWaypoint);
 
@@ -508,4 +477,59 @@ function deactivateWaypoints(ecs: ECS, shipId: number) {
 	pubsub.publish.waypoints.all({
 		shipId,
 	});
+}
+
+export function spawnWaypoint(
+	ecs: ECS,
+	params: {
+		shipId: number;
+		position: { x: number; y: number; z: number };
+		systemId: number | null;
+		permanent?: boolean;
+		active?: boolean;
+		attachedObjectId?: number;
+		name?: string;
+		tags?: string[];
+	},
+) {
+	const newWaypoint = new Entity();
+	newWaypoint.addComponent("isWaypoint", {
+		assignedShipId: params.shipId,
+		attachedObjectId: params.attachedObjectId,
+		permanent: params.permanent || false,
+		isActive: params.active ?? true,
+		lastInteractedAt: Date.now(),
+	});
+	// If we have an object, set the name to the name of that object
+	if (params.name) {
+		newWaypoint.addComponent("identity", {
+			name: params.name,
+		});
+	} else {
+		// Count up the highest waypoint count and use that.
+		let waypointNum = 1;
+		for (const waypoint of ecs.componentCache.get("isWaypoint") || []) {
+			if (waypoint.components.isWaypoint?.assignedShipId === params.shipId) {
+				const nameWords = waypoint.components.identity?.name.split(" ") || [];
+				const num = Number.parseInt(nameWords[nameWords.length - 1], 10);
+				if (num && num >= waypointNum) waypointNum = num + 1;
+			}
+		}
+		newWaypoint.addComponent("identity", {
+			name: `Waypoint ${waypointNum}`,
+		});
+	}
+	newWaypoint.addComponent("position", {
+		...params.position,
+		parentId: params.systemId,
+		type: params.systemId ? "solar" : "interstellar",
+	});
+
+	if (params.tags && params.tags.length > 0) {
+		newWaypoint.addComponent("tags", {
+			tags: params.tags,
+		});
+	}
+
+	return newWaypoint;
 }

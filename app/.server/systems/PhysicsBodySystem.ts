@@ -4,6 +4,8 @@ import System from "@thorium/utils/ecs/system";
 
 /** Ensure that every entity that needs one has a body in its physics world */
 export class PhysicsBodySystem extends System {
+	static flightMode = ["nova"];
+
 	test(entity: Entity) {
 		return Boolean(
 			(entity.components.position && entity.components.velocity) ||

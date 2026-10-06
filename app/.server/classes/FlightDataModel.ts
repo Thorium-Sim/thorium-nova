@@ -55,7 +55,10 @@ export class FlightDataModel extends DataStore {
 		instance.stateReason = data.stateReason || "";
 		instance.startInput = data.startInput || {};
 		await instance.initEcs(params.serverDataModel, data.entities || []);
-
+		await instance.initPhysics();
+		if (!instance.interval) {
+			instance.run();
+		}
 		return instance;
 	}
 	constructor(
@@ -105,10 +108,8 @@ export class FlightDataModel extends DataStore {
 			});
 			this.ecs.addEntity(flight);
 		}
-		if (!this.interval) {
-			this.run();
-		}
 	}
+
 	setupEcsCallbacks() {
 		this.ecs.processTriggers = (event) => processTriggers(this.ecs, event);
 		this.ecs.executeBlocks = (blocks, metadata) => executeBlocks(this.ecs, blocks, metadata);

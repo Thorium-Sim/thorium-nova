@@ -56,8 +56,6 @@ export async function startFlight(
 
 	let solarSystemMap: Record<string, Entity> = {};
 	if (mode === "nova") {
-		await ctx.flight.initPhysics();
-
 		// This will spawn all of the systems and planets bundled with the plugins
 		for (const pluginId of ctx.flight.pluginIds) {
 			const plugin = ctx.server.plugins.find((plugin) => plugin.id === pluginId);

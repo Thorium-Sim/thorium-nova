@@ -8,7 +8,15 @@ import z from "zod";
  * - defend: move towards a target and defend it, regardless of own safety
  * - avoid: move away from a target
  */
-export const shipObjectives = z.enum(["hold", "patrol", "follow", "attack", "defend", "avoid"]);
+export const shipObjectives = z.enum([
+	"hold",
+	"patrol",
+	"follow",
+	"attack",
+	"defend",
+	"avoid",
+	"dock",
+]);
 
 /**
  * Immediate behaviors
@@ -17,11 +25,11 @@ export const shipActions = z.enum([
 	...shipObjectives.options,
 	"firePhasers",
 	"fireTorpedo",
+	"undock",
 	// Move away from the target, load and charge weapons
 	"regroup",
 	"moveTo",
 	"scan",
-	"dock",
 	"flee",
 ]);
 

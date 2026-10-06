@@ -174,7 +174,9 @@ function FlightStatus() {
 				"absolute z-100001 inset-0 bg-black/50 backdrop-blur transition-all opacity-0 pointer-events-none flex items-center justify-center",
 				{
 					"opacity-100 pointer-events-auto":
-						flight?.state !== "in-progress" || ship.isDestroyed || flight.paused,
+						flight?.state !== "in-progress" ||
+						ship.isDestroyed ||
+						(flight.paused && process.env.NODE_ENV === "production"),
 				},
 			)}
 		>
@@ -205,7 +207,7 @@ function FlightStatus() {
 						<p className="text-4xl">Game Over</p>
 					)}
 				</div>
-			) : flight.paused ? (
+			) : flight.paused && process.env.NODE_ENV === "production" ? (
 				<div className="panel panel-alert p-6 text-center">
 					<p className="mb-4 text-6xl">Flight Paused</p>
 					<Button className="btn-alert" onClick={() => q.flight.resume.netSend()}>

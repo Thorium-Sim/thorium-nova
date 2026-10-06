@@ -70,9 +70,8 @@ export class AutoRotateSystem extends System {
 		);
 		desiredRotationQuat.identity();
 
+		let doneWithPath = false;
 		if (autopilot.desiredCoordinates) {
-			let doneWithPath = false;
-
 			// Use the ship's current speed to determine when to advance to the
 			// next waypoint, matching AutoThrustSystem's approach. This prevents
 			// chaotic rotation at warp when the ship overshoots closely-spaced
@@ -142,7 +141,8 @@ export class AutoRotateSystem extends System {
 				// First, determine the angle to the destination.
 				desiredRotationQuat.setFromRotationMatrix(matrix);
 			}
-		} else if (autopilot.desiredRotation) {
+		}
+		if (autopilot.desiredRotation && doneWithPath) {
 			desiredRotationQuat.set(
 				autopilot.desiredRotation.x,
 				autopilot.desiredRotation.y,

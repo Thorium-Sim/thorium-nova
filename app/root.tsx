@@ -46,7 +46,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				</UNSAFE_PortalProvider>
 				<div ref={container} />
 				<div id="training-container" />
-				<Snapshot />
 				<ScrollRestoration />
 				<Scripts />
 			</body>
@@ -88,6 +87,7 @@ export default function Root() {
 		<AppContext>
 			<Preload />
 			<Outlet />
+			{process.env.NODE_ENV === "production" ? null : <Snapshot />}
 		</AppContext>
 	);
 }
@@ -130,16 +130,44 @@ export function ErrorBoundary({ error }: { error: Error }) {
 }
 
 function Snapshot() {
-	if (process.env.NODE_ENV === "production") return null;
+	const [flight] = q.flight.active.useNetRequest();
 	return (
-		<Button
-			className="btn-circle btn-sm bg-neutral/20 fixed bottom-2 left-2 z-50 backdrop-blur"
-			onClick={() => {
-				q.server.snapshot.netSend();
-			}}
-		>
-			<Icon name="camera" size="md" className="text-white" />
-		</Button>
+		<div className="fixed bottom-2 left-2 z-50 flex gap-2">
+			<Button
+				className="btn-circle btn-sm bg-neutral/20 z-50 backdrop-blur"
+				onClick={() => {
+					q.server.snapshot.netSend();
+				}}
+			>
+				<Icon name="camera" size="md" className="text-white" />
+			</Button>
+			{flight ? (
+				<Button
+					className="btn-circle btn-sm bg-neutral/20 z-50 backdrop-blur"
+					onClick={() => {
+						if (flight.paused) {
+							q.flight.resume.netSend();
+						} else {
+							q.flight.pause.netSend();
+						}
+					}}
+				>
+					{flight.paused ? (
+						<Icon name="play" size="md" className="text-white" />
+					) : (
+						<Icon name="pause" size="md" className="text-white" />
+					)}
+				</Button>
+			) : null}
+			{flight?.paused ? (
+				<Button
+					className="btn-circle btn-sm bg-neutral/20 z-50 backdrop-blur"
+					onClick={() => q.flight.step.netSend()}
+				>
+					<Icon name="step-forward" size="md" className="text-white" />
+				</Button>
+			) : null}
+		</div>
 	);
 }
 

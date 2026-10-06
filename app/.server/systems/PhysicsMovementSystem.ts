@@ -8,8 +8,8 @@ import {
 	handleCollisionDamage,
 	handleTorpedoDamage,
 } from "@thorium/utils/.server/ship/collisionDamage";
+import { computeDockedTransform } from "@thorium/utils/dockingClient";
 import { type Entity, System } from "@thorium/utils/ecs";
-import { computeDockedTransform } from "@thorium/utils/starmap/docking";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
 import { KM_TO_LM, M_TO_KM, rpmToRadianPerSecond } from "@thorium/utils/unitTypes";
 import { Euler, Object3D, Quaternion, Vector3 } from "three";
@@ -29,7 +29,6 @@ const eventQueue = new RAPIER.EventQueue(true);
 const frameAVec = new Vector3(0, 0, 1);
 const frameBVec = new Vector3(0, 0, 1);
 
-const map = new Map<number, { x: number; y: number; z: number }>();
 /**
  * This system applies the physics of anything flying through space
  * So ships, asteroids, projectiles, etc.
@@ -54,7 +53,6 @@ export class PhysicsMovementSystem extends System {
 	preUpdate(): void {
 		this.collisionStepEntities.clear();
 		this.simpleJointEntities.clear();
-		map.clear();
 	}
 	update(entity: Entity, elapsed: number) {
 		if (this.ecs.colliderCache.size === 0) return;
@@ -67,7 +65,7 @@ export class PhysicsMovementSystem extends System {
 
 		// Nab some systems to use elsewhere.
 		const systems: Entity[] = [];
-		entity.components.shipSystems?.shipSystems.forEach((shipSystem, id) => {
+		entity.components.shipSystems?.shipSystems.forEach((_, id) => {
 			const sys = this.ecs.getEntityById(id);
 			if (sys) systems.push(sys);
 		});
@@ -90,7 +88,9 @@ export class PhysicsMovementSystem extends System {
 			tempObj.quaternion.set(x, y, z, w);
 		}
 		if (world) {
-			const body = getBodyForEntity(entity);
+			const worldPosition = getWorldPosition(position);
+			worldVector.copy(worldPosition);
+			const body = getBodyForEntity(entity, world);
 
 			if (body && !isHighSpeed) {
 				/**
@@ -191,7 +191,6 @@ export class PhysicsMovementSystem extends System {
 						body.applyTorqueImpulse(tempObj.localToWorld(tempVector), true);
 					}
 				}
-				map.set(entity.id, position);
 				return;
 			}
 			// Fall back on simple physics if we can't get a physics body for the entity.
@@ -319,9 +318,10 @@ export class PhysicsMovementSystem extends System {
 		this.ecs.worlds.forEach((world) => {
 			try {
 				world.step(eventQueue);
-			} catch {
+			} catch (e) {
 				// Occasionally there's an odd error that throws
 				// We can mostly safely ignore it
+				console.error("Rapier Step panicked", e);
 			}
 
 			eventQueue.drainContactForceEvents((event) => {

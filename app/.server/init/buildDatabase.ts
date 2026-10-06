@@ -41,7 +41,6 @@ export async function buildDatabase(loadPlugins: (this: ServerDataModel) => Prom
 			},
 			{ meta: { filePath: `/flights/${flightName}/data.yml`, flightName } },
 		);
-		await flight.initPhysics();
 	}
 
 	thoriumContext.getStore()!.database = { server: serverModel, flight };

@@ -125,7 +125,6 @@ export const flight = t.router({
 				},
 			},
 		);
-		await ctx.flight.initPhysics();
 
 		ctx.server.activeFlightName = input.flightName;
 		pubsub.publishAll();
@@ -162,6 +161,11 @@ export const flight = t.router({
 			pubsub.publish.flight.active();
 		}
 		return ctx.flight;
+	}),
+	step: t.procedure.send(({ ctx }) => {
+		if (ctx.flight?.paused) {
+			ctx.flight.ecs.update(16);
+		}
 	}),
 	snapshot: t.procedure
 		.input(z.object({ name: z.string().optional() }))

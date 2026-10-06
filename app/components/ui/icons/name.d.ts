@@ -116,6 +116,7 @@ export const iconNames = [
   "square-dashed-text",
   "square-dashed",
   "star",
+  "step-forward",
   "sun",
   "sword",
   "text-cursor-input",

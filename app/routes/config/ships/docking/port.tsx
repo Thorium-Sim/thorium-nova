@@ -10,6 +10,7 @@ import { href, useNavigate } from "react-router";
 
 import type { Route } from "./+types/port";
 
+// TODO October 1, 2026 — Add sound effects for clamps attaching, clamps detaching, ramps attaching, ramps detaching
 export default function DockingPortsConfig({
 	params: { pluginId, shipId, portId },
 }: Route.ComponentProps) {

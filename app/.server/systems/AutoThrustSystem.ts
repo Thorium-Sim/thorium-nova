@@ -1,6 +1,6 @@
 import { pubsub } from "@thorium/.server/init/pubsub";
 import type { isWarpEngines } from "@thorium/ecs-components/shipSystems";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { getShipSystem, getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { type Entity, System } from "@thorium/utils/ecs";
 import { getAutopilotPositionAndRotation } from "@thorium/utils/starmap/autopilotGetCoordinates";
 import { KM_TO_LY, lightYearToLightMinute } from "@thorium/utils/unitTypes";
@@ -12,7 +12,7 @@ const emptyVector = new Vector3(0, 0, 0);
 const scaleVector = new Vector3(1, 1, 1);
 const shipMatrix = new Matrix4();
 const steeringForce = new Vector3();
-
+const thrusterForce = new Vector3();
 export class AutoThrustSystem extends System {
 	static flightMode = ["nova"];
 	updateCount = 0;
@@ -70,20 +70,27 @@ export class AutoThrustSystem extends System {
 			(Math.abs(rotationQuat.angleTo(desiredRotationQuat)) / Math.PI) * 180;
 
 		const impulseMaxSpeed = impulseEngines?.cruisingSpeed || 1;
-
+		const thrusterMaxSpeed = thrusters?.directionMaxSpeed || 1;
 		// There's a heuristic here for which engine to choose to reach a given destination.
 		// Basically, if it would take 15 seconds or less to reach the destination at cruising
 		// impulse speed, we should use that. Otherwise, we should use warp.
-		const TRAVEL_TIME_THRESHOLD_SECONDS = 30;
+		const IMPULSE_TRAVEL_TIME_THRESHOLD_SECONDS = 30;
+		const THRUSTERS_TRAVEL_TIME_THRESHOLD_SECONDS = 3;
 		/** How close the ship is to the destination before deactivating warp engines */
-		const minWarpDistance = impulseMaxSpeed * TRAVEL_TIME_THRESHOLD_SECONDS;
+		const minWarpDistance = impulseMaxSpeed * IMPULSE_TRAVEL_TIME_THRESHOLD_SECONDS;
+		const minImpulseDistance = thrusterMaxSpeed * THRUSTERS_TRAVEL_TIME_THRESHOLD_SECONDS;
 		const isWithinWarpDistance = distanceInKM > minWarpDistance;
+		const isWithinImpulseDistance = distanceInKM > minImpulseDistance;
 
 		// This will be 1 if the ship is pointing directly at the destination, and 0 if it's pointing directly away
 		const correctDirectionCoefficient = (180 - rotationDifference) / 180;
 
 		// We have to be within 0.5 degrees of the destination to be considered in the right direction
 		const inCorrectDirection = rotationDifference <= 5;
+
+		steeringForce.set(0, 0, 0);
+		thrusterForce.set(0, 0, 0);
+
 		if (warpEngines && isWithinWarpDistance) {
 			impulseEntity?.updateComponent("isImpulseEngines", { targetSpeed: 0 });
 			// Use warp engines
@@ -118,7 +125,7 @@ export class AutoThrustSystem extends System {
 			} else {
 				warpEntity.updateComponent("isWarpEngines", { currentWarpFactor: 0 });
 			}
-		} else if (impulseEngines) {
+		} else if (impulseEngines && isWithinImpulseDistance) {
 			warpEntity?.updateComponent("isWarpEngines", {
 				currentWarpFactor: 0,
 				maxVelocity: 0,
@@ -148,12 +155,27 @@ export class AutoThrustSystem extends System {
 			impulseEntity.updateComponent("isImpulseEngines", {
 				targetSpeed: desiredSpeed,
 			});
+		} else {
+			warpEntity?.updateComponent("isWarpEngines", {
+				currentWarpFactor: 0,
+				maxVelocity: 0,
+			});
+			impulseEntity?.updateComponent("isImpulseEngines", { targetSpeed: 0 });
+			const slowDownSlope = distanceInKM < 2 ? 2 : 1;
+			// Use thrusters to get the rest of the way to the destination.
+			thrusterForce
+				.subVectors(desiredDestination, positionVec)
+				.applyQuaternion(rotationQuat.invert())
+				.normalize()
+				.multiplyScalar(Math.min(1, distanceInKM / slowDownSlope));
 		}
-
 		if (thrusters) {
-			// Use thrusters to apply the minute steering force
-			steeringForce.set(0, 0, 0).add(separation(entity)).add(leaderFollowing()).normalize();
-
+			steeringForce
+				// Use thrusters to apply the minute steering force
+				.add(separation(entity))
+				.add(leaderFollowing())
+				.normalize()
+				.add(thrusterForce);
 			// Apply the steering force to the thrusters
 			thrustersEntity.updateComponent("isThrusters", {
 				direction: {
@@ -199,6 +221,7 @@ function separation(entity: Entity) {
 		if (distance > minSafeDistance) return;
 		const nearbyEntity = entity.ecs?.getEntityById(id);
 		if (!nearbyEntity) return;
+		if (isEntityExcludedFromSeparation(entity, nearbyEntity)) return;
 		const nearbyPosition = nearbyEntity.components.position;
 		if (!nearbyPosition) return;
 		otherEntityPosition.set(nearbyPosition.x, nearbyPosition.y, nearbyPosition.z);
@@ -208,6 +231,19 @@ function separation(entity: Entity) {
 	});
 
 	return separationVector;
+}
+
+function isEntityExcludedFromSeparation(entity: Entity, nearbyEntity: Entity) {
+	// If entity is trying to dock with nearbyEntity or nearbyEntity is trying to dock with it, exclude it
+	const dockingPorts = getShipSystems(entity.ecs, { systemType: "dockingPort", shipId: entity.id });
+	for (const dockingPort of dockingPorts) {
+		if (dockingPort.components.isDockingPort?.connectedPortId) {
+			const connectedPort = entity.ecs.getEntityById(
+				dockingPort.components.isDockingPort?.connectedPortId,
+			);
+			if (connectedPort?.components.isShipSystem?.shipId === nearbyEntity.id) return true;
+		}
+	}
 }
 
 const leaderFollowingVector = new Vector3();

@@ -48,6 +48,14 @@ export function dataStreamEntity(e: Entity) {
 			c: e.components.legacyCoolant?.coolant || 0,
 		};
 	}
+	// TODO: DELETE ME, this is just for debug purposes
+	if (e.components.isThrusters) {
+		const { direction } = e.components.isThrusters;
+		return {
+			id: e.id.toString(),
+			...direction,
+		};
+	}
 	if (e.components.isShields) {
 		return {
 			id: e.id.toString(),

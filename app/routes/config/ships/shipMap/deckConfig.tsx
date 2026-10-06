@@ -181,7 +181,6 @@ export default function DeckConfig() {
 										setSelectedEdgeId(null);
 									} else {
 										setSelectedNodeId(null);
-										console.trace("Add Edge");
 										q.plugin.ship.deck.addEdge.netSend({
 											pluginId,
 											shipId,

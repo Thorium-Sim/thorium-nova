@@ -6,12 +6,11 @@ import {
 } from "@thorium/.server/init/rapier";
 import type { Entity } from "@thorium/utils/ecs";
 import System from "@thorium/utils/ecs/system";
-import { Vector3 } from "three";
 
-const anchorVecA = new Vector3();
-const anchorVecB = new Vector3();
 /** Ensure that every entity has its joints spawned in its physics world */
 export class PhysicsJointsSystem extends System {
+	static flightMode = ["nova"];
+
 	test(entity: Entity) {
 		return !!entity.components.fixedJoint || !!entity.components.springJoint;
 	}
@@ -29,8 +28,7 @@ export class PhysicsJointsSystem extends System {
 	}
 	update(entity: Entity) {
 		if (entity.components.fixedJoint) {
-			const { anchorA, anchorB, frameA, frameB, idA, idB } = entity.components.fixedJoint;
-			const handles = entity.components.fixedJoint.handles || new Map();
+			const { idA, idB } = entity.components.fixedJoint;
 			const entityA = this.ecs.getEntityById(idA);
 			const entityB = this.ecs.getEntityById(idB);
 			if (!entityA) {
@@ -41,36 +39,62 @@ export class PhysicsJointsSystem extends System {
 				this.ecs.removeEntity(entity);
 				return;
 			}
-			const position = entityA.components.position;
-			if (!position) return;
-			const worldSector = getSectorNumber(position);
-			const handle = handles.get(worldSector);
-			if (handle) return;
-
-			const world = getEntityWorld(entityA);
-			if (!world) return;
-
-			anchorVecA
-				.set(anchorA.x, anchorA.y, anchorA.z)
-				.multiplyScalar(entityA.components.size?.length || 1);
-			anchorVecB
-				.set(anchorB.x, anchorB.y, anchorB.z)
-				.multiplyScalar(entityB.components.size?.length || 1);
-
-			const params = RAPIER.JointData.fixed(anchorVecA, frameA, anchorVecB, frameB);
-
-			const bodyA = getBodyForEntity(this.ecs.getEntityById(idA));
-			const bodyB = getBodyForEntity(this.ecs.getEntityById(idB));
-			if (!bodyA || !bodyB) {
-				return;
-			}
-
-			const joint = world.createImpulseJoint(params, bodyA, bodyB, true);
-			joint.setContactsEnabled(false);
-			handles.set(worldSector, joint.handle);
-			entity.updateComponent("fixedJoint", { handles });
+			createJoint(entity);
 		}
 		if (entity.components.springJoint) {
 		}
 	}
+}
+
+export function createJoint(jointEntity: Entity) {
+	const ecs = jointEntity.ecs;
+
+	if (!jointEntity.components.fixedJoint) return;
+	const { anchorA, anchorB, frameA, frameB, idA, idB } = jointEntity.components.fixedJoint;
+
+	const handles = jointEntity.components.fixedJoint.handles || new Map();
+
+	const entityA = ecs.getEntityById(idA);
+	const entityB = ecs.getEntityById(idB);
+	if (!entityA || !entityB) return;
+
+	const position = entityA.components.position;
+	if (!position) return;
+	const worldSector = getSectorNumber(position);
+	const handle = handles.get(worldSector);
+	if (typeof handle === "number") return;
+
+	const world = getEntityWorld(entityA);
+	if (!world) return;
+
+	const sizeA = entityA.components.size?.length || 1;
+	const sizeB = entityB.components.size?.length || 1;
+
+	const params = RAPIER.JointData.fixed(
+		{
+			x: anchorA.x * sizeA,
+			y: anchorA.y * sizeA,
+			z: anchorA.z * sizeA,
+		},
+		frameA,
+		{
+			x: anchorB.x * sizeB,
+			y: anchorB.y * sizeB,
+			z: anchorB.z * sizeB,
+		},
+		frameB,
+	);
+
+	console.log(sizeA, sizeB);
+
+	const bodyA = getBodyForEntity(entityA);
+	const bodyB = getBodyForEntity(entityB);
+	if (!bodyA || !bodyB) {
+		return;
+	}
+	console.log("Creating joint", worldSector);
+	const joint = world.createImpulseJoint(params, bodyA, bodyB, true);
+	joint.setContactsEnabled(false);
+	handles.set(worldSector, joint.handle);
+	jointEntity.updateComponent("fixedJoint", { handles });
 }

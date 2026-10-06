@@ -3,7 +3,8 @@ import { TORPEDO_FIRE_DISTANCE_SECONDS } from "@thorium/.server/systems/NPCFireW
 import { getPhaserCharge } from "@thorium/.server/systems/PhasersSystem";
 import { adjustTorpedoInventory, getShipTorpedos } from "@thorium/cards/Targeting/data.server";
 import type { ShipSystemTypes } from "@thorium/ecs-components/shipSystems";
-import { getShipSystem } from "@thorium/utils/.server/ship/getShipSystem";
+import { calculateDockedTransformFromShips } from "@thorium/utils/.server/docking";
+import { getShipSystem, getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { type ECS, Entity, System } from "@thorium/utils/ecs";
 import type { scanTypes } from "@thorium/utils/flags/scanTypes";
 import type { threatScores } from "@thorium/utils/flags/shipObjectives";
@@ -36,6 +37,7 @@ const direction = new Vector3();
  */
 
 const DEFAULT_FLEE_DISTANCE = 25_000;
+// TODO October 1, 2026 — It would be cool if each behavior and action could be self-contained and then composed here.
 export class NPCDecisionSystem extends System {
 	static flightMode = ["nova"];
 	test(entity: Entity) {
@@ -45,7 +47,18 @@ export class NPCDecisionSystem extends System {
 		const knowledge = entity.components.npcKnowledge;
 		const shipBehavior = entity.components.shipBehavior;
 		if (!knowledge || !shipBehavior) return;
-		const { patrolRadius, objective, action, actionTarget, behaviorTarget } = shipBehavior;
+		let { patrolRadius, objective, action, actionTarget, behaviorTarget } = shipBehavior;
+
+		// if (entity.components.isDocked && objective !== "dock") {
+		// 	action = "undock";
+
+		// 	entity.updateComponent("shipBehavior", {
+		// 		action: "undock",
+		// 		// We'll have the action target be the ship we're docked with
+		// 		// so we know which ship we need to move a little ways away from
+		// 		actionTarget: entity.components.isDocked.hostShipId,
+		// 	});
+		// }
 
 		// Decide what ships to scan, and what to scan
 		npcScan(entity);
@@ -66,20 +79,24 @@ export class NPCDecisionSystem extends System {
 			target?: Entity | null,
 			options?: { multiplier: number } | { distance: number },
 		) {
-			if (target && position) {
-				const offsetPosition = getObjectOffsetPosition(
-					target,
-					position,
+			if (target?.components.isWaypoint && target.components.position) {
+				desiredPosition.parentId = position.parentId;
+				desiredPosition.x = target.components.position.x;
+				desiredPosition.y = target.components.position.y;
+				desiredPosition.z = target.components.position.z;
+			} else {
+				const distance =
 					(options && "distance" in options
 						? options.distance
 						: ((entity.components.size?.length || 1) / 1000) * 2) *
-						(options && "multiplier" in options ? options.multiplier : 1),
-				);
-
-				desiredPosition.parentId = position.parentId;
-				desiredPosition.x = offsetPosition.x;
-				desiredPosition.y = offsetPosition.y;
-				desiredPosition.z = offsetPosition.z;
+					(options && "multiplier" in options ? options.multiplier : 1);
+				if (target && position) {
+					const offsetPosition = getObjectOffsetPosition(target, position, distance);
+					desiredPosition.parentId = position.parentId;
+					desiredPosition.x = offsetPosition.x;
+					desiredPosition.y = offsetPosition.y;
+					desiredPosition.z = offsetPosition.z;
+				}
 			}
 		}
 		function setLookAtPosition(target: Entity | null) {
@@ -119,8 +136,25 @@ export class NPCDecisionSystem extends System {
 		) {
 			combatAction = "hold";
 		}
-
-		if (combatAction === "regroup") {
+		// This is the first action we handle, because it's a prerequisite for any other action or objective
+		if (action === "undock") {
+			const dockingPorts = getShipSystems(this.ecs, {
+				systemType: "dockingPort",
+				shipId: entity.id,
+			});
+			const dockedPort = dockingPorts.find(
+				(d) =>
+					d.components.isDockingPort?.state === "clamps" ||
+					d.components.isDockingPort?.state === "ramps",
+			);
+			if (dockedPort) {
+				ahhhhh!;
+				// TODO October 1, 2026 — Figure out all the steps we need to do.
+				// Probably starting with waiting for the velocity to be close to zero,
+				// then retracting ramps, waiting, detaching clamps, waiting, and then moving away
+				// until clear
+			}
+		} else if (combatAction === "regroup") {
 			// TODO May 15 2025 - add in some kind of attack patterns
 			// where the ship moves back and forth
 			setMoveTowardsPosition(
@@ -223,10 +257,36 @@ export class NPCDecisionSystem extends System {
 			const target =
 				typeof behaviorTarget === "number" ? this.ecs.getEntityById(behaviorTarget) : null;
 			setMoveTowardsPosition(target);
-		} else if (action === "dock" || action === "moveTo") {
+		} else if (action === "moveTo") {
 			const target =
-				typeof behaviorTarget === "number" ? this.ecs.getEntityById(behaviorTarget) : null;
+				typeof actionTarget === "number"
+					? this.ecs.getEntityById(actionTarget)
+					: typeof behaviorTarget === "number"
+						? this.ecs.getEntityById(behaviorTarget)
+						: null;
 			setMoveTowardsPosition(target);
+		} else if (
+			action === "dock" &&
+			typeof behaviorTarget === "number" &&
+			!entity.components.isDocked
+		) {
+			const target = this.ecs.getEntityById(behaviorTarget);
+			if (target) {
+				const transform = calculateDockedTransformFromShips(entity, target);
+
+				if (transform) {
+					const { position, rotation } = transform;
+					desiredRotation = {
+						x: rotation.x,
+						y: rotation.y,
+						z: rotation.z,
+						w: rotation.w,
+					};
+					desiredPosition.x = position.x;
+					desiredPosition.y = position.y;
+					desiredPosition.z = position.z;
+				}
+			}
 		} else if (action === "scan") {
 			const target =
 				typeof behaviorTarget === "number" ? this.ecs.getEntityById(behaviorTarget) : null;
@@ -243,6 +303,7 @@ export class NPCDecisionSystem extends System {
 
 			path = pathfinder(entity, wanderVector) || [];
 		}
+
 		const nextCoordinates = path.shift();
 
 		const distanceFromDesired = Math.hypot(
@@ -267,6 +328,46 @@ export class NPCDecisionSystem extends System {
 			nextCoordinates,
 			desiredSolarSystemId: position?.parentId || null,
 		});
+
+		if (objective === "dock" && action === "moveTo" && distanceFromDesired < 0.3) {
+			if (typeof actionTarget === "number") {
+				const actionTargetEntity = this.ecs.getEntityById(actionTarget);
+				if (actionTargetEntity?.components.isWaypoint) {
+					// Remove the waypoint that was used
+					this.ecs.removeEntity(actionTargetEntity);
+				}
+			}
+			// When the action is "dock", we'll actually move in towards the docking port
+			entity.updateComponent("shipBehavior", {
+				action: "dock",
+				actionTarget: behaviorTarget,
+			});
+		}
+		if (
+			objective === "dock" &&
+			action === "dock" &&
+			distanceFromDesired <= 0.2 &&
+			!entity.components.isDocked &&
+			typeof behaviorTarget === "number"
+		) {
+			// The docking port is whichever one is connected to the host ship AKA the behavior target
+			const hostDockingPorts = getShipSystems(this.ecs, {
+				systemType: "dockingPort",
+				shipId: behaviorTarget,
+			}).map((port) => port.id);
+			const guestDockingPorts = getShipSystems(this.ecs, {
+				systemType: "dockingPort",
+				shipId: entity.id,
+			});
+			for (const guestDockingPort of guestDockingPorts) {
+				const dockingPortId = guestDockingPort.components.isDockingPort?.connectedPortId;
+				if (!dockingPortId) continue;
+				if (hostDockingPorts.includes(dockingPortId)) {
+					this.ecs.triggerAction("pilot.docking.setClamps", { dockingPortId, clamps: "attached" });
+					break;
+				}
+			}
+		}
 
 		const shields = getSystemsOfType(this.ecs, entity.id, "Shields");
 		if (alertLevel <= 3) {

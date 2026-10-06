@@ -67,7 +67,6 @@ export function CircleGridContacts({
 	});
 	const [ships] = q.starmapCore.ships.useNetRequest({ systemId });
 	const [torpedos] = q.starmapCore.torpedos.useNetRequest({ systemId });
-
 	return (
 		<group>
 			{orbs.map((entity) => {
@@ -451,6 +450,24 @@ export const ShipEntity = ({
 		</Fragment>
 	);
 };
+
+// Useful for showing the current thruster direction.
+// const thrusterVector = new Vector3();
+// function ThrustersHelper({ shipId }: { shipId: number }) {
+//  q.pilot.debugThrustersStream.useDataStream()
+// 	const [thrusters] = q.pilot.thrusters.get.useNetRequest({ shipId });
+// 	const thrusterRef = useRef<ArrowHelper>(null);
+// 	const { interpolate } = useLiveQuery();
+// 	useFrame(() => {
+// 		const thruster = interpolate(thrusters.id);
+// 		if (!thruster) return;
+// 		thrusterVector.set(thruster.x, thruster.y, thruster.z);
+// 		thrusterRef.current?.setLength(thrusterVector.length() * 3);
+// 		thrusterRef.current?.setDirection(thrusterVector);
+// 	});
+// 	return <arrowHelper ref={thrusterRef} args={[new Vector3(), new Vector3(), 1, "red", 0.5, 3]} />;
+// }
+
 interface PlanetaryEntityProps {
 	id: number;
 	satellite: z.infer<typeof satellite>;

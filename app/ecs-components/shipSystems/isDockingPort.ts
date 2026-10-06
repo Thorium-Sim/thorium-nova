@@ -19,10 +19,18 @@ export const isDockingPort = z
 		 * incoming — Another ship is docking with this port
 		 * requesting — Requesting for this docking port to dock with another ship
 		 * requested — Another ship has requested to dock with this docking port
+		 * clamps — Docking clamps are attached
+		 * ramps — Boarding ramps are extended
+		 *
+		 * Progression for the guest ship goes:
+		 * idle -> requesting -> outgoing -> clamps -> ramps -> clamps -> idle
+		 *
+		 * For host ship:
+		 * idle -> requested -> incoming -> idle
 		 */
-		state: z.enum(["idle", "outgoing", "incoming", "requesting", "requested"]).default("idle"),
-		clamps: z.boolean().default(false),
-		ramps: z.boolean().default(false),
+		state: z
+			.enum(["idle", "outgoing", "incoming", "requesting", "requested", "clamps", "ramps"])
+			.default("idle"),
 		connectedPortId: z.number().nullable().default(null),
 	})
 	.default({});

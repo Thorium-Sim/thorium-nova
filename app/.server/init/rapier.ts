@@ -202,21 +202,28 @@ function generateShipRigidBody(
 
 /** Returns the world that contains this entity */
 export function getEntityWorld(entity: Entity) {
+	// If the entity is docked to another entity, we'll exist within the world of that entity.
+	if (entity.components.isDocked) {
+		const hostShip = entity.ecs.getEntityById(entity.components.isDocked.hostShipId || -1);
+		if (hostShip) {
+			return getEntityWorld(hostShip);
+		}
+	}
 	const position =
 		entity.components.position ||
 		(entity.components.satellite && {
 			...getOrbitPosition(entity.components.satellite),
 			parentId: entity.components.satellite.parentId,
 		});
-	if (typeof position?.parentId !== "number") return null;
+	if (typeof position?.parentId !== "number") return undefined;
 	const entitySector = getSectorNumber(position);
 
 	return entity.ecs.getWorld(entitySector);
 }
 
-export function getBodyForEntity(entity: Entity | null) {
+export function getBodyForEntity(entity: Entity | null, world?: World) {
 	if (!entity) return null;
-	const world = getEntityWorld(entity);
+	world = world || getEntityWorld(entity);
 
 	const position = entity.components.position;
 	if (!position || !world) return null;
