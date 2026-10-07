@@ -40,6 +40,8 @@ const DEFAULT_FLEE_DISTANCE = 25_000;
 // TODO October 1, 2026 — It would be cool if each behavior and action could be self-contained and then composed here.
 export class NPCDecisionSystem extends System {
 	static flightMode = ["nova"];
+	// Map of the previous distance, used for docking.
+	lastDistance = new Map<number, number>();
 	test(entity: Entity) {
 		return !!(entity.components.isShip && !entity.components.isPlayerShip?.value);
 	}
@@ -148,7 +150,6 @@ export class NPCDecisionSystem extends System {
 					d.components.isDockingPort?.state === "ramps",
 			);
 			if (dockedPort) {
-				ahhhhh!;
 				// TODO October 1, 2026 — Figure out all the steps we need to do.
 				// Probably starting with waiting for the velocity to be close to zero,
 				// then retracting ramps, waiting, detaching clamps, waiting, and then moving away
@@ -343,12 +344,13 @@ export class NPCDecisionSystem extends System {
 				actionTarget: behaviorTarget,
 			});
 		}
+		const lastDistance = this.lastDistance.get(entity.id) || 0;
 		if (
 			objective === "dock" &&
 			action === "dock" &&
-			distanceFromDesired <= 0.2 &&
 			!entity.components.isDocked &&
-			typeof behaviorTarget === "number"
+			typeof behaviorTarget === "number" &&
+			Math.abs(lastDistance - distanceFromDesired) < 0.00001
 		) {
 			// The docking port is whichever one is connected to the host ship AKA the behavior target
 			const hostDockingPorts = getShipSystems(this.ecs, {
@@ -368,7 +370,7 @@ export class NPCDecisionSystem extends System {
 				}
 			}
 		}
-
+		this.lastDistance.set(entity.id, distanceFromDesired);
 		const shields = getSystemsOfType(this.ecs, entity.id, "Shields");
 		if (alertLevel <= 3) {
 			for (const shield of shields) {

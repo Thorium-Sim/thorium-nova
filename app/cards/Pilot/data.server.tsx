@@ -709,11 +709,7 @@ export const pilot = t.router({
 					shipId: requestingDockingPort.components.isShipSystem?.shipId || -1,
 				});
 			}),
-		test: t.procedure.send(({ ctx }) => {
-			const playerShip = ctx.ecs.getEntityById(3145)!;
-			const guestShip = ctx.ecs.getEntityById(3215)!;
-			dockEntities(guestShip, playerShip);
-		}),
+
 		setClamps: t.procedure
 			.input(z.object({ dockingPortId: z.number(), clamps: z.enum(["attached", "detached"]) }))
 			.send(({ ctx, input }) => {
@@ -741,7 +737,6 @@ export const pilot = t.router({
 						if (!client) continue;
 						client.sendDataStream();
 					}
-					console.log("Clamps attached");
 				}
 				pubsub.publish.pilot.docking.get({
 					shipId: guestShip.id,

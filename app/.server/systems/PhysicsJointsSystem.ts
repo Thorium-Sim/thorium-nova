@@ -8,6 +8,11 @@ import type { Entity } from "@thorium/utils/ecs";
 import System from "@thorium/utils/ecs/system";
 
 /** Ensure that every entity has its joints spawned in its physics world */
+/**
+ * October 7, 2026 — I wasn't able to figure out how to make this work properly,
+ * so I'm using simple physics for docked entities and this system is dormant.
+ * Someday we might hook it up so we have proper physics.
+ */
 export class PhysicsJointsSystem extends System {
 	static flightMode = ["nova"];
 
@@ -85,14 +90,11 @@ export function createJoint(jointEntity: Entity) {
 		frameB,
 	);
 
-	console.log(sizeA, sizeB);
-
 	const bodyA = getBodyForEntity(entityA);
 	const bodyB = getBodyForEntity(entityB);
 	if (!bodyA || !bodyB) {
 		return;
 	}
-	console.log("Creating joint", worldSector);
 	const joint = world.createImpulseJoint(params, bodyA, bodyB, true);
 	joint.setContactsEnabled(false);
 	handles.set(worldSector, joint.handle);

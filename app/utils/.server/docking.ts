@@ -15,15 +15,15 @@ const forward = new Vector3(0, 0, 1);
 export function calculateDockedTransformFromShips(guestShip: Entity, hostShip: Entity) {
 	const ecs = guestShip.ecs;
 	const guestPort = getShipSystems(ecs, { systemType: "dockingPort", shipId: guestShip.id }).find(
-		(s) => true, // s.components.isDockingPort?.state === "outgoing",
+		(s) => s.components.isDockingPort?.state === "outgoing",
 	);
 
 	const hostPort = getShipSystems(ecs, { systemType: "dockingPort", shipId: hostShip.id }).find(
 		(s) => {
-			return true; /*(
+			return (
 				s.components.isDockingPort?.state === "incoming" &&
 				s.components.isDockingPort.connectedPortId === guestPort?.id
-			);*/
+			);
 		},
 	);
 	if (!guestPort || !hostPort) return null;

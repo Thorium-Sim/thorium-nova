@@ -56,7 +56,10 @@ export class PhysicsMovementSystem extends System {
 	}
 	update(entity: Entity, elapsed: number) {
 		if (this.ecs.colliderCache.size === 0) return;
-
+		if (entity.components.isDocked) {
+			this.simpleJointEntities.add(entity.id);
+			return;
+		}
 		// Determine whether the entity is using collision or simple physics
 		// and update the position accordingly.
 		const world = getEntityWorld(entity);
@@ -201,9 +204,7 @@ export class PhysicsMovementSystem extends System {
 			 * Simple Physics
 			 */
 			// If this ship is docked, just match it to the docked entity's position
-			if (entity.components.isDocked) {
-				this.simpleJointEntities.add(entity.id);
-			}
+
 			const elapsedRatio = elapsed / 1000;
 			const mass = entity.components.mass?.mass || 1;
 			{
@@ -331,6 +332,20 @@ export class PhysicsMovementSystem extends System {
 				const entityId2 = (body2?.userData as any)?.entityId;
 				const entity1 = this.ecs.getEntityById(entityId1);
 				const entity2 = this.ecs.getEntityById(entityId2);
+
+				// Don't allow self-collisions
+				if (entity1 === entity2) {
+					event.free();
+					return;
+				}
+				// Docked ships don't collide
+				if (
+					entity1?.components.isDocked?.hostShipId === entityId2 ||
+					entity2?.components.isDocked?.hostShipId === entityId1
+				) {
+					event.free();
+					return;
+				}
 
 				// Special handling to ignore torpedoes their own ships
 				if (entity1?.components.isTorpedo || entity2?.components.isTorpedo) {

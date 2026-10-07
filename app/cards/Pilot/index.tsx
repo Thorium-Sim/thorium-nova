@@ -114,7 +114,7 @@ export function Pilot({ cardLoaded }: CardProps) {
 	const { gridOffline } = useSensorGridOffline();
 
 	return (
-		<CircleGridStoreProvider>
+		<CircleGridStoreProvider zoomMax={15000}>
 			<div className="grid h-full grid-cols-4 grid-rows-1 place-content-center gap-4">
 				<div className="flex flex-col justify-between">
 					<ImpulseControls
@@ -173,7 +173,6 @@ export function Pilot({ cardLoaded }: CardProps) {
 				</div>
 
 				<div className="flex h-full flex-col justify-between gap-2">
-					<Button onClick={() => q.pilot.docking.test.netSend()}>Test</Button>
 					<LockOnButton userUnlockedRef={userUnlockedRef} />
 					<div>
 						<div className="pilot-slider">

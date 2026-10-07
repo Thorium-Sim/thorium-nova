@@ -1,7 +1,7 @@
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { q } from "@thorium/context/AppContext";
-import { computeDockedTransform } from "@thorium/utils/starmap/docking";
+import { computeDockedTransform } from "@thorium/utils/dockingClient";
 import { Euler, Quaternion, Vector3 } from "three";
 
 export default function ThreeD() {
