@@ -1,10 +1,9 @@
 import { getShipSystems } from "@thorium/utils/.server/ship/getShipSystem";
 import { computeDockedTransform } from "@thorium/utils/dockingClient";
 import { Entity } from "@thorium/utils/ecs";
+import { getCollider } from "@thorium/utils/physics/initColliders";
 import { Quaternion, Vector3 } from "three";
 
-const anchorA = new Vector3();
-const anchorB = new Vector3();
 const frameAVec = new Vector3();
 const frameBVec = new Vector3();
 const frameAQuat = new Quaternion();
@@ -15,51 +14,59 @@ const forward = new Vector3(0, 0, 1);
 export function calculateDockedTransformFromShips(guestShip: Entity, hostShip: Entity) {
 	const ecs = guestShip.ecs;
 	const guestPort = getShipSystems(ecs, { systemType: "dockingPort", shipId: guestShip.id }).find(
-		(s) => s.components.isDockingPort?.state === "outgoing",
+		(s) => true, //s.components.isDockingPort?.state === "outgoing",
 	);
 
 	const hostPort = getShipSystems(ecs, { systemType: "dockingPort", shipId: hostShip.id }).find(
 		(s) => {
-			return (
+			return true; /*(
 				s.components.isDockingPort?.state === "incoming" &&
 				s.components.isDockingPort.connectedPortId === guestPort?.id
-			);
+			);*/
 		},
 	);
 	if (!guestPort || !hostPort) return null;
-	anchorA
-		.set(
+
+	const hostCollider = getCollider(hostShip.components.isShip!.assets.model!);
+	const guestCollider = getCollider(guestShip.components.isShip!.assets.model!);
+
+	return computeDockedTransform({
+		hostPosition: {
+			x: hostShip.components.position!.x,
+			y: hostShip.components.position!.y,
+			z: hostShip.components.position!.z,
+		},
+		hostRotation: hostShip.components.rotation!,
+		hostPortPos: [
 			hostPort.components.position!.x,
 			hostPort.components.position!.y,
 			hostPort.components.position!.z,
-		)
-		.divideScalar(1000);
-	anchorB
-		.set(
+		],
+		hostPortDir: [
+			hostPort.components.isDockingPort!.orientation.x,
+			hostPort.components.isDockingPort!.orientation.y,
+			hostPort.components.isDockingPort!.orientation.z,
+		],
+		hostCenterOfMass: hostCollider && [
+			hostCollider.centerOfMass[0] / 1000,
+			hostCollider.centerOfMass[1] / 1000,
+			hostCollider.centerOfMass[2] / 1000,
+		],
+		guestPortPos: [
 			guestPort.components.position!.x,
 			guestPort.components.position!.y,
 			guestPort.components.position!.z,
-		)
-		.divideScalar(1000);
-	return computeDockedTransform({
-		hostPosition: hostShip.components.position!,
-		hostRotation: hostShip.components.rotation!,
-		hostPortPos: anchorA,
-		hostPortDir: frameAVec
-			.set(0, 0, 1)
-			.applyQuaternion(
-				frameAQuat.setFromUnitVectors(forward, hostPort.components.isDockingPort!.orientation),
-			)
-			.toArray(),
-		hostScale: hostShip.components.size!.length,
-		guestPortPos: anchorB,
-		guestPortDir: frameBVec
-			.set(0, 0, 1)
-			.applyQuaternion(
-				frameBQuat.setFromUnitVectors(forward, guestPort.components.isDockingPort!.orientation),
-			)
-			.toArray(),
-		guestScale: guestShip.components.size!.length,
+		],
+		guestPortDir: [
+			guestPort.components.isDockingPort!.orientation.x,
+			guestPort.components.isDockingPort!.orientation.y,
+			guestPort.components.isDockingPort!.orientation.z,
+		],
+		guestCenterOfMass: guestCollider && [
+			guestCollider.centerOfMass[0] / 1000,
+			guestCollider.centerOfMass[1] / 1000,
+			guestCollider.centerOfMass[2] / 1000,
+		],
 		currentGuestRotation: guestShip.components.rotation,
 	});
 }
@@ -72,45 +79,27 @@ export function dockEntities(guest: Entity, host: Entity) {
 		throw new Error("Unable to dock — missing position component.");
 
 	const jointEntity = new Entity();
-	const frameATuple = frameAQuat
-		.setFromUnitVectors(forward, hostPort.components.isDockingPort!.orientation)
-		.toArray();
-	const frameBTuple = frameBQuat
-		.setFromUnitVectors(forward, guestPort.components.isDockingPort!.orientation)
-		.toArray();
 
-	const anchorA = {
-		x: hostPort.components.position.x / 1000,
-		y: hostPort.components.position.y / 1000,
-		z: hostPort.components.position.z / 1000,
-	};
-	const anchorB = {
-		x: guestPort.components.position.x / 1000,
-		y: guestPort.components.position.y / 1000,
-		z: guestPort.components.position.z / 1000,
-	};
-	const frameA = {
-		x: frameATuple[0],
-		y: frameATuple[1],
-		z: frameATuple[2],
-		w: frameATuple[3],
-	};
-	const frameB = {
-		x: frameBTuple[0],
-		y: frameBTuple[1],
-		z: frameBTuple[2],
-		w: frameBTuple[3],
-	};
-	jointEntity.addComponent("fixedJoint", {
+	const hostPosition = hostPort.components.position;
+	const guestPosition = guestPort.components.position;
+	const hostOrientation = hostPort.components.isDockingPort!.orientation;
+	const guestOrientation = guestPort.components.isDockingPort!.orientation;
+
+	const sizeA = host.components.size?.length || 1;
+	const sizeB = guest.components.size?.length || 1;
+
+	jointEntity.addComponent("fixedConstraint", {
 		idA: host?.id,
 		idB: guest?.id,
-		anchorA,
-		anchorB,
-		frameA,
-		frameB,
+		anchorA: [hostPosition.x * sizeA, hostPosition.y * sizeA, hostPosition.z * sizeA],
+		anchorB: [guestPosition.x * sizeB, guestPosition.y * sizeB, guestPosition.z * sizeB],
+		frameA: [hostOrientation.x, hostOrientation.y, hostOrientation.z],
+		// Reverse the orientation so we dock the correct way.
+		frameB: [-guestOrientation.x, -guestOrientation.y, -guestOrientation.z],
 	});
+	// ecs.addEntity(jointEntity);
 
-	// Snap the guest to the calculated docking position
+	// // Snap the guest to the calculated docking position
 	const transform = calculateDockedTransformFromShips(guest, host);
 	if (transform) {
 		const { position, rotation } = transform;
@@ -136,7 +125,6 @@ export function dockEntities(guest: Entity, host: Entity) {
 			z: 0,
 		});
 	}
-	ecs.addEntity(jointEntity);
 
 	guest?.addComponent("isDocked", {
 		dockingPortId: guestPort.id,

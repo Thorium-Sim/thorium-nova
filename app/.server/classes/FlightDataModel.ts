@@ -1,6 +1,5 @@
 import path from "node:path";
 
-import RAPIER from "@thorium-sim/rapier3d-node";
 import { initECS } from "@thorium/.server/classes/initECS";
 import { thoriumContext } from "@thorium/utils/.server/context";
 import { DataStore, type DataStoreOptions } from "@thorium/utils/.server/db-fs";
@@ -9,8 +8,8 @@ import { loadGltf } from "@thorium/utils/.server/loadGltf";
 import { processTriggers } from "@thorium/utils/.server/processTriggers";
 import { triggerAction } from "@thorium/utils/.server/triggerAction";
 import { ECS, Entity } from "@thorium/utils/ecs";
+import { initColliders } from "@thorium/utils/physics/initColliders";
 import randomWords from "@thorium/utils/random-words";
-import { ConvexHull } from "@thorium/utils/starmap/ConvexHull.js";
 
 import type ShipPlugin from "./Plugins/Ship";
 import type { ServerDataModel } from "./ServerDataModel";
@@ -119,32 +118,26 @@ export class FlightDataModel extends DataStore {
 		// Fetch and calculate all of the colliders for the ships in the plugins
 		// Loop over every ship in every loaded plugin
 		const thoriumPath = await this.getAssetUrl();
-		// Key is the model URL
-		const colliders = new Map<string, { mass: number; length: number }>();
+		// Key is the model URL, value is the length
+		const colliders = new Map<string, number>();
 		for (const plugin of this.serverDataModel.plugins) {
 			if (!this.pluginIds.includes(plugin.id)) continue;
 			for (const ship of plugin.aspects.ships) {
-				colliders.set(ship.assets.model, { mass: ship.mass, length: ship.length });
+				colliders.set(ship.assets.model, ship.length);
 			}
 			for (const system of plugin.aspects.solarSystems) {
 				for (const planet of system.planets || []) {
 					for (const satellite of planet.satellites || []) {
 						if (satellite.type === "starbase" && satellite.isStarbase.assets.model) {
-							colliders.set(satellite.isStarbase.assets.model, {
-								mass: satellite.mass,
-								length: satellite.length,
-							});
+							colliders.set(satellite.isStarbase.assets.model, satellite.length);
 						}
 					}
 				}
 			}
 		}
-		for (const [model, { mass, length }] of colliders) {
-			const assetUrl = path.join(thoriumPath, model);
-			const colliderDesc = await generateColliderDesc(assetUrl, mass, length);
-			if (!colliderDesc) return;
-			this.ecs.colliderCache.set(model, colliderDesc);
-		}
+		await initColliders(colliders, (modelPath) => {
+			return loadGltf(path.join(thoriumPath, modelPath));
+		});
 	}
 
 	stop() {
@@ -215,29 +208,5 @@ export class FlightDataModel extends DataStore {
 			lastSaved: Date.now(),
 		};
 		return data;
-	}
-}
-
-async function generateColliderDesc(filePath: string, mass: number, size: number) {
-	try {
-		const hull = new ConvexHull();
-		const gltf = await loadGltf(filePath);
-		if (!gltf) {
-			throw new Error("Failed to load gltf");
-		}
-		// This properly scales the collider to the size of the ship
-		gltf.scene.children[0].scale.multiplyScalar(size / 1000);
-		hull.setFromObject(gltf.scene.children[0]);
-		const vertices = [];
-		for (const vertex of hull.vertices) {
-			vertices.push(vertex.point.x, vertex.point.y, vertex.point.z);
-		}
-		const verticesFloat32 = new Float32Array(vertices);
-		const colliderDesc = RAPIER.ColliderDesc.convexHull(verticesFloat32)?.setMass(mass);
-		return colliderDesc;
-	} catch (err) {
-		console.error("Failed to generate convex hulls for", filePath);
-		console.error(err);
-		return null;
 	}
 }

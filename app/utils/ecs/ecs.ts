@@ -2,8 +2,6 @@
  * Entity Component System module
  */
 
-import type { ColliderDesc, World } from "@thorium-sim/rapier3d-node";
-import RAPIER from "@thorium-sim/rapier3d-node";
 import type { ServerDataModel } from "@thorium/.server/classes/ServerDataModel";
 import type { DataContext } from "@thorium/.server/DataContext";
 import type { AllSends, SendInputs } from "@thorium/.server/init/router";
@@ -11,6 +9,7 @@ import type { TimelineBlock } from "@thorium/components/timelineBuilder/Timeline
 import type { ComponentIds } from "@thorium/ecs-components";
 import type { BlockMetadata } from "@thorium/utils/.server/executeBlocks";
 import { type RNG, createRNG } from "@thorium/utils/rng";
+import { date } from "zod/v4";
 
 import type Entity from "./entity";
 import performance from "./performance";
@@ -37,12 +36,9 @@ class ECS {
 	rng: RNG;
 	maxEntityId = 1;
 	componentCache = new Map<ComponentIds, Set<Entity>>();
-	colliderCache = new Map<string, ColliderDesc>();
 	shipSystemCache = new Map<number, Map<string, Entity | Entity[]>>();
 	changeBatch = new Set<`${number}-${ComponentIds}`>();
 	removeBatch = new Map<number, Pick<Entity, "id" | "components">>();
-	// The key is the sector number based on the location of this physics world
-	worlds = new Map<string, World>();
 
 	constructor(
 		public server: ServerDataModel,
@@ -166,13 +162,18 @@ class ECS {
 		if (this.entitiesSystemsDirty.size > 0) {
 			this.cleanDirtyEntities();
 		}
+		let systems: { name: string; duration: number }[] = [];
 		for (const system of this.systems) {
 			if (this.entitiesSystemsDirty.size > 0) {
 				// if the last system flagged some entities as dirty check that case
 				this.cleanDirtyEntities();
 			}
+			const time = Date.now();
 			system.updateAll(elapsed, this.updateCounter);
+			systems.push({ name: system.constructor.name, duration: Date.now() - time });
 		}
+		systems.sort((a, b) => b.duration - a.duration);
+		console.log(systems[0].name, systems[0].duration);
 		this.updateCounter += 1;
 		this.lastUpdate = now;
 	}
@@ -186,17 +187,10 @@ class ECS {
 		for (const [, entity] of this.entities) {
 			this.removeEntity(entity);
 		}
-		this.colliderCache.clear();
 		this.componentCache.clear();
 		this.shipSystemCache.clear();
 		this.changeBatch.clear();
 		this.removeBatch.clear();
-	}
-	getWorld(key: string) {
-		if (!this.worlds.has(key)) {
-			this.worlds.set(key, new RAPIER.World({ x: 0, y: 0, z: 0 }));
-		}
-		return this.worlds.get(key)!;
 	}
 	async executeBlocks(
 		// oxlint-disable-next-line no-unused-vars

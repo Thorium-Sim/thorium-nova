@@ -1,5 +1,5 @@
 import { isSortable } from "@dnd-kit/react/sortable";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, useGLTF } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useQueryClient } from "@tanstack/react-query";
 import { useShipModel } from "@thorium/components/Starmap/StarmapShip";
@@ -7,8 +7,9 @@ import { q } from "@thorium/context/AppContext";
 import { useConfirm, usePrompt } from "@thorium/ui/AlertDialog";
 import Button from "@thorium/ui/Button";
 import { SortableList } from "@thorium/ui/SortableItem";
+import { generateColliderDesc } from "@thorium/utils/physics/generateCollider";
 import { cursorList, setCursor } from "@thorium/utils/setCursor";
-import { use, useRef } from "react";
+import { use, useMemo, useRef } from "react";
 import { href, Outlet, useNavigate } from "react-router";
 import { Vector3 } from "three";
 
@@ -34,6 +35,9 @@ function PageContent({ pluginId, shipId, portId }: Route.ComponentProps["params"
 		use(DockingPortContext);
 	const cursorRef = useRef("auto");
 	const targetCursorRef = useRef<(typeof cursorList)[number]>("grab");
+
+	const model = useGLTF(data.assets.model, false);
+	const collider = useMemo(() => generateColliderDesc(model, 1), [model]);
 
 	return (
 		<>
@@ -167,19 +171,28 @@ function PageContent({ pluginId, shipId, portId }: Route.ComponentProps["params"
 
 					<ShipModel
 						modelUrl={data.assets.model}
-						pickPosition={isPicking ? setPickedPosition : null}
+						pickPosition={
+							isPicking
+								? ({ orientation, position }) => {
+										setPickedPosition({
+											orientation,
+											position: subtractCenter(position, collider?.centerOfMass),
+										});
+									}
+								: null
+						}
 					/>
 					{pickedPosition ? (
 						<DockingPort
 							selected
-							position={pickedPosition.position}
+							position={addCenter(pickedPosition.position, collider?.centerOfMass)}
 							orientation={pickedPosition.orientation}
 						/>
 					) : null}
 					{data.dockingPorts.map((port) => (
 						<DockingPort
 							key={port.name}
-							position={port.position}
+							position={addCenter(port.position, collider?.centerOfMass)}
 							orientation={port.orientation}
 							selected={portId === port.name}
 							select={() =>
@@ -253,6 +266,20 @@ function PageContent({ pluginId, shipId, portId }: Route.ComponentProps["params"
 	);
 }
 
+function addCenter(point: Coordinate, center: [number, number, number] = [0, 0, 0]) {
+	return {
+		x: point.x + center[0],
+		y: point.y + center[1],
+		z: point.z + center[2],
+	};
+}
+function subtractCenter(point: Coordinate, center: [number, number, number] = [0, 0, 0]) {
+	return {
+		x: point.x - center[0],
+		y: point.y - center[1],
+		z: point.z - center[2],
+	};
+}
 function ShipModel({
 	modelUrl,
 	pickPosition,

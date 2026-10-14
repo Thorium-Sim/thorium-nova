@@ -61,10 +61,7 @@ const arch = (process.env.BUILD_ARCH ||
 	`${targetArch}-${targetPlatform}`) as keyof typeof platformMap;
 await Promise.all([
 	Bun.build({
-		entrypoints: [
-			"./desktop/exe.ts",
-			"./node_modules/@thorium-sim/rapier3d-node/dist/rapier_wasm3d_bg.wasm",
-		],
+		entrypoints: ["./desktop/exe.ts"],
 		compile: {
 			autoloadBunfig: false,
 			autoloadDotenv: false,
@@ -90,11 +87,7 @@ await Promise.all([
 		target: "bun",
 	}),
 	Bun.build({
-		entrypoints: [
-			"./desktop/index.tsx",
-			"./desktop/exe.ts",
-			"./node_modules/@thorium-sim/rapier3d-node/dist/rapier_wasm3d_bg.wasm",
-		],
+		entrypoints: ["./desktop/index.tsx", "./desktop/exe.ts"],
 		compile: {
 			autoloadBunfig: false,
 			autoloadDotenv: false,

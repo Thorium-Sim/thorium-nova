@@ -11,10 +11,5 @@ export default defineConfig({
 			"../../../build/defaultPlugin.plug": "./stub.js",
 		},
 		exclude: [".hutch/**", "node_modules"],
-		server: {
-			deps: {
-				external: ["@thorium-sim/rapier3d-node"],
-			},
-		},
 	},
 });

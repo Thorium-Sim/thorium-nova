@@ -173,6 +173,9 @@ export function Pilot({ cardLoaded }: CardProps) {
 				</div>
 
 				<div className="flex h-full flex-col justify-between gap-2">
+					<button className="btn" onClick={() => q.pilot.docking.test.netSend()}>
+						Test
+					</button>
 					<LockOnButton userUnlockedRef={userUnlockedRef} />
 					<div>
 						<div className="pilot-slider">

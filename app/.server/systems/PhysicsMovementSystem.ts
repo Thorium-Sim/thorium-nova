@@ -1,40 +1,36 @@
 import {
-	getBodyForEntity,
-	getEntityWorld,
-	universeToWorld,
-	worldToUniverse,
-} from "@thorium/.server/init/rapier";
-import {
 	handleCollisionDamage,
 	handleTorpedoDamage,
 } from "@thorium/utils/.server/ship/collisionDamage";
 import { computeDockedTransform } from "@thorium/utils/dockingClient";
 import { type Entity, System } from "@thorium/utils/ecs";
+import { getRigidBody } from "@thorium/utils/physics/getRigidBody";
+import { collidersInited } from "@thorium/utils/physics/initColliders";
+import { getPhysicsWorld } from "@thorium/utils/physics/world";
 import { getOrbitPosition } from "@thorium/utils/starmap/getOrbitPosition";
+import { getObjectSystem } from "@thorium/utils/starmap/position";
 import { KM_TO_LM, M_TO_KM, rpmToRadianPerSecond } from "@thorium/utils/unitTypes";
+import { MotionType, rigidBody, updateWorld, type Listener, type World } from "crashcat";
 import { Euler, Object3D, Quaternion, Vector3 } from "three";
-
-import { getWorldPosition, RAPIER } from "../init/rapier";
 
 const tempObj = new Object3D();
 const tempVector = new Vector3();
-const worldVector = new Vector3();
 const velocityVector = new Vector3();
 const rotationVelocityVector = new Vector3();
 const velocityEuler = new Euler();
 const velocityQuaternion = new Quaternion();
 const BRAKE_CONSTANT = 0.99;
-const eventQueue = new RAPIER.EventQueue(true);
 
-const frameAVec = new Vector3(0, 0, 1);
-const frameBVec = new Vector3(0, 0, 1);
+const PHYSICS_DT = 1 / 60;
 
+const bodyAVec = new Vector3();
+const bodyBVec = new Vector3();
 /**
  * This system applies the physics of anything flying through space
  * So ships, asteroids, projectiles, etc.
  *
  * There are two physics systems in the game:
- * 1. RapierJS - This is the main physics system. It's used for
+ * 1. crashcat - This is the main physics system. It's used for
  *   everything that's in the same physics world as the player.
  * 2. Simple - This is a simple physics system that doesn't include
  *  collisions. It's used for everything that's not in the same
@@ -42,8 +38,16 @@ const frameBVec = new Vector3(0, 0, 1);
  */
 export class PhysicsMovementSystem extends System {
 	static flightMode = ["nova"];
+	timeAccumulator = 0;
+	worlds = new Set<World>();
 	collisionStepEntities = new Set<number>();
 	simpleJointEntities = new Set<number>();
+	pendingDamage: {
+		entityId: number;
+		direction: [number, number, number];
+		amount: number;
+		type: "collision" | "torpedo";
+	}[] = [];
 	test(entity: Entity) {
 		return Boolean(
 			(entity.components.position && entity.components.velocity) ||
@@ -51,21 +55,22 @@ export class PhysicsMovementSystem extends System {
 		);
 	}
 	preUpdate(): void {
+		this.worlds.clear();
 		this.collisionStepEntities.clear();
 		this.simpleJointEntities.clear();
 	}
+	updateAll(elapsed: number, updateCounter: number) {
+		super.updateAll(elapsed, updateCounter);
+	}
 	update(entity: Entity, elapsed: number) {
-		if (this.ecs.colliderCache.size === 0) return;
-		if (entity.components.isDocked) {
-			this.simpleJointEntities.add(entity.id);
-			return;
-		}
+		if (!collidersInited) return;
+
 		// Determine whether the entity is using collision or simple physics
 		// and update the position accordingly.
-		const world = getEntityWorld(entity);
-		const position = entity.components.position;
-		if (!position) return;
+		const solarSystemId = getObjectSystem(entity)?.id || -1;
+		const world = getPhysicsWorld(solarSystemId);
 
+		this.worlds.add(world);
 		// Nab some systems to use elsewhere.
 		const systems: Entity[] = [];
 		entity.components.shipSystems?.shipSystems.forEach((_, id) => {
@@ -91,47 +96,48 @@ export class PhysicsMovementSystem extends System {
 			tempObj.quaternion.set(x, y, z, w);
 		}
 		if (world) {
-			const worldPosition = getWorldPosition(position);
-			worldVector.copy(worldPosition);
-			const body = getBodyForEntity(entity, world);
+			const body = getRigidBody(entity);
 
 			if (body && !isHighSpeed) {
 				/**
 				 * Collision Physics
 				 */
 				this.collisionStepEntities.add(entity.id);
-
-				// No need to do further calculations if this entity is docked, since its body is attached to the parent entity
-				// and will be dragged around with the joint during the world update phase
-				if (entity.components.isDocked) return;
+				const { position, rotation, velocity, rotationVelocity } = entity.components;
 
 				// No need to do an update if this ship is docked with another ship
 				// Transform the position of the body based on the position of the entity relative
 				// to the position of the physics world entity.
-				if (entity.components.position) {
-					let positionVector = tempVector.set(
-						entity.components.position.x,
-						entity.components.position.y,
-						entity.components.position.z,
+				if (position && rotation) {
+					rigidBody.setTransform(
+						world,
+						body,
+						[position.x, position.y, position.z],
+						[rotation.x, rotation.y, rotation.z, rotation.w],
+						true,
 					);
-					positionVector = universeToWorld(positionVector, worldVector);
-					body.setTranslation(positionVector, true);
 				}
-				if (entity.components.rotation) {
-					body.setRotation(entity.components.rotation, true);
+				if (velocity) {
+					rigidBody.setLinearVelocity(world, body, [velocity.x, velocity.y, velocity.z]);
 				}
-				if (entity.components.velocity) {
-					body.setLinvel(entity.components.velocity, true);
-				}
-				if (entity.components.rotationVelocity) {
-					body.setAngvel(entity.components.rotationVelocity, true);
+				if (rotationVelocity) {
+					rigidBody.setAngularVelocity(world, body, [
+						rotationVelocity.x,
+						rotationVelocity.y,
+						rotationVelocity.z,
+					]);
 				}
 
 				/**
 				 * Inertial Dampeners
 				 */
-				body.setAngularDamping(dampening);
-				body.setLinearDamping(dampening);
+
+				body.motionProperties.linearDamping = dampening;
+				body.motionProperties.angularDamping = dampening;
+
+				// No need to do further calculations if this entity is docked, since its body is attached to the parent entity
+				// and will be dragged around with the joint during the world update phase
+				if (entity.components.isDocked) return;
 
 				/**
 				 * Warp Engines
@@ -143,14 +149,10 @@ export class PhysicsMovementSystem extends System {
 						tempVector.set(0, 0, warpEngines.components.isWarpEngines.forwardVelocity),
 					);
 					if (warpVelocity.lengthSq() > 0) {
-						body.setLinvel(
-							{
-								x: warpVelocity.x,
-								y: warpVelocity.y,
-								z: warpVelocity.z,
-							},
-							true,
-						);
+						body.motionProperties.maxLinearVelocity =
+							(warpEngines?.components.isWarpEngines?.interstellarCruisingSpeed || 599600000000) *
+							1000; // km/s to m/s
+						rigidBody.setLinearVelocity(world, body, warpVelocity.toArray());
 					}
 				}
 
@@ -158,11 +160,12 @@ export class PhysicsMovementSystem extends System {
 				 * Impulse Engines
 				 */
 				if (forwardImpulse) {
-					body.applyImpulse(
-						// I don't know why, but for some reason the impulse needs to be doubled
-						// to reach the expected speed.
-						tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse * 2)),
-						true,
+					body.motionProperties.maxLinearVelocity =
+						(impulseEngines?.components.isImpulseEngines?.emergencySpeed || 2000) * 1000; // km/s to m/s
+					rigidBody.addImpulse(
+						world,
+						body,
+						tempObj.localToWorld(tempVector.set(0, 0, forwardImpulse)).toArray(),
 					);
 				}
 
@@ -173,27 +176,23 @@ export class PhysicsMovementSystem extends System {
 					{
 						const { x, y, z } = thrusters.components.isThrusters.directionImpulse;
 						tempVector.set(x, y, z);
-						body.applyImpulse(tempObj.localToWorld(tempVector), true);
+						rigidBody.addImpulse(world, body, tempObj.localToWorld(tempVector).toArray());
 					}
-
-					// Set the max rotation velocity
-					const { x, y, z } = body.angvel();
-					tempVector.set(x, y, z);
-					// Convert rotation max speed from RPM to radians per second
-					if (
-						tempVector.lengthSq() >
-						rpmToRadianPerSecond(thrusters.components.isThrusters.rotationMaxSpeed)
-					) {
-						tempVector.multiplyScalar(BRAKE_CONSTANT);
-						const { x, y, z } = tempVector;
-						body.setAngvel({ x, y, z }, true);
-					} else {
+					{
 						const { x, y, z } = thrusters.components.isThrusters.rotationImpulse;
-
 						tempVector.set(x, y, z);
-						body.applyTorqueImpulse(tempObj.localToWorld(tempVector), true);
+						body.motionProperties.maxAngularVelocity = rpmToRadianPerSecond(
+							thrusters.components.isThrusters.rotationMaxSpeed,
+						);
+						rigidBody.addAngularImpulse(
+							world,
+							body,
+							tempObj.localToWorld(tempVector).toArray(),
+							// true,
+						);
 					}
 				}
+
 				return;
 			}
 			// Fall back on simple physics if we can't get a physics body for the entity.
@@ -204,7 +203,9 @@ export class PhysicsMovementSystem extends System {
 			 * Simple Physics
 			 */
 			// If this ship is docked, just match it to the docked entity's position
-
+			if (entity.components.isDocked) {
+				this.simpleJointEntities.add(entity.id);
+			}
 			const elapsedRatio = elapsed / 1000;
 			const mass = entity.components.mass?.mass || 1;
 			{
@@ -313,78 +314,92 @@ export class PhysicsMovementSystem extends System {
 			});
 		}
 	}
-	postUpdate(elapsed: number): void {
-		const elapsedSeconds = elapsed / 1000;
-		// Run the physics simulation for all of the relevant worlds.
-		this.ecs.worlds.forEach((world) => {
-			try {
-				world.step(eventQueue);
-			} catch (e) {
-				// Occasionally there's an odd error that throws
-				// We can mostly safely ignore it
-				console.error("Rapier Step panicked", e);
+	worldListener: Listener = {
+		onContactAdded: (bodyA, bodyB, manifold, settings) => {
+			const entityIdA = (bodyA?.userData as any)?.entityId;
+			const entityIdB = (bodyB?.userData as any)?.entityId;
+			const entityA = this.ecs.getEntityById(entityIdA);
+			const entityB = this.ecs.getEntityById(entityIdB);
+
+			// This is basically a collision of the mass of a small ship at 1km/s
+			const MIN_IMPULSE = 1000 / (1 / 700000);
+			const DAMAGE_SCALE = 1;
+
+			bodyAVec
+				.set(...bodyA.position)
+				.sub(bodyBVec.set(...bodyB.position))
+				.normalize();
+
+			const n = manifold.worldSpaceNormal; // points from A to B
+
+			const vA = bodyA.motionProperties.linearVelocity;
+			const vB = bodyB.motionProperties.linearVelocity;
+
+			// closing speed along the normal (positive = approaching)
+			const closingSpeed = (vA[0] - vB[0]) * n[0] + (vA[1] - vB[1]) * n[1] + (vA[2] - vB[2]) * n[2];
+			if (closingSpeed <= 0) return;
+
+			const invMassSum = bodyA.motionProperties.invMass + bodyB.motionProperties.invMass;
+			if (invMassSum === 0) return;
+
+			const impulse = ((1 + settings.combinedRestitution) * closingSpeed) / invMassSum;
+
+			if (impulse < MIN_IMPULSE) return;
+
+			const damage = (impulse - MIN_IMPULSE) * DAMAGE_SCALE;
+
+			handleCollisionDamage(entityA, damage, bodyAVec, PHYSICS_DT);
+
+			if (entityA?.components.isTorpedo || entityB?.components.isTorpedo) {
+				const torpedoEntity = entityA?.components.isTorpedo ? entityA : entityB;
+				const otherEntity = entityA?.components.isTorpedo ? entityB : entityA;
+				if (torpedoEntity && otherEntity && !torpedoEntity.components.isDestroyed) {
+					handleTorpedoDamage(torpedoEntity, otherEntity, bodyAVec);
+				}
+			}
+			handleCollisionDamage(entityB, damage, bodyAVec.negate(), PHYSICS_DT);
+		},
+		onBodyPairValidate: (bodyA, bodyB) => {
+			const entityIdA = (bodyA?.userData as any)?.entityId;
+			const entityIdB = (bodyB?.userData as any)?.entityId;
+			// no self-collisions
+			if (entityIdA === entityIdB) return false;
+			const entityA = this.ecs.getEntityById(entityIdA);
+			const entityB = this.ecs.getEntityById(entityIdB);
+
+			// Docked ships don't collide
+			if (
+				entityA?.components.isDocked?.hostShipId === entityIdB ||
+				entityB?.components.isDocked?.hostShipId === entityIdA
+			) {
+				return false;
 			}
 
-			eventQueue.drainContactForceEvents((event) => {
-				const body1 = world.getCollider(event.collider1()).parent();
-				const body2 = world.getCollider(event.collider2()).parent();
-				const entityId1 = (body1?.userData as any)?.entityId;
-				const entityId2 = (body2?.userData as any)?.entityId;
-				const entity1 = this.ecs.getEntityById(entityId1);
-				const entity2 = this.ecs.getEntityById(entityId2);
-
-				// Don't allow self-collisions
-				if (entity1 === entity2) {
-					event.free();
-					return;
+			// Special handling to ignore torpedoes their own ships
+			if (entityA?.components.isTorpedo || entityB?.components.isTorpedo) {
+				const entity = entityA?.components.isTorpedo ? entityA : entityB;
+				const otherEntity = entityA?.components.isTorpedo ? entityB : entityA;
+				const launcher = this.ecs.getEntityById(entity?.components.isTorpedo?.launcherId || -1);
+				const ship = this.ecs.getEntityById(launcher?.components.isShipSystem?.shipId || -1);
+				if (ship?.id !== undefined && ship.id === otherEntity?.id) {
+					return false;
 				}
-				// Docked ships don't collide
-				if (
-					entity1?.components.isDocked?.hostShipId === entityId2 ||
-					entity2?.components.isDocked?.hostShipId === entityId1
-				) {
-					event.free();
-					return;
-				}
+			}
+			return true; // allow collision
+		},
+	};
+	postUpdate(elapsed: number): void {
+		const elapsedSeconds = Math.min(elapsed / 1000, 0.25);
+		this.timeAccumulator += elapsedSeconds;
 
-				// Special handling to ignore torpedoes their own ships
-				if (entity1?.components.isTorpedo || entity2?.components.isTorpedo) {
-					const entity = entity1?.components.isTorpedo ? entity1 : entity2;
-					const otherEntity = entity1?.components.isTorpedo ? entity2 : entity1;
-					const launcher = this.ecs.getEntityById(entity?.components.isTorpedo?.launcherId || -1);
-					const ship = this.ecs.getEntityById(launcher?.components.isShipSystem?.shipId || -1);
-					if (ship?.id !== undefined && ship.id === otherEntity?.id) {
-						event.free();
-						return;
-					}
-				}
-				// This is the vector from entity1 to entity2,
-				const direction = new Vector3(
-					body1?.translation().x,
-					body1?.translation().y,
-					body1?.translation().z,
-				)
-					.sub(new Vector3(body2?.translation().x, body2?.translation().y, body2?.translation().z))
-					.normalize();
-
-				handleCollisionDamage(entity1, event.totalForceMagnitude(), direction, elapsedSeconds);
-				handleCollisionDamage(
-					entity2,
-					event.totalForceMagnitude(),
-					direction.negate(),
-					elapsedSeconds,
-				);
-
-				if (entity1?.components.isTorpedo || entity2?.components.isTorpedo) {
-					const torpedoEntity = entity1?.components.isTorpedo ? entity1 : entity2;
-					const otherEntity = entity1?.components.isTorpedo ? entity2 : entity1;
-					if (torpedoEntity && otherEntity && !torpedoEntity.components.isDestroyed) {
-						handleTorpedoDamage(torpedoEntity, otherEntity, direction);
-					}
-				}
-				event.free();
+		while (this.timeAccumulator >= PHYSICS_DT) {
+			// Run the physics simulation for all of the relevant worlds.
+			this.worlds.forEach((world) => {
+				updateWorld(world, this.worldListener, PHYSICS_DT);
 			});
-		});
+
+			this.timeAccumulator -= PHYSICS_DT;
+		}
 
 		// Now loop over all of the collision step entities
 		// Copy over the properties of each of the bodies to the entities
@@ -399,37 +414,29 @@ export class PhysicsMovementSystem extends System {
 				});
 			if (!position) continue;
 
-			const worldPosition = getWorldPosition(position);
-			const body = getBodyForEntity(entity);
+			const body = getRigidBody(entity);
 			if (!body) continue;
 			// No need to update fixed bodies.
-			if (body.bodyType() === RAPIER.RigidBodyType.Fixed) continue;
+			if (body.motionType === MotionType.STATIC) continue;
 
 			{
-				const translation = body.translation();
-				tempVector.set(translation.x, translation.y, translation.z);
-				const { x, y, z } = worldToUniverse(tempVector, worldPosition);
+				const [x, y, z] = body.position;
 				entity.updateComponent("position", { x, y, z });
 			}
 			{
-				const { x, y, z, w } = body.rotation();
+				const [x, y, z, w] = body.quaternion;
 				entity.updateComponent("rotation", { x, y, z, w });
 			}
 			{
-				const { x, y, z } = body.linvel();
-				entity.updateComponent("velocity", { x, y, z });
-			}
-			{
-				const { x, y, z } = body.angvel();
-				entity.updateComponent("rotationVelocity", { x, y, z });
-			}
-
-			{
-				// Set the measured forward velocity
-				const { x, y, z } = body.linvel();
+				const [x, y, z] = body.motionProperties.linearVelocity;
 				entity.updateComponent("velocity", {
 					forwardVelocity: tempVector.set(x, y, z).length(),
 				});
+				entity.updateComponent("velocity", { x, y, z });
+			}
+			{
+				const [x, y, z] = body.motionProperties.angularVelocity;
+				entity.updateComponent("rotationVelocity", { x, y, z });
 			}
 		}
 
@@ -437,8 +444,8 @@ export class PhysicsMovementSystem extends System {
 		for (const entityId of this.simpleJointEntities) {
 			const entity = this.ecs.getEntityById(entityId);
 			const joint = this.ecs.getEntityById(entity?.components.isDocked?.jointId || -1);
-			if (!joint?.components.fixedJoint) continue;
-			const { anchorA, anchorB, frameA, frameB, idA, idB } = joint.components.fixedJoint;
+			if (!joint?.components.fixedConstraint) continue;
+			const { anchorA, anchorB, frameA, frameB, idA, idB } = joint.components.fixedConstraint;
 			const shipA = this.ecs.getEntityById(idA);
 			const shipB = this.ecs.getEntityById(idB);
 			if (!shipA?.components.position || !shipA.components.size || !shipA.components.rotation)
@@ -448,11 +455,11 @@ export class PhysicsMovementSystem extends System {
 				hostPosition: shipA.components.position,
 				hostRotation: shipA.components.rotation,
 				hostPortPos: anchorA,
-				hostPortDir: frameAVec.set(0, 0, 1).applyQuaternion(frameA).toArray(),
-				hostScale: shipA.components.size.length,
+				hostPortDir: frameA,
+				hostScale: 1,
 				guestPortPos: anchorB,
-				guestPortDir: frameBVec.set(0, 0, 1).applyQuaternion(frameB).toArray(),
-				guestScale: shipB.components.size.length,
+				guestPortDir: frameB,
+				guestScale: 1,
 				currentGuestRotation: shipB.components.rotation,
 			});
 

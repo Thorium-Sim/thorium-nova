@@ -59,11 +59,11 @@
 		"@seregpie/three.text-texture": "^3.2.1",
 		"@tanstack/react-query": "^5.102.8",
 		"@tanstack/react-query-devtools": "^5.102.8",
-		"@thorium-sim/rapier3d-node": "^0.13.2",
 		"@use-gesture/react": "^10.3.1",
 		"change-case": "^5.4.4",
 		"chroma-js": "^3.2.0",
 		"cn": "^0.2.6",
+		"crashcat": "^0.0.5",
 		"csv-simple-parser": "^2.0.2",
 		"d3": "^7.9.0",
 		"dot-beat-time": "^1.2.1",
@@ -159,8 +159,5 @@
 		"vite-plugin-inspect": "^11.4.1",
 		"vite-tsconfig-paths": "^6.1.1",
 		"vitest": "^4.1.9"
-	},
-	"patchedDependencies": {
-		"@thorium-sim/rapier3d-node@0.13.2": "patches/@thorium-sim%2Frapier3d-node@0.13.2.patch"
 	}
 }

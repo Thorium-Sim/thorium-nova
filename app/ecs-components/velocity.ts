@@ -1,5 +1,6 @@
 import z from "zod";
 
+/** Linear velocity in meters / second */
 export const velocity = z
 	.object({
 		x: z.number().default(0),

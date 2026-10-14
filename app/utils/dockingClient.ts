@@ -22,26 +22,29 @@ export function computeDockedTransform({
 	hostRotation,
 	hostPortPos,
 	hostPortDir,
-	hostScale,
+	hostCenterOfMass = [0, 0, 0],
+	guestCenterOfMass = [0, 0, 0],
 	guestPortPos,
 	guestPortDir,
-	guestScale,
 	currentGuestRotation = null,
 }: {
 	hostPosition: Coordinate;
 	hostRotation: Coordinate & { w: number };
-	hostPortPos: Coordinate;
+	hostPortPos: [number, number, number];
 	hostPortDir: [number, number, number];
-	hostScale: number;
-	guestPortPos: Coordinate;
+	hostCenterOfMass?: [number, number, number];
+	guestCenterOfMass?: [number, number, number];
+	guestPortPos: [number, number, number];
 	guestPortDir: [number, number, number];
-	guestScale: number;
 	currentGuestRotation?: (Coordinate & { w: number }) | null;
 }) {
 	// --- 1. Host port, in world space ---------------------------------------
 	worldPortPos
-		.set(hostPortPos.x, hostPortPos.y, hostPortPos.z)
-		.multiplyScalar(hostScale)
+		.set(
+			hostPortPos[0] + hostCenterOfMass[0],
+			hostPortPos[1] + hostCenterOfMass[1],
+			hostPortPos[2] + hostCenterOfMass[2],
+		)
 		.applyQuaternion(hostRotation)
 		.add(hostPosVec.set(hostPosition.x, hostPosition.y, hostPosition.z));
 
@@ -81,8 +84,11 @@ export function computeDockedTransform({
 		.clone()
 		.sub(
 			guestPortPosVec
-				.set(guestPortPos.x, guestPortPos.y, guestPortPos.z)
-				.multiplyScalar(guestScale)
+				.set(
+					guestPortPos[0] + guestCenterOfMass[0],
+					guestPortPos[1] + guestCenterOfMass[1],
+					guestPortPos[2] + guestCenterOfMass[2],
+				)
 				.applyQuaternion(guestRotation),
 		);
 

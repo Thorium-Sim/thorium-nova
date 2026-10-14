@@ -15,7 +15,7 @@ import { NPCDecisionSystem } from "@thorium/.server/systems/NPCDecisionSystem";
 import { NPCFireWeaponsSystem } from "@thorium/.server/systems/NPCFireWeaponsSystem";
 import { NPCKnowledgeSystem } from "@thorium/.server/systems/NPCKnowledgeSystem";
 import { PhysicsBodySystem } from "@thorium/.server/systems/PhysicsBodySystem";
-// import { PhysicsJointsSystem } from "@thorium/.server/systems/PhysicsJointsSystem";
+import { PhysicsConstraintSystem } from "@thorium/.server/systems/PhysicsConstraintSystem";
 import { PowerEfficiencyOverloadSystem } from "@thorium/.server/systems/PowerEfficiencyOverloadSystem";
 import { ReactorPowerUpSystem } from "@thorium/.server/systems/ReactorPowerUpSystem";
 import { SensorScanSystem } from "@thorium/.server/systems/SensorScanSystem";
@@ -86,7 +86,7 @@ const systems = [
 	TorpedoMovementSystem,
 	CommSatelliteSystem,
 	PhysicsBodySystem,
-	// PhysicsJointsSystem,
+	PhysicsConstraintSystem,
 	PhysicsMovementSystem,
 	SensorScanSystem,
 	MainComputerDiagnosticSystem,
