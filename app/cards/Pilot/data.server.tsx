@@ -768,22 +768,9 @@ export const pilot = t.router({
 				});
 			}),
 		test: t.procedure.send(({ ctx }) => {
-			// ctx.ecs.componentCache
-			// 	.get("isShip")
-			// 	?.forEach((ship) => console.log(ship.id, ship.components.identity.name));
 			const hostShip = ctx.ecs.getEntityById(10084)!;
 			const guestShip = ctx.ecs.getEntityById(10154)!;
-			const { x, y, z } = guestShip.components.position;
 			dockEntities(guestShip, hostShip);
-			setTimeout(() => {
-				console.log(
-					Math.hypot(
-						guestShip.components.position.x - hostShip.components.position.x,
-						guestShip.components.position.y - hostShip.components.position.y,
-						guestShip.components.position.z - hostShip.components.position.z,
-					),
-				);
-			}, 2000);
 		}),
 	}),
 	stream: t.procedure

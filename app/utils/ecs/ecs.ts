@@ -9,7 +9,6 @@ import type { TimelineBlock } from "@thorium/components/timelineBuilder/Timeline
 import type { ComponentIds } from "@thorium/ecs-components";
 import type { BlockMetadata } from "@thorium/utils/.server/executeBlocks";
 import { type RNG, createRNG } from "@thorium/utils/rng";
-import { date } from "zod/v4";
 
 import type Entity from "./entity";
 import performance from "./performance";
@@ -162,18 +161,13 @@ class ECS {
 		if (this.entitiesSystemsDirty.size > 0) {
 			this.cleanDirtyEntities();
 		}
-		let systems: { name: string; duration: number }[] = [];
 		for (const system of this.systems) {
 			if (this.entitiesSystemsDirty.size > 0) {
 				// if the last system flagged some entities as dirty check that case
 				this.cleanDirtyEntities();
 			}
-			const time = Date.now();
 			system.updateAll(elapsed, this.updateCounter);
-			systems.push({ name: system.constructor.name, duration: Date.now() - time });
 		}
-		systems.sort((a, b) => b.duration - a.duration);
-		console.log(systems[0].name, systems[0].duration);
 		this.updateCounter += 1;
 		this.lastUpdate = now;
 	}

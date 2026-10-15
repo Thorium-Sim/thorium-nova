@@ -68,11 +68,9 @@ export default function ThreeD() {
 		hostRotation: { x: 0, y: 0, z: 0, w: 1 },
 		hostPortPos: portPos,
 		hostPortDir: portOrientation,
-		hostScale: ship.length,
 		guestCenterOfMass: collider?.centerOfMass,
 		guestPortPos: portPos,
 		guestPortDir: portOrientation,
-		guestScale: ship.length,
 		currentGuestRotation: { x: 0, y: 1, z: 0, w: 0 },
 	});
 

@@ -44,6 +44,8 @@ export const ShipSprite = ({
 	);
 };
 
+const shipSpriteCache = new Map<string, ImageData>();
+
 export function useShipSprite(spriteAsset: string) {
 	const canvasDimensions = 2048;
 	const [canvas] = useState(() =>
@@ -55,10 +57,20 @@ export function useShipSprite(spriteAsset: string) {
 	const [spriteMap] = useState(() => new CanvasTexture(canvas));
 	useEffect(() => {
 		const ctx = canvas.getContext("2d");
+		if (shipSpriteCache.has(spriteAsset)) {
+			ctx?.putImageData(shipSpriteCache.get(spriteAsset)!, 0, 0);
+			spriteMap.needsUpdate = true;
+			return;
+		}
 		const img = new Image();
 		img.src = spriteAsset;
 		img.onload = () => {
 			if (!ctx) return;
+			if (shipSpriteCache.has(spriteAsset)) {
+				ctx?.putImageData(shipSpriteCache.get(spriteAsset)!, 0, 0);
+				spriteMap.needsUpdate = true;
+				return;
+			}
 			// Draw the canvas
 			ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 			const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -68,6 +80,7 @@ export function useShipSprite(spriteAsset: string) {
 				data[i] = data[i + 1] = data[i + 2] = data[i + 3];
 				// data[i + 3] = 255;
 			}
+			shipSpriteCache.set(spriteAsset, imageData);
 			ctx.putImageData(imageData, 0, 0);
 			spriteMap.needsUpdate = true;
 		};

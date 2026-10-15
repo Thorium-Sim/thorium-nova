@@ -456,10 +456,8 @@ export class PhysicsMovementSystem extends System {
 				hostRotation: shipA.components.rotation,
 				hostPortPos: anchorA,
 				hostPortDir: frameA,
-				hostScale: 1,
 				guestPortPos: anchorB,
 				guestPortDir: frameB,
-				guestScale: 1,
 				currentGuestRotation: shipB.components.rotation,
 			});
 
