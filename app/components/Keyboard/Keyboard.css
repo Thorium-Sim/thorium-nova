@@ -1,0 +1,50 @@
+.keyboard {
+	display: grid;
+	grid-template-rows: 1fr 2fr 2fr 2fr 2fr 2fr;
+	gap: 0.25rem;
+	font-size: 0.8rem;
+
+	.keyboard-key {
+		--key-lightness: 0.2;
+		--key-chroma: 0.05;
+		--key-hue: 260.6;
+
+		align-content: center;
+		background: linear-gradient(
+			180deg in oklch,
+			oklch(calc(var(--key-lightness) + 0.07) var(--key-chroma) var(--key-hue)),
+			oklch(var(--key-lightness) var(--key-chroma) var(--key-hue))
+		);
+		border-radius: 0.25rem;
+		text-align: center;
+		user-select: none;
+		&:empty {
+			opacity: 0;
+		}
+		&:hover {
+			--key-lightness: 0.25;
+		}
+		&:active {
+			--key-lightness: 0.2;
+			--key-chroma: 0.07;
+		}
+	}
+	.key-escape {
+		--key-hue: 30;
+	}
+	.key-caps {
+		--key-hue: 150;
+	}
+	.key-modifier {
+		--key-hue: 313;
+	}
+	.key-selected {
+		--key-chroma: 0.15;
+		--key-lightness: 0.35;
+	}
+}
+@layer base {
+	.keyboard-key {
+		grid-column: span 4 / span 4;
+	}
+}
