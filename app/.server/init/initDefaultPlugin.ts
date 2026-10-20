@@ -15,13 +15,9 @@ export async function initDefaultPlugin(isProd: boolean) {
 	const tempFile = path.join(tempPath, "defaultPlugin.plug");
 
 	// This is just necessary to embed the plugin, but we don't reference it this way.
-	await import(
-		// @ts-expect-error
-		"../../../build/defaultPlugin.plug",
-		{
-			with: { type: "file" },
-		}
-	);
+	await import("../../../build/defaultPlugin.plug", {
+		with: { type: "file" },
+	});
 	try {
 		// Initialize the default plugin
 		const devPluginPath = path.join(import.meta.dirname, "../../../build");

@@ -5,7 +5,6 @@ import { embeddedFiles } from "bun";
 import { getMimeType } from "hono/utils/mime";
 
 export async function getClientBundleFile(filePath: string) {
-	// @ts-expect-error
 	await import("../../../build/clientBundle.dat", {
 		with: { type: "file" },
 	});
