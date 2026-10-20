@@ -1,4 +1,5 @@
 import ConversationPlugin from "@thorium/.server/classes/Plugins/Conversation";
+import { KeyboardPlugin } from "@thorium/.server/classes/Plugins/Keyboard";
 import ReportPlugin from "@thorium/.server/classes/Plugins/Report";
 import { ShipSystemTypes } from "@thorium/.server/classes/Plugins/ShipSystems/shipSystemTypes";
 import TextPatternPlugin from "@thorium/.server/classes/Plugins/TextPattern";
@@ -38,6 +39,7 @@ const Aspects = {
 	trainings: TrainingPlugin,
 	conversations: ConversationPlugin,
 	textPatterns: TextPatternPlugin,
+	keyboards: KeyboardPlugin,
 };
 
 export type AspectsMap = {
@@ -112,6 +114,7 @@ export default class BasePlugin extends ProxyDataStore {
 				trainings: [],
 				conversations: [],
 				textPatterns: [],
+				keyboards: [],
 			};
 			pluginAspects.set(this, aspects);
 		}

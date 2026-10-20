@@ -42,6 +42,9 @@
 		--key-chroma: 0.15;
 		--key-lightness: 0.35;
 	}
+	.key-highlighted {
+		--key-hue: 90;
+	}
 }
 @layer base {
 	.keyboard-key {

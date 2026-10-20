@@ -359,6 +359,15 @@ export function SoundConfigForm({
 									</>
 								}
 							/>
+							<div>
+								<Checkbox
+									name="cancelLoopingWhenDuplicate"
+									checked={sound.cancelLoopingWhenDuplicate}
+									onChange={(e) => updateSound("cancelLoopingWhenDuplicate", e.target.checked)}
+									label="Cancel Looping When Duplicated"
+									helperText="If this sound is played again, instead of starting a new looping sound, it will cancel the previous looping sound without starting a new one."
+								/>
+							</div>
 						</>
 					) : null}
 					{!ambiance ? (

@@ -74,6 +74,7 @@ export const iconNames = [
   "inbox",
   "info",
   "joystick",
+  "keyboard",
   "loader-circle",
   "loader",
   "log-out",

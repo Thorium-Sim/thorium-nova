@@ -194,17 +194,20 @@ export const keys: Key[] = [
 	{ keyCode: "Numpad0", char: "0", className: "col-span-8", ex: true },
 	{ keyCode: "NumpadDecimal", char: ".", ex: true },
 ];
+export type MetaList = "shift" | "alt" | "meta" | "control" | "capsLock";
 
 export function Keyboard({
 	extended,
 	shifting,
 	selected,
+	highlighted,
 	onPointerDown,
 	onPointerUp,
 }: {
 	extended?: boolean | "auto";
 	shifting?: boolean;
 	selected?: string[];
+	highlighted?: string[];
 	onPointerDown?: (key: Key, event: PointerEvent<HTMLButtonElement>) => void;
 	onPointerUp?: (key: Key, event: PointerEvent<HTMLButtonElement>) => void;
 }) {
@@ -229,6 +232,7 @@ export function Keyboard({
 							className={cn("keyboard-key", k.className, {
 								"@max-5xl:hidden": k.ex && extended === "auto",
 								"key-selected": selected?.includes(k.keyCode),
+								"key-highlighted": highlighted?.includes(k.keyCode),
 							})}
 							onPointerDown={(event) => {
 								onPointerDown?.(k, event);

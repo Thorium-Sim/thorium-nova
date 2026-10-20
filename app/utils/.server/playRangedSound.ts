@@ -62,14 +62,10 @@ export function playServerSound(ship: Entity, sound: Sound, stations?: string[])
 		key: soundKey,
 		id: uniqid("snd_"),
 	};
-	pubsub.publish.effects.sounds({
-		type: "sound",
-		entityId: ship.id,
-		sound: soundEffect,
-	});
+	const looping = ship.components.soundEffects?.looping || [];
 
-	if (soundEffect.sounds.some((sound) => sound.loop)) {
-		ship.components.soundEffects?.looping
+	if (sound.loop) {
+		looping
 			.filter((s) => s.key === soundKey)
 			.forEach((s) => {
 				pubsub.publish.effects.sounds({
@@ -78,14 +74,26 @@ export function playServerSound(ship: Entity, sound: Sound, stations?: string[])
 					soundId: s.id,
 				});
 			});
+	}
 
-		const newLooping = ship.components.soundEffects?.looping
-			.filter((s) => s.key !== soundKey)
-			.concat(soundEffect);
+	// Don't play the sound if it's a duplicate of an existing sound and is configured to cancel.
+	if (
+		!sound.loop ||
+		!sound.cancelLoopingWhenDuplicate ||
+		!looping.some((s) => s.key === soundKey)
+	) {
+		pubsub.publish.effects.sounds({
+			type: "sound",
+			entityId: ship.id,
+			sound: soundEffect,
+		});
+		const newLooping = (looping.filter((s) => s.key !== soundKey) || []).concat(soundEffect);
 		ship.updateComponent("soundEffects", {
 			looping: newLooping,
 		});
 	}
+
+	return soundEffect;
 }
 
 export function cancelLoopingSound(entity: Entity, soundKey: string) {

@@ -67,3 +67,4 @@ export * from "./engineeringPanel";
 export * from "./disposable";
 export * from "./physicsJoint";
 export * from "./notification";
+export * from "./keyboard";

@@ -29,7 +29,7 @@ export async function executeBlocks(
 	ecs: ECS,
 	blocks: TimelineBlock[],
 	blockMetadata: BlockMetadata = {},
-): Promise<{ waiting: boolean }> {
+): Promise<{ waiting: boolean; localVariables: Record<string, any> }> {
 	let {
 		stepId,
 		localVariables = {},
@@ -57,13 +57,13 @@ export async function executeBlocks(
 					timer,
 				);
 
-				return { waiting: true };
+				return { waiting: true, localVariables };
 			}
 			case "WaitComplete": {
 				// If the timeline step is already marked as completed
 				// then we should skip executing the rest of the blocks
 				if (ecs.getEntityById(stepId || -1)?.components.isTimelineStep?.state === "executed") {
-					return { waiting: false };
+					return { waiting: false, localVariables };
 				}
 				break;
 			}
@@ -322,7 +322,9 @@ export async function executeBlocks(
 						} catch {}
 						let val = getValueReference(value, localVariables, ecs, baseType);
 
-						// Special handling for certain keys we know are entity id references or numbers
+						if (val === null) {
+							return val;
+						} else // Special handling for certain keys we know are entity id references or numbers
 						if (typeof val === "boolean" || typeof val === "number") {
 						} else if (value !== "" && !Number.isNaN(Number(val)) && key !== "alertLevel") {
 							val = Number(val);
@@ -458,7 +460,7 @@ export async function executeBlocks(
 		}
 		blockIndex++;
 	}
-	return { waiting: false };
+	return { waiting: false, localVariables };
 }
 
 function getBaseZodType(schema: any) {

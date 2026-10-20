@@ -9,8 +9,6 @@ import Effects, { useEscapeHotkey } from "./Effects";
 
 export default function StationWrapper() {
 	useEscapeHotkey();
-	// TODO November 29, 2021: Include some kind of alert toast notification thing here
-	// The existing alerts won't be targeted by the theme, so we need to embed it here.
 	return (
 		<div className="absolute top-0 bottom-0 z-1 h-full w-full bg-black">
 			<Suspense>

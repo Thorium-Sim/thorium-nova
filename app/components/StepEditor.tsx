@@ -41,7 +41,7 @@ export function TimelineStepEditor({
 			: timelineType === "trainings"
 				? trainingVariableNames
 				: [];
-	const getActionPresetValues = useGetActionPresetValue(timelineType);
+	const getActionPresetValues = useGetActionPresetValue(variables);
 	return (
 		<div className="flex flex-1 flex-col">
 			<div className="flex w-full justify-between gap-2">
@@ -538,15 +538,12 @@ export function PrerequisiteBlocks({
 	);
 }
 
-export function useGetActionPresetValue(timelineType: "reports" | "missions" | "trainings") {
+export function useGetActionPresetValue<Vars extends string[] | readonly string[]>(
+	variables?: Vars,
+) {
 	const [actions] = q.thorium.actions.useNetRequest();
-	const variables =
-		timelineType === "reports"
-			? reportVariableNames
-			: timelineType === "trainings"
-				? trainingVariableNames
-				: [];
-	const localVariables = [...variables, ...useDefinedVariables()];
+
+	const localVariables = [...(variables || []), ...useDefinedVariables()];
 
 	return function getActionPresetValues(actionName: string, initValues = {}, initOverrides = true) {
 		const action = actions.find((a) => a.action === actionName);

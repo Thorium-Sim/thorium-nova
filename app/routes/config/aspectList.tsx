@@ -86,6 +86,10 @@ const ConfigList = () => {
 					<Icon name="square-dashed-text" className="mb-4 text-6xl" />
 					<p className="text-2xl font-bold">Text Patterns</p>
 				</ConfigIcon>
+				<ConfigIcon to={`/config/${pluginId}/keyboards`}>
+					<Icon name="keyboard" className="mb-4 text-6xl" />
+					<p className="text-2xl font-bold">Keyboard</p>
+				</ConfigIcon>
 			</div>
 		</div>
 	);

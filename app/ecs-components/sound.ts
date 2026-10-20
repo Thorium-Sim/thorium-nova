@@ -32,4 +32,6 @@ export const sound = z.object({
 	 * Which channels the sound plays on. If null, it uses the same channels as the sound effect. If set, the sound is downmixed to the number of channels.
 	 */
 	channel: z.number().array().nullable().default(null),
+	/** If a looping sound is played again with this flag on, it will cancel the looping sound without restarting it */
+	cancelLoopingWhenDuplicate: z.boolean().optional(),
 });

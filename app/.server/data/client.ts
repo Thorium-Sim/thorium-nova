@@ -9,6 +9,7 @@ import { applyCardHighlight } from "@thorium/utils/.server/applyCardHighlight";
 import { triggerStep } from "@thorium/utils/.server/evaluateEntityQuery";
 import { selectAvailableTimelines } from "@thorium/utils/.server/executeBlocks";
 import type { Entity } from "@thorium/utils/ecs";
+import { getBitmaskFromMeta } from "@thorium/utils/keyboardMetaBitmask";
 import MarkdownIt from "markdown-it";
 import z from "zod";
 const md = MarkdownIt();
@@ -128,6 +129,8 @@ export const client = t.router({
 				originalShipId: z.number().nullable().optional(),
 				stationId: z.string().nullable(),
 				clientId: z.string(),
+				kind: z.string().optional(),
+				pluginId: z.string().optional(),
 			}),
 		)
 		.meta({ event: true, action: true })
@@ -145,6 +148,7 @@ export const client = t.router({
 			if (!flightClient) {
 				throw new Error("No flight has been started.");
 			}
+			flightClient.removeComponent("keyboard");
 
 			// If shipId is null, we're removing ourselves from the flight.
 			if (input.shipId === null) {
@@ -174,17 +178,45 @@ export const client = t.router({
 			if (!ship?.components.isShip) {
 				throw new Error("No ship with that ID exists.");
 			}
-			const station = [
-				...staticStations,
-				...(ship.components.stationComplement?.stations || []),
-			].find((station) => station.name === input.stationId);
 
-			if (!station) {
-				throw new Error("No station with that ID exists.");
+			let stationId = undefined;
+			if (!input.kind) {
+				const station = [
+					...staticStations,
+					...(ship.components.stationComplement?.stations || []),
+				].find((station) => station.name === input.stationId);
+				stationId = station?.name;
+			}
+			if (input.kind === "keyboards") {
+				const plugin = ctx.server.plugins.find((p) => p.id === input.pluginId);
+				const keyboard = plugin?.aspects.keyboards.find((k) => k.name === input.stationId);
+				if (keyboard) {
+					// Instantiate the keyboard for this client and assign it to the flight client
+					flightClient.addComponent("keyboard", {
+						keys: Object.fromEntries(
+							keyboard.keys.map((k) => [
+								k.meta.length === 0 ? k.keyCode : `${k.keyCode}-${getBitmaskFromMeta(k.meta)}`,
+								// For some reason, structuredClone won't clone this object.
+								JSON.parse(
+									JSON.stringify({
+										downBlocks: k.downBlocks,
+										upBlocks: k.upBlocks,
+									}),
+								),
+							]),
+						),
+					});
+
+					stationId = keyboard.name;
+				}
+			}
+
+			if (!stationId) {
+				throw new Error("Invalid station.");
 			}
 
 			flightClient.updateComponent("flightClient", {
-				stationId: input.stationId,
+				stationId,
 				shipId: input.shipId,
 				originalShipId: input.originalShipId || input.shipId,
 			});
@@ -203,9 +235,11 @@ export const client = t.router({
 			});
 
 			const { name } = ctx.server.clients[input.clientId];
-			const { flightId, shipId, stationId } =
-				ctx.getFlightClient(input.clientId)?.components.flightClient || {};
-			return { name, clientId: input.clientId, flightId, shipId, stationId };
+			{
+				const { flightId, shipId, stationId } =
+					ctx.getFlightClient(input.clientId)?.components.flightClient || {};
+				return { name, clientId: input.clientId, flightId, shipId, stationId };
+			}
 		}),
 	setCard: t.procedure
 		.meta({ event: true, action: true })

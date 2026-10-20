@@ -1,6 +1,7 @@
 import path from "node:path";
 
 import BasePlugin from "@thorium/.server/classes/Plugins";
+import { keyboard } from "@thorium/.server/data/plugins/keyboard";
 import { macro } from "@thorium/.server/data/plugins/macro";
 import { textPattern } from "@thorium/.server/data/plugins/textPattern";
 import { pubsub } from "@thorium/.server/init/pubsub";
@@ -30,6 +31,7 @@ export const plugin = t.router({
 	starmap,
 	inventory,
 	textPattern,
+	keyboard,
 	all: t.procedure.request(({ ctx }) => {
 		return ctx.server.plugins.map((p) => p.toJSON());
 	}),

@@ -19,3 +19,4 @@ export { shortRangeComm } from "./ShortRangeComm/data.server";
 export { exocomps } from "./Exocomps/data.server";
 export { engineeringPanels } from "./EngineeringPanels/data.server";
 export { coolantLoop } from "./CoolantLoop/data.server";
+export { keyboard } from "./Keyboard/data.server";

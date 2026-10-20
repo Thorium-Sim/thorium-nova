@@ -22,3 +22,4 @@ export * from "./ShortRangeComm";
 export * from "./Exocomps";
 export * from "./EngineeringPanels";
 export * from "./CoolantLoop";
+export * from "./Keyboard";

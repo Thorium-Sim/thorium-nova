@@ -146,7 +146,6 @@ export function TypingKeyboard() {
 					case "ShiftLeft":
 						setShifting((s) => !s);
 						break;
-					case "":
 					case "ControlRight":
 					case "ControlLeft":
 						setSelected((selected) =>

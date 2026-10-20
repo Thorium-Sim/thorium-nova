@@ -54,7 +54,7 @@ export function AddBlockButton({
 	omitBlocks?: boolean;
 	macro?: boolean;
 	executionType: ("main" | "prerequisite")[];
-	timelineType?: "missions" | "reports" | "trainings";
+	timelineType?: "missions" | "reports" | "trainings" | "keyboard";
 }) {
 	const id = useId();
 	const hasEvents = useActiveCores().some((c) => c.component === "EventsCore");
@@ -132,6 +132,19 @@ export function AddBlockButton({
 									</StyledMenuItem>
 								</>
 							) : null}
+							{timelineType === "keyboard" ? (
+								<StyledMenuItem
+									onAction={() =>
+										onAddBlock("Action", {
+											action: "effects.playSound",
+											values: { shipId: "$shipId" },
+										})
+									}
+								>
+									Play Sound
+								</StyledMenuItem>
+							) : null}
+
 							<StyledMenuItem onAction={() => onAddBlock("Action")}>Action</StyledMenuItem>
 							<StyledMenuItem onAction={() => onAddBlock("Action", { action: "timeline.advance" })}>
 								Advance Timeline

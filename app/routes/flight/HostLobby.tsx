@@ -8,7 +8,7 @@ import { Menu, MenuItem, MenuTrigger } from "@thorium/ui/Menu";
 import Menubar, { useMenubar } from "@thorium/ui/Menubar";
 import SearchableList from "@thorium/ui/SearchableList";
 import { cn } from "@thorium/utils/cn";
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { type Dispatch, type ReactNode, type SetStateAction, useState } from "react";
 import { Header, Button as RAButton } from "react-aria-components";
 import { Link, Outlet, useNavigate } from "react-router";
 
@@ -100,9 +100,8 @@ function FlightButtons() {
 function ClientAssignment() {
 	const [clients] = q.client.all.useNetRequest();
 	const [playerShips] = q.ship.players.useNetRequest();
+	const [keyboards] = q.plugin.keyboard.all.useNetRequest({});
 	const [selectedClient, setSelectedClient] = useState(clientId);
-	const [flight] = q.flight.active.useNetRequest();
-
 	return (
 		<div className="flex w-full justify-around gap-4">
 			<div>
@@ -182,17 +181,34 @@ function ClientAssignment() {
 									setSelectedClient={setSelectedClient}
 								/>
 							))}
-							{flight?.hasFlightDirector
-								? staticStations.map((station) => (
-										<HostStationItem
-											key={station.name}
-											shipId={ship.id}
-											station={station}
-											selectedClient={selectedClient}
-											setSelectedClient={setSelectedClient}
-										/>
-									))
-								: null}
+							{staticStations.map((station) => (
+								<HostStationItem
+									key={station.name}
+									shipId={ship.id}
+									station={station}
+									selectedClient={selectedClient}
+									setSelectedClient={setSelectedClient}
+								/>
+							))}
+							{keyboards.map((keyboard) => (
+								<HostStationItem
+									key={keyboard.name}
+									shipId={ship.id}
+									station={{
+										name: keyboard.name,
+										label: (
+											<>
+												<Icon name="keyboard" /> {keyboard.name}
+											</>
+										),
+										description: keyboard.description,
+										kind: keyboard.kind,
+										pluginName: keyboard.pluginName,
+									}}
+									selectedClient={selectedClient}
+									setSelectedClient={setSelectedClient}
+								/>
+							))}
 						</ul>
 					</div>
 				))}
@@ -207,7 +223,13 @@ function HostStationItem({
 	setSelectedClient,
 }: {
 	shipId: number;
-	station: { name: string; description?: string };
+	station: {
+		name: string;
+		label?: ReactNode;
+		description?: string;
+		pluginName?: string;
+		kind?: string;
+	};
 	selectedClient: string;
 	setSelectedClient: Dispatch<SetStateAction<string>>;
 }) {
@@ -218,7 +240,7 @@ function HostStationItem({
 		<>
 			<li className="list-group-item" key={station.name}>
 				<span className="flex justify-between gap-2">
-					<span className="flex-1">{station.name}</span>{" "}
+					<span className="flex flex-1 items-baseline gap-1">{station.label || station.name}</span>{" "}
 					<Button
 						className={`btn-xs btn-success ${!selectedClient ? "btn-disabled" : ""}`}
 						onClick={async () => {
@@ -227,6 +249,8 @@ function HostStationItem({
 									shipId: shipId,
 									stationId: station.name,
 									clientId: selectedClient,
+									kind: station.kind,
+									pluginId: station.pluginName,
 								});
 							} catch (err) {
 								if (err instanceof Error) {

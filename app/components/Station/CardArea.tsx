@@ -22,6 +22,7 @@ const CardError = () => {
 	);
 };
 
+const noLoginStations = ["Viewscreen", "Keyboard"];
 export const CardArea: React.FC<{
 	card: { component: string };
 }> = ({ card }) => {
@@ -35,7 +36,7 @@ export const CardArea: React.FC<{
 	return (
 		<div className="fade-in">
 			<Transition
-				isOpen={!client.loginName && station.name !== "Viewscreen"}
+				isOpen={!client.loginName && !noLoginStations.includes(station.name)}
 				className="card-transition absolute top-0 left-0 h-full w-full"
 			>
 				<Login />
@@ -69,7 +70,7 @@ const CardRenderer = ({
 	const [client] = q.client.get.useNetRequest({ clientId });
 	const [station] = q.station.get.useNetRequest({ clientId });
 	const allowCard =
-		(station.name === "Viewscreen" || Boolean(client.loginName)) && !client.offlineState;
+		(noLoginStations.includes(station.name) || Boolean(client.loginName)) && !client.offlineState;
 	const show = allowCard && currentCardId === rest.component;
 	const [cardLoaded, setCardLoaded] = useState(show);
 	return (

@@ -129,6 +129,8 @@ export default [
 				route("textPatterns", "routes/config/textPatterns/layout.tsx", [
 					route(":textPatternId", "routes/config/textPatterns/textPattern.tsx"),
 				]),
+				route("keyboards", "routes/config/keyboards/layout.tsx"),
+				route("keyboards/:keyboardId", "routes/config/keyboards/keyboard.tsx"),
 			]),
 		]),
 		route("releases", "routes/releases.tsx"),

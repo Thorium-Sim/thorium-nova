@@ -15,9 +15,22 @@ export const station = t.router({
 			}
 		})
 		.request(({ ctx, input }) => {
-			const flightClient = ctx.getFlightClient(input.clientId)?.components.flightClient;
+			const flightClientEntity = ctx.getFlightClient(input.clientId);
+			const flightClient = flightClientEntity?.components.flightClient;
 			const ship = ctx.getPlayerShip(input.clientId);
 			if (flightClient?.stationOverride) return flightClient.stationOverride;
+			if (flightClientEntity?.components.keyboard) {
+				return {
+					cards: [{ name: "Keyboard", component: "Keyboard" }],
+					description: "",
+					logo: "",
+					messageGroups: [],
+					name: "Keyboard",
+					tags: [],
+					theme: "",
+					widgets: [],
+				};
+			}
 			const stations = [...(ship?.components.stationComplement?.stations || [])];
 			for (const staticStation of staticStations) {
 				stations.push({

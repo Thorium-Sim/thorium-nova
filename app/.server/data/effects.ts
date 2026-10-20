@@ -16,7 +16,7 @@ type SoundPayload =
 	| { type: "sound"; entityId: number; sound: SoundEffect & { id: string } }
 	| { type: "cancelLooping"; entityId: number; soundId: string }
 	| { type: "stop"; entityId: number; soundId: string }
-	| { type: "stopAll" };
+	| { type: "stopAll"; entityId?: number };
 
 type DialoguePayload =
 	| {
@@ -96,6 +96,9 @@ export const effects = t.router({
 		.autoPublish([], () => null)
 		.filter((payload: SoundPayload | null, { ctx, input: { clientId } }) => {
 			const clientSettings = ctx.getClient(clientId)?.settings || {};
+			const flightClient = ctx.getFlightClient(clientId);
+			const clientData = flightClient?.components.flightClient;
+
 			/**
 			 * Logic for filtering out sound payloads
 			 * - If the sound has `clients`, it only plays on those clients
@@ -107,7 +110,17 @@ export const effects = t.router({
 			 * - Otherwise the sound doesn't play
 			 */
 			if (!payload) return false;
-			if (payload.type === "stopAll") return true;
+			if (payload.type === "stopAll") {
+				if (!payload.entityId || payload.entityId === clientData?.shipId) {
+					const entity = ctx.flight?.ecs.getEntityById(payload.entityId || -1);
+
+					entity?.updateComponent("soundEffects", {
+						looping: [],
+					});
+					return true;
+				}
+				return false;
+			}
 
 			let sound: SoundEffect | null = null;
 
@@ -130,12 +143,10 @@ export const effects = t.router({
 						entity.components.soundEffects?.looping.filter((s) => s.key !== sound?.key) || [],
 				});
 			}
-
 			if (!sound) return false;
 
-			const flightClient = ctx.getFlightClient(clientId);
-			const clientData = flightClient?.components.flightClient;
 			const ship = ctx.ecs.getEntityById(clientData?.shipId || -1);
+
 			return matchSound(
 				sound,
 				clientId,
@@ -228,14 +239,57 @@ export const effects = t.router({
 			}),
 			event: true,
 		})
+		.output(z.object({ soundId: z.string() }))
 		.send(({ ctx, input }) => {
 			const ship = ctx.ecs.getEntityById(input.shipId);
-			if (!ship) return;
-			playServerSound(
+			if (!ship) throw new Error("Ship not found. Sound effects must be played from a ship.");
+			const { id } = playServerSound(
 				ship,
 				input.sound,
 				Array.isArray(input.station) ? input.station : input.station ? [input.station] : undefined,
 			);
+			return { soundId: id };
+		}),
+	cancelLoopingSound: t.procedure
+		.input(z.object({ shipId: z.number(), soundId: z.string() }))
+		.meta({ action: true })
+		.send(({ ctx, input }) => {
+			const entity = ctx.ecs.getEntityById(input.shipId);
+			if (!entity) throw new Error("Ship not found.");
+			entity.components.soundEffects?.looping
+				.filter((s) => s.id === input.soundId)
+				.forEach((s) => {
+					pubsub.publish.effects.sounds({
+						type: "cancelLooping",
+						entityId: entity.id,
+						soundId: s.id,
+					});
+				});
+		}),
+	cancelAllLooping: t.procedure
+		.input(z.object({ shipId: z.number() }))
+		.meta({ action: true })
+		.send(({ ctx, input }) => {
+			const entity = ctx.ecs.getEntityById(input.shipId);
+			if (!entity) throw new Error("Ship not found.");
+			entity.components.soundEffects?.looping.forEach((s) => {
+				pubsub.publish.effects.sounds({
+					type: "cancelLooping",
+					entityId: entity.id,
+					soundId: s.id,
+				});
+			});
+		}),
+	stopAllSounds: t.procedure
+		.input(z.object({ shipId: z.number().optional() }))
+		.meta({ action: true })
+		.send(({ ctx, input }) => {
+			pubsub.publish.effects.sounds({ type: "stopAll", entityId: input.shipId });
+			const entity = ctx.ecs.getEntityById(input.shipId || -1);
+
+			entity?.updateComponent("soundEffects", {
+				looping: [],
+			});
 		}),
 	trigger: t.procedure
 		.meta({ action: true, event: true })

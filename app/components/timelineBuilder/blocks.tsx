@@ -36,6 +36,8 @@ import { VariableGetter } from "@thorium/components/timelineBuilder/VariableGett
 import { SetVariable } from "@thorium/components/timelineBuilder/VariableSetter";
 import { WaitBlock } from "@thorium/components/timelineBuilder/WaitBlock";
 import { q } from "@thorium/context/AppContext";
+import { reportVariableNames } from "@thorium/routes/config/reports/reportAvailableVariables";
+import { trainingVariableNames } from "@thorium/routes/config/trainings/trainingAvailableVariables";
 import uniqid from "@thorium/utils/uniqid";
 import { Suspense } from "react";
 
@@ -154,7 +156,14 @@ function MacroTriggerBlocks(props: BlockProps) {
 }
 
 function TriggerBlocks({ timelineType, executionType, macro, update, ...block }: BlockProps) {
-	const getActionPresetValues = useGetActionPresetValue(timelineType || "missions");
+	const variables =
+		timelineType === "reports"
+			? reportVariableNames
+			: timelineType === "trainings"
+				? trainingVariableNames
+				: [];
+
+	const getActionPresetValues = useGetActionPresetValue(variables);
 	if (!("triggerBlocks" in block)) return null;
 
 	return (
