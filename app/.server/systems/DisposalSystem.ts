@@ -10,13 +10,19 @@ export class DisposalSystem extends System {
 
 	update(entity: Entity) {
 		let newIds = [];
+		let needsUpdate = false;
 		for (const parentId of entity.components.disposable?.entityIds || []) {
 			if (this.ecs.entities.has(parentId)) {
 				newIds.push(parentId);
+				if (!entity.components.disposable?.entityIds.includes(parentId)) {
+					needsUpdate = true;
+				}
 			}
 		}
 
-		entity.updateComponent("disposable", { entityIds: newIds });
+		if (needsUpdate) {
+			entity.updateComponent("disposable", { entityIds: newIds });
+		}
 		if (newIds.length === 0) {
 			this.ecs.removeEntity(entity);
 		}
