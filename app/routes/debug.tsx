@@ -1,5 +1,77 @@
-export default function () {
-	return <WeirdAnimations />;
+import { cn } from "cn";
+import { produce } from "immer";
+import { useMemo, useRef, useState, type ReactNode } from "react";
+
+export default function Debug() {
+	const [cellState, setCellState] = useState(() => Array.from({ length: 32 * 32 }).fill(false));
+	const paintStyle = useRef<"" | true | false>("");
+	const gridCells = useMemo(() => {
+		const gridCells: ReactNode[] = [];
+		for (let row = 0; row < 32; row++) {
+			for (let col = 0; col < 32; col++) {
+				gridCells.push(
+					<div
+						key={`${row}-${col}`}
+						className={cn("aspect-square border-r border-b border-white/20", {
+							"border-t": row === 0,
+							"border-l": col === 0,
+							"bg-green-500": cellState[row * 32 + col],
+						})}
+						onPointerDown={() => {
+							setCellState(
+								produce((draft) => {
+									paintStyle.current = !draft[row * 32 + col];
+									draft[row * 32 + col] = !draft[row * 32 + col];
+								}),
+							);
+							document.addEventListener(
+								"pointerup",
+								() => {
+									paintStyle.current = "";
+								},
+								{ once: true },
+							);
+						}}
+						onPointerEnter={() => {
+							setCellState(
+								produce((draft) => {
+									draft[row * 32 + col] = paintStyle.current;
+								}),
+							);
+						}}
+					></div>,
+				);
+			}
+		}
+		return gridCells;
+	}, [cellState]);
+	return (
+		<div>
+			<div className={cn("h-md grid w-md grid-cols-32 grid-rows-32")}>{gridCells}</div>
+			<button onClick={() => setCellState(Array.from({ length: 32 * 32 }).fill(false))}>
+				Clear
+			</button>
+			<button
+				onClick={() => {
+					const canvas = document.createElement("canvas");
+					canvas.width = 32;
+					canvas.height = 32;
+					const ctx = canvas.getContext("2d")!;
+
+					// Inject the pixels into the canvas context
+					const imageData = ctx.createImageData(canvas.width, canvas.height);
+					imageData.data.set(cellState.flatMap((b) => (b ? [255, 255, 255, 255] : [0, 0, 0, 0])));
+					ctx.putImageData(imageData, 0, 0);
+
+					// Export as a PNG Data URL
+					const pngUrl = canvas.toDataURL("image/png");
+					document.body.appendChild(Object.assign(document.createElement("img"), { src: pngUrl }));
+				}}
+			>
+				Save
+			</button>
+		</div>
+	);
 }
 
 function WeirdAnimations() {

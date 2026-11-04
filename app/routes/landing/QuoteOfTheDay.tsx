@@ -448,6 +448,9 @@ const quotes = [
 	"I’m a pessimist because of intelligence, but an optimist because of will.",
 	// Random graffiti https://bsky.app/profile/cassidoo.co/post/3mwokoklltc2q
 	"Y'all want everything, but nothing if it takes time.",
+	// Random Britishisms
+	"When you build a cow by committee, it ends up being a camel",
+	"Never complain, never explain.",
 ];
 
 const QuoteOfTheDay = () => {
